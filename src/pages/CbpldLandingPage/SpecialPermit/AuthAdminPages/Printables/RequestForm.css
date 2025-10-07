@@ -1,0 +1,53 @@
+.title {
+  font-family: "Cambria, serif";
+  color: #154172;
+  font-size: 19pt;
+  font-weight: bold;
+  letter-spacing: "0.05em" !important;
+}
+.header-title {
+  font-size: 13pt;
+}
+
+.table-header {
+  margin-top: 20px;
+}
+.table-row {
+  display: flex;
+}
+
+.checkbox {
+  border: 2px solid black;
+  width: 20px;
+  height: 20px;
+}
+.main-table th,
+.main-table td {
+  border: 1px solid #333;
+  padding: 8px;
+}
+
+.main-table th {
+  font-family: "Cambria, serif";
+  font-weight: bolder;
+  color: black;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.footer-table {
+  border-collapse: collapse;
+}
+.footer-table th,
+.footer-table td {
+  border: 1px solid #000000;
+  padding: 8px;
+}
+.bolder-text {
+  font-weight: bolder;
+  color: #000000;
+  padding: 0%;
+}
+.cambraText {
+  font-family: "Cambria, serif";
+}

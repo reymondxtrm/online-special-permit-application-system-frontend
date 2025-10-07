@@ -1,0 +1,63 @@
+.special-permit-layout {
+  /* Left Section */
+  .left-section {
+    background: url("background-image.jpg") center/cover no-repeat;
+    position: relative;
+  }
+
+  .left-section .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7); /* Fade effect */
+  }
+
+  .left-section .footer {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    text-align: left;
+    color: #000;
+  }
+
+  .left-section .footer .logo {
+    width: 80px;
+    margin-bottom: 10px;
+  }
+
+  .left-section .footer h3 {
+    font-weight: bold;
+  }
+
+  .left-section .footer p {
+    margin: 0;
+  }
+
+  /* Right Section */
+  .right-section {
+    background: #fff;
+  }
+
+  .right-section .content {
+    max-width: 400px;
+  }
+
+  .right-section .content h1 {
+    font-weight: bold;
+  }
+
+  .right-section .content p {
+    font-size: 1.1rem;
+    color: #555;
+  }
+
+  .right-section .content button {
+    font-size: 1rem;
+  }
+  .required-input-field {
+    color: red;
+    margin-left: 2px;
+  }
+}
