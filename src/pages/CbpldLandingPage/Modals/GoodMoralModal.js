@@ -154,7 +154,7 @@ function GoodMoralModal({ openModal, toggleModal }) {
         <ModalHeader
           toggle={() => {
             toggleModal();
-            setProceedHandle();
+            setIsProceed(true);
           }}
         >
           <p
@@ -434,7 +434,7 @@ function GoodMoralModal({ openModal, toggleModal }) {
             color="secondary"
             onClick={() => {
               toggleModal();
-              setProceedHandle();
+              setIsProceed(true);
             }}
           >
             Close

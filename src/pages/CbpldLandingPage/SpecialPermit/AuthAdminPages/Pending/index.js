@@ -42,13 +42,13 @@ const Pending = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("good_moral");
   const [newCounts, setNewCounts] = useState({
-    1: 1,
-    2: 1,
-    3: 1,
-    4: 1,
-    5: 1,
-    6: 1,
-    7: 1,
+    mayors_permit: 0,
+    good_moral: 0,
+    event: 0,
+    motorcade: 0,
+    parade: 0,
+    recorrida: 0,
+    use_of_government_property: 0,
   });
   const handleTabSelect = (key) => {
     setActiveTab(key);
@@ -58,16 +58,7 @@ const Pending = () => {
     { value: 2, label: "2024" },
   ];
   const opcr = useSelector((state) => state.opcr);
-
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
-  };
-
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const toggleupdateModal = () => {
-    setIsUpdateModalOpen(!isUpdateModalOpen);
-  };
-
   const [newMfoModal, setNewMfoModal] = useState(false);
   const toggleNewMfoModal = () => {
     setNewMfoModal(!newMfoModal);
@@ -75,18 +66,14 @@ const Pending = () => {
 
   useEffect(() => {
     const channel = echo.channel("special-permit-pending");
-
     const handler = (event) => {
       const { documentType, count } = event;
       // Only update state if value actually changes to avoid extra renders
+      console.log(event);
       setNewCounts((prevCounts) => {
-        const current = prevCounts[documentType] || 0;
-        const next = Math.max(0, count - current);
-        if (next === current) return prevCounts;
-        return { ...prevCounts, [documentType]: next };
+        return { ...prevCounts, [documentType]: count };
       });
     };
-
     channel.listen(".document.stage_moved", handler);
 
     return () => {
@@ -96,7 +83,6 @@ const Pending = () => {
       } catch (err) {}
     };
   }, []);
-  console.log(newCounts);
 
   useEffect(() => {
     const fetchInitialCounts = async () => {
@@ -107,7 +93,15 @@ const Pending = () => {
         );
 
         if (response && response.data) {
-          setNewCounts((prev) => ({ ...prev }));
+          setNewCounts((prev) => {
+            const updatedCounts = { ...prev };
+
+            response?.data?.forEach((item) => {
+              updatedCounts[item.code] = item.total;
+            });
+
+            return updatedCounts;
+          });
         }
       } catch (error) {
         console.error("Error fetching initial counts:", error);
@@ -132,13 +126,14 @@ const Pending = () => {
                     className="mb-3"
                     activeKey={activeTab}
                     onSelect={handleTabSelect}
+                    unmountOnExit
                   >
                     <Tab
                       eventKey="mayors_permit"
                       title={
                         <>
                           MAYORS CERTIFICATE{" "}
-                          {newCounts.mayors_permit && (
+                          {newCounts.mayors_permit !== 0 && (
                             <Badge color="danger" className="ms-1">
                               {newCounts.mayors_permit}
                             </Badge>
@@ -149,6 +144,7 @@ const Pending = () => {
                       <AdminTable
                         status="pending"
                         activeTab={activeTab}
+                        count={newCounts.mayors_permit}
                         applicationType="mayors_permit"
                       />
                     </Tab>
@@ -158,7 +154,7 @@ const Pending = () => {
                       title={
                         <>
                           GOOD MORAL{" "}
-                          {newCounts.good_moral && (
+                          {newCounts.good_moral !== 0 && (
                             <Badge color="danger" className="ms-1">
                               {newCounts.good_moral}
                             </Badge>
@@ -178,7 +174,7 @@ const Pending = () => {
                       title={
                         <>
                           EVENT{" "}
-                          {newCounts.event && (
+                          {newCounts.event !== 0 && (
                             <Badge color="danger" className="ms-1">
                               {newCounts.event}
                             </Badge>
@@ -198,7 +194,7 @@ const Pending = () => {
                       title={
                         <>
                           MOTORCADE{" "}
-                          {newCounts.motorcade && (
+                          {newCounts.motorcade !== 0 && (
                             <Badge color="danger" className="ms-1">
                               {newCounts.motorcade}
                             </Badge>
@@ -218,7 +214,7 @@ const Pending = () => {
                       title={
                         <>
                           PARADE{" "}
-                          {newCounts.parade && (
+                          {newCounts.parade !== 0 && (
                             <Badge color="danger" className="ms-1">
                               {newCounts.parade}
                             </Badge>
@@ -238,7 +234,7 @@ const Pending = () => {
                       title={
                         <>
                           RECORRIDA{" "}
-                          {newCounts.recorrida && (
+                          {newCounts.recorrida !== 0 && (
                             <Badge color="danger" className="ms-1">
                               {newCounts.recorrida}
                             </Badge>
@@ -258,7 +254,7 @@ const Pending = () => {
                       title={
                         <>
                           USE OF GOVERNMENT PROPERTY{" "}
-                          {newCounts.use_of_government_property && (
+                          {newCounts.use_of_government_property !== 0 && (
                             <Badge color="danger" className="ms-1">
                               {newCounts.use_of_government_property}
                             </Badge>

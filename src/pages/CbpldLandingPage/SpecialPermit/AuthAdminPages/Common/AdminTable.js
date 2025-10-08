@@ -11,6 +11,7 @@ import {
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
+  Badge,
 } from "reactstrap";
 import Swal from "sweetalert2";
 import moment from "moment";
@@ -28,7 +29,10 @@ import RemarksModal from "../Modals/RemarksModal";
 import ReturnRemarksModal from "../Modals/ReturnRemarksModal";
 import { PhotoView } from "react-photo-view";
 import Viewer from "react-viewer";
-import { formateDateIntoString } from "common/utility/utilityFunction";
+import {
+  formateDateIntoString,
+  updateTabNotification,
+} from "common/utility/utilityFunction";
 import { motion } from "motion/react";
 import RequestForm from "../Printables/RequestForm";
 
@@ -90,7 +94,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
     setCurrentImage(null);
   };
   const toggleRefresh = useCallback(() => {
-    setrefreshPage(!refreshPage);
+    setrefreshPage((prev) => !prev);
   }, []);
 
   const toggleAmountModal = () => {
@@ -118,8 +122,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
               value: options.id,
               label: options.name,
             }));
-            // const updatedOptions = [{ value: 0, label: "Others" }, ...options];
-            // options.push({ value: "others", label: "Others" });
+
             setpurposeOptions(options);
           },
           (error) => {
@@ -226,6 +229,10 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   //     echo.leaveChannel("permits");
   //   };
   // }, []);
+  const handleRowOnclick = (permit_id) => {
+    const response = updateTabNotification(applicationType, permit_id, status);
+    console.log(response);
+  };
   return (
     <>
       {/* Attachment Modal */}
@@ -406,6 +413,14 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
               {status === "for_payment_approval" ? <th>Actions</th> : null}
             </tr>
           </thead>
+          <Button
+            color="primary"
+            style={{ position: "absolute", right: "20px", top: "14px" }}
+            onClick={toggleRefresh}
+          >
+            <i className="mdi mdi-reload me-2 fs-5" />
+            Reload
+          </Button>
           <tbody>
             {loading ? (
               <tr>
@@ -416,8 +431,14 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
             ) : applications.length > 0 ? (
               applications.map((application, index) => (
                 <React.Fragment key={application.id}>
-                  <tr>
-                    <td>{`${index + 1}.`}</td>
+                  <tr
+                    onClick={() => {
+                      application.mark_as_read
+                        ? null
+                        : handleRowOnclick(application.id);
+                    }}
+                  >
+                    <td>{`${index + 1}`}</td>
                     {status === "for_signature" && (
                       <td>{application.reference_no}</td>
                     )}
@@ -428,7 +449,14 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                       <>
                         {applicationType === "mayors_permit" ||
                         applicationType === "good_moral" ? (
-                          <td>{application.application_purpose?.name}</td>
+                          <td>
+                            {application?.application_purpose?.name}{" "}
+                            {application?.mark_as_read ? (
+                              ""
+                            ) : (
+                              <Badge color="danger"> Unread</Badge>
+                            )}
+                          </td>
                         ) : null}
 
                         {/* {applicationType === "good_moral" && (
@@ -481,7 +509,14 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               ?.phone_number
                           }
                         </td>
-                        <td>{application?.requestor_name}</td>
+                        <td>
+                          {application?.requestor_name}{" "}
+                          {application?.mark_as_read ? (
+                            ""
+                          ) : (
+                            <Badge color="primary"> Unread</Badge>
+                          )}
+                        </td>
                         <td>{application?.event_name}</td>
                         <td>
                           {dateOfEvent(
