@@ -479,7 +479,7 @@ function GeneratePermitModal({
                       permitType === "motorcade" ||
                       permitType === "parade" ||
                       permitType === "recorrida" ||
-                      permitType === "use_of_goverment_property") && (
+                      permitType === "use_of_government_property") && (
                       <>
                         <Button
                           onClick={addOrgaizationToActiveParagraph}

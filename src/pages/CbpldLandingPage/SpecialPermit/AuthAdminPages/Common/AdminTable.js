@@ -35,6 +35,7 @@ import {
 } from "common/utility/utilityFunction";
 import { motion } from "motion/react";
 import RequestForm from "../Printables/RequestForm";
+import MayorsAndGoodMoralRequestForm from "../Printables/MayorsAndGoodMoralRequestForm";
 
 const AdminTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
@@ -68,7 +69,10 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const [currentImage, setCurrentImage] = useState(null);
   const [selectedRow, setSelectedRow] = useState([]);
   const [openRequestFormModal, setOpenRequestFormModal] = useState(false);
-
+  const [
+    openMayorsAndGoodMoralRequestForm,
+    setOpenMayorsAndGoodMoralRequestForm,
+  ] = useState(false);
   const formatName = (name) => {
     const nameParts = name.split(" ");
     const firstName = nameParts[0]?.toUpperCase();
@@ -82,7 +86,9 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   };
 
   const toggleRemarksModal = useCallback(() => {
-    setremarksModal(!remarksModal);
+    // use functional updater to avoid stale closure issues when this
+    // callback is invoked from dropdowns / child components
+    setremarksModal((prev) => !prev);
   }, []);
   const openImageViewer = useCallback((imageUrl) => {
     setCurrentImage(imageUrl);
@@ -109,7 +115,11 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
     setScale((prev) => Math.min(Math.max(prev + delta, 1), 3));
   };
+  //mayors and good moral request form
 
+  const toggleMayorsAndGoodMoralRequestModal = () => {
+    setOpenMayorsAndGoodMoralRequestForm((prev) => !prev);
+  };
   useEffect(() => {
     if (activeTab === "mayors_permit" || activeTab === "good_moral") {
       axios
@@ -247,6 +257,10 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
       <RequestForm
         isOpen={openRequestFormModal}
         toggle={toggleRequestFormModal}
+      />
+      <MayorsAndGoodMoralRequestForm
+        isOpen={openMayorsAndGoodMoralRequestForm}
+        toggle={toggleMayorsAndGoodMoralRequestModal}
       />
 
       {status === "pending" ? (
@@ -692,7 +706,19 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               >
                                 Decline
                               </DropdownItem>
-                              <DropdownItem onClick={toggleRequestFormModal}>
+                              <DropdownItem
+                                onClick={() => {
+                                  // call the appropriate toggle function instead of returning it
+                                  if (
+                                    applicationType === "good_moral" ||
+                                    applicationType === "mayors_permit"
+                                  ) {
+                                    toggleMayorsAndGoodMoralRequestModal();
+                                  } else {
+                                    toggleRequestFormModal();
+                                  }
+                                }}
+                              >
                                 View Request Form
                               </DropdownItem>
                             </DropdownMenu>

@@ -30,19 +30,63 @@ function AmountModal({
   const handleSubmit = useSubmit();
   console.log(permitType);
   const formikRef = useRef(null);
+  const [discountOption, setDiscountOptions] = useState([]);
+  const [exempted, setExempted] = useState(false);
+  useEffect(() => {
+    if (openModal) {
+      axios
+        .get("api/admin/get/exempted-cases", {
+          params: { permit_type: "event" },
+        })
+        .then(
+          (res) => {
+            const options = res.data.map((options) => ({
+              value: options.id,
+              label: options.name,
+            }));
+            // options.push({ value: "others", label: "Others" });
+            setDiscountOptions(options);
+          },
+          (error) => {
+            console.log(error);
+          }
+        );
+    }
+  }, [openModal]);
   return (
     <React.Fragment>
       <Modal
         isOpen={openModal}
-        toggle={toggleModal}
+        toggle={() => {
+          // ensure parent toggles and reset local state and form
+          toggleModal();
+          setExempted(false);
+          if (
+            formikRef.current &&
+            typeof formikRef.current.resetForm === "function"
+          ) {
+            formikRef.current.resetForm();
+          }
+        }}
         fade={true}
         backdrop="static"
-        size="m"
-        className="modal-dialog-centered"
+        // use reactstrap props: centered to vertically center, remove invalid props
+        centered
+        keyboard
         style={{ overflowY: "auto" }}
-        unmountOnClose
       >
-        <ModalHeader toggle={toggleModal}>
+        <ModalHeader
+          toggle={() => {
+            toggleModal();
+            setExempted(false);
+            if (
+              formikRef.current &&
+              typeof formikRef.current.resetForm === "function"
+            ) {
+              formikRef.current.resetForm();
+            }
+          }}
+        >
           <p
             style={{
               fontWeight: "bold",
@@ -63,6 +107,7 @@ function AmountModal({
             initialValues={{
               amount: "",
               event_type: "",
+              exemption_id: null,
             }}
             onSubmit={handleSubmit}
             enableReinitialize
@@ -86,21 +131,66 @@ function AmountModal({
                     </Col>
                   </Row>
                   {permitType === "event" && (
-                    <Row>
-                      <Col md={12}>
-                        <FormGroup>
-                          <Label for="amount">Event Type</Label>
-                          <Input
-                            id="event_type"
-                            name={`event_type`}
-                            type="text"
-                            placeholder="Event Type"
-                            value={props.values.event_type}
-                            onChange={props.handleChange}
+                    <>
+                      <Row>
+                        <Col md={12}>
+                          <FormGroup>
+                            <Label for="amount">Event Type</Label>
+                            <Input
+                              id="event_type"
+                              name={`event_type`}
+                              type="text"
+                              placeholder="Event Type"
+                              value={props.values.event_type}
+                              onChange={props.handleChange}
+                            />
+                          </FormGroup>
+                        </Col>
+                      </Row>
+                      <Row
+                        style={{
+                          backgroundColor: "#0b95f4",
+                          alignItems: "center", // centers vertically
+                          display: "flex", // enable flex layout
+                          minHeight: "30px", // optional: gives some height
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            marginTop: "5px",
+                          }}
+                        >
+                          <FormGroup check inline>
+                            <Input
+                              type="checkbox"
+                              className="me-2"
+                              onChange={() => setExempted((prev) => !prev)}
+                            />
+
+                            <Label style={{ color: "white", fontSize: "15px" }}>
+                              Exempted
+                            </Label>
+                          </FormGroup>
+                        </div>
+                      </Row>
+                      <Row>
+                        <Col>
+                          <Label>Exemption</Label>
+                          <Select
+                            options={discountOption}
+                            onChange={(selected) => {
+                              props.setFieldValue(
+                                "exemption_id",
+                                selected.value
+                              );
+                            }}
+                            isDisabled={!exempted}
                           />
-                        </FormGroup>
-                      </Col>
-                    </Row>
+                        </Col>
+                      </Row>
+                    </>
                   )}
                 </Col>
               </Form>
@@ -117,11 +207,13 @@ function AmountModal({
               color: "white",
             }}
             onClick={() => {
-              const formik = formikRef.current.values;
-
+              const formik = formikRef.current?.values || {};
+              console.log(exempted);
               handleSubmit(
                 {
-                  url: "api/admin/check-attachments",
+                  url: formik.exemption_id
+                    ? "api/admin/approve/exemption"
+                    : "api/admin/check-attachments",
                   message: {
                     title: "Are you sure you want to Proceed?",
                     failedTitle: "FAILED",
@@ -132,16 +224,37 @@ function AmountModal({
                     special_permit_application_id: applicationId,
                     billed_amount: formik.amount,
                     event_type: formik.event_type,
+                    exemption_id: formik.exemption_id,
+                    admin: exempted,
                   },
                 },
                 [],
-                [toggleRefresh, toggleModal]
+                [
+                  toggleRefresh,
+                  // ensure modal closes and form resets after action
+                  () => {
+                    toggleModal();
+                    if (
+                      formikRef.current &&
+                      typeof formikRef.current.resetForm === "function"
+                    ) {
+                      formikRef.current.resetForm();
+                    }
+                  },
+                ]
               );
+              setExempted(false);
             }}
           >
             SAVE
           </Button>
-          <Button color="secondary" onClick={toggleModal}>
+          <Button
+            color="secondary"
+            onClick={() => {
+              toggleModal();
+              setExempted(false);
+            }}
+          >
             Close
           </Button>
         </ModalFooter>

@@ -1,7 +1,7 @@
 import React from "react";
 
 export default function Purpose({ purpose, scale }) {
-  const baseFontSize = 18; // pt
+  const baseFontSize = 17; // pt
   const fontSize = baseFontSize * scale;
   return (
     <div

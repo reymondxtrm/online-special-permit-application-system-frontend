@@ -249,7 +249,9 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                   permitType={permitType}
                   scale={scale}
                 />
-                {permitType === "good_moral" && <Purpose purpose={purpose} />}
+                {permitType === "good_moral" && (
+                  <Purpose purpose={purpose} scale={scale} />
+                )}
                 <ThirdParagraph thirdParagraph={thirdParagraph} scale={scale} />
                 {(permitType === "good_moral" ||
                   permitType === "mayors_permit") && (
