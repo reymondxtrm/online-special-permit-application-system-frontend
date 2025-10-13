@@ -27,7 +27,7 @@ function MayorsCertificateModal({ openModal, toggleModal }) {
   const formikRef = useRef(null);
   const [purposeOptions, setpurposeOptions] = useState();
   const [otherPurpose, setotherPurpose] = useState(false);
-  const [proceed, setIsProceed] = useState(true);
+  const [proceed, setIsProceed] = useState(false);
 
   // const purposeOptions = [
   //   { value: 1, label: "Local Employment" },
@@ -98,7 +98,7 @@ function MayorsCertificateModal({ openModal, toggleModal }) {
         isOpen={openModal}
         toggle={() => {
           toggleModal();
-          setProceedHandle();
+          setIsProceed(false);
         }}
         fade={true}
         backdrop="static"
@@ -115,7 +115,7 @@ function MayorsCertificateModal({ openModal, toggleModal }) {
         <ModalHeader
           toggle={() => {
             toggleModal();
-            setProceedHandle();
+            setIsProceed(false);
           }}
         >
           <p
@@ -499,30 +499,30 @@ function MayorsCertificateModal({ openModal, toggleModal }) {
             }}
             onClick={() => {
               const formik = formikRef.current.values;
-              // console.log(formik);
-              // console.log(formik.amountPaid);
-              // var bodyFormData = getFormData(formik);
+
               const formData = getFormData(formik);
-              console.log(formData);
-              handleSubmit(
-                {
-                  url: "api/client/special-permit/mayors-permit",
-                  headers: {
-                    "Content-Type": "multipart/form-data",
+              if (proceed) {
+                handleSubmit(
+                  {
+                    url: "api/client/special-permit/mayors-permit",
+                    headers: {
+                      "Content-Type": "multipart/form-data",
+                    },
+                    message: {
+                      title: "Are you sure you want to Proceed?",
+                      failedTitle: "FAILED",
+                      success: "Success!",
+                      error: "unknown error occured",
+                    },
+                    params: formData,
                   },
-                  message: {
-                    title: "Are you sure you want to Proceed?",
-                    failedTitle: "FAILED",
-                    success: "Success!",
-                    error: "unknown error occured",
-                  },
-                  params: formData,
-                },
-                [],
-                [toggleModal]
-              );
+                  [],
+                  [toggleModal]
+                );
+                setIsProceed(false);
+              }
             }}
-            disabled={proceed}
+            disabled={!proceed}
           >
             Submit
           </Button>
@@ -530,7 +530,7 @@ function MayorsCertificateModal({ openModal, toggleModal }) {
             color="secondary"
             onClick={() => {
               toggleModal();
-              setProceedHandle();
+              setIsProceed(false);
             }}
           >
             Close

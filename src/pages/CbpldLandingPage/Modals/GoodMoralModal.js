@@ -32,7 +32,7 @@ function GoodMoralModal({ openModal, toggleModal }) {
   const [employmentPurpose, setemploymentPurpose] = useState(false);
   const [firstTimeJobSeeker, setfirstTimeJobSeeker] = useState(false);
   const [discountOptions, setdiscountOptions] = useState();
-  const [proceed, setIsProceed] = useState(true);
+  const [proceed, setIsProceed] = useState(false);
   console.log(proceed);
   useEffect(() => {
     if (openModal) {
@@ -139,7 +139,10 @@ function GoodMoralModal({ openModal, toggleModal }) {
     <React.Fragment>
       <Modal
         isOpen={openModal}
-        toggle={toggleModal}
+        toggle={() => {
+          toggleModal();
+          setIsProceed(false);
+        }}
         fade={true}
         backdrop="static"
         size="m"
@@ -154,7 +157,7 @@ function GoodMoralModal({ openModal, toggleModal }) {
         <ModalHeader
           toggle={() => {
             toggleModal();
-            setIsProceed(true);
+            setIsProceed(false);
           }}
         >
           <p
@@ -408,10 +411,9 @@ function GoodMoralModal({ openModal, toggleModal }) {
               color: "white",
             }}
             onClick={() => {
-              // toggleConfirmationModal();
               const formik = formikRef.current.values;
               const formData = getFormData(formik);
-              if (!proceed) {
+              if (proceed) {
                 handleSubmit(
                   {
                     url: "api/client/special-permit/good-moral",
@@ -429,9 +431,10 @@ function GoodMoralModal({ openModal, toggleModal }) {
                   [],
                   [toggleModal]
                 );
+                setIsProceed(false);
               }
             }}
-            disabled={proceed}
+            disabled={!proceed}
           >
             Submit
           </Button>
@@ -439,7 +442,7 @@ function GoodMoralModal({ openModal, toggleModal }) {
             color="secondary"
             onClick={() => {
               toggleModal();
-              setIsProceed(true);
+              setIsProceed(false);
             }}
           >
             Close

@@ -49,7 +49,10 @@ function MotorcadeModal({ openModal, toggleModal }) {
     <React.Fragment>
       <Modal
         isOpen={openModal}
-        toggle={toggleModal}
+        toggle={() => {
+          toggleModal();
+          setIsProceed(false);
+        }}
         fade={true}
         backdrop="static"
         size="m"
@@ -62,7 +65,7 @@ function MotorcadeModal({ openModal, toggleModal }) {
         <ModalHeader
           toggle={() => {
             toggleModal();
-            setProceedHandle();
+            setIsProceed(false);
           }}
         >
           <p
@@ -278,20 +281,23 @@ function MotorcadeModal({ openModal, toggleModal }) {
             onClick={() => {
               const formik = formikRef.current.values;
               const formData = getFormData(formik);
-              handleSubmit(
-                {
-                  url: "api/client/special-permit/motorcade",
-                  message: {
-                    title: "Are you sure you want to Proceed?",
-                    failedTitle: "FAILED",
-                    success: "Success!",
-                    error: "unknown error occured",
+              if (proceed) {
+                handleSubmit(
+                  {
+                    url: "api/client/special-permit/motorcade",
+                    message: {
+                      title: "Are you sure you want to Proceed?",
+                      failedTitle: "FAILED",
+                      success: "Success!",
+                      error: "unknown error occured",
+                    },
+                    params: formData,
                   },
-                  params: formData,
-                },
-                [],
-                [toggleModal]
-              );
+                  [],
+                  [toggleModal]
+                );
+                setIsProceed(false);
+              }
             }}
             disabled={!proceed}
           >
@@ -301,7 +307,7 @@ function MotorcadeModal({ openModal, toggleModal }) {
             color="secondary"
             onClick={() => {
               toggleModal();
-              setProceedHandle();
+              setIsProceed(false);
             }}
           >
             Close

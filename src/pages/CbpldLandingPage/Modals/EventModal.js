@@ -83,7 +83,10 @@ function EventModal({ openModal, toggleModal }) {
     <React.Fragment>
       <Modal
         isOpen={openModal}
-        toggle={toggleModal}
+        toggle={() => {
+          toggleModal();
+          setIsProceed(false);
+        }}
         fade={true}
         backdrop="static"
         size="m"
@@ -98,7 +101,7 @@ function EventModal({ openModal, toggleModal }) {
         <ModalHeader
           toggle={() => {
             toggleModal();
-            setProceedHandle();
+            setIsProceed(false);
           }}
         >
           <p
@@ -319,25 +322,28 @@ function EventModal({ openModal, toggleModal }) {
             }}
             onClick={() => {
               const formik = formikRef.current.values;
-              console.log(formik);
+
               const formData = getFormData(formik);
-              handleSubmit(
-                {
-                  url: "api/client/special-permit/event",
-                  headers: {
-                    "Content-Type": "multipart/form-data",
+              if (proceed) {
+                handleSubmit(
+                  {
+                    url: "api/client/special-permit/event",
+                    headers: {
+                      "Content-Type": "multipart/form-data",
+                    },
+                    message: {
+                      title: "Are you sure you want to Proceed?",
+                      failedTitle: "FAILED",
+                      success: "Success!",
+                      error: "unknown error occured",
+                    },
+                    params: formData,
                   },
-                  message: {
-                    title: "Are you sure you want to Proceed?",
-                    failedTitle: "FAILED",
-                    success: "Success!",
-                    error: "unknown error occured",
-                  },
-                  params: formData,
-                },
-                [],
-                [toggleModal]
-              );
+                  [],
+                  [toggleModal]
+                );
+                setIsProceed(false);
+              }
             }}
             disabled={!proceed}
           >
@@ -347,7 +353,7 @@ function EventModal({ openModal, toggleModal }) {
             color="secondary"
             onClick={() => {
               toggleModal();
-              setProceedHandle();
+              setIsProceed(false);
             }}
           >
             Close
