@@ -51,7 +51,7 @@ function UploadPermitModal({
 
     handleSubmit(
       {
-        url: "/api/admin/upload-permit", 
+        url: "/api/admin/upload-permit",
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -101,6 +101,7 @@ function UploadPermitModal({
                 name="official_receipt"
                 onChange={handleFileChange}
                 type="file"
+                accept="application/pdf"
               />
             </FormGroup>
           </Col>

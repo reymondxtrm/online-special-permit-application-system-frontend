@@ -106,6 +106,7 @@ function ReuploadModal({
                               );
                             }}
                             type="file"
+                            accept="image/*"
                           />
                         </div>
                       </FormGroup>

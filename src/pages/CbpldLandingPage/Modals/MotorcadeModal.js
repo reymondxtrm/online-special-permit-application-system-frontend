@@ -227,6 +227,7 @@ function MotorcadeModal({ openModal, toggleModal }) {
                                 event.currentTarget.files[0]
                               );
                             }}
+                            accept="image/*"
                           />
                         </FormGroup>
                       </Col>
@@ -248,6 +249,7 @@ function MotorcadeModal({ openModal, toggleModal }) {
                                 event.currentTarget.files[0]
                               );
                             }}
+                            accept="image/*"
                           />
                         </FormGroup>
                       </Col>

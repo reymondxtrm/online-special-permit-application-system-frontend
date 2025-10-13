@@ -20,7 +20,8 @@ const PagesMaintenance = () => {
               <div className="home-wrapper">
                 <div className="mb-5">
                   <Link to="/dashboard" className="d-block auth-logo">
-                    <img src={logoDPWH} alt="logo" height="50" />
+                    {/* <img src={logoDPWH} alt="logo" height="50" /> */}
+                    <p className="fw-bold fs-1">OSPAS</p>
                   </Link>
                 </div>
 
@@ -37,10 +38,10 @@ const PagesMaintenance = () => {
                 </Row>
                 <h3 className="mt-5">Site is Under Maintenance</h3>
                 <p style={{ marginBottom: "5px" }}>
-                  Please check back in sometime.
+                  Please check back in sometnpime.
                 </p>
                 <Row>
-                  <Link to="/login" className="font-weight-bold text-primary">
+                  <Link to="/home" className="font-weight-bold text-primary">
                     Go to Login
                   </Link>
                 </Row>

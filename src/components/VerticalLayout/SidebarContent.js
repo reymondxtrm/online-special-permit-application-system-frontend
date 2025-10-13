@@ -298,6 +298,7 @@ const SidebarContent = (props) => {
                       </li> */}
                     </>
                   )}
+                  {checkRole([""])}
 
                   {checkRole(["super_admin"]) && (
                     <li>

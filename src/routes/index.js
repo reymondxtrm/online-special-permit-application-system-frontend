@@ -78,52 +78,52 @@ import ConfirmMail from "pages/AuthenticationInner/page-confirm-mail";
 const authProtectedRoutes = [
   { path: "/dashboard", component: Analytics },
 
-  { path: "/initial-receiver/dashboard", component: InitialReceiverDashboard },
-  { path: "/initial-receiver/receive", component: Receive },
-  {
-    path: "/assessment-receiver/dashboard",
-    component: AssessmentReceiverDashboard,
-  },
-  {
-    path: "/assessment-receiver/for-receiving",
-    component: AssessmentForReceiving,
-  },
-  {
-    path: "/assessment-releaser/dashboard",
-    component: AssessmentReleaserDashboard,
-  },
-  {
-    path: "/assessment-releaser/for-releasing",
-    component: AssessmentForReleasing,
-  },
-  {
-    path: "/complete-receiver/dashboard",
-    component: CompleteReceiverDashboard,
-  },
-  {
-    path: "/complete-receiver/for-receiving",
-    component: CompleteForReceiving,
-  },
-  {
-    path: "/final-releaser/dashboard",
-    component: FinalReleaserDashboard,
-  },
-  {
-    path: "/final-releaser/for-printing",
-    component: ForPrinting,
-  },
-  {
-    path: "/final-releaser/for-releasing",
-    component: FinalForReleasing,
-  },
-  {
-    path: "/summary",
-    component: Summary,
-  },
-  {
-    path: "/user-control",
-    component: Controls,
-  },
+  // { path: "/initial-receiver/dashboard", component: InitialReceiverDashboard },
+  // { path: "/initial-receiver/receive", component: Receive },
+  // {
+  //   path: "/assessment-receiver/dashboard",
+  //   component: AssessmentReceiverDashboard,
+  // },
+  // {
+  //   path: "/assessment-receiver/for-receiving",
+  //   component: AssessmentForReceiving,
+  // },
+  // {
+  //   path: "/assessment-releaser/dashboard",
+  //   component: AssessmentReleaserDashboard,
+  // },
+  // {
+  //   path: "/assessment-releaser/for-releasing",
+  //   component: AssessmentForReleasing,
+  // },
+  // {
+  //   path: "/complete-receiver/dashboard",
+  //   component: CompleteReceiverDashboard,
+  // },
+  // {
+  //   path: "/complete-receiver/for-receiving",
+  //   component: CompleteForReceiving,
+  // },
+  // {
+  //   path: "/final-releaser/dashboard",
+  //   component: FinalReleaserDashboard,
+  // },
+  // {
+  //   path: "/final-releaser/for-printing",
+  //   component: ForPrinting,
+  // },
+  // {
+  //   path: "/final-releaser/for-releasing",
+  //   component: FinalForReleasing,
+  // },
+  // {
+  //   path: "/summary",
+  //   component: Summary,
+  // },
+  // {
+  //   path: "/user-control",
+  //   component: Controls,
+  // },
 
   // Special Permit Routes
   { path: "/client/services", component: ClientServices },
@@ -154,7 +154,7 @@ const authProtectedRoutes = [
 const publicRoutes = [
   { path: "/profile", component: UserProfile },
   { path: "/logout", component: Logout },
-  { path: "/login", component: Login },
+  // { path: "/login", component: Login },
   { path: "/forgot-password", component: ForgetPwd },
   { path: "/register", component: Register },
   { path: "/home", component: CbpldLandingPage },

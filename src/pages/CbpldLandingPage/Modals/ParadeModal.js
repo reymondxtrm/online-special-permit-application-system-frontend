@@ -217,6 +217,7 @@ function ParadeModal({ openModal, toggleModal }) {
                                 event.currentTarget.files[0]
                               );
                             }}
+                            accept="image/*"
                           />
                         </FormGroup>
                       </Col>
@@ -238,6 +239,7 @@ function ParadeModal({ openModal, toggleModal }) {
                                 event.currentTarget.files[0]
                               );
                             }}
+                            accept="image/*"
                           />
                         </FormGroup>
                       </Col>

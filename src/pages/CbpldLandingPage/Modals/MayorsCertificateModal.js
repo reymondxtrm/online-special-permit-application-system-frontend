@@ -389,6 +389,7 @@ function MayorsCertificateModal({ openModal, toggleModal }) {
                                 event.currentTarget.files[0]
                               );
                             }}
+                            accept="image/*"
                           />
                         </FormGroup>
                       </Col>
@@ -408,6 +409,7 @@ function MayorsCertificateModal({ openModal, toggleModal }) {
                               );
                             }}
                             type="file"
+                            accept="image/*"
                           />
                         </FormGroup>
                       </Col>
@@ -429,6 +431,7 @@ function MayorsCertificateModal({ openModal, toggleModal }) {
                               );
                             }}
                             type="file"
+                            accept="image/*"
                           />
                         </FormGroup>
                       </Col>
@@ -448,6 +451,7 @@ function MayorsCertificateModal({ openModal, toggleModal }) {
                               );
                             }}
                             type="file"
+                            accept="image/*"
                           />
                         </FormGroup>
                       </Col>
@@ -467,6 +471,7 @@ function MayorsCertificateModal({ openModal, toggleModal }) {
                               );
                             }}
                             type="file"
+                            accept="image/*"
                           />
                         </FormGroup>
                       </Col>

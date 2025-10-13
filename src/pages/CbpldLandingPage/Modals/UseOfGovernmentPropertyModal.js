@@ -242,6 +242,7 @@ function UseOfGovernmentPropertyModal({ openModal, toggleModal }) {
                                 event.currentTarget.files[0]
                               );
                             }}
+                            accept="image/*"
                           />
                         </FormGroup>
                       </Col>
@@ -263,6 +264,7 @@ function UseOfGovernmentPropertyModal({ openModal, toggleModal }) {
                                 event.currentTarget.files[0]
                               );
                             }}
+                            accept="image/*"
                           />
                           {/* <FormText>
                         This is some placeholder block-level help text for the

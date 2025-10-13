@@ -59,7 +59,6 @@ const App = (props) => {
         // window.location.href = '/logout';
         // window.location.href = "/pages-forbidden";
         history.replace("/pages-forbidden");
-        console.log(error.response.status);
       } else if (error.response.status === 503) {
         // window.location.href = '/pages-maintenance';
         // history.replace("/pages-forbidden");
@@ -75,12 +74,10 @@ const App = (props) => {
   const notificationParams = useSelector(
     (state) => state.notificationFilter.params
   );
-  const pusher = useSelector((state) => state.pusher.pusherData);
   function getLayout() {
     let layoutCls = VerticalLayout;
     return layoutCls;
   }
-  console.log(isVerified);
   const Layout = getLayout();
   return (
     <React.Fragment>

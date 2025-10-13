@@ -247,6 +247,7 @@ function EventModal({ openModal, toggleModal }) {
                                 event.currentTarget.files[0]
                               );
                             }}
+                            accept="image/*"
                           />
                         </FormGroup>
                       </Col>
@@ -268,6 +269,7 @@ function EventModal({ openModal, toggleModal }) {
                                 event.currentTarget.files[0]
                               );
                             }}
+                            accept="image/*"
                           />
                         </FormGroup>
                       </Col>
@@ -289,6 +291,7 @@ function EventModal({ openModal, toggleModal }) {
                                 event.currentTarget.files[0]
                               );
                             }}
+                            accept="image/*"
                           />
                         </FormGroup>
                       </Col>

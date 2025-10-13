@@ -185,6 +185,7 @@ function OverTheCounterModal({
                               );
                             }}
                             type="file"
+                            accept="image/*"
                           />
                         </div>
                       </FormGroup>

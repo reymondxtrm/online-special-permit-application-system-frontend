@@ -21,27 +21,16 @@ export const loginUser = createAsyncThunk(
   "users/login",
   async ({ data, history }, thunkAPI) => {
     try {
-      // await axios.get("/sanctum/csrf-cookie");
-
       const res = await axios.post("/api/login", data);
-      // const data = await res.json();
       if (res.data.status === 200) {
         localStorage.setItem("authUser", JSON.stringify(res.data));
         localStorage.setItem("authToken", res.data.token);
-
-        history.push("/admin/dashboard");
-        res.data.user.user_type === "client"
-          ? history.push("/client/services")
-          : res.data.roles.includes("special_permit_admin")
-          ? history.push("/admin/dashboard")
-          : history.push("/dashboard");
-        // res.data.roles = "special_permit_admin";
-        // res.data.user_type = "admin";
+        history.push("/client/services");
         return { ...res.data };
       } else if (res.data.status === 403) {
         history.push("/email-verification");
       } else {
-        return thunkAPI.rejectWithValue(res.data);
+        return thunkAPI.rejectWithValue(res.da.ta);
       }
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
