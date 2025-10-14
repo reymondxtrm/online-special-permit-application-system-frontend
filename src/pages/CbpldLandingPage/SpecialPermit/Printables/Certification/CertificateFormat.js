@@ -44,71 +44,33 @@ const CertificateFormat = React.forwardRef((props, ref) => {
 
   const certificateRef = useRef();
 
-  // useEffect(() => {
-  //   const adjustFontScale = () => {
-  //     if (certificateRef.current) {
-  //       const maxHeight =
-  //         permitType === "good_moral" || permitType === "mayors_permit"
-  //           ? 1122
-  //           : 1248;
-  //       const height = certificateRef.current.scrollHeight;
-
-  //       if (height > maxHeight) {
-  //         const ratio = maxHeight / height;
-
-  //         const newScale = Math.max(ratio, 0.7);
-
-  //         setScale(newScale);
-  //       } else {
-  //         setScale(1);
-  //       }
-  //     }
-  //   };
-
-  //   adjustFontScale();
-
-  //   window.addEventListener("resize", adjustFontScale);
-  //   return () => window.removeEventListener("resize", adjustFontScale);
-  // }, [
-  //   firstParagraph,
-  //   secondParagraph,
-  //   thirdParagraph,
-  //   purpose,
-  //   withCase,
-  //   conditions,
-  //   eventName,
-  // ]);
-
   useEffect(() => {
     const adjustFontScale = () => {
       if (certificateRef.current) {
-        const maxHeight = 1122; // target limit (A4 height)
+        // const maxHeight = 1212;
+        const maxHeight =
+          permitType === "good_moral" || permitType === "mayors_certificate"
+            ? 1208
+            : 1244;
         const height = certificateRef.current.scrollHeight;
 
         let newScale = 1;
 
         if (height > maxHeight) {
-          // shrink when overflow
           const ratio = maxHeight / height;
           newScale = Math.max(ratio, 0.7);
         } else {
-          // gradually go back to full scale when content fits
           newScale = 1;
         }
 
-        // Smooth transition
         setScale((prev) => {
-          // Avoid too many updates for tiny differences
           if (Math.abs(prev - newScale) < 0.01) return prev;
           return newScale;
         });
       }
     };
-
-    // Observe height changes
     const observer = new ResizeObserver(adjustFontScale);
     if (certificateRef.current) observer.observe(certificateRef.current);
-
     return () => observer.disconnect();
   }, [
     firstParagraph,
@@ -134,9 +96,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
   ) {
     headerTitle = "SPECIAL PERMIT";
   }
-  // else if (permitType === "occupational_permit") {
-  //   headerTitle = "";
-  // }
+
   let subHeader = "";
   if (permitType === "use_of_government_property") {
     subHeader = "USE OF GOVERNMENT PROPERTY";
@@ -160,22 +120,20 @@ const CertificateFormat = React.forwardRef((props, ref) => {
       }`}
     >
       <div
-        // className="certificate-wrapper"
         ref={certificateRef}
         style={{
           width:
             permitType === "good_moral" || permitType === "mayors_permit"
-              ? "210mm"
+              ? "208mm"
               : "215.9mm",
           height:
             permitType === "good_moral" || permitType === "mayors_permit"
-              ? "297mm"
+              ? "295mm"
               : "330.2mm",
         }}
       >
         <table className="certificate-table">
           <tbody>
-            {/* Header Section */}
             <tr className="certificate-header">
               <td colSpan="2">
                 <div className="header-content">

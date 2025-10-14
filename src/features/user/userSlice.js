@@ -25,12 +25,16 @@ export const loginUser = createAsyncThunk(
       if (res.data.status === 200) {
         localStorage.setItem("authUser", JSON.stringify(res.data));
         localStorage.setItem("authToken", res.data.token);
-        history.push("/client/services");
+        if (res.data.user.user_type === "client") {
+          history.push("/client/services");
+        } else {
+          history.push("/dashboard");
+        }
         return { ...res.data };
       } else if (res.data.status === 403) {
         history.push("/email-verification");
       } else {
-        return thunkAPI.rejectWithValue(res.da.ta);
+        return thunkAPI.rejectWithValue(res.data);
       }
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);

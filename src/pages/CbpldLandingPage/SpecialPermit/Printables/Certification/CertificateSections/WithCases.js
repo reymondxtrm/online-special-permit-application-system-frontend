@@ -3,6 +3,9 @@ import React from "react";
 export default function WithCases({ withCase, scale }) {
   const baseFontSize = 11; // pt
   const fontSize = baseFontSize * scale;
+  const formatWithNewlines = (text) => {
+    return text.replace(/\n/g, "<br>");
+  };
   return (
     <div
       style={{
@@ -24,7 +27,7 @@ export default function WithCases({ withCase, scale }) {
             textAlign: "justify", // Justify the text
             lineHeight: "1.5", // Set line height for readability
           }}
-          dangerouslySetInnerHTML={{ __html: withCase }} // Render the text
+          dangerouslySetInnerHTML={{ __html: formatWithNewlines(withCase) }} // Render the text
         ></p>
       </div>
     </div>

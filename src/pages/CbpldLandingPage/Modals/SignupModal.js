@@ -13,6 +13,9 @@ import {
   Input,
   Label,
   FormGroup,
+  InputGroup,
+  InputGroupText,
+  FormFeedback,
 } from "reactstrap";
 import { faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -39,7 +42,47 @@ function SignupModal({ openModal, toggleModal, props }) {
     { value: "MALE", label: "MALE" },
     { value: "FEMALE", label: "FEMALE" },
   ];
-
+  const educationalAttainmentOption = [
+    {
+      value: "College Graduate",
+      label: "College Graduate",
+    },
+    {
+      value: "High-school Graduate",
+      label: "High-school Graduate",
+    },
+    {
+      value: "SeniorGraduate",
+      label: "Senior-High Graduate",
+    },
+    { value: "Non-Graduate", label: "Non-Graduate" },
+    {
+      value: "Vocational Graduate",
+      label: "Vocational Graduate",
+    },
+  ];
+  const employmentStatusOptions = [
+    { value: "employed", label: "Employed" },
+    { value: "self_employed", label: "Self-employed" },
+    { value: "mixed_income_earner", label: "Mixed Income Earner" },
+    { value: "unemployed", label: "Unemployed" },
+    { value: "student", label: "Student" },
+    { value: "retired", label: "Retired" },
+  ];
+  const bloodTypeOptions = [
+    { value: "A+", label: "A+" },
+    { value: "A-", label: "A-" },
+    { value: "B+", label: "B+" },
+    { value: "B-", label: "B-" },
+    { value: "AB+", label: "AB+" },
+    { value: "AB-", label: "AB-" },
+    { value: "O+", label: "O+" },
+    { value: "O-", label: "O-" },
+  ];
+  const needCompanyDetailsEmploymentStatus = [
+    "employed",
+    "mixed_income_earner",
+  ];
   useEffect(() => {
     if (openModal) {
       axios
@@ -52,7 +95,6 @@ function SignupModal({ openModal, toggleModal, props }) {
 
             const uniqueBarangays = [];
             const seen = new Set();
-
             for (const item of barangays) {
               if (!seen.has(item.psgc_id)) {
                 seen.add(item.psgc_id);
@@ -95,43 +137,28 @@ function SignupModal({ openModal, toggleModal, props }) {
 
   const validationSchema = Yup.object().shape({
     surname: Yup.string().required("Surname is required"),
-    // .matches(/^[A-Za-z\s'-]+$/, "Surname must only contain letters"),
-
     first_name: Yup.string().required("First name is required"),
-    // .matches(/^[A-Za-z\s'-]+$/, "First name must only contain letters"),
-
     middle_name: Yup.string().nullable(),
-    // .matches(/^[A-Za-z\s'-]*$/, "Middle name must only contain letters"),
-
     suffix: Yup.string().nullable(),
-
-    sex: Yup.string()
-      // .oneOf(["Male", "Female"], "Invalid sex")
-      .required("Gender is required")
-      .nullable(),
+    sex: Yup.string().required("Gender is required").nullable(),
 
     email: Yup.string()
       .email("Invalid email format")
       .required("Email is required"),
-
     contact_no: Yup.string().required("Contact number is required"),
-
     barangay: Yup.string().required("Barangay is required").nullable(),
-
     additional_address: Yup.string().nullable(),
-
     date_of_birth: Yup.date()
       .required("Date of birth is required")
       .max(new Date(), "Date of birth cannot be in the future"),
-
     place_of_birth: Yup.string().required("Place of birth is required"),
-
     educational_attainment: Yup.string()
       .required("Educational attainment is required")
       .nullable(),
-
     civil_status: Yup.number().required("Civil status is required").nullable(),
-
+    blood_type: Yup.string().notRequired(),
+    weight: Yup.string().required("Weight is required"),
+    height: Yup.string().required("Height is required"),
     password: Yup.string()
       .required("Password is required")
       .min(6, "Password must be at least 6 characters"),
@@ -139,8 +166,45 @@ function SignupModal({ openModal, toggleModal, props }) {
     confirm_password: Yup.string()
       .required("Confirm your password")
       .oneOf([Yup.ref("password"), null], "Passwords must match"),
-  });
+    employment_status: Yup.string().required("Employment status is required"),
 
+    company_name: Yup.string().when("employment_status", {
+      is: (value) => ["employed", "mixed_income_earner"].includes(value),
+      then: (schema) => schema.required("Company name is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+    position: Yup.string().when("employment_status", {
+      is: (value) => ["employed", "mixed_income_earner"].includes(value),
+      then: (schema) =>
+        schema.required("Your position in the company is requried"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+    date_hired: Yup.string().when("employment_status", {
+      is: (value) => ["employed", "mixed_income_earner"].includes(value),
+      then: (schema) => schema.required("Date hired is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+    company_province: Yup.string().when("employment_status", {
+      is: (value) => ["employed", "mixed_income_earner"].includes(value),
+      then: (schema) => schema.required("Provinces is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+    company_city: Yup.string().when("employment_status", {
+      is: (value) => ["employed", "mixed_income_earner"].includes(value),
+      then: (schema) => schema.required("City is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+    company_barangay: Yup.string().when("employment_status", {
+      is: (value) => ["employed", "mixed_income_earner"].includes(value),
+      then: (schema) => schema.required("Barangay is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+    company_specific_address: Yup.string().when("employment_status", {
+      is: (value) => ["employed", "mixed_income_earner"].includes(value),
+      then: (schema) => schema.required("Company specific address is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+  });
   return (
     <React.Fragment>
       <Modal
@@ -194,6 +258,17 @@ function SignupModal({ openModal, toggleModal, props }) {
               username: "",
               password: "",
               confirm_password: "",
+              company_name: "",
+              position: "",
+              date_hired: "",
+              company_province: "",
+              company_city: "",
+              company_barangay: "",
+              company_specific_address: "",
+              employment_status: "",
+              blood_type: "",
+              height: "",
+              weight: "",
             }}
             validationSchema={validationSchema}
             onSubmit={async (values) => {
@@ -202,60 +277,60 @@ function SignupModal({ openModal, toggleModal, props }) {
                 additional_address: `${street} ${subDivision}`,
                 username: `${values.first_name}.${values.surname}`,
               };
-              Swal.fire({
-                title: "Submitting...",
-                allowOutsideClick: false,
-                didOpen: () => {
-                  Swal.showLoading();
-                },
-              });
 
-              const res = await dispatch(
-                specialPermitClientRegister({ params, props })
-              );
+              // Swal.fire({
+              //   title: "Submitting...",
+              //   allowOutsideClick: false,
+              //   didOpen: () => {
+              //     Swal.showLoading();
+              //   },
+              // });
 
-              if (res?.error) {
-                Swal.fire({
-                  icon: "error",
-                  title: "Error",
-                  text: res?.payload?.message || "Something went wrong",
-                  confirmButtonText: "OK",
-                });
-              } else {
-                Swal.close();
-              }
+              // const res = await dispatch(
+              //   specialPermitClientRegister({ params, props })
+              // );
+
+              // if (res?.error) {
+              //   Swal.fire({
+              //     icon: "error",
+              //     title: "Error",
+              //     text: res?.payload?.message || "Something went wrong",
+              //     confirmButtonText: "OK",
+              //   });
+              // } else {
+              //   Swal.close();
+              // }
             }}
           >
             {(props) => {
               return (
                 <Form onSubmit={props.handleSubmit}>
-                  <Row>
+                  <Row
+                    style={{
+                      border: "3px solid #32b3c4ff",
+                      borderRadius: "10px",
+                      paddingTop: "20px",
+                      position: "relative",
+                    }}
+                  >
                     {/* 1st main Col */}
                     <Row>
-                      <Col md={3}>
-                        <BasicInputField
-                          col={12}
-                          label="Surname"
-                          name="surname"
-                          placeholder="Enter Surname"
-                          value={props.values.surname}
-                          touched={props.touched.surname}
-                          errors={props.errors.surname}
-                          validation={props}
-                          required
-                          onCustomChange={(e) => {
-                            const firstName =
-                              props.values.first_name?.trim().toLowerCase() ||
-                              "";
-                            const surname = e.target.value.trim().toLowerCase();
-                            const username =
-                              firstName && surname
-                                ? `${firstName}.${surname}`
-                                : "";
-                            props.setFieldValue("username", username);
-                          }}
-                        />
-                      </Col>
+                      <p
+                        style={{
+                          fontSize: "15px",
+                          backgroundColor: "white",
+                          position: "absolute",
+                          top: "-35px",
+                          left: "25px",
+                          width: "auto",
+                          padding: "3px",
+                          color: "#1bb7cb",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        Personnal Information
+                      </p>
+
                       <Col md={3}>
                         <BasicInputField
                           col={12}
@@ -303,6 +378,30 @@ function SignupModal({ openModal, toggleModal, props }) {
                           }}
                         />
                       </Col>
+                      <Col>
+                        <BasicInputField
+                          col={12}
+                          label="Surname"
+                          name="surname"
+                          placeholder="Enter Surname"
+                          value={props.values.surname}
+                          touched={props.touched.surname}
+                          errors={props.errors.surname}
+                          validation={props}
+                          required
+                          onCustomChange={(e) => {
+                            const firstName =
+                              props.values.first_name?.trim().toLowerCase() ||
+                              "";
+                            const surname = e.target.value.trim().toLowerCase();
+                            const username =
+                              firstName && surname
+                                ? `${firstName}.${surname}`
+                                : "";
+                            props.setFieldValue("username", username);
+                          }}
+                        />
+                      </Col>
 
                       <Col md={1}>
                         <BasicInputField
@@ -316,8 +415,84 @@ function SignupModal({ openModal, toggleModal, props }) {
                           validation={props}
                         />
                       </Col>
-
+                    </Row>
+                    <Row>
+                      <Col>
+                        <FormGroup>
+                          <Label>
+                            {" "}
+                            Height <span style={{ color: "red" }}>*</span>
+                          </Label>
+                          <InputGroup>
+                            <Input
+                              name="height"
+                              onChange={props.handleChange}
+                              type="text"
+                              invalid={
+                                props.touched.height && !!props.errors.height
+                              }
+                              onBlur={props.handleBlur}
+                              value={props.values.height}
+                            />
+                            <InputGroupText>cm</InputGroupText>
+                            {props.touched.height && !!props.errors.height ? (
+                              <FormFeedback type="invalid">
+                                {props.errors.height}
+                              </FormFeedback>
+                            ) : null}
+                          </InputGroup>
+                        </FormGroup>
+                      </Col>
+                      <Col>
+                        <FormGroup>
+                          <Label>
+                            Weight <span style={{ color: "red" }}>*</span>
+                          </Label>
+                          <InputGroup>
+                            <Input
+                              name="weight"
+                              type="text"
+                              onChange={props.handleChange}
+                              onBlur={props.handleBlur}
+                              value={props.values.weight}
+                              invalid={
+                                props.touched.weight && !!props.errors.weight
+                              }
+                            />
+                            <InputGroupText>kg</InputGroupText>{" "}
+                            {props.touched.weight && props.errors.weight && (
+                              <FormFeedback>{props.errors.weight}</FormFeedback>
+                            )}
+                          </InputGroup>
+                        </FormGroup>
+                      </Col>
                       <Col md={2}>
+                        <FormGroup>
+                          <Label>Blood Type</Label>
+                          <Select
+                            isClearable
+                            placeholder="Blood Type"
+                            name="blood_type"
+                            options={bloodTypeOptions}
+                            value={
+                              bloodTypeOptions?.find(
+                                (option) =>
+                                  option.value === props.values.blood_type
+                              ) || null
+                            }
+                            onChange={(selectedOption) =>
+                              props.setFieldValue(
+                                "blood_type",
+                                selectedOption ? selectedOption.value : ""
+                              )
+                            }
+                            onBlur={() =>
+                              props.setFieldTouched("blood_type", true)
+                            }
+                          />
+                        </FormGroup>
+                      </Col>
+                      <Col md={3}>
                         <FormGroup>
                           <Label>
                             Gender <span style={{ color: "red" }}>*</span>
@@ -352,176 +527,7 @@ function SignupModal({ openModal, toggleModal, props }) {
                           )}
                         </FormGroup>
                       </Col>
-                    </Row>
-                    <Row>
-                      <Col md={6}>
-                        <FormGroup>
-                          <Label>Username</Label>
-                          <Input
-                            disabled
-                            value={
-                              props.values.first_name +
-                              "." +
-                              props.values.surname
-                            }
-                          />
-                        </FormGroup>
-                        {/* <BasicInputField
-                          col={12}
-                          label="Username (Auto Generated)"
-                          name="username"
-                          placeholder="Generated Username"
-                          value={props.values.username}
-                          touched={false} // optional, no validation needed
-                          errors={null} // optional, no validation needed
-                          validation={props}
-                          disable={true}
-                        /> */}
-                      </Col>
                       <Col md={3}>
-                        <BasicInputField
-                          col={12}
-                          label="Password"
-                          name="password"
-                          type="password"
-                          placeholder="Enter Password"
-                          value={props.values.password}
-                          touched={props.touched.password}
-                          errors={props.errors.password}
-                          validation={props}
-                          required
-                        />
-                      </Col>
-                      <Col md={3}>
-                        <BasicInputField
-                          col={12}
-                          label="Confirm Password"
-                          name="confirm_password"
-                          type="password"
-                          required
-                          placeholder="Re-enter Password"
-                          value={props.values.confirm_password}
-                          touched={props.touched.confirm_password}
-                          errors={props.errors.confirm_password}
-                          validation={{
-                            handleChange: props.handleChange,
-                            handleBlur: props.handleBlur,
-                          }}
-                        />
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col md={4}>
-                        <BasicInputField
-                          col={12}
-                          label="Email Address"
-                          name="email"
-                          placeholder="Enter Email Address"
-                          value={props.values.email}
-                          touched={props.touched.email}
-                          errors={props.errors.email}
-                          validation={props}
-                          type="email"
-                          required
-                        />
-                      </Col>
-                      <Col md={4}>
-                        <BasicInputField
-                          col={12}
-                          label="Contact No."
-                          name="contact_no"
-                          required
-                          placeholder="Enter Contact No."
-                          value={props.values.contact_no}
-                          touched={props.touched.contact_no}
-                          errors={props.errors.contact_no}
-                          validation={props}
-                        />
-                      </Col>
-
-                      <Col md={4}>
-                        <FormGroup>
-                          <Label for="educationalAttainment">
-                            Educational Attainment{" "}
-                            <span style={{ color: "red" }}>*</span>
-                          </Label>
-                          <Select
-                            id="educationalAttainment"
-                            name="educational_attainment"
-                            options={[
-                              {
-                                value: "College Graduate",
-                                label: "College Graduate",
-                              },
-                              {
-                                value: "High-school Graduate",
-                                label: "High-school Graduate",
-                              },
-                              {
-                                value: "SeniorGraduate",
-                                label: "Senior-High Graduate",
-                              },
-                              { value: "Non-Graduate", label: "Non-Graduate" },
-                              {
-                                value: "Vocational Graduate",
-                                label: "Vocational Graduate",
-                              },
-                            ]}
-                            onChange={(selected) =>
-                              props.setFieldValue(
-                                "educational_attainment",
-                                selected ? selected.value : ""
-                              )
-                            }
-                            placeholder="Select Educational Attainment"
-                            isClearable
-                            className={
-                              props.errors.educational_attainment &&
-                              props.touched.educational_attainment
-                                ? "is-invalid"
-                                : ""
-                            }
-                          />
-
-                          {props.errors.educational_attainment &&
-                            props.touched.educational_attainment && (
-                              <div className="invalid-feedback d-block">
-                                {props.errors.educational_attainment}
-                              </div>
-                            )}
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col md={4}>
-                        <BasicInputField
-                          col={12}
-                          label="Birthday"
-                          name="date_of_birth"
-                          type="date"
-                          required
-                          placeholder="Select Birthday"
-                          value={props.values.date_of_birth}
-                          touched={props.touched.date_of_birth}
-                          errors={props.errors.date_of_birth}
-                          validation={props}
-                        />
-                      </Col>
-                      <Col md={4}>
-                        <BasicInputField
-                          col={12}
-                          label="Birth Place"
-                          name="place_of_birth"
-                          type="text"
-                          required
-                          placeholder="Enter Birth Place"
-                          value={props.values.place_of_birth}
-                          touched={props.touched.place_of_birth}
-                          errors={props.errors.place_of_birth}
-                          validation={props}
-                        />
-                      </Col>
-                      <Col md={4}>
                         <FormGroup>
                           <Label>
                             Civil Status <span style={{ color: "red" }}>*</span>
@@ -557,6 +563,71 @@ function SignupModal({ openModal, toggleModal, props }) {
                             props.touched.civil_status && (
                               <div className="invalid-feedback d-block">
                                 {props.errors.civil_status}
+                              </div>
+                            )}
+                        </FormGroup>
+                      </Col>
+                    </Row>
+
+                    <Row>
+                      <Col md={4}>
+                        <BasicInputField
+                          col={12}
+                          label="Birthday"
+                          name="date_of_birth"
+                          type="date"
+                          required
+                          placeholder="Select Birthday"
+                          value={props.values.date_of_birth}
+                          touched={props.touched.date_of_birth}
+                          errors={props.errors.date_of_birth}
+                          validation={props}
+                        />
+                      </Col>
+                      <Col md={4}>
+                        <BasicInputField
+                          col={12}
+                          label="Birth Place"
+                          name="place_of_birth"
+                          type="text"
+                          required
+                          placeholder="Enter Birth Place"
+                          value={props.values.place_of_birth}
+                          touched={props.touched.place_of_birth}
+                          errors={props.errors.place_of_birth}
+                          validation={props}
+                        />
+                      </Col>
+                      <Col>
+                        <FormGroup>
+                          <Label for="educationalAttainment">
+                            Educational Attainment{" "}
+                            <span style={{ color: "red" }}>*</span>
+                          </Label>
+                          <Select
+                            id="educationalAttainment"
+                            name="educational_attainment"
+                            options={educationalAttainmentOption}
+                            onChange={(selected) =>
+                              props.setFieldValue(
+                                "educational_attainment",
+                                selected ? selected.value : ""
+                              )
+                            }
+                            placeholder="Select Educational Attainment"
+                            isClearable
+                            className={
+                              props.errors.educational_attainment &&
+                              props.touched.educational_attainment
+                                ? "is-invalid"
+                                : ""
+                            }
+                          />
+
+                          {props.errors.educational_attainment &&
+                            props.touched.educational_attainment && (
+                              <div className="invalid-feedback d-block">
+                                {props.errors.educational_attainment}
                               </div>
                             )}
                         </FormGroup>
@@ -615,6 +686,347 @@ function SignupModal({ openModal, toggleModal, props }) {
                       </Col>
                     </Row>
                   </Row>
+                  <Row
+                    style={{
+                      border: "3px solid #32b3c4ff",
+                      borderRadius: "10px",
+                      paddingTop: "20px",
+                      position: "relative",
+                      marginTop: "30px",
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontSize: "15px",
+                        backgroundColor: "white",
+                        position: "absolute",
+                        top: "-15px",
+                        left: "25px",
+                        width: "auto",
+                        padding: "3px",
+                        color: "#1bb7cb",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Contact Information
+                    </p>
+                    <Col md={6}>
+                      <BasicInputField
+                        col={12}
+                        label="Email Address"
+                        name="email"
+                        placeholder="Enter Email Address"
+                        value={props.values.email}
+                        touched={props.touched.email}
+                        errors={props.errors.email}
+                        validation={props}
+                        type="email"
+                        required
+                      />
+                    </Col>
+                    <Col md={6}>
+                      <BasicInputField
+                        col={12}
+                        label="Contact No."
+                        name="contact_no"
+                        required
+                        placeholder="Enter Contact No."
+                        value={props.values.contact_no}
+                        touched={props.touched.contact_no}
+                        errors={props.errors.contact_no}
+                        validation={props}
+                      />
+                    </Col>
+                  </Row>
+
+                  <Row
+                    style={{
+                      border: "3px solid #32b3c4ff",
+                      borderRadius: "10px",
+                      paddingTop: "20px",
+                      position: "relative",
+                      marginTop: "30px",
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontSize: "15px",
+                        backgroundColor: "white",
+                        position: "absolute",
+                        top: "-15px",
+                        left: "25px",
+                        width: "auto",
+                        padding: "3px",
+                        color: "#1bb7cb",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Employment Information
+                    </p>
+                    <Row>
+                      <Col>
+                        <FormGroup>
+                          <Label>
+                            Employment Status{" "}
+                            <span style={{ color: "red" }}>*</span>
+                          </Label>
+                          <Select
+                            options={employmentStatusOptions}
+                            isClearable
+                            name="employment_status"
+                            value={
+                              employmentStatusOptions.find(
+                                (option) =>
+                                  option.value ===
+                                  props.values.employment_status
+                              ) || null
+                            } // ← THIS IS CRUCIAL
+                            onChange={(selected) =>
+                              props.setFieldValue(
+                                "employment_status",
+                                selected ? selected.value : ""
+                              )
+                            }
+                            onBlur={() =>
+                              props.setFieldTouched("employment_status", true)
+                            }
+                            className={
+                              props.errors.employment_status &&
+                              props.touched.employment_status
+                                ? "is-invalid"
+                                : ""
+                            }
+                            placeholder="Employment Status"
+                          />
+                          {props.errors.employment_status &&
+                            props.touched.employment_status && (
+                              <div className="invalid-feedback d-block">
+                                {props.errors.employment_status}
+                              </div>
+                            )}
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                    <Row>
+                      {/* <p
+                        style={{
+                          fontSize: "12px",
+                          color: "#19818fff",
+                        }}
+                      >
+                        Company
+                      </p> */}
+                      <Col>
+                        <BasicInputField
+                          col={12}
+                          type={"text"}
+                          name="company_name"
+                          validation={props}
+                          value={props.values.company_name}
+                          label="Company Name"
+                          errors={props.errors.company_name}
+                          touched={props.touched.company_name}
+                          required
+                          placeholder="Company name"
+                          disable={
+                            !needCompanyDetailsEmploymentStatus.includes(
+                              props?.values?.employment_status
+                            )
+                          }
+                        />
+                      </Col>
+                      <Col>
+                        <BasicInputField
+                          col={12}
+                          type={"text"}
+                          name="position"
+                          validation={props}
+                          value={props?.values?.position}
+                          label="Position"
+                          errors={props?.errors?.position}
+                          touched={props?.touched?.position}
+                          required
+                          placeholder="Your position in the company"
+                          disable={
+                            !needCompanyDetailsEmploymentStatus.includes(
+                              props?.values?.employment_status
+                            )
+                          }
+                        />
+                      </Col>
+                      <Col>
+                        <BasicInputField
+                          col={12}
+                          type={"date"}
+                          name="date_hired"
+                          validation={props}
+                          value={props?.values?.date_hired}
+                          label="Date Hired"
+                          errors={props?.errors?.date_hired}
+                          touched={props?.touched?.date_hired}
+                          required
+                          placeholder="Date hired"
+                          disable={
+                            !needCompanyDetailsEmploymentStatus.includes(
+                              props?.values?.employment_status
+                            )
+                          }
+                        />
+                      </Col>
+                    </Row>
+                    <Row>
+                      <p
+                        style={{
+                          fontSize: "12px",
+                          color: "black",
+                          marginBottom: "0px",
+                        }}
+                        className="form-label"
+                      >
+                        Company Address <span style={{ color: "red" }}>*</span>
+                      </p>
+                      <Col>
+                        <BasicInputField
+                          col={12}
+                          type={"text"}
+                          name="company_specific_address"
+                          validation={props}
+                          value={props?.values?.company_specific_address}
+                          // label="Street/Purok"
+                          errors={props?.errors?.company_specific_address}
+                          touched={props?.touched?.company_specific_address}
+                          placeholder="Building No./Street/Purok"
+                          disable={
+                            !needCompanyDetailsEmploymentStatus.includes(
+                              props?.values?.employment_status
+                            )
+                          }
+                        />
+                      </Col>
+                      <Col>
+                        <BasicInputField
+                          col={12}
+                          type={"text"}
+                          name="company_province"
+                          validation={props}
+                          value={props?.values?.company_province}
+                          label=""
+                          errors={props?.errors?.company_province}
+                          touched={props?.touched?.company_province}
+                          placeholder="Province"
+                          disable={
+                            !needCompanyDetailsEmploymentStatus.includes(
+                              props?.values?.employment_status
+                            )
+                          }
+                        />
+                      </Col>
+                      <Col>
+                        <BasicInputField
+                          col={12}
+                          type={"text"}
+                          name="company_city"
+                          validation={props}
+                          value={props?.values?.company_city}
+                          label=""
+                          errors={props?.errors?.company_city}
+                          touched={props?.touched?.company_city}
+                          placeholder="City"
+                          disable={
+                            !needCompanyDetailsEmploymentStatus.includes(
+                              props?.values?.employment_status
+                            )
+                          }
+                        />
+                      </Col>
+                      <Col>
+                        <BasicInputField
+                          col={12}
+                          type={"text"}
+                          name="company_barangay"
+                          validation={props}
+                          value={props?.values?.company_barangay}
+                          label=""
+                          errors={props?.errors?.company_barangay}
+                          touched={props?.touched?.company_barangay}
+                          placeholder="Barangay"
+                          disable={
+                            !needCompanyDetailsEmploymentStatus.includes(
+                              props?.values?.employment_status
+                            )
+                          }
+                        />
+                      </Col>
+                    </Row>
+                  </Row>
+                  <Row
+                    style={{
+                      border: "3px solid #32b3c4ff",
+                      borderRadius: "10px",
+                      paddingTop: "20px",
+                      position: "relative",
+                      marginTop: "30px",
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontSize: "15px",
+                        backgroundColor: "white",
+                        position: "absolute",
+                        top: "-15px",
+                        left: "25px",
+                        width: "auto",
+                        padding: "3px",
+                        color: "#1bb7cb",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Account Credential
+                    </p>
+                    <Col>
+                      <FormGroup>
+                        <Label>Username</Label>
+                        <Input
+                          disabled
+                          value={
+                            props.values.first_name + "." + props.values.surname
+                          }
+                        />
+                      </FormGroup>
+                    </Col>
+
+                    <Col md={3}>
+                      <BasicInputField
+                        col={12}
+                        label="Password"
+                        name="password"
+                        type="password"
+                        placeholder="Enter Password"
+                        value={props.values.password}
+                        touched={props.touched.password}
+                        errors={props.errors.password}
+                        validation={props}
+                        required
+                      />
+                    </Col>
+                    <Col md={3}>
+                      <BasicInputField
+                        col={12}
+                        label="Confirm Password"
+                        name="confirm_password"
+                        type="password"
+                        required
+                        placeholder="Re-enter Password"
+                        value={props.values.confirm_password}
+                        touched={props.touched.confirm_password}
+                        errors={props.errors.confirm_password}
+                        validation={{
+                          handleChange: props.handleChange,
+                          handleBlur: props.handleBlur,
+                        }}
+                      />
+                    </Col>
+                  </Row>
                 </Form>
               );
             }}
@@ -644,5 +1056,4 @@ function SignupModal({ openModal, toggleModal, props }) {
     </React.Fragment>
   );
 }
-
 export default SignupModal;

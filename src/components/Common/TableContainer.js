@@ -20,7 +20,7 @@ function GlobalFilter({
 }) {
   const count = preGlobalFilteredRows.length;
   const [value, setValue] = React.useState(globalFilter);
-  const onChange = useAsyncDebounce(value => {
+  const onChange = useAsyncDebounce((value) => {
     setGlobalFilter(value || undefined);
   }, 200);
 
@@ -33,7 +33,7 @@ function GlobalFilter({
               Search this table
             </span>
             <input
-              onChange={e => {
+              onChange={(e) => {
                 setValue(e.target.value);
                 onChange(e.target.value);
               }}
@@ -51,53 +51,53 @@ function GlobalFilter({
   );
 }
 
-    const TableContainer = ({
+const TableContainer = ({
+  columns,
+  data,
+  isGlobalFilter,
+  isAddOptions,
+  isAddUserList,
+  handleOrderClicks,
+  handleUserClick,
+  handleCustomerClick,
+  isAddCustList,
+  customPageSize,
+  className,
+  customPageSizeOptions,
+}) => {
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    page,
+    prepareRow,
+    canPreviousPage,
+    canNextPage,
+    pageOptions,
+    pageCount,
+    gotoPage,
+    nextPage,
+    previousPage,
+    setPageSize,
+    state,
+    preGlobalFilteredRows,
+    setGlobalFilter,
+    state: { pageIndex, pageSize },
+  } = useTable(
+    {
       columns,
       data,
-      isGlobalFilter,
-      isAddOptions,
-      isAddUserList,
-      handleOrderClicks,
-      handleUserClick,
-      handleCustomerClick,
-      isAddCustList,
-      customPageSize,
-      className,
-      customPageSizeOptions
-    }) => {
-      const {
-        getTableProps,
-        getTableBodyProps,
-        headerGroups,
-        page,
-        prepareRow,
-        canPreviousPage,
-        canNextPage,
-        pageOptions,
-        pageCount,
-        gotoPage,
-        nextPage,
-        previousPage,
-        setPageSize,
-        state,
-        preGlobalFilteredRows,
-        setGlobalFilter,
-        state: { pageIndex, pageSize },
-      } = useTable(
-        {
-          columns,
-          data,
-          defaultColumn: { Filter: DefaultColumnFilter },
-          initialState: { 
-            pageIndex: 0, 
-            pageSize: customPageSize,
-            sortBy: [
-              {
-                desc: true,
-              },
-            ],
+      defaultColumn: { Filter: DefaultColumnFilter },
+      initialState: {
+        pageIndex: 0,
+        pageSize: customPageSize,
+        sortBy: [
+          {
+            desc: true,
           },
-        },
+        ],
+      },
+    },
     useGlobalFilter,
     useFilters,
     useSortBy,
@@ -105,15 +105,15 @@ function GlobalFilter({
     usePagination
   );
 
-  const generateSortingIndicator = column => {
+  const generateSortingIndicator = (column) => {
     return column.isSorted ? (column.isSortedDesc ? " 🔽" : " 🔼") : "";
   };
 
-  const onChangeInSelect = event => {
+  const onChangeInSelect = (event) => {
     setPageSize(Number(event.target.value));
   };
 
-  const onChangeInInput = event => {
+  const onChangeInInput = (event) => {
     const page = event.target.value ? Number(event.target.value) - 1 : 0;
     gotoPage(page);
   };
@@ -190,9 +190,9 @@ function GlobalFilter({
       <div className="table-responsive react-table">
         <Table bordered hover {...getTableProps()} className={className}>
           <thead className="table-light table-nowrap">
-            {headerGroups.map(headerGroup => (
+            {headerGroups.map((headerGroup) => (
               <tr key={headerGroup.id} {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map(column => (
+                {headerGroup.headers.map((column) => (
                   <th key={column.id}>
                     <div className="mb-2" {...column.getSortByToggleProps()}>
                       {column.render("Header")}
@@ -206,12 +206,12 @@ function GlobalFilter({
           </thead>
 
           <tbody {...getTableBodyProps()}>
-            {page.map(row => {
+            {page.map((row) => {
               prepareRow(row);
               return (
                 <Fragment key={row.getRowProps().key}>
                   <tr>
-                    {row.cells.map(cell => {
+                    {row.cells.map((cell) => {
                       return (
                         <td key={cell.id} {...cell.getCellProps()}>
                           {cell.render("Cell")}
@@ -261,7 +261,6 @@ function GlobalFilter({
             onChange={onChangeInInput}
           />
         </Col>
-
         <Col className="col-md-auto">
           <div className="d-flex gap-1">
             <Button color="primary" onClick={nextPage} disabled={!canNextPage}>
