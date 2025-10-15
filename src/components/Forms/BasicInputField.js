@@ -16,10 +16,12 @@ const BasicInputField = ({
   return (
     <Col md={col}>
       <div className="mb-3">
-        <Label className="form-label">
-          {label}
-          {required && <span style={{ color: "red" }}>&nbsp;*</span>}
-        </Label>
+        {label ? (
+          <Label className="form-label">
+            {label}
+            {required && <span style={{ color: "red" }}>&nbsp;*</span>}
+          </Label>
+        ) : null}
         <Input
           disabled={disable}
           name={name}
