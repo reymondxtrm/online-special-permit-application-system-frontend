@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import { useHistory } from "react-router-dom";
 
 function getFormData(object) {
   const formData = new FormData();
@@ -28,7 +27,7 @@ export const loginUser = createAsyncThunk(
         if (res.data.user.user_type === "client") {
           history.push("/client/services");
         } else {
-          history.push("/dashboard");
+          history.push("/admin/dashboard");
         }
         return { ...res.data };
       } else if (res.data.status === 403) {
@@ -61,7 +60,7 @@ export const signupUser = createAsyncThunk(
 );
 export const specialPermitClientRegister = createAsyncThunk(
   "user/specialPermitClientRegister",
-  async ({ params, props }, thunkAPI) => {
+  async ({ params, history }, thunkAPI) => {
     try {
       const response = await axios({
         url: "api/registration",
@@ -69,7 +68,7 @@ export const specialPermitClientRegister = createAsyncThunk(
         data: params,
       });
       if (response.status === 200) {
-        props.history.push(`/email-verification/${params.email}`);
+        history.push(`/email-verification/${params.email}`);
         return response;
       }
       return thunkAPI.rejectWithValue(response.data);

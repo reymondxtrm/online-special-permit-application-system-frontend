@@ -1,11 +1,58 @@
-import React from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Modal, ModalBody, ModalHeader } from "reactstrap";
 // import cgbLogo from "../../../../../assets/images/cgbLogo.png";
 // import headerLine from "../../../../../assets/images/permitHeaderLine.png";
 import cgbLogo from "../../../../../assets/images/cgbLogo.png";
 import headerLine from "../../../../../assets/images/permitHeaderLine.png";
 import "./RequestForm.css";
-export default function RequestForm({ isOpen, toggle }) {
+import axios from "axios";
+import moment from "moment";
+export default function RequestForm({ isOpen, toggle, applicationId }) {
+  const [application, setApplication] = useState(null);
+  useEffect(() => {
+    let mounted = true;
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`api/admin/get-request-form-data`, {
+          params: { id: applicationId },
+          withCredentials: true,
+        });
+
+        if (mounted && response) {
+          setApplication(response.data);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    if (applicationId) fetchData();
+
+    return () => {
+      mounted = false;
+    };
+  }, [applicationId]);
+  const column1 = application?.special_permit_type?.code === "good_moral";
+  const formater = (date) => {
+    const newDate = new Date(date);
+    const formatedDate = newDate.toLocaleDateString("en-US");
+    return formatedDate;
+  };
+  const type = application?.special_permit_type?.code;
+  // const concatEventDate = useMemo(() => {
+  //   if (!application?.event_date_from && !application?.event_date_to) return "";
+
+  //   const timeFrom = moment(application.event_time_from, "h:mm A").format(
+  //     "h:mm A"
+  //   );
+  //   const timeTo = moment(application.event_time_to, "h:mm A").format("h:mm A");
+
+  //   if (application.event_date_from === application.event_date_to) {
+  //     return `${application.event_date_from} at ${timeFrom} to ${timeTo}`;
+  //   } else {
+  //     return `${application.event_date_from} at ${timeFrom} to ${application.event_date_to} at ${timeTo}`;
+  //   }
+  // }, [application]);
+
   return (
     <Modal isOpen={isOpen} toggle={toggle} size="xl">
       <ModalHeader toggle={toggle}></ModalHeader>
@@ -41,10 +88,10 @@ export default function RequestForm({ isOpen, toggle }) {
                     <div>
                       <div className="header-text">
                         <p>Republic of the Philippines</p>
-                        <p className="header-title">
+                        <p className="header-title ">
                           CITY GOVERNMENT OF BUTUAN
                         </p>
-                        <p className="header-title">
+                        <p className="header-title ">
                           CITY GOVERNMENT PERMITS AND LICENSING DEPARTMENT
                         </p>
                         <p>
@@ -102,91 +149,250 @@ export default function RequestForm({ isOpen, toggle }) {
                     <tbody>
                       <tr>
                         <td>
-                          <div className="checkbox"></div>
-                          <p>
-                            Request Letter &quot;Received&quot; by the Office of
-                            the City Mayor.{" "}
-                          </p>
+                          <div className="d-flex gap-1 align-items-center">
+                            <div
+                              className="checkbox"
+                              style={{
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.request_letter && type === "event"
+                                    ? "black"
+                                    : "",
+                              }}
+                            ></div>
+                            <p style={{ flex: "1" }} className="m-0 p-0">
+                              Request Letter &quot;Received&quot; by the Office
+                              of the City Mayor.{" "}
+                            </p>
+                          </div>
                         </td>
                         <td>
-                          <div className="checkbox"></div>
-                          <p>
-                            Request Letter &quot;Received&quot; by the Office of
-                            the City Mayor.{" "}
-                          </p>
+                          <div className="d-flex gap-1 align-items-center">
+                            <div
+                              className="checkbox"
+                              style={{
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.request_letter && type === "motorcade"
+                                    ? "black"
+                                    : "",
+                              }}
+                            ></div>
+                            <p style={{ flex: "1" }} className="m-0 p-0">
+                              Request Letter &quot;Received&quot; by the Office
+                              of the City Mayor.{" "}
+                            </p>
+                          </div>
                         </td>
                         <td>
-                          <div className="checkbox"></div>
-                          <p>
-                            Request Letter &quot;Received&quot; by the Office of
-                            the City Mayor.{" "}
-                          </p>
+                          <div className="d-flex gap-1 align-items-center">
+                            <div
+                              className="checkbox"
+                              style={{
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.request_letter && type === "parade"
+                                    ? "black"
+                                    : "",
+                              }}
+                            ></div>
+                            <p style={{ flex: "1" }} className="m-0 p-0">
+                              Request Letter &quot;Received&quot; by the Office
+                              of the City Mayor.{" "}
+                            </p>
+                          </div>
                         </td>
                         <td>
-                          <div className="checkbox"></div>
-                          <p>
-                            Request Letter &quot;Received&quot; by the Office of
-                            the City Mayor.{" "}
-                          </p>
+                          <div className="d-flex gap-1 align-items-center">
+                            <div
+                              className="checkbox"
+                              style={{
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.request_letter && type === "recorrida"
+                                    ? "black"
+                                    : "",
+                              }}
+                            ></div>
+                            <p style={{ flex: "1" }} className="m-0 p-0">
+                              Request Letter &quot;Received&quot; by the Office
+                              of the City Mayor.{" "}
+                            </p>
+                          </div>
                         </td>
                         <td>
-                          <div className="checkbox"></div>
-                          <p>
-                            Request Letter &quot;Received&quot; by the Office of
-                            the City Mayor.{" "}
-                          </p>
+                          <div className="d-flex gap-1 align-items-center">
+                            <div
+                              className="checkbox"
+                              style={{
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.request_letter &&
+                                  type === "use_of_government_property"
+                                    ? "black"
+                                    : "",
+                              }}
+                            ></div>
+                            <p style={{ flex: "1" }} className="m-0 p-0">
+                              Request Letter &quot;Received&quot; by the Office
+                              of the City Mayor.{" "}
+                            </p>
+                          </div>
                         </td>
                       </tr>
                       <tr>
                         <td>
-                          <div className="checkbox"> </div>
-                          <p>
-                            Official Receipt (pursuant to City Ordinance No.
-                            6795 - 2022)
-                          </p>
+                          <div className="d-flex gap-1 align-items-center">
+                            <div
+                              className="checkbox"
+                              style={{
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.official_receipt && type === "event"
+                                    ? "black"
+                                    : "",
+                              }}
+                            >
+                              {" "}
+                            </div>
+                            <p style={{ flex: "1" }} className="m-0 p-0">
+                              Official Receipt (pursuant to City Ordinance No.
+                              6795 - 2022)
+                            </p>
+                          </div>
                         </td>
                         <td>
-                          <div className="checkbox"></div>
-                          <p>Route Plan approved by the CTTMD</p>
+                          <div className="d-flex gap-1 align-items-center">
+                            <div
+                              className="checkbox"
+                              style={{
+                                backgroundColor:
+                                  !!application?.uploaded_file?.route_plan &&
+                                  type === "motorcade"
+                                    ? "black"
+                                    : "",
+                              }}
+                            ></div>
+                            <p style={{ flex: "1" }} className="m-0 p-0">
+                              Route Plan approved by the CTTMD
+                            </p>
+                          </div>
                         </td>
                         <td>
-                          <div className="checkbox"></div>
-                          <p>Route Plan approved by the CTTMD</p>
+                          <div className="d-flex gap-1 align-items-center">
+                            <div
+                              className="checkbox"
+                              style={{
+                                backgroundColor:
+                                  !!application?.uploaded_file?.route_plan &&
+                                  type === "parade"
+                                    ? "black"
+                                    : "",
+                              }}
+                            ></div>
+                            <p style={{ flex: "1" }} className="m-0 p-0">
+                              Route Plan approved by the CTTMD
+                            </p>
+                          </div>
                         </td>
                         <td>
-                          <div className="checkbox"></div>
-                          <p>Route Plan approved by the CTTMD</p>
+                          <div className="d-flex gap-1 align-items-center">
+                            <div
+                              className="checkbox"
+                              style={{
+                                backgroundColor:
+                                  !!application?.uploaded_file?.route_plan &&
+                                  type === "recorrida"
+                                    ? "black"
+                                    : "",
+                              }}
+                            ></div>
+                            <p style={{ flex: "1" }} className="m-0 p-0">
+                              Route Plan approved by the CTTMD
+                            </p>
+                          </div>
                         </td>
                         <td>
-                          <div className="checkbox"> </div>
-                          <p>
-                            Official Receipt (pursuant to City Ordinance No.
-                            6795 - 2022)
-                          </p>
+                          <div className="d-flex gap-1 align-items-center">
+                            <div
+                              className="checkbox"
+                              style={{
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.official_receipt &&
+                                  type === "use_of_government_property"
+                                    ? "black"
+                                    : "",
+                              }}
+                            >
+                              {" "}
+                            </div>
+                            <p style={{ flex: "1" }} className="m-0 p-0">
+                              Official Receipt (pursuant to City Ordinance No.
+                              6795 - 2022)
+                            </p>
+                          </div>
                         </td>
                       </tr>
                       <tr>
                         <td></td>
                         <td>
-                          <div className="checkbox"></div>
-                          <p>
-                            Official Receipt &#8369;200.00 per day (less than 10
-                            vehicles) pursuant to City Ordinance No, 6795 -2022.
-                          </p>
+                          <div className="d-flex gap-1 align-items-center">
+                            <div
+                              className="checkbox"
+                              style={{
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.official_receipt && type === "motorcade"
+                                    ? "black"
+                                    : "",
+                              }}
+                            ></div>
+                            <p style={{ flex: "1" }} className="m-0 p-0">
+                              Official Receipt &#8369;200.00 per day (less than
+                              10 vehicles) pursuant to City Ordinance No, 6795
+                              -2022.
+                            </p>
+                          </div>
                         </td>
                         <td>
-                          <div className="checkbox"></div>
-                          <p>
-                            Official Receipt &#8369;200.00 per day (less than 10
-                            vehicles) pursuant to City Ordinance No, 6795 -2022.
-                          </p>
+                          <div className="d-flex gap-1 align-items-center">
+                            <div
+                              className="checkbox"
+                              style={{
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.official_receipt && type === "parade"
+                                    ? "black"
+                                    : "",
+                              }}
+                            ></div>
+                            <p style={{ flex: "1" }} className="m-0 p-0">
+                              Official Receipt &#8369;200.00 per day (less than
+                              10 vehicles) pursuant to City Ordinance No, 6795
+                              -2022.
+                            </p>
+                          </div>
                         </td>
                         <td>
-                          <div className="checkbox"></div>
-                          <p>
-                            Official Receipt &#8369;200.00 per day pursuant to
-                            City Ordinance No. 6795-2022
-                          </p>
+                          <div className="d-flex gap-1 align-items-center">
+                            <div
+                              className="checkbox"
+                              style={{
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.official_receipt && type === "recorrida"
+                                    ? "black"
+                                    : "",
+                              }}
+                            >
+                              {" "}
+                            </div>
+                            <p style={{ flex: "1" }} className="m-0 p-0">
+                              Official Receipt &#8369;200.00 per day pursuant to
+                              City Ordinance No. 6795-2022
+                            </p>
+                          </div>
                         </td>
                         <td></td>
                       </tr>
@@ -208,53 +414,125 @@ export default function RequestForm({ isOpen, toggle }) {
                   >
                     <tbody>
                       <tr>
-                        <td style={{ width: "65%" }}>
-                          <span className="bolder-text cambraText">Date:</span>
+                        <td style={{ width: "65%" }} className="m-0 p-0">
+                          <div className="d-flex align-items-center gap-2">
+                            <p className="label">Date:</p>
+                            <p className="p-0 m-0">
+                              {new Date(
+                                application?.created_at
+                              ).toLocaleDateString()}
+                            </p>
+                          </div>
                         </td>
-                        <td style={{ width: "35%" }}>
-                          <span className="bolder-text cambraText">
-                            Contact No.:
-                          </span>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td colSpan={2} className="bolder-text cambraText">
-                          Name of Requestor/ Organization:
-                        </td>
-                      </tr>
-                      <tr>
-                        <td colSpan={2} className="bolder-text cambraText">
-                          Name of Representative:
-                        </td>
-                      </tr>
-                      <tr>
-                        <td colSpan={2} className="text-center">
-                          <span className="cambraText me-5 ms-5">Surname</span>
-                          <span className="cambraText me-5 ms-5">
-                            First Name
-                          </span>
-                          <span className="cambraText me-5 ms-5">
-                            Middle Name
-                          </span>
+                        <td style={{ width: "35%" }} className="m-0 p-0">
+                          <div className="d-flex align-items-center gap-2">
+                            <p className="label">Contact No.:</p>
+                            <p className="p-0 m-0">
+                              {" "}
+                              {
+                                application?.user?.user_phone_numbers[0]
+                                  ?.phone_number
+                              }
+                            </p>
+                          </div>
                         </td>
                       </tr>
                       <tr>
-                        <td colSpan={2} className="bolder-text cambraText">
-                          Address:
+                        <td colSpan={2} className="m-0 p-0">
+                          <div className="d-flex align-items-center gap-2">
+                            <p className="label">
+                              Name of Requestor/ Organization:
+                            </p>
+                            <p className="p-0 m-0">
+                              {application?.requestor_name}
+                            </p>
+                          </div>
                         </td>
                       </tr>
                       <tr>
-                        <td colSpan={2} className="bolder-text cambraText">
-                          Name of Event:
+                        <td colSpan={2} className=" m-0 p-0">
+                          <div className="d-flex gap-2 h-100">
+                            <p className="label" style={{ width: "20%" }}>
+                              Name of Representative:
+                            </p>
+                            <div
+                              className="d-flex justify-content-around"
+                              style={{ width: "80%" }}
+                            >
+                              <p className="p-0 m-0">
+                                {application?.user?.lname}
+                              </p>
+                              <p className="m-0 p-0">
+                                {application?.user?.fname}
+                              </p>
+                              <p className="m-0 p-0">
+                                {application?.user?.mname}
+                              </p>
+                            </div>
+                          </div>
                         </td>
                       </tr>
                       <tr>
-                        <td className="bolder-text cambraText">
-                          Name of Event
+                        <td colSpan={2} className="text-center p-0">
+                          <div
+                            className="d-flex justify-content-around"
+                            style={{ marginLeft: "10%" }}
+                          >
+                            <span className="cambraText me-5 ms-5 fst-italic">
+                              Surname
+                            </span>
+                            <span className="cambraText me-5 ms-5 fst-italic">
+                              First Name
+                            </span>
+                            <span className="cambraText me-5 ms-5 fst-italic">
+                              Middle Name
+                            </span>
+                          </div>
                         </td>
-                        <td className="bolder-text cambraText">
-                          {" "}
-                          Time of Event
+                      </tr>
+                      <tr>
+                        <td colSpan={2} className=" m-0 p-0">
+                          <div className="d-flex gap-2">
+                            <p className="label">Address:</p>
+                            <p className="p-0 m-0 ">
+                              {`${
+                                application?.user?.user_addresses[0]
+                                  ?.address_line || ""
+                              } ${
+                                application?.user?.user_addresses[0]?.barangay
+                              } ${application?.user?.user_addresses[0]?.city} ${
+                                application?.user?.user_addresses[0]?.province
+                              }`}
+                            </p>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan={2} className="t m-0 p-0">
+                          <div className="d-flex gap-2">
+                            <p className="label">Name of Event:</p>
+                            <p className="p-0 m-0">{application?.event_name}</p>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className=" m-0 p-0">
+                          <div className="d-flex gap-2">
+                            <p className="label">Date of Event</p>
+                            <p className="p-0 m-0">{`${
+                              application?.event_date_from
+                            }  ${
+                              application?.event_date_to
+                                ? "to " + application?.event_date_to
+                                : ""
+                            }`}</p>
+                          </div>
+                        </td>
+                        <td className=" m-0 p-0">
+                          <div className="d-flex gap-2">
+                            <p className="label">Time of Event</p>
+                            <p className="m-0 p-0">{`${application?.event_time_from} to ${application?.event_time_to}`}</p>
+                          </div>
                         </td>
                       </tr>
                     </tbody>

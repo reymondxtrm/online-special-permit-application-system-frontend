@@ -28,16 +28,16 @@ import BasicInputField from "components/Forms/BasicInputField";
 import { useDispatch, useSelector } from "react-redux";
 import { specialPermitClientRegister } from "features/user/userSlice";
 import Swal from "sweetalert2";
+import { useHistory } from "react-router-dom/cjs/react-router-dom";
 
 function SignupModal({ openModal, toggleModal, props }) {
   const formikRef = useRef(null);
   const user = useSelector((state) => state.user);
   const [civilStatusOptions, setcivilStatusOptions] = useState();
   const [brangaysOptions, setBarangaysOptions] = useState();
-  const [street, setStreet] = useState("");
-  const [subDivision, setSubDivision] = useState("");
-  const dispatch = useDispatch();
 
+  const dispatch = useDispatch();
+  const history = useHistory();
   const genderOptions = [
     { value: "MALE", label: "MALE" },
     { value: "FEMALE", label: "FEMALE" },
@@ -250,7 +250,6 @@ function SignupModal({ openModal, toggleModal, props }) {
               province: "Agusan del Norte",
               city: "City of Butuan",
               barangay: null,
-              additional_address: "",
               date_of_birth: "",
               place_of_birth: "",
               educational_attainment: null,
@@ -269,37 +268,38 @@ function SignupModal({ openModal, toggleModal, props }) {
               blood_type: "",
               height: "",
               weight: "",
+              subdivision: "",
+              additional_address: "",
             }}
             validationSchema={validationSchema}
             onSubmit={async (values) => {
               const params = {
                 ...values,
-                additional_address: `${street} ${subDivision}`,
+
                 username: `${values.first_name}.${values.surname}`,
               };
 
-              // Swal.fire({
-              //   title: "Submitting...",
-              //   allowOutsideClick: false,
-              //   didOpen: () => {
-              //     Swal.showLoading();
-              //   },
-              // });
+              Swal.fire({
+                title: "Submitting...",
+                allowOutsideClick: false,
+                didOpen: () => {
+                  Swal.showLoading();
+                },
+              });
 
-              // const res = await dispatch(
-              //   specialPermitClientRegister({ params, props })
-              // );
-
-              // if (res?.error) {
-              //   Swal.fire({
-              //     icon: "error",
-              //     title: "Error",
-              //     text: res?.payload?.message || "Something went wrong",
-              //     confirmButtonText: "OK",
-              //   });
-              // } else {
-              //   Swal.close();
-              // }
+              const res = await dispatch(
+                specialPermitClientRegister({ params, history })
+              );
+              if (res?.error) {
+                Swal.fire({
+                  icon: "error",
+                  title: "Error",
+                  text: res?.payload?.message || "Something went wrong",
+                  confirmButtonText: "OK",
+                });
+              } else {
+                Swal.close();
+              }
             }}
           >
             {(props) => {
@@ -640,19 +640,33 @@ function SignupModal({ openModal, toggleModal, props }) {
                             Address{" "}
                             <span style={{ color: "red" }}>&nbsp;*</span>
                           </Label>
-                          <Input
-                            value={street}
-                            onChange={(e) => setStreet(e.target.value)}
+                          <BasicInputField
+                            type={"text"}
+                            col="12"
                             placeholder="House no./Street/Purok"
+                            value={props?.values?.additional_address}
+                            touched={props?.touched?.additional_address}
+                            validation={props}
+                            name="additional_address"
                           />
                         </FormGroup>
                       </Col>
                       <Col style={{ marginTop: "27px" }}>
-                        <Input
+                        <BasicInputField
+                          type={"text"}
+                          validation={props}
+                          value={props.values.subdivision}
+                          errors={props?.errors?.subdivision}
+                          col="12"
+                          touched={props.touched.subdivision}
+                          placeholder="Subdivision"
+                          name="subdivision"
+                        />
+                        {/* <Input
                           value={subDivision}
                           onChange={(e) => setSubDivision(e.target.value)}
                           placeholder="Subdivision"
-                        />
+                        /> */}
                       </Col>
                       <Col md={4}>
                         <FormGroup>

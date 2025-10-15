@@ -25,7 +25,7 @@ export const getUserList = createAsyncThunk(
   async (filters, thunkAPI) => {
     try {
       const response = await axios({
-        url: "api/admin/get-users",
+        url: "api/admin/get-OSPAS-users",
         method: "GET",
         params: filters,
       });

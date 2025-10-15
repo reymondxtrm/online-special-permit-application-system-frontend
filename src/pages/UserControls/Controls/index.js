@@ -10,6 +10,8 @@ import {
   CardHeader,
   Button,
   Label,
+  FormGroup,
+  Input,
 } from "reactstrap";
 import Breadcrumbs from "components/Common/Breadcrumb";
 import { useDispatch, useSelector } from "react-redux";
@@ -23,6 +25,7 @@ import Pagination from "components/Pagination";
 import { userListSlice, getUserList } from "features/user/userListSlice";
 import BasicInputField from "components/Forms/BasicInputField";
 import { useFormik } from "formik";
+import { head } from "lodash";
 const AssessmentReceiverDashboard = () => {
   const dispatch = useDispatch();
   const filter = useSelector((state) => state.dateFilter.params);
@@ -101,7 +104,7 @@ const AssessmentReceiverDashboard = () => {
   console.log(validation.errors);
   return (
     <React.Fragment>
-      <div className="page-content">
+      <div className="page-content" style={{ height: "100vh" }}>
         <Container fluid>
           <Breadcrumbs title="User Controls" breadcrumbItem="Users" />
           <Row>
@@ -180,18 +183,21 @@ const AssessmentReceiverDashboard = () => {
                     errors={validation.errors.confirm_password}
                     label={"Confirm Password"}
                   />
+                  <FormGroup>
+                    <Label>Username</Label>
+                    <Input
+                      readOnly
+                      value={`${validation.values.fname}.${validation.values.lname}`}
+                    />
+                  </FormGroup>
                   <Label>
                     User Role<span style={{ color: "red" }}>&nbsp;*</span>
                   </Label>
                   <Select
                     options={roleOptions || []}
-                    isMulti
                     closeMenuOnSelect={false}
                     onChange={(selected) => {
-                      const values = selected
-                        ? selected.map((opt) => opt.value)
-                        : [];
-                      validation.setFieldValue("role_id", values);
+                      validation.setFieldValue("role_id", selected.values);
                     }}
                   />
                   <Row className="mt-2">

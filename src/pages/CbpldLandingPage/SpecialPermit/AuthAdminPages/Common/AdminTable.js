@@ -257,10 +257,12 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
       <RequestForm
         isOpen={openRequestFormModal}
         toggle={toggleRequestFormModal}
+        applicationId={applicationId}
       />
       <MayorsAndGoodMoralRequestForm
         isOpen={openMayorsAndGoodMoralRequestForm}
         toggle={toggleMayorsAndGoodMoralRequestModal}
+        applicationId={applicationId}
       />
 
       {status === "pending" ? (
@@ -714,8 +716,10 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                                     applicationType === "mayors_permit"
                                   ) {
                                     toggleMayorsAndGoodMoralRequestModal();
+                                    setapplicationId(application.id);
                                   } else {
                                     toggleRequestFormModal();
+                                    setapplicationId(application.id);
                                   }
                                 }}
                               >

@@ -149,6 +149,10 @@ const authProtectedRoutes = [
   },
   { path: "/admin/pending", component: AdminPending },
   { path: "/admin/controls", component: AdminControls },
+  {
+    path: "/user-control",
+    component: Controls,
+  },
 ];
 
 const publicRoutes = [

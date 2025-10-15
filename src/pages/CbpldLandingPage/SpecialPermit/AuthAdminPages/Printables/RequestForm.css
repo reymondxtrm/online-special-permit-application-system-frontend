@@ -1,6 +1,6 @@
 .title {
   font-family: "Cambria, serif";
-  color: #154172;
+  color: #154172 !important;
   font-size: 19pt;
   font-weight: bold;
   letter-spacing: "0.05em" !important;
@@ -18,7 +18,7 @@
 
 .checkbox {
   border: 2px solid black;
-  width: 20px;
+  width: 20px !important;
   height: 20px;
 }
 .main-table th,
@@ -50,4 +50,20 @@
 }
 .cambraText {
   font-family: "Cambria, serif";
+}
+.label {
+  font-size: 15px;
+  font-family: "Cambria, serif";
+  font-weight: bold;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  margin-bottom: 0px;
+  padding-left: 5px;
+  color: #000000;
+}
+.header-text > p {
+  color: #154172 !important;
+}
+p {
+  color: #000000;
 }

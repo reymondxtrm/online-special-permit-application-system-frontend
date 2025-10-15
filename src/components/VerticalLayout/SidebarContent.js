@@ -323,19 +323,19 @@ const SidebarContent = (props) => {
                 <li>
                   <Link to="/client/services">
                     <i className=" mdi mdi-package-variant fs-2"></i>
-                    {props.t("Services")}
+                    <span>{props.t("Services")}</span>
                   </Link>
                 </li>
                 <li>
                   <Link to="/client/dashboard">
                     <i className="mdi mdi-view-dashboard fs-2"></i>
-                    {props.t("Dashboard")}
+                    <span>{props.t("Dashboard")}</span>
                   </Link>
                 </li>
                 <li>
                   <Link to="/client/pending">
                     <i className="mdi mdi-progress-clock fs-2"></i>
-                    {props.t("Pending")}
+                    <span>{props.t("Pending")}</span>
                   </Link>
                 </li>
                 <li>
@@ -364,20 +364,20 @@ const SidebarContent = (props) => {
                 <li>
                   <Link to="/client/for-signature">
                     <i className="mdi mdi-file-check fs-2"></i>
-                    {props.t("For Final Approval")}
+                    <span>{props.t("For Final Approval")}</span>
                   </Link>
                 </li>
                 <li>
                   <Link to="/client/declined">
                     <i className="mdi mdi-file-cancel fs-2"></i>
-                    {props.t("Declined Application")}
+                    <span>{props.t("Declined Application")}</span>
                   </Link>
                 </li>
 
                 <li>
                   <Link to="/client/profile">
                     <i className="bx bxs-user-detail fs-2"></i>
-                    {props.t("Profile")}
+                    <span>{props.t("Profile")}</span>
                   </Link>
                 </li>
               </>
@@ -388,13 +388,13 @@ const SidebarContent = (props) => {
                 <li>
                   <Link to="/admin/dashboard">
                     <i className="mdi mdi-view-dashboard fs-2"></i>
-                    {props.t("Dashboard")}
+                    <span>{props.t("Dashboard")}</span>
                   </Link>
                 </li>
                 <li>
                   <Link to="/admin/pending">
                     <i className="mdi mdi-progress-clock fs-2"></i>
-                    {props.t("Pending")}
+                    <span>{props.t("Pending")}</span>{" "}
                   </Link>
                 </li>
                 <li>
@@ -423,7 +423,7 @@ const SidebarContent = (props) => {
                 <li>
                   <Link to="/admin/for-signature">
                     <i className="mdi mdi-file-check fs-2"></i>
-                    {props.t("For Final Approval")}
+                    <span> {props.t("For Final Approval")}</span>
                   </Link>
                 </li>
                 {/* <li>
@@ -450,7 +450,13 @@ const SidebarContent = (props) => {
                 <li>
                   <Link to="/admin/controls">
                     <i className="mdi mdi-shield-account fs-2"></i>
-                    {props.t("Admin Controls")}
+                    <span>{props.t("Admin Controls")}</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/user-control">
+                    <i className="mdi mdi-account-circle fs-2"></i>
+                    <span>{props.t("User Control")}</span>
                   </Link>
                 </li>
               </>

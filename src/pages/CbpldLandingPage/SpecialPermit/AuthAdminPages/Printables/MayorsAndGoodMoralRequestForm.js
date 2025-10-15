@@ -1,9 +1,54 @@
-import React from "react";
-import { Modal, ModalBody, ModalHeader } from "reactstrap";
+import React, { useEffect, useState, useRef } from "react";
+import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import cgbLogo from "../../../../../assets/images/cgbLogo.png";
 import headerLine from "../../../../../assets/images/permitHeaderLine.png";
+import footerLine from "../../../../../assets/images/permitFooterLine.png";
+import butuanOnLogo from "../../../../../assets/images/butuanOnLogo.png";
+import axios from "axios";
+import ReactToPrint from "react-to-print";
 
-export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
+export default function MayorsAndGoodMoralRequestForm({
+  isOpen,
+  toggle,
+  applicationId,
+}) {
+  const [application, setApplication] = useState(null);
+  const printRef = useRef();
+  useEffect(() => {
+    let mounted = true;
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`api/admin/get-request-form-data`, {
+          params: { id: applicationId },
+          withCredentials: true,
+        });
+
+        if (mounted && response) {
+          setApplication(response.data);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    if (applicationId) fetchData();
+
+    return () => {
+      mounted = false;
+    };
+  }, [applicationId]);
+  const handleDefaultFileName = async () => {
+    const originalTitle = document.title;
+    document.title = `${application?.application_purpose?.name} Request Form`; // Set your desired default file name here
+    setTimeout(() => {
+      document.title = originalTitle; // Restore the original title after the print dialog opens
+    }, 5000); // Slight delay to ensure the print dialog uses the updated title
+  };
+  const column1 = application?.special_permit_type?.code === "good_moral";
+  const formater = (date) => {
+    const newDate = new Date(date);
+    const formatedDate = newDate.toLocaleDateString("en-US");
+    return formatedDate;
+  };
   return (
     <Modal isOpen={isOpen} toggle={toggle} size="xl">
       <ModalHeader toggle={toggle}></ModalHeader>
@@ -14,11 +59,11 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
             alignItems: "center",
             justifyContent: "center",
           }}
+          ref={printRef}
         >
           <table>
             <tbody>
               <tr>
-                {console.log("wew")}
                 <td>
                   <div
                     className="header-content"
@@ -40,10 +85,10 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                     <div>
                       <div className="header-text">
                         <p>Republic of the Philippines</p>
-                        <p className="header-title">
+                        <p className="header-title ">
                           CITY GOVERNMENT OF BUTUAN
                         </p>
-                        <p className="header-title">
+                        <p className="header-title ">
                           CITY GOVERNMENT PERMITS AND LICENSING DEPARTMENT
                         </p>
                         <p>
@@ -86,7 +131,7 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                   <table
                     className="main-table"
                     style={{
-                      width: "800px",
+                      width: "100%",
                       borderCollapse: "collapse",
                       marginTop: "50px",
                       tableLayout: "fixed",
@@ -95,16 +140,17 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                     <thead>
                       <tr>
                         <th>
-                          <div className="d-flex gap-5">
+                          <div className="d-flex ">
                             <div
                               style={{
                                 border: "2px solid",
                                 borderColor: "red",
                                 width: "20px",
                                 height: "20px",
+                                backgroundColor: column1 ? "black" : "",
                               }}
                             ></div>
-                            <div>
+                            <div style={{ marginLeft: "100px" }}>
                               <p className="m-0 p-0">MAYOR&apos;S CLEARANCE</p>
                               <p className="m-0 p-0">
                                 (Certificate of Good Moral Character)
@@ -113,18 +159,21 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                           </div>
                         </th>
                         <th>
-                          <div className=" d-flex  gap-5">
+                          <div className=" d-flex">
                             <div
                               style={{
                                 border: "2px solid",
                                 borderColor: "red",
                                 width: "20px",
                                 height: "20px",
+                                backgroundColor: !column1 ? "black" : "",
                               }}
                             ></div>
-                            <p className="m-0 p-0">
-                              MAYOR&apos;S CERTIFICATION
-                            </p>
+                            <div style={{ marginLeft: "120px" }}>
+                              <p className="m-0 p-0">
+                                MAYOR&apos;S CERTIFICATION
+                              </p>
+                            </div>
                           </div>
                         </th>
                       </tr>
@@ -132,7 +181,7 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                     <tbody>
                       <tr>
                         <td>
-                          <div className="d-flex justify-content-center gap-2">
+                          <div className="d-flex  gap-2">
                             <div
                               style={{
                                 border: "2px solid",
@@ -140,6 +189,11 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.police_clearance && column1
+                                    ? "black"
+                                    : "",
                               }}
                             ></div>
                             <p className="fw-bold m-0 p-0">
@@ -148,7 +202,7 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                           </div>
                         </td>
                         <td>
-                          <div className="d-flex justify-content-center gap-2">
+                          <div className="d-flex gap-2">
                             <div
                               style={{
                                 border: "2px solid",
@@ -156,6 +210,11 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.police_clearance && !column1
+                                    ? "black"
+                                    : "",
                               }}
                             ></div>
                             <p className="fw-bold m-0 p-0">Police Clearance</p>
@@ -164,7 +223,7 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                       </tr>
                       <tr>
                         <td>
-                          <div className="d-flex justify-content-center gap-2">
+                          <div className="d-flex  gap-2">
                             <div
                               style={{
                                 border: "2px solid",
@@ -172,6 +231,11 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.community_tax_certificate && column1
+                                    ? "black"
+                                    : "",
                               }}
                             ></div>
                             <p className="fw-bold m-0 p-0">
@@ -180,7 +244,7 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                           </div>
                         </td>
                         <td>
-                          <div className="d-flex justify-content-center gap-2">
+                          <div className="d-flex  gap-2">
                             <div
                               style={{
                                 border: "2px solid",
@@ -188,6 +252,11 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.community_tax_certificate && !column1
+                                    ? "black"
+                                    : "",
                               }}
                             ></div>
                             <p className="fw-bold m-0 p-0">
@@ -199,7 +268,7 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                       </tr>
                       <tr>
                         <td>
-                          <div className="d-flex justify-content-center ">
+                          <div className="d-flex  gap-2 ">
                             <div
                               style={{
                                 border: "2px solid",
@@ -207,9 +276,17 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.barangay_clearance && column1
+                                    ? "black"
+                                    : "",
                               }}
                             ></div>
-                            <p className="fw-bold m-0 p-0">
+                            <p
+                              className="fw-bold m-0 p-0"
+                              style={{ flex: "1" }}
+                            >
                               Baragay Clearance
                               <span className="fw-normal ">
                                 (to be issued by the Punong Barangay in Butuan
@@ -219,7 +296,7 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                           </div>
                         </td>
                         <td>
-                          <div className="d-flex justify-content-center ">
+                          <div className="d-flex  gap-2">
                             <div
                               style={{
                                 border: "2px solid",
@@ -227,9 +304,17 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.barangay_clearance && !column1
+                                    ? "black"
+                                    : "",
                               }}
                             ></div>
-                            <p className="fw-bold m-0 p-0">
+                            <p
+                              className="fw-bold m-0 p-0"
+                              style={{ flex: "1" }}
+                            >
                               Baragay Clearance
                               <span className="fw-normal ">
                                 (to be issued by the Punong Barangay in Butuan
@@ -241,7 +326,7 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                       </tr>
                       <tr>
                         <td>
-                          <div className="d-flex justify-content-center gap-2">
+                          <div className="d-flex  gap-2">
                             <div
                               style={{
                                 border: "2px solid",
@@ -249,6 +334,11 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.official_receipt && column1
+                                    ? "black"
+                                    : "",
                               }}
                             ></div>
                             <div>
@@ -274,7 +364,7 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                           </div>
                         </td>
                         <td>
-                          <div className="d-flex justify-content-center gap-2">
+                          <div className="d-flex  gap-2">
                             <div
                               style={{
                                 border: "2px solid",
@@ -282,6 +372,11 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.official_receipt && column1
+                                    ? "black"
+                                    : "",
                               }}
                             ></div>
                             <div>
@@ -309,7 +404,7 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                       </tr>
                       <tr>
                         <td>
-                          <div className="d-flex justify-content-center gap-2">
+                          <div className="d-flex  gap-2">
                             <div
                               style={{
                                 border: "2px solid",
@@ -317,11 +412,16 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.fiscal_clearance && column1
+                                    ? "black"
+                                    : "",
                               }}
                             ></div>
                             <p className="fw-bold m-0 p-0">Fiscal Clearance</p>
                           </div>
-                          <div className="d-flex justify-content-center mt-3 gap-2">
+                          <div className="d-flex  mt-3 gap-2">
                             <div
                               style={{
                                 border: "2px solid",
@@ -329,13 +429,18 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.court_clearance && column1
+                                    ? "black"
+                                    : "",
                               }}
                             ></div>
                             <p className="fw-bold m-0 p-0">Court Clearance</p>
                           </div>
                         </td>
                         <td>
-                          <div className="d-flex justify-content-center gap-2">
+                          <div className="d-flex  gap-2">
                             <div
                               style={{
                                 border: "2px solid",
@@ -343,11 +448,16 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.fiscal_clearance && !column1
+                                    ? "black"
+                                    : "",
                               }}
                             ></div>
                             <p className="fw-bold m-0 p-0">Fiscal Clearance</p>
                           </div>
-                          <div className="d-flex justify-content-center mt-3 gap-2">
+                          <div className="d-flex  mt-3 gap-2">
                             <div
                               style={{
                                 border: "2px solid",
@@ -355,6 +465,11 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.court_clearance && !column1
+                                    ? "black"
+                                    : "",
                               }}
                             ></div>
                             <p className="fw-bold m-0 p-0">Court Clearance</p>
@@ -383,7 +498,7 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                           </p>
                         </td>
                         <td>
-                          <div className="d-flex justify-content-center gap-2">
+                          <div className="d-flex gap-2">
                             <div
                               style={{
                                 border: "2px solid",
@@ -391,6 +506,11 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
+                                backgroundColor:
+                                  !!application?.uploaded_file
+                                    ?.court_clearance && !column1
+                                    ? "black"
+                                    : "",
                               }}
                             ></div>
                             <p className="fw-bold m-0 p-0">
@@ -402,7 +522,7 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                       <tr>
                         <td>
                           {" "}
-                          <div className="d-flex justify-content-center gap-3">
+                          <div className="d-flex gap-2">
                             <div
                               style={{
                                 border: "2px solid",
@@ -413,8 +533,8 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                               }}
                             ></div>
                             <p className="fw-bold m-0 p-0">
-                              Securities and Exchange Commission (SEC)
-                              Registration of the church
+                              Securities and Exchange Commission () Registration
+                              of the church
                             </p>
                           </div>
                         </td>
@@ -438,45 +558,138 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                     <tbody>
                       <tr>
                         <td style={{ width: "65%" }}>
-                          <span className="bolder-text cambraText">Date:</span>
+                          <div className="d-flex">
+                            <span className="bolder-text cambraText">
+                              Date:
+                            </span>
+                            <p className="p-0 m-0">
+                              {formater(application?.created_at)}
+                            </p>
+                          </div>
                         </td>
                         <td style={{ width: "35%" }}>
-                          <span className="bolder-text cambraText">
-                            Contact No.:
-                          </span>
+                          <div className="d-flex">
+                            <span className="bolder-text cambraText">
+                              Contact No.:
+                            </span>
+                            <p className="p-0 m-0">
+                              {
+                                application?.user?.user_phone_numbers[0]
+                                  .phone_number
+                              }
+                            </p>
+                          </div>
                         </td>
                       </tr>
                       <tr>
-                        <td colSpan={2} className="bolder-text cambraText">
-                          Name
+                        <td colSpan={2}>
+                          <div className="d-flex w-100">
+                            <span
+                              className="bolder-text cambraText"
+                              style={{ width: "10%" }}
+                            >
+                              Name
+                            </span>
+                            <div
+                              className="d-flex justify-content-around"
+                              style={{ width: "90%" }}
+                            >
+                              <p className="m-0 bolder-text ">
+                                {application?.user?.fname
+                                  ? application.user.fname.toUpperCase()
+                                  : ""}
+                              </p>
+                              <p className="m-0 bolder-text">
+                                {application?.user?.mname
+                                  ? application.user.mname.toUpperCase()
+                                  : ""}
+                              </p>
+                              <p className="m-0 bolder-text">
+                                {application?.user?.lname
+                                  ? application.user.lname.toUpperCase()
+                                  : ""}
+                              </p>
+                            </div>
+                          </div>
                         </td>
                       </tr>
 
                       <tr>
                         <td colSpan={2} className="text-center">
-                          <span
-                            className="cambraText me-5 ms-5"
-                            style={{ fontStyle: "italic" }}
+                          <div
+                            className="d-flex justify-content-around"
+                            style={{ width: "90%", marginLeft: "10%" }}
                           >
-                            Surname
-                          </span>
-                          <span
-                            className="cambraText me-5 ms-5"
-                            style={{ fontStyle: "italic" }}
-                          >
-                            First Name
-                          </span>
-                          <span
-                            className="cambraText me-5 ms-5"
-                            style={{ fontStyle: "italic" }}
-                          >
-                            Middle Name
-                          </span>
+                            <span
+                              className="cambraText"
+                              style={{ fontStyle: "italic" }}
+                            >
+                              Surname
+                            </span>
+                            <span
+                              className="cambraText"
+                              style={{ fontStyle: "italic" }}
+                            >
+                              First Name
+                            </span>
+                            <span
+                              className="cambraText"
+                              style={{ fontStyle: "italic" }}
+                            >
+                              Middle Name
+                            </span>
+                          </div>
                         </td>
                       </tr>
                       <tr>
-                        <td colSpan={2} className="bolder-text cambraText">
-                          Address:
+                        <td colSpan={2}>
+                          <div className="d-flex w-100">
+                            <span
+                              className="bolder-text cambraText"
+                              style={{ width: "10%" }}
+                            >
+                              Address
+                            </span>
+                            <div
+                              style={{ width: "90%" }}
+                              className="d-flex justify-content-around"
+                            >
+                              <p className="m-0 p-0">
+                                {
+                                  application?.user?.user_addresses[0]
+                                    ?.address_line
+                                }
+                              </p>
+                              <p className="m-0 p-0">
+                                {application?.user?.user_addresses[0]
+                                  ?.subdivision || " "}
+                              </p>
+                              <p className="m-0 p-0">
+                                {application?.user?.user_addresses[0]?.barangay}
+                              </p>
+                              <p className="m-0 p-0">
+                                {application?.user?.user_addresses[0]?.city}
+                              </p>
+                              <p className="m-0 p-0">8600</p>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan={2}>
+                          <div
+                            className="d-flex justify-content-between"
+                            style={{
+                              paddingLeft: "60px",
+                              paddingRight: "60px",
+                            }}
+                          >
+                            <i className="cambraText">House No./Street/Purok</i>
+                            <i className="cambraText">Subdivision</i>
+                            <i className="cambraText">Barangay</i>
+                            <i className="cambraText">City</i>
+                            <i className="cambraText">Zip Code</i>
+                          </div>
                         </td>
                       </tr>
                       <tr>
@@ -491,10 +704,16 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                         </td>
                       </tr>
                       <tr>
-                        <td className="bolder-text cambraText">Purpose</td>
-                        <td className="bolder-text cambraText">
-                          {" "}
-                          Time of Event
+                        <td colSpan={2}>
+                          <div className="d-flex gap-2">
+                            <span className="bolder-text cambraText">
+                              {" "}
+                              Purpose:
+                            </span>
+                            <p className="p-0 m-0 ">
+                              {application?.application_purpose?.name}
+                            </p>
+                          </div>
                         </td>
                       </tr>
                     </tbody>
@@ -538,10 +757,38 @@ export default function MayorsAndGoodMoralRequestForm({ isOpen, toggle }) {
                   <p className="cambraText">Signature over Printed Name</p>
                 </td>
               </tr>
+              <tr>
+                <td className="text-end">
+                  <img src={butuanOnLogo} style={{ width: "180px" }} />
+                  <p
+                    className="p-0 m-0 fw-bold"
+                    style={{ fontStyle: "italic", fontSize: "16px" }}
+                  >
+                    CBPLD.BPLD.F.107.REV04
+                  </p>
+                </td>
+              </tr>
             </tbody>
+            <tfoot>
+              <tr>
+                <td style={{ width: "100%" }}>
+                  <img src={footerLine} style={{ width: "100%" }} />
+                </td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </ModalBody>
+      <ModalFooter>
+        <div className="d-flex gap-2 text-end">
+          <ReactToPrint
+            trigger={() => <Button color="primary">Print</Button>}
+            content={() => printRef.current}
+            onBeforePrint={handleDefaultFileName}
+          />
+          <Button onClick={toggle}>Close</Button>
+        </div>
+      </ModalFooter>
     </Modal>
   );
 }

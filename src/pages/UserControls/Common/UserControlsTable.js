@@ -59,9 +59,6 @@ const UserControlsTable = ({ data, tableData }) => {
             timer: 2000,
             showConfirmButton: false,
           });
-
-          // 🔄 Optional: refresh your list after deletion
-          // fetchUsers();
         } catch (error) {
           Swal.fire({
             icon: "error",
@@ -151,33 +148,27 @@ const UserControlsTable = ({ data, tableData }) => {
                       <td>{`${items.middle_name || ""}`}</td>
                       <td>{items.last_name}</td>
                       <td>
-                        {items.user_roles.map((role) => (
-                          <span key={role.id + role.role_name}>
-                            <h5>
-                              <Badge color="success">
-                                {role.role_name === "admin" ? "Admin" : null}
-                                {role.role_name === "initial_receiver"
-                                  ? "Initian Receiver"
-                                  : null}
-                                {role.role_name === "assessment_receiver"
-                                  ? "Assessment Receiver"
-                                  : null}
-                                {role.role_name === "assessment_releaser"
-                                  ? "Assessment Releaser"
-                                  : null}
-                                {role.role_name === "complete_receiver"
-                                  ? "Complete Receiver"
-                                  : null}
-                                {role.role_name === "final_releaser"
-                                  ? "Final Releaser"
-                                  : null}
-                                {role.role_name === "super_admin"
-                                  ? "Super Admin"
-                                  : null}
-                              </Badge>{" "}
-                            </h5>
-                          </span>
-                        ))}
+                        {items.user_roles.length === 0 ? (
+                          <h5>
+                            {" "}
+                            <Badge color="success">Special Permit User</Badge>
+                          </h5>
+                        ) : (
+                          items.user_roles.map((role, index) => (
+                            <span key={index}>
+                              <h5>
+                                <Badge color="success">
+                                  {role.role_name === "special_permit_admin"
+                                    ? "Special Permit Admin"
+                                    : null}
+                                  {role.role_name === "special_permit_user"
+                                    ? "Special Permit user"
+                                    : null}
+                                </Badge>{" "}
+                              </h5>
+                            </span>
+                          ))
+                        )}
                       </td>
                       <td>
                         {/* <i
