@@ -11,7 +11,7 @@ import {
   Button,
 } from "reactstrap";
 import avatar1 from "../../../../../assets/images/users/AvatarTheLegendOfAng.jpg";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import * as Yup from "yup";
@@ -20,6 +20,9 @@ import AddExemptedCaseModal from "./Modals/AddExemptedCaseModal";
 import TableLoaders from "components/Loaders/TableLoaders";
 import AddApplicationPurposeModal from "./Modals/AddApplicationPurposeModal";
 import FileViewerModal from "./Modals/FileViewerModal";
+import AddGovernmentPropertyModal from "./Modals/AddGovernmentPropertyModal";
+import Swal from "sweetalert2";
+import { getGovernmentProperty } from "features/AdminSlice/AdminSlice";
 
 const AdminControls = () => {
   const [editOccupationState, seteditOccupationState] = useState(false);
@@ -34,9 +37,15 @@ const AdminControls = () => {
   const userDetails = useSelector((state) => state.user);
   const [openFileModal, setOpenFileModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState();
+  const [governmentProperty, setGovernmetProperty] = useState([]);
+  const [openPropertyModal, setOpenPropertyModal] = useState(false);
+  const [propertModalMode, setPropertyModalMode] = useState();
+  const [property, setProperty] = useState();
+  const dispatch = useDispatch();
 
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
+  const admin = useSelector((state) => state.batsAdmin);
 
   const toggleRefresh = () => {
     setrefresh(!refresh);
@@ -56,7 +65,7 @@ const AdminControls = () => {
     setisLoading(true);
     axios
       .get("api/admin/get/exempted-cases", {
-        //   params: { permit_type: "good_moral" },
+        // params: { permit_type: "good_moral" },
       })
       .then(
         (res) => {
@@ -73,6 +82,7 @@ const AdminControls = () => {
   }, [refresh]);
 
   useEffect(() => {
+    dispatch(getGovernmentProperty());
     setisLoading(true);
     axios
       .get("api/admin/get/purposes", {
@@ -134,8 +144,52 @@ const AdminControls = () => {
 
     return age;
   }
-  const showFileModal = () => {};
+  const togglePropertyModal = (mode) => {
+    setOpenPropertyModal((prev) => !prev);
+    setPropertyModalMode(mode);
+  };
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "This action will permanently delete the government property.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    });
 
+    if (result.isConfirmed) {
+      try {
+        const response = await axios.post("api/delete-government-property", {
+          id: id,
+        });
+
+        if (response.status === 200) {
+          Swal.fire({
+            icon: "success",
+            title: "Deleted!",
+            text: "Government property has been deleted successfully.",
+            timer: 2000,
+            showConfirmButton: false,
+          });
+          dispatch(getGovernmentProperty());
+        }
+      } catch (error) {
+        console.error(error);
+
+        Swal.fire({
+          icon: "error",
+          title: "Something went wrong!",
+          text:
+            error.response?.data?.message ||
+            "An error occurred while deleting the record.",
+          confirmButtonColor: "#3085d6",
+        });
+      }
+    }
+  };
   return (
     <>
       <AddExemptedCaseModal
@@ -154,6 +208,12 @@ const AdminControls = () => {
         isOpen={openFileModal}
         fileUrl={selectedFile}
       />
+      <AddGovernmentPropertyModal
+        toggle={togglePropertyModal}
+        isOpen={openPropertyModal}
+        mode={propertModalMode}
+        property={property}
+      />
       <div
         style={{
           height: "100vh",
@@ -163,7 +223,7 @@ const AdminControls = () => {
           margin: 0,
         }}
       >
-        <Card
+        {/* <Card
           className="shadow-lg"
           style={{
             minHeight: "83%",
@@ -175,208 +235,319 @@ const AdminControls = () => {
             marginTop: "40px",
           }}
         >
-          <CardBody style={{ display: "flex", flexDirection: "column" }}>
-            <Row style={{ flexGrow: 1 }}>
-              <Col md="6" style={{ overflowY: "auto", maxHeight: "45vh" }}>
-                <p
-                  style={{
-                    fontWeight: "bold",
-                    letterSpacing: ".2rem",
-                    fontSize: "18pt",
-                    margin: "0",
-                    padding: "0 0 0 12px", // top, right, bottom, left
-                    color: "#368be0",
-                  }}
-                >
-                  {"EXEMPTED CASES"}
-                </p>
+          <CardBody style={{ display: "flex", flexDirection: "column" }}> */}
+        <Row style={{ flexGrow: 1 }}>
+          <Col>
+            <Row>
+              <Card>
+                <CardBody>
+                  <Col md="12" style={{ overflowY: "auto", maxHeight: "45vh" }}>
+                    <p
+                      style={{
+                        fontWeight: "bold",
+                        letterSpacing: ".2rem",
+                        fontSize: "18pt",
+                        margin: "0",
+                        padding: "0 0 0 12px", // top, right, bottom, left
+                        color: "#368be0",
+                      }}
+                    >
+                      {"EXEMPTED CASES"}
+                    </p>
 
-                <div style={{ paddingTop: "15px", paddingLeft: "12px" }}>
-                  <Button
-                    color="success"
-                    style={{
-                      width: "85px",
-                    }}
-                    onClick={() => toggleExemptedCaseModal()}
-                  >
-                    Add New
-                  </Button>
-                </div>
+                    <div style={{ paddingTop: "15px", paddingLeft: "12px" }}>
+                      <Button
+                        color="success"
+                        style={{
+                          width: "85px",
+                        }}
+                        onClick={() => toggleExemptedCaseModal()}
+                      >
+                        Add New
+                      </Button>
+                    </div>
 
-                <div
-                  style={{
-                    paddingTop: "25px",
-                    maxHeight: "35vh",
-                    overflowY: "auto",
-                  }}
-                >
-                  <Table striped>
-                    <thead>
-                      <tr>
-                        <th>Permit Type</th>
-                        <th>Case Name</th>
-                        <th>Ordinance</th>
-                        <th>Attachment</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {isLoading ? (
-                        <TableLoaders row={4} col={4} />
-                      ) : (
-                        discountedCasesData &&
-                        (discountedCasesData.length === 0 ? (
+                    <div
+                      style={{
+                        paddingTop: "25px",
+                        maxHeight: "35vh",
+                        overflowY: "auto",
+                      }}
+                    >
+                      <Table striped>
+                        <thead>
                           <tr>
-                            <td
-                              colSpan={4}
-                              style={{
-                                textAlign: "center",
-                              }}
-                            >
-                              No record found
-                            </td>
+                            <th>Permit Type</th>
+                            <th>Case Name</th>
+                            <th>Ordinance</th>
+                            <th>Attachment</th>
                           </tr>
-                        ) : (
-                          discountedCasesData?.map((items, index) => {
-                            return (
-                              <tr key={index}>
-                                <td>
-                                  {isLoading ? "loding ..." : items.permit_type}
-                                </td>
-                                <td>{isLoading ? "loding ..." : items.name}</td>
-                                <td>
-                                  {isLoading ? "loding ..." : items.ordinance}
-                                </td>
-                                <td>
-                                  {isLoading ? (
-                                    "loding ..."
-                                  ) : (
-                                    <Button
-                                      onClick={() => {
-                                        toggleFileViewerModal();
-                                        setSelectedFile(items.attachment);
-                                      }}
-                                      color="primary"
-                                    >
-                                      FILE
-                                    </Button>
-                                  )}
+                        </thead>
+                        <tbody>
+                          {isLoading ? (
+                            <TableLoaders row={4} col={4} />
+                          ) : (
+                            discountedCasesData &&
+                            (discountedCasesData.length === 0 ? (
+                              <tr>
+                                <td
+                                  colSpan={4}
+                                  style={{
+                                    textAlign: "center",
+                                  }}
+                                >
+                                  No record found
                                 </td>
                               </tr>
-                            );
-                          })
-                        ))
-                      )}
-                    </tbody>
-                  </Table>
-                </div>
-              </Col>
-
-              <Col md="6" style={{ overflowY: "auto", maxHeight: "45vh" }}>
-                <p
-                  style={{
-                    fontWeight: "bold",
-                    letterSpacing: ".2rem",
-                    fontSize: "18pt",
-                    margin: "0",
-                    padding: "0 0 0 12px",
-                    color: "#368be0",
-                  }}
-                >
-                  APPLICATION PURPOSE
-                </p>
-
-                <div style={{ paddingTop: "15px", paddingLeft: "12px" }}>
-                  <Button
-                    color="success"
-                    style={{
-                      width: "85px",
-                    }}
-                    onClick={() => toggleApplicationPurposeModal()}
-                  >
-                    Add New
-                  </Button>
-                </div>
-
-                <div
-                  style={{
-                    paddingTop: "25px",
-                    overflowY: "auto",
-                    maxHeight: "35vh",
-                  }}
-                >
-                  <Table striped>
-                    <thead>
-                      <tr>
-                        <th>Permit Type</th>
-                        <th>Purpose</th>
-                        <th>Type</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {isLoading ? (
-                        <TableLoaders row={4} col={4} />
-                      ) : (
-                        purposesData &&
-                        (purposesData.length === 0 ? (
-                          <tr>
-                            <td
-                              colSpan={4}
-                              style={{
-                                textAlign: "center",
-                              }}
-                            >
-                              No record found
-                            </td>
-                          </tr>
-                        ) : (
-                          purposesData?.map((items, index) => {
-                            return (
-                              <tr key={index}>
-                                <td>
-                                  {isLoading ? "loding ..." : items.permit_type}
-                                </td>
-                                <td>{isLoading ? "loding ..." : items.name}</td>
-                                <td>{isLoading ? "loding ..." : items.type}</td>
-                                <td>
-                                  {isLoading
-                                    ? "loding ..."
-                                    : items.address_type}
-                                </td>
-                              </tr>
-                            );
-                          })
-                        ))
-                      )}
-                    </tbody>
-                  </Table>
-                </div>
-              </Col>
+                            ) : (
+                              discountedCasesData?.map((items, index) => {
+                                return (
+                                  <tr key={index}>
+                                    <td>
+                                      {isLoading
+                                        ? "loding ..."
+                                        : items.permit_type}
+                                    </td>
+                                    <td>
+                                      {isLoading ? "loding ..." : items.name}
+                                    </td>
+                                    <td>
+                                      {isLoading
+                                        ? "loding ..."
+                                        : items.ordinance}
+                                    </td>
+                                    <td>
+                                      {isLoading ? (
+                                        "loding ..."
+                                      ) : (
+                                        <Button
+                                          onClick={() => {
+                                            toggleFileViewerModal();
+                                            setSelectedFile(items.attachment);
+                                          }}
+                                          color="primary"
+                                        >
+                                          FILE
+                                        </Button>
+                                      )}
+                                    </td>
+                                  </tr>
+                                );
+                              })
+                            ))
+                          )}
+                        </tbody>
+                      </Table>
+                    </div>
+                  </Col>
+                </CardBody>
+              </Card>
             </Row>
-            {/* <Row>
-              <Col>
-                <Table>
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Role</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>1</td>
-                      <td>Reymond R. Ricaborda</td>
-                      <td>Reymond</td>
-                    </tr>
-                  </tbody>
-                </Table>
-              </Col>
-            </Row> */}
-          </CardBody>
-        </Card>
+            <Row>
+              <Card>
+                <CardBody>
+                  <Col md="12">
+                    <p
+                      style={{
+                        fontWeight: "bold",
+                        letterSpacing: ".2rem",
+                        fontSize: "18pt",
+                        margin: "0",
+                        padding: "0 0 0 12px", // top, right, bottom, left
+                        color: "#368be0",
+                      }}
+                    >
+                      {"Government Property"}
+                    </p>
+
+                    <div style={{ paddingTop: "15px", paddingLeft: "12px" }}>
+                      <Button
+                        color="success"
+                        style={{
+                          width: "85px",
+                        }}
+                        onClick={() => {
+                          togglePropertyModal("add");
+                        }}
+                      >
+                        Add New
+                      </Button>
+                    </div>
+
+                    <div
+                      style={{
+                        paddingTop: "25px",
+                        maxHeight: "35vh",
+                        overflowY: "auto",
+                      }}
+                    >
+                      <Table striped>
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Property Name</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {admin.getGovernmentPropertyIsFetching ? (
+                            <TableLoaders row={4} col={4} />
+                          ) : (
+                            admin.governmentProperty &&
+                            (admin.governmentProperty.length === 0 ? (
+                              <tr>
+                                <td
+                                  colSpan={4}
+                                  style={{
+                                    textAlign: "center",
+                                  }}
+                                >
+                                  No record found
+                                </td>
+                              </tr>
+                            ) : (
+                              admin.governmentProperty?.map((items, index) => {
+                                return (
+                                  <tr key={index}>
+                                    <td>{index + 1}</td>
+                                    <td>
+                                      {isLoading ? "loding ..." : items.name}
+                                    </td>
+                                    <td>
+                                      {isLoading ? (
+                                        "loding ..."
+                                      ) : (
+                                        <div className="d-flex gap-2">
+                                          <Button
+                                            color="warning"
+                                            size="sm"
+                                            onClick={() => {
+                                              togglePropertyModal("edit");
+                                              setProperty(items);
+                                            }}
+                                          >
+                                            Edit
+                                          </Button>
+                                          <Button
+                                            color="danger "
+                                            size="sm"
+                                            onClick={() =>
+                                              handleDelete(items.id)
+                                            }
+                                          >
+                                            Delete
+                                          </Button>
+                                        </div>
+                                      )}
+                                    </td>
+                                  </tr>
+                                );
+                              })
+                            ))
+                          )}
+                        </tbody>
+                      </Table>
+                    </div>
+                  </Col>
+                </CardBody>
+              </Card>
+            </Row>
+          </Col>
+
+          <Col md="6">
+            <Card>
+              <CardBody>
+                <Row>
+                  <p
+                    style={{
+                      fontWeight: "bold",
+                      letterSpacing: ".2rem",
+                      fontSize: "18pt",
+                      margin: "0",
+                      padding: "0 0 0 12px",
+                      color: "#368be0",
+                    }}
+                  >
+                    APPLICATION PURPOSE
+                  </p>
+
+                  <div style={{ paddingTop: "15px", paddingLeft: "12px" }}>
+                    <Button
+                      color="success"
+                      style={{
+                        width: "85px",
+                      }}
+                      onClick={() => toggleApplicationPurposeModal()}
+                    >
+                      Add New
+                    </Button>
+                  </div>
+
+                  <div
+                    style={{
+                      paddingTop: "25px",
+                      overflowY: "auto",
+                      maxHeight: "35vh",
+                    }}
+                  >
+                    <Table striped>
+                      <thead>
+                        <tr>
+                          <th>Permit Type</th>
+                          <th>Purpose</th>
+                          <th>Type</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {isLoading ? (
+                          <TableLoaders row={4} col={4} />
+                        ) : (
+                          purposesData &&
+                          (purposesData.length === 0 ? (
+                            <tr>
+                              <td
+                                colSpan={4}
+                                style={{
+                                  textAlign: "center",
+                                }}
+                              >
+                                No record found
+                              </td>
+                            </tr>
+                          ) : (
+                            purposesData?.map((items, index) => {
+                              return (
+                                <tr key={index}>
+                                  <td>
+                                    {isLoading
+                                      ? "loding ..."
+                                      : items.permit_type}
+                                  </td>
+                                  <td>
+                                    {isLoading ? "loding ..." : items.name}
+                                  </td>
+                                  <td>
+                                    {isLoading ? "loding ..." : items.type}
+                                  </td>
+                                  <td>
+                                    {isLoading
+                                      ? "loding ..."
+                                      : items.address_type}
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          ))
+                        )}
+                      </tbody>
+                    </Table>
+                  </div>
+                </Row>
+              </CardBody>
+            </Card>
+          </Col>
+        </Row>
       </div>
     </>
   );

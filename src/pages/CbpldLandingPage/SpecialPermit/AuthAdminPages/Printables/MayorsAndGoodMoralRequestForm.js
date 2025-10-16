@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
+import "./MayorsAndGoodMoralRequestForm.css";
 import cgbLogo from "../../../../../assets/images/cgbLogo.png";
 import headerLine from "../../../../../assets/images/permitHeaderLine.png";
 import footerLine from "../../../../../assets/images/permitFooterLine.png";
@@ -38,7 +39,10 @@ export default function MayorsAndGoodMoralRequestForm({
   }, [applicationId]);
   const handleDefaultFileName = async () => {
     const originalTitle = document.title;
-    document.title = `${application?.application_purpose?.name} Request Form`; // Set your desired default file name here
+    // set a readable default filename for the print dialog
+    document.title = `${
+      application?.special_permit_type?.code || "request"
+    } Request Form`;
     setTimeout(() => {
       document.title = originalTitle; // Restore the original title after the print dialog opens
     }, 5000); // Slight delay to ensure the print dialog uses the updated title
@@ -58,13 +62,22 @@ export default function MayorsAndGoodMoralRequestForm({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+
+            height: "1410px",
           }}
+          className="testing"
           ref={printRef}
         >
-          <table>
+          <table style={{ margin: "10px", height: "100%" }}>
             <tbody>
               <tr>
-                <td>
+                <td
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
                   <div
                     className="header-content"
                     style={{ position: "relative" }}
@@ -82,7 +95,7 @@ export default function MayorsAndGoodMoralRequestForm({
                         className="header-logo"
                       />
                     </div>
-                    <div>
+                    <div style={{ marginTop: "20px" }}>
                       <div className="header-text">
                         <p>Republic of the Philippines</p>
                         <p className="header-title ">
@@ -95,7 +108,7 @@ export default function MayorsAndGoodMoralRequestForm({
                           City Hall Bldg., J.P. Rosales Ave., Doongan, Butuan
                           City
                         </p>
-                        <div style={{ marginTop: "5px" }}>
+                        <div style={{ marginTop: "px", marginLeft: "-20px" }}>
                           <img
                             className="header-line"
                             src={headerLine}
@@ -108,8 +121,8 @@ export default function MayorsAndGoodMoralRequestForm({
                       className="text-center"
                       style={{
                         position: "absolute",
-                        bottom: "-50px",
-                        left: "200px",
+                        bottom: "-80px",
+                        left: "225px",
                       }}
                     >
                       <h1 className="title">REQUEST FORM </h1>
@@ -131,9 +144,10 @@ export default function MayorsAndGoodMoralRequestForm({
                   <table
                     className="main-table"
                     style={{
-                      width: "100%",
+                      width: "900px",
                       borderCollapse: "collapse",
                       marginTop: "50px",
+
                       tableLayout: "fixed",
                     }}
                   >
@@ -721,43 +735,6 @@ export default function MayorsAndGoodMoralRequestForm({
                 </td>
               </tr>
               <tr>
-                <td style={{ textAlign: "center" }}>
-                  <p
-                    style={{ marginTop: "30px" }}
-                    className="cambraText bolder-text fs-5"
-                  >
-                    DECLARATION AS TO THE CORRECTNESS OF THE INFORMATION GIVEN
-                  </p>
-                </td>
-              </tr>
-              <tr>
-                <td style={{ width: "800px" }}>
-                  <p
-                    style={{ marginTop: "30px", textIndent: "40px" }}
-                    className="cambraText"
-                  >
-                    I hereby voluntarily declare that all the information
-                    provided in this request form for the special permit is
-                    true, accurate, and complete to the best of my knowledge and
-                    belief. I fully understand that any false, misleading, or
-                    incomplete information may result in the disapproval of my
-                    application.
-                  </p>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <hr
-                    style={{
-                      width: "200px",
-                      border: "1px solid #000000",
-                      marginTop: "80px",
-                    }}
-                  />
-                  <p className="cambraText">Signature over Printed Name</p>
-                </td>
-              </tr>
-              <tr>
                 <td className="text-end">
                   <img src={butuanOnLogo} style={{ width: "180px" }} />
                   <p
@@ -780,7 +757,7 @@ export default function MayorsAndGoodMoralRequestForm({
         </div>
       </ModalBody>
       <ModalFooter>
-        <div className="d-flex gap-2 text-end">
+        <div className="d-flex gap-2">
           <ReactToPrint
             trigger={() => <Button color="primary">Print</Button>}
             content={() => printRef.current}

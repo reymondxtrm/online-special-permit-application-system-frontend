@@ -19,12 +19,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Select from "react-select";
 import { FieldArray, Formik } from "formik";
 import useSubmit from "hooks/Common/useSubmit";
-import { NAME_OF_GOVERNMENT_PROPERTY, USER_PRIVACY } from "assets/data/data";
+import { USER_PRIVACY } from "assets/data/data";
+import axios from "axios";
 
 function UseOfGovernmentPropertyModal({ openModal, toggleModal }) {
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
   const [proceed, setIsProceed] = useState(false);
+  const [propertyOptions, setPropertyOptions] = useState([]);
 
   const purposeOptions = [
     { value: 1, label: "Local Employment" },
@@ -49,7 +51,22 @@ function UseOfGovernmentPropertyModal({ openModal, toggleModal }) {
   const setProceedHandle = () => {
     setIsProceed((prev) => !prev);
   };
-
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const response = await axios.get("api/get-government-property");
+        if (response) {
+          const options = response.data.map((item) => {
+            return { value: item.id, label: item.name };
+          });
+          setPropertyOptions(options);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetch();
+  }, []);
   return (
     <React.Fragment>
       <Modal
@@ -145,7 +162,7 @@ function UseOfGovernmentPropertyModal({ openModal, toggleModal }) {
                             Name of Government Property hello
                           </Label>
                           <Select
-                            options={NAME_OF_GOVERNMENT_PROPERTY}
+                            options={propertyOptions}
                             placeholder="Select a property.."
                             onChange={(selected) => {
                               props.setFieldValue(

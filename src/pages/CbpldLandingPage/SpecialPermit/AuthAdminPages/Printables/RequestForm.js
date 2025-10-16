@@ -1,14 +1,25 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { Modal, ModalBody, ModalHeader } from "reactstrap";
+import React, { useEffect, useState, useMemo, useRef } from "react";
+import {
+  Button,
+  ButtonToggle,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+} from "reactstrap";
 // import cgbLogo from "../../../../../assets/images/cgbLogo.png";
 // import headerLine from "../../../../../assets/images/permitHeaderLine.png";
 import cgbLogo from "../../../../../assets/images/cgbLogo.png";
 import headerLine from "../../../../../assets/images/permitHeaderLine.png";
+import butuanOnLogo from "../../../../../assets/images/butuanOnLogo.png";
+import footerLine from "../../../../../assets/images/permitFooterLine.png";
 import "./RequestForm.css";
 import axios from "axios";
 import moment from "moment";
+import ReactToPrint from "react-to-print";
 export default function RequestForm({ isOpen, toggle, applicationId }) {
   const [application, setApplication] = useState(null);
+  const printRef = useRef();
   useEffect(() => {
     let mounted = true;
     const fetchData = async () => {
@@ -32,26 +43,22 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
     };
   }, [applicationId]);
   const column1 = application?.special_permit_type?.code === "good_moral";
+  const handleDefaultFileName = async () => {
+    const originalTitle = document.title;
+    // set a readable default filename for the print dialog
+    document.title = `${
+      application?.special_permit_type?.code || "request"
+    } Request Form`;
+    setTimeout(() => {
+      document.title = originalTitle; // Restore the original title after the print dialog opens
+    }, 5000); // Slight delay to ensure the print dialog uses the updated title
+  };
   const formater = (date) => {
     const newDate = new Date(date);
     const formatedDate = newDate.toLocaleDateString("en-US");
     return formatedDate;
   };
   const type = application?.special_permit_type?.code;
-  // const concatEventDate = useMemo(() => {
-  //   if (!application?.event_date_from && !application?.event_date_to) return "";
-
-  //   const timeFrom = moment(application.event_time_from, "h:mm A").format(
-  //     "h:mm A"
-  //   );
-  //   const timeTo = moment(application.event_time_to, "h:mm A").format("h:mm A");
-
-  //   if (application.event_date_from === application.event_date_to) {
-  //     return `${application.event_date_from} at ${timeFrom} to ${timeTo}`;
-  //   } else {
-  //     return `${application.event_date_from} at ${timeFrom} to ${application.event_date_to} at ${timeTo}`;
-  //   }
-  // }, [application]);
 
   return (
     <Modal isOpen={isOpen} toggle={toggle} size="xl">
@@ -62,7 +69,9 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            margin: "10px",
           }}
+          ref={printRef}
         >
           <table>
             <tbody>
@@ -410,7 +419,11 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                 >
                   <table
                     className="footer-table"
-                    style={{ width: "900px", marginTop: "20px" }}
+                    style={{
+                      width: "900px",
+                      marginTop: "20px",
+                      tableLayout: "fixed",
+                    }}
                   >
                     <tbody>
                       <tr>
@@ -576,10 +589,38 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                   <p className="cambraText">Signature over Printed Name</p>
                 </td>
               </tr>
+              <tr>
+                <td className="text-end">
+                  <img src={butuanOnLogo} style={{ width: "180px" }} />
+                  <p
+                    className="p-0 m-0 fw-bold"
+                    style={{ fontStyle: "italic", fontSize: "16px" }}
+                  >
+                    CBPLD.BPLD.F.018.REV02
+                  </p>
+                </td>
+              </tr>
             </tbody>
+            <tfoot>
+              <tr>
+                <td style={{ width: "100%" }}>
+                  <img src={footerLine} style={{ width: "100%" }} />
+                </td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </ModalBody>
+      <ModalFooter>
+        <div className="d-flex gap-2">
+          <ReactToPrint
+            trigger={() => <Button color="primary">Print</Button>}
+            content={() => printRef.current}
+            onBeforePrint={handleDefaultFileName}
+          />
+          <Button onClick={toggle}>Close</Button>
+        </div>
+      </ModalFooter>
     </Modal>
   );
 }

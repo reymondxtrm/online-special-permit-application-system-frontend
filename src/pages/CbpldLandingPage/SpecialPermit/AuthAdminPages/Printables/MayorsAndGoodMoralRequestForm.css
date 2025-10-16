@@ -1,0 +1,9 @@
+@media print {
+  .testing {
+    /* height: 1190px !important; */
+    width: 1000px !important;
+  }
+}
+/* .testing { */
+/* width: 1000px; */
+/* } */

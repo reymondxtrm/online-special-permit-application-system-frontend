@@ -19,12 +19,31 @@ export const getBusinessStageData = createAsyncThunk(
     }
   }
 );
+export const getGovernmentProperty = createAsyncThunk(
+  "admin/getGovernmentProperty",
+  async (thunkAPI) => {
+    try {
+      const response = await axios({
+        url: "api/get-government-property",
+        method: "GET",
+      });
+      if (!response) {
+        return thunkAPI.rejectWithValue(response.data);
+      }
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
 export const AdminSlice = createSlice({
   name: "batsAdmin",
   initialState: {
     businessStagesData: [],
     errors: null,
     getBusinessStageDataIsFetching: false,
+    governmentProperty: [],
+    getGovernmentPropertyIsFetching: false,
   },
   extraReducers: {
     [getBusinessStageData.pending]: (state) => {
@@ -36,6 +55,17 @@ export const AdminSlice = createSlice({
     },
     [getBusinessStageData.rejected]: (state, { payload }) => {
       state.getBusinessStageDataIsFetching = false;
+      state.errors = payload;
+    },
+    [getGovernmentProperty.pending]: (state) => {
+      state.getGovernmentPropertyIsFetching = true;
+    },
+    [getGovernmentProperty.fulfilled]: (state, { payload }) => {
+      state.getGovernmentPropertyIsFetching = false;
+      state.governmentProperty = payload;
+    },
+    [getGovernmentProperty.rejected]: (state, { payload }) => {
+      state.getGovernmentPropertyIsFetching = false;
       state.errors = payload;
     },
   },
