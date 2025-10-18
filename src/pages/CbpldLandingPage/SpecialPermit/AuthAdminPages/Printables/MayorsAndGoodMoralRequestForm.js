@@ -62,13 +62,12 @@ export default function MayorsAndGoodMoralRequestForm({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-
-            height: "1410px",
+            flexDirection: "column",
           }}
           className="testing"
           ref={printRef}
         >
-          <table style={{ margin: "10px", height: "100%" }}>
+          <table style={{ margin: "10px", height: "990px" }}>
             <tbody>
               <tr>
                 <td
@@ -95,8 +94,8 @@ export default function MayorsAndGoodMoralRequestForm({
                         className="header-logo"
                       />
                     </div>
-                    <div style={{ marginTop: "20px" }}>
-                      <div className="header-text">
+                    <div style={{ marginTop: "10px" }}>
+                      <div className="header-text d-flex flex-column gap-1">
                         <p>Republic of the Philippines</p>
                         <p className="header-title ">
                           CITY GOVERNMENT OF BUTUAN
@@ -108,7 +107,7 @@ export default function MayorsAndGoodMoralRequestForm({
                           City Hall Bldg., J.P. Rosales Ave., Doongan, Butuan
                           City
                         </p>
-                        <div style={{ marginTop: "px", marginLeft: "-20px" }}>
+                        <div style={{ marginTop: "px", marginLeft: "-30px" }}>
                           <img
                             className="header-line"
                             src={headerLine}
@@ -118,16 +117,19 @@ export default function MayorsAndGoodMoralRequestForm({
                       </div>
                     </div>
                     <div
-                      className="text-center"
+                      className="text-center d-flex flex-column"
                       style={{
                         position: "absolute",
-                        bottom: "-80px",
-                        left: "225px",
+                        bottom: "-70px",
+                        left: "250px",
                       }}
                     >
-                      <h1 className="title">REQUEST FORM </h1>
-                      <h1 className="title" style={{ fontStyle: "italic" }}>
-                        ( Good Moral Character/ Mayor&apos;s Certification)
+                      <h1 className="title m-0 p-0">REQUEST FORM </h1>
+                      <h1 className="title ">
+                        ({" "}
+                        <span style={{ fontStyle: "italic" }}>
+                          Good Moral Character/ Mayor&apos;s Certification)
+                        </span>
                       </h1>
                     </div>
                   </div>
@@ -146,24 +148,25 @@ export default function MayorsAndGoodMoralRequestForm({
                     style={{
                       width: "900px",
                       borderCollapse: "collapse",
-                      marginTop: "50px",
-
+                      marginTop: "70px",
                       tableLayout: "fixed",
                     }}
                   >
                     <thead>
                       <tr>
                         <th>
-                          <div className="d-flex ">
+                          <div className="d-flex align-items-center">
                             <div
                               style={{
                                 border: "2px solid",
                                 borderColor: "red",
-                                width: "20px",
-                                height: "20px",
+                                width: "30px",
+                                height: "30px",
                                 backgroundColor: column1 ? "black" : "",
                               }}
-                            ></div>
+                            >
+                              {" "}
+                            </div>
                             <div style={{ marginLeft: "100px" }}>
                               <p className="m-0 p-0">MAYOR&apos;S CLEARANCE</p>
                               <p className="m-0 p-0">
@@ -173,13 +176,13 @@ export default function MayorsAndGoodMoralRequestForm({
                           </div>
                         </th>
                         <th>
-                          <div className=" d-flex">
+                          <div className="d-flex align-items-center">
                             <div
                               style={{
                                 border: "2px solid",
                                 borderColor: "red",
-                                width: "20px",
-                                height: "20px",
+                                width: "30px",
+                                height: "30px",
                                 backgroundColor: !column1 ? "black" : "",
                               }}
                             ></div>
@@ -195,7 +198,7 @@ export default function MayorsAndGoodMoralRequestForm({
                     <tbody>
                       <tr>
                         <td>
-                          <div className="d-flex  gap-2">
+                          <div className="main-table-cell">
                             <div
                               style={{
                                 border: "2px solid",
@@ -216,7 +219,7 @@ export default function MayorsAndGoodMoralRequestForm({
                           </div>
                         </td>
                         <td>
-                          <div className="d-flex gap-2">
+                          <div className="main-table-cell">
                             <div
                               style={{
                                 border: "2px solid",
@@ -237,7 +240,7 @@ export default function MayorsAndGoodMoralRequestForm({
                       </tr>
                       <tr>
                         <td>
-                          <div className="d-flex  gap-2">
+                          <div className="main-table-cell">
                             <div
                               style={{
                                 border: "2px solid",
@@ -258,7 +261,7 @@ export default function MayorsAndGoodMoralRequestForm({
                           </div>
                         </td>
                         <td>
-                          <div className="d-flex  gap-2">
+                          <div className="main-table-cell">
                             <div
                               style={{
                                 border: "2px solid",
@@ -274,7 +277,6 @@ export default function MayorsAndGoodMoralRequestForm({
                               }}
                             ></div>
                             <p className="fw-bold m-0 p-0">
-                              {" "}
                               Community Tax Certificate(Cedula)
                             </p>
                           </div>
@@ -282,7 +284,7 @@ export default function MayorsAndGoodMoralRequestForm({
                       </tr>
                       <tr>
                         <td>
-                          <div className="d-flex  gap-2 ">
+                          <div className="main-table-cell ">
                             <div
                               style={{
                                 border: "2px solid",
@@ -310,7 +312,7 @@ export default function MayorsAndGoodMoralRequestForm({
                           </div>
                         </td>
                         <td>
-                          <div className="d-flex  gap-2">
+                          <div className="main-table-cell">
                             <div
                               style={{
                                 border: "2px solid",
@@ -340,7 +342,7 @@ export default function MayorsAndGoodMoralRequestForm({
                       </tr>
                       <tr>
                         <td>
-                          <div className="d-flex  gap-2">
+                          <div className="d-flex gap-2">
                             <div
                               style={{
                                 border: "2px solid",
@@ -348,6 +350,7 @@ export default function MayorsAndGoodMoralRequestForm({
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
+                                marginLeft: "30px",
                                 backgroundColor:
                                   !!application?.uploaded_file
                                     ?.official_receipt && column1
@@ -378,7 +381,7 @@ export default function MayorsAndGoodMoralRequestForm({
                           </div>
                         </td>
                         <td>
-                          <div className="d-flex  gap-2">
+                          <div className="d-flex gap-2">
                             <div
                               style={{
                                 border: "2px solid",
@@ -386,6 +389,7 @@ export default function MayorsAndGoodMoralRequestForm({
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
+                                marginLeft: "30px",
                                 backgroundColor:
                                   !!application?.uploaded_file
                                     ?.official_receipt && column1
@@ -418,75 +422,83 @@ export default function MayorsAndGoodMoralRequestForm({
                       </tr>
                       <tr>
                         <td>
-                          <div className="d-flex  gap-2">
-                            <div
-                              style={{
-                                border: "2px solid",
-                                borderRadius: "50%",
-                                borderColor: "black",
-                                width: "20px",
-                                height: "20px",
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.fiscal_clearance && column1
-                                    ? "black"
-                                    : "",
-                              }}
-                            ></div>
-                            <p className="fw-bold m-0 p-0">Fiscal Clearance</p>
-                          </div>
-                          <div className="d-flex  mt-3 gap-2">
-                            <div
-                              style={{
-                                border: "2px solid",
-                                borderRadius: "50%",
-                                borderColor: "black",
-                                width: "20px",
-                                height: "20px",
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.court_clearance && column1
-                                    ? "black"
-                                    : "",
-                              }}
-                            ></div>
-                            <p className="fw-bold m-0 p-0">Court Clearance</p>
+                          <div className="d-flex flex-column gap-2">
+                            <div className="main-table-cell">
+                              <div
+                                style={{
+                                  border: "2px solid",
+                                  borderRadius: "50%",
+
+                                  width: "20px",
+                                  height: "20px",
+                                  backgroundColor:
+                                    !!application?.uploaded_file
+                                      ?.fiscal_clearance && column1
+                                      ? "black"
+                                      : "",
+                                }}
+                              ></div>
+                              <p className="fw-bold m-0 p-0">
+                                Fiscal Clearance
+                              </p>
+                            </div>
+                            <div className="main-table-cell">
+                              <div
+                                style={{
+                                  border: "2px solid",
+                                  borderRadius: "50%",
+
+                                  width: "20px",
+                                  height: "20px",
+                                  backgroundColor:
+                                    !!application?.uploaded_file
+                                      ?.court_clearance && column1
+                                      ? "black"
+                                      : "",
+                                }}
+                              ></div>
+                              <p className="fw-bold m-0 p-0">Court Clearance</p>
+                            </div>
                           </div>
                         </td>
                         <td>
-                          <div className="d-flex  gap-2">
-                            <div
-                              style={{
-                                border: "2px solid",
-                                borderRadius: "50%",
-                                borderColor: "black",
-                                width: "20px",
-                                height: "20px",
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.fiscal_clearance && !column1
-                                    ? "black"
-                                    : "",
-                              }}
-                            ></div>
-                            <p className="fw-bold m-0 p-0">Fiscal Clearance</p>
-                          </div>
-                          <div className="d-flex  mt-3 gap-2">
-                            <div
-                              style={{
-                                border: "2px solid",
-                                borderRadius: "50%",
-                                borderColor: "black",
-                                width: "20px",
-                                height: "20px",
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.court_clearance && !column1
-                                    ? "black"
-                                    : "",
-                              }}
-                            ></div>
-                            <p className="fw-bold m-0 p-0">Court Clearance</p>
+                          <div className="d-flex flex-column gap-2">
+                            <div className="main-table-cell">
+                              <div
+                                style={{
+                                  border: "2px solid",
+                                  borderRadius: "50%",
+
+                                  width: "20px",
+                                  height: "20px",
+                                  backgroundColor:
+                                    !!application?.uploaded_file
+                                      ?.fiscal_clearance && !column1
+                                      ? "black"
+                                      : "",
+                                }}
+                              ></div>
+                              <p className="fw-bold m-0 p-0">
+                                Fiscal Clearance
+                              </p>
+                            </div>
+                            <div className="main-table-cell">
+                              <div
+                                style={{
+                                  border: "2px solid",
+                                  borderRadius: "50%",
+
+                                  width: "20px",
+                                  height: "20px",
+                                  backgroundColor:
+                                    !!application?.uploaded_file
+                                      ?.court_clearance && !column1
+                                      ? "black"
+                                      : "",
+                                }}
+                              ></div>
+                              <p className="fw-bold m-0 p-0">Court Clearance</p>
+                            </div>
                           </div>
                         </td>
                       </tr>
@@ -512,7 +524,7 @@ export default function MayorsAndGoodMoralRequestForm({
                           </p>
                         </td>
                         <td>
-                          <div className="d-flex gap-2">
+                          <div className="main-table-cell">
                             <div
                               style={{
                                 border: "2px solid",
@@ -536,7 +548,7 @@ export default function MayorsAndGoodMoralRequestForm({
                       <tr>
                         <td>
                           {" "}
-                          <div className="d-flex gap-2">
+                          <div className="main-table-cell">
                             <div
                               style={{
                                 border: "2px solid",
@@ -567,7 +579,7 @@ export default function MayorsAndGoodMoralRequestForm({
                 >
                   <table
                     className="footer-table"
-                    style={{ width: "900px", marginTop: "20px" }}
+                    style={{ width: "900px", marginTop: "50px" }}
                   >
                     <tbody>
                       <tr>
@@ -735,25 +747,30 @@ export default function MayorsAndGoodMoralRequestForm({
                 </td>
               </tr>
               <tr>
-                <td className="text-end">
+                <td
+                  className="text-end"
+                  style={{
+                    paddingRight: "22px",
+                    paddingLeft: "22px",
+                    paddingTop: "40px",
+                  }}
+                >
                   <img src={butuanOnLogo} style={{ width: "180px" }} />
                   <p
                     className="p-0 m-0 fw-bold"
-                    style={{ fontStyle: "italic", fontSize: "16px" }}
+                    style={{
+                      fontStyle: "italic",
+                      fontSize: "16px",
+                      marginTop: "-10px",
+                    }}
                   >
                     CBPLD.BPLD.F.107.REV04
                   </p>
                 </td>
               </tr>
             </tbody>
-            <tfoot>
-              <tr>
-                <td style={{ width: "100%" }}>
-                  <img src={footerLine} style={{ width: "100%" }} />
-                </td>
-              </tr>
-            </tfoot>
           </table>
+          <img src={footerLine} style={{ width: "100%" }} />
         </div>
       </ModalBody>
       <ModalFooter>

@@ -45,33 +45,36 @@ const CertificateFormat = React.forwardRef((props, ref) => {
   const certificateRef = useRef();
 
   useEffect(() => {
-    const adjustFontScale = () => {
+    const adjustLayout = () => {
       if (certificateRef.current) {
-        // const maxHeight = 1212;
         const maxHeight =
           permitType === "good_moral" || permitType === "mayors_certificate"
             ? 1208
             : 1244;
         const height = certificateRef.current.scrollHeight;
 
-        let newScale = 1;
-
         if (height > maxHeight) {
-          const ratio = maxHeight / height;
-          newScale = Math.max(ratio, 0.7);
+          const overflow = height - maxHeight;
+          if (overflow < 100) {
+            certificateRef.current.style.lineHeight = "1.3";
+            certificateRef.current.style.padding = "0";
+            setScale(1);
+          } else {
+            const ratio = maxHeight / height;
+            const newScale = Math.max(ratio); //0.75
+            setScale(newScale);
+          }
         } else {
-          newScale = 1;
+          certificateRef.current.style.lineHeight = "";
+          certificateRef.current.style.padding = "";
+          setScale(1);
         }
-
-        setScale((prev) => {
-          if (Math.abs(prev - newScale) < 0.01) return prev;
-          return newScale;
-        });
       }
     };
-    const observer = new ResizeObserver(adjustFontScale);
-    if (certificateRef.current) observer.observe(certificateRef.current);
-    return () => observer.disconnect();
+
+    // const observer = new ResizeObserver(adjustLayout);
+    // if (certificateRef.current) observer.observe(certificateRef.current);
+    // return () => observer.disconnect();
   }, [
     firstParagraph,
     secondParagraph,
@@ -80,8 +83,8 @@ const CertificateFormat = React.forwardRef((props, ref) => {
     withCase,
     conditions,
     eventName,
+    permitType,
   ]);
-
   let headerTitle = "";
   if (permitType === "mayors_permit") {
     headerTitle = "MAYOR'S CERTIFICATION";
@@ -126,10 +129,6 @@ const CertificateFormat = React.forwardRef((props, ref) => {
             permitType === "good_moral" || permitType === "mayors_permit"
               ? "208mm"
               : "215.9mm",
-          height:
-            permitType === "good_moral" || permitType === "mayors_permit"
-              ? "295mm"
-              : "330.2mm",
         }}
       >
         <table className="certificate-table">

@@ -65,15 +65,16 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
       <ModalHeader toggle={toggle}></ModalHeader>
       <ModalBody>
         <div
+          className="wrapper"
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            margin: "10px",
+            flexDirection: "column",
           }}
           ref={printRef}
         >
-          <table>
+          <table style={{ margin: "10px", height: "990px", width: "765px" }}>
             <tbody>
               <tr>
                 <td>
@@ -94,8 +95,8 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                         className="header-logo"
                       />
                     </div>
-                    <div>
-                      <div className="header-text">
+                    <div style={{ marginTop: "10px" }}>
+                      <div className="header-text d-flex flex-column gap-1">
                         <p>Republic of the Philippines</p>
                         <p className="header-title ">
                           CITY GOVERNMENT OF BUTUAN
@@ -107,7 +108,7 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                           City Hall Bldg., J.P. Rosales Ave., Doongan, Butuan
                           City
                         </p>
-                        <div style={{ marginTop: "5px" }}>
+                        <div style={{ marginTop: "px", marginLeft: "-30px" }}>
                           <img
                             className="header-line"
                             src={headerLine}
@@ -120,8 +121,8 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                       className="text-center"
                       style={{
                         position: "absolute",
-                        bottom: "-20px",
-                        left: "200px",
+                        bottom: "-30px",
+                        left: "180px",
                       }}
                     >
                       <h1 className="title">REQUEST FORM FOR SPECIAL PERMIT</h1>
@@ -135,15 +136,16 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    width: "765px",
                   }}
                 >
                   <table
                     className="main-table"
                     style={{
-                      width: "800px",
                       borderCollapse: "collapse",
-                      marginTop: "20px",
+                      marginTop: "30px",
                       tableLayout: "fixed",
+                      width: "92%",
                     }}
                   >
                     <thead>
@@ -420,7 +422,7 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                   <table
                     className="footer-table"
                     style={{
-                      width: "900px",
+                      width: "765px",
                       marginTop: "20px",
                       tableLayout: "fixed",
                     }}
@@ -465,12 +467,12 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                       <tr>
                         <td colSpan={2} className=" m-0 p-0">
                           <div className="d-flex gap-2 h-100">
-                            <p className="label" style={{ width: "20%" }}>
+                            <p className="label" style={{ width: "30%" }}>
                               Name of Representative:
                             </p>
                             <div
                               className="d-flex justify-content-around"
-                              style={{ width: "80%" }}
+                              style={{ width: "70%" }}
                             >
                               <p className="p-0 m-0">
                                 {application?.user?.lname}
@@ -489,7 +491,7 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                         <td colSpan={2} className="text-center p-0">
                           <div
                             className="d-flex justify-content-around"
-                            style={{ marginLeft: "10%" }}
+                            style={{ marginLeft: "30%" }}
                           >
                             <span className="cambraText me-5 ms-5 fst-italic">
                               Surname
@@ -563,11 +565,8 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                 </td>
               </tr>
               <tr>
-                <td style={{ width: "800px" }}>
-                  <p
-                    style={{ marginTop: "30px", textIndent: "40px" }}
-                    className="cambraText"
-                  >
+                <td style={{ width: "900px" }}>
+                  <p style={{ textIndent: "40px" }} className="cambraText">
                     I hereby voluntarily declare that all the information
                     provided in this request form for the special permit is
                     true, accurate, and complete to the best of my knowledge and
@@ -579,14 +578,23 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
               </tr>
               <tr>
                 <td>
-                  <hr
-                    style={{
-                      width: "200px",
-                      border: "1px solid #000000",
-                      marginTop: "80px",
-                    }}
-                  />
-                  <p className="cambraText">Signature over Printed Name</p>
+                  <div
+                    style={{ width: "200px" }}
+                    className="d-flex align-items-center flex-column"
+                  >
+                    <hr
+                      style={{
+                        width: "200px",
+                        border: "1px solid #000000",
+                        color: "#000000",
+                        marginTop: "40px",
+                        marginBottom: "0px",
+                      }}
+                    />
+                    <p className="cambraText p-0 m-0">
+                      Signature over Printed Name
+                    </p>
+                  </div>
                 </td>
               </tr>
               <tr>
@@ -601,14 +609,8 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                 </td>
               </tr>
             </tbody>
-            <tfoot>
-              <tr>
-                <td style={{ width: "100%" }}>
-                  <img src={footerLine} style={{ width: "100%" }} />
-                </td>
-              </tr>
-            </tfoot>
           </table>
+          <img src={footerLine} style={{ width: "100%" }} />
         </div>
       </ModalBody>
       <ModalFooter>

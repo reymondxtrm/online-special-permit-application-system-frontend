@@ -281,6 +281,7 @@ const AdminControls = () => {
                             <th>Case Name</th>
                             <th>Ordinance</th>
                             <th>Attachment</th>
+                            <th>Actions</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -321,6 +322,7 @@ const AdminControls = () => {
                                         "loding ..."
                                       ) : (
                                         <Button
+                                          size="sm"
                                           onClick={() => {
                                             toggleFileViewerModal();
                                             setSelectedFile(items.attachment);
@@ -330,6 +332,24 @@ const AdminControls = () => {
                                           FILE
                                         </Button>
                                       )}
+                                    </td>
+                                    <td>
+                                      <div className="d-flex gap-2">
+                                        <Button
+                                          size="sm"
+                                          color="warning "
+                                          disabled
+                                        >
+                                          Edit
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          color="danger"
+                                          disabled
+                                        >
+                                          Delete
+                                        </Button>
+                                      </div>
                                     </td>
                                   </tr>
                                 );
@@ -535,6 +555,14 @@ const AdminControls = () => {
                                       ? "loding ..."
                                       : items.address_type}
                                   </td>
+                                  <div className="d-flex gap-2">
+                                    <Button size="sm" color="warning " disabled>
+                                      Edit
+                                    </Button>
+                                    <Button size="sm" color="danger" disabled>
+                                      Delete
+                                    </Button>
+                                  </div>
                                 </tr>
                               );
                             })

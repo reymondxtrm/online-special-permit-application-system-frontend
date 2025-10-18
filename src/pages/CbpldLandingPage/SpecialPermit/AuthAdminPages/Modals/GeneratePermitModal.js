@@ -37,16 +37,14 @@ function GeneratePermitModal({
   specialPermitID,
 }) {
   const [data, setdata] = useState();
-  const componentRef = useRef(null); // Ref to the printable component
+  const componentRef = useRef(null);
 
-  // State to store the sentences being constructed for both paragraphs
   const [firstParagraph, setFirstParagraph] = useState("");
   const [firstParagraphTextArea, setFirstParagraphTextArea] = useState("");
   const [withCase, setwithCase] = useState("");
   const [secondParagraph, setSecondParagraph] = useState("");
   const [secondParagraphTextArea, setSecondParagraphTextArea] = useState("");
   const [thirdParagraph, setthirdParagraph] = useState();
-  // const [conditions, setConditions] = useState([]);
   const [conditionsTextArea, setConditionsTextArea] = useState("");
   const [activeParagraph, setActiveParagraph] = useState(null);
   const openFirstColumn = useMemo(() => {
@@ -216,7 +214,7 @@ function GeneratePermitModal({
             `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold; font-size: 14pt; text-decoration: underline;">${data?.requestor_name}</span>`
         );
         setFirstParagraphTextArea(
-          (prevText) => prevText + data?.requestor_name
+          (prevText) => prevText + data?.requesSor_name
         );
       } else if (activeParagraph === "second") {
         setSecondParagraph(
@@ -774,60 +772,8 @@ function GeneratePermitModal({
                 </div>
               </Row>
             )}
-            {/* <Row>
-              <div>
-                <Card
-                  style={{
-                    borderRadius: "10px",
-                    boxShadow: "5px 5px 15px ",
-                    height: "auto",
-                  }}
-                >
-                  <CardHeader
-                    style={{
-                      backgroundColor: "#0d6dfc",
-                      color: "white",
-                      fontWeight: "bold",
-                      fontSize: "12pt",
-                      letterSpacing: ".2rem",
-                      minHeight: "60px",
-                      display: "flex",
-                      alignItems: "center",
-                      borderTopLeftRadius: "10px",
-                      borderTopRightRadius: "10px",
-                    }}
-                  >
-                    NUMBER OF PARTICIPANTS
-                  </CardHeader>
-                  <CardBody>
-                    <Input
-                      name="numberOfParticipants"
-                      type="number"
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        debouncer(value);
-                      }}
-                      style={{
-                        width: "100%",
-                        height: "100px",
-                        padding: "8px",
-                        borderRadius: "4px",
-                        border: "1px solid #ccc",
-                        fontFamily: "Cambria, serif",
-                        fontWeight: "bold",
-                        fontSize: "13pt",
-                      }}
-                      onFocus={() => handleFocus("numberOfParticipants")}
-                      placeholder="Start typing..."
-                      value={numberOfParticipants}
-                    />
-                  </CardBody>
-                </Card>
-              </div>
-            </Row> */}
           </Col>
 
-          {/* Certificate content */}
           <Col md={openFirstColumn ? 5 : 7}>
             <CertificateFormat
               ref={componentRef}

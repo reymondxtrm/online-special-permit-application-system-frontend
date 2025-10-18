@@ -10,7 +10,7 @@
 /* Page sizes */
 .a4 {
   width: 208mm;
-  height: 293mm;
+  height: 290mm;
 }
 
 .folio {
@@ -145,13 +145,14 @@
 
   .certificate-wrapper.a4 {
     width: 210mm;
-    height: 297mm;
+    height: 290mm !important;
+    max-height: 290mm !important;
     page-break-after: always;
   }
 
   .certificate-wrapper.folio {
     width: 215.9mm;
-    height: 330.2mm;
+    height: 330.2mm !important;
     page-break-after: always;
   }
 

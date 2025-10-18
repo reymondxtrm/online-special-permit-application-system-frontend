@@ -1,7 +1,7 @@
 .title {
   font-family: "Cambria, serif";
   color: #154172 !important;
-  font-size: 19pt;
+  font-size: 16pt;
   font-weight: bold;
   letter-spacing: "0.05em" !important;
 }
@@ -66,4 +66,15 @@
 }
 p {
   color: #000000;
+}
+@media print {
+  .wrapper {
+    width: 920px !important;
+  }
+  .header-logo {
+    width: "40px";
+  }
+  .header-text > p {
+    font-size: 14px;
+  }
 }

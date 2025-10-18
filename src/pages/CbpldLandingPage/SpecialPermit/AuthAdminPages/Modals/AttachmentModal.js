@@ -16,7 +16,6 @@ import {
 } from "reactstrap";
 import classnames from "classnames";
 import Viewer from "react-viewer";
-// import Viewer from "react-viewer";
 import axios from "axios";
 
 function AttachmentModal({
@@ -94,14 +93,25 @@ function AttachmentModal({
   };
 
   const handleDownload = async (filePath) => {
-    const link = document.createElement("a");
-    link.href = `${window.location.protocol}//${process.env.REACT_APP_API}storage/${filePath}`;
-    link.setAttribute("download", "");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+    try {
+      const response = await axios.get("api/admin/download-image", {
+        params: { filePath },
+        responseType: "blob",
+      });
 
+      if (response.status === 200) {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "PoliceClearance-71.jpg"); // filename
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+    } catch (error) {
+      console.error("Download error:", error);
+    }
+  };
   return (
     <Modal
       isOpen={openModal}
@@ -219,31 +229,6 @@ function AttachmentModal({
           scalable
           attribute={false}
           zIndex={2000}
-          customToolbar={(toolbars) => [
-            ...toolbars,
-            {
-              key: "download",
-              render: (
-                <svg
-                  viewBox="0 0 1024 1024"
-                  width="30"
-                  height="30"
-                  fill="yellow"
-                  style={{ cursor: "pointer" }}
-                >
-                  <path d="M505.6 704L313.6 512h121.6V192h160v320h121.6L505.6 704z m-320 64h640v64H185.6v-64z" />
-                </svg>
-              ),
-              onClick: (activeImage) => {
-                const link = document.createElement("a");
-                link.href = activeImage.src;
-                link.download = activeImage.alt || "downloaded_image";
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-              },
-            },
-          ]}
         />
       )}
     </Modal>

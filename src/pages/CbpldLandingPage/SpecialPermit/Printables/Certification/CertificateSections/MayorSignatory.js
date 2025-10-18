@@ -1,8 +1,13 @@
 import React from "react";
 
-export default function MayorSignatory({ permitType }) {
+export default function MayorSignatory({ permitType, scale }) {
+  const baseFontSize = 13; // pt
+  const fontSize = baseFontSize * scale;
 
-  
+  // Scale padding
+  const topPadding = 40 * scale;
+  const bottomPadding = 30 * scale;
+
   return (
     <>
       <div
@@ -14,11 +19,9 @@ export default function MayorSignatory({ permitType }) {
       >
         <p
           style={{
-            fontSize: "13pt",
+            fontSize: `${fontSize}pt`,
             fontWeight: "bold",
-            // color: "#005a99",
-            paddingTop: "min(40px, 2vh)", // Shrinks when space is tight
-            // paddingTop: "40px",
+            paddingTop: `${topPadding}px`,
             margin: 0,
             fontFamily: "Cambria, serif",
           }}
@@ -35,8 +38,7 @@ export default function MayorSignatory({ permitType }) {
       >
         <p
           style={{
-            fontSize: "13pt",
-            // color: "#005a99",
+            fontSize: `${fontSize}pt`,
             padding: 0,
             margin: 0,
             fontFamily: "Cambria, serif",
@@ -56,9 +58,9 @@ export default function MayorSignatory({ permitType }) {
       >
         <p
           style={{
-            fontSize: "13pt",
+            fontSize: `${fontSize}pt`,
             fontStyle: "italic",
-            paddingTop: "30px", // Shrinks when space is tight
+            paddingTop: `${bottomPadding}px`,
             margin: 0,
             fontFamily: "Cambria, serif",
             wordWrap: "break-word",

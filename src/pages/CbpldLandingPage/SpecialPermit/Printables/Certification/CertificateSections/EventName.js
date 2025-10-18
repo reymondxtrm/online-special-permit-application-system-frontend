@@ -1,7 +1,7 @@
 import React from "react";
 
 export default function EventName({ eventName, permitType, scale }) {
-  const baseFontSize = 17; // pt
+  const baseFontSize = 17;
   const fontSize = baseFontSize * scale;
   const allowed = [
     "event",

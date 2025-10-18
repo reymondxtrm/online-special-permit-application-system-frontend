@@ -3,6 +3,12 @@ import React from "react";
 export default function ThirdParagraph({ thirdParagraph, scale }) {
   const baseFontSize = 13; // pt
   const fontSize = baseFontSize * scale;
+
+  const marginTop = 4 * scale;
+  const marginLeftRight = 1.5 * scale; // cm
+  const marginBottom = 0.25 * scale; // cm
+  const textIndent = 50 * scale; // px
+
   const escapeHtml = (s) =>
     s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -26,25 +32,26 @@ export default function ThirdParagraph({ thirdParagraph, scale }) {
 
     return t;
   };
+
   return (
     <div
       style={{
-        marginTop: "4px", // Top margin
-        marginLeft: "2.54cm", // Left margin
-        marginBottom: "0.25cm", // Bottom margin
-        marginRight: "1.5cm",
+        marginTop: `${marginTop}px`,
+        marginLeft: `${marginLeftRight}cm`,
+        marginBottom: `${marginBottom}cm`,
+        marginRight: `${marginLeftRight}cm`,
         lineHeight: "1.2",
       }}
     >
       <p
         style={{
           fontFamily: "Cambria, serif",
-          fontSize: `${fontSize}pt`, // Font size for the rest of the text
-          fontWeight: "bold", // Bold for the rest of the text
-          textIndent: "50px", // Indentation for the first line of text
-          marginBottom: "1em", // Add spacing for readability
-          textAlign: "justify", // Justify the text
-          lineHeight: "1.5", // Set line height for readability
+          fontSize: `${fontSize}pt`,
+          fontWeight: "bold",
+          textIndent: `${textIndent}px`,
+          marginBottom: "1em",
+          textAlign: "justify",
+          lineHeight: "1.5",
         }}
         dangerouslySetInnerHTML={{
           __html: transformText(thirdParagraph),
