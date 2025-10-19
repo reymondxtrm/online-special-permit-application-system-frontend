@@ -36,14 +36,52 @@ export const getGovernmentProperty = createAsyncThunk(
     }
   }
 );
+export const getExemptedCases = createAsyncThunk(
+  "admin/getExemptedCases",
+  async (thunkAPI) => {
+    try {
+      const response = await axios({
+        url: "api/admin/get/exempted-cases",
+        method: "GET",
+      });
+      if (!response) {
+        return thunkAPI.rejectWithValue(response.data);
+      }
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+export const getPurpose = createAsyncThunk(
+  "admin/getPurpose",
+  async (thunkAPI) => {
+    try {
+      const response = await axios({
+        url: "api/admin/get/purposes",
+        method: "GET",
+      });
+      if (!response) {
+        return thunkAPI.rejectWithValue(response.data);
+      }
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
 export const AdminSlice = createSlice({
   name: "batsAdmin",
   initialState: {
     businessStagesData: [],
     errors: null,
     getBusinessStageDataIsFetching: false,
+    exemptedCases: [],
+    getExemptedCaseIsFetching: false,
     governmentProperty: [],
     getGovernmentPropertyIsFetching: false,
+    purposes: [],
+    getPurposeIsFetching: false,
   },
   extraReducers: {
     [getBusinessStageData.pending]: (state) => {
@@ -66,6 +104,28 @@ export const AdminSlice = createSlice({
     },
     [getGovernmentProperty.rejected]: (state, { payload }) => {
       state.getGovernmentPropertyIsFetching = false;
+      state.errors = payload;
+    },
+    [getExemptedCases.pending]: (state) => {
+      state.getExemptedCaseIsFetching = true;
+    },
+    [getExemptedCases.fulfilled]: (state, { payload }) => {
+      state.getExemptedCaseIsFetching = false;
+      state.exemptedCases = payload;
+    },
+    [getExemptedCases.rejected]: (state, { payload }) => {
+      state.getExemptedCaseIsFetching = false;
+      state.errors = payload;
+    },
+    [getPurpose.pending]: (state) => {
+      state.getPurposeIsFetching = true;
+    },
+    [getPurpose.fulfilled]: (state, { payload }) => {
+      state.getPurposeIsFetching = false;
+      state.purposes = payload;
+    },
+    [getPurpose.rejected]: (state, { payload }) => {
+      state.getPurposeIsFetching = false;
       state.errors = payload;
     },
   },

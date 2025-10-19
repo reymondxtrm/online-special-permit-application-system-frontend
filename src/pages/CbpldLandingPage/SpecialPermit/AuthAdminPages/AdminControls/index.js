@@ -22,7 +22,11 @@ import AddApplicationPurposeModal from "./Modals/AddApplicationPurposeModal";
 import FileViewerModal from "./Modals/FileViewerModal";
 import AddGovernmentPropertyModal from "./Modals/AddGovernmentPropertyModal";
 import Swal from "sweetalert2";
-import { getGovernmentProperty } from "features/AdminSlice/AdminSlice";
+import {
+  getExemptedCases,
+  getGovernmentProperty,
+  getPurpose,
+} from "features/AdminSlice/AdminSlice";
 
 const AdminControls = () => {
   const [editOccupationState, seteditOccupationState] = useState(false);
@@ -39,7 +43,7 @@ const AdminControls = () => {
   const [selectedFile, setSelectedFile] = useState();
   const [governmentProperty, setGovernmetProperty] = useState([]);
   const [openPropertyModal, setOpenPropertyModal] = useState(false);
-  const [propertModalMode, setPropertyModalMode] = useState();
+  const [mode, setMode] = useState();
   const [property, setProperty] = useState();
   const dispatch = useDispatch();
 
@@ -62,43 +66,10 @@ const AdminControls = () => {
   };
 
   useEffect(() => {
-    setisLoading(true);
-    axios
-      .get("api/admin/get/exempted-cases", {
-        // params: { permit_type: "good_moral" },
-      })
-      .then(
-        (res) => {
-          setisLoading(false);
-
-          setdiscountedCasesData(res.data);
-        },
-        (error) => {
-          setisLoading(false);
-
-          console.log(error);
-        }
-      );
-  }, [refresh]);
-
-  useEffect(() => {
     dispatch(getGovernmentProperty());
-    setisLoading(true);
-    axios
-      .get("api/admin/get/purposes", {
-        //   params: { permit_type: "good_moral" },
-      })
-      .then(
-        (res) => {
-          setpurposesData(res.data);
-        },
-        (error) => {
-          setisLoading(false);
-
-          console.log(error);
-        }
-      );
-  }, []);
+    dispatch(getPurpose());
+    dispatch(getExemptedCases());
+  }, [refresh]);
 
   const initialValues = {
     companyName: userData?.user_occupation_details?.company_name || "",
@@ -146,7 +117,7 @@ const AdminControls = () => {
   }
   const togglePropertyModal = (mode) => {
     setOpenPropertyModal((prev) => !prev);
-    setPropertyModalMode(mode);
+    setMode(mode);
   };
   const handleDelete = async (id) => {
     const result = await Swal.fire({
@@ -196,6 +167,7 @@ const AdminControls = () => {
         openModal={addExemptedCaseModal}
         toggleModal={toggleExemptedCaseModal}
         toggleRefresh={toggleRefresh}
+        mode={mode}
       />
 
       <AddApplicationPurposeModal
@@ -211,7 +183,7 @@ const AdminControls = () => {
       <AddGovernmentPropertyModal
         toggle={togglePropertyModal}
         isOpen={openPropertyModal}
-        mode={propertModalMode}
+        mode={mode}
         property={property}
       />
       <div
@@ -223,19 +195,6 @@ const AdminControls = () => {
           margin: 0,
         }}
       >
-        {/* <Card
-          className="shadow-lg"
-          style={{
-            minHeight: "83%",
-            minWidth: "96%",
-            display: "flex",
-            padding: "2rem",
-            borderRadius: "10px",
-            boxShadow: "10px 10px 30px ",
-            marginTop: "40px",
-          }}
-        >
-          <CardBody style={{ display: "flex", flexDirection: "column" }}> */}
         <Row style={{ flexGrow: 1 }}>
           <Col>
             <Row>
@@ -285,11 +244,11 @@ const AdminControls = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {isLoading ? (
+                          {admin.getExemptedCasesIsFetching ? (
                             <TableLoaders row={4} col={4} />
                           ) : (
-                            discountedCasesData &&
-                            (discountedCasesData.length === 0 ? (
+                            admin.exemptedCases &&
+                            (admin.exemptedCases.length === 0 ? (
                               <tr>
                                 <td
                                   colSpan={4}
@@ -301,7 +260,7 @@ const AdminControls = () => {
                                 </td>
                               </tr>
                             ) : (
-                              discountedCasesData?.map((items, index) => {
+                              admin.exemptedCases?.map((items, index) => {
                                 return (
                                   <tr key={index}>
                                     <td>
@@ -520,11 +479,11 @@ const AdminControls = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {isLoading ? (
+                        {admin.getPurposeIsFetching ? (
                           <TableLoaders row={4} col={4} />
                         ) : (
-                          purposesData &&
-                          (purposesData.length === 0 ? (
+                          admin.purposes &&
+                          (admin.purposes.length === 0 ? (
                             <tr>
                               <td
                                 colSpan={4}
@@ -536,7 +495,7 @@ const AdminControls = () => {
                               </td>
                             </tr>
                           ) : (
-                            purposesData?.map((items, index) => {
+                            admin.purposes?.map((items, index) => {
                               return (
                                 <tr key={index}>
                                   <td>
@@ -550,11 +509,7 @@ const AdminControls = () => {
                                   <td>
                                     {isLoading ? "loding ..." : items.type}
                                   </td>
-                                  <td>
-                                    {isLoading
-                                      ? "loding ..."
-                                      : items.address_type}
-                                  </td>
+
                                   <div className="d-flex gap-2">
                                     <Button size="sm" color="warning " disabled>
                                       Edit

@@ -20,11 +20,14 @@ import Select, { StylesConfig } from "react-select";
 import { FieldArray, Formik } from "formik";
 import useSubmit from "hooks/Common/useSubmit";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { getExemptedCases } from "features/AdminSlice/AdminSlice";
 
-function AddExemptedCaseModal({ openModal, toggleModal, toggleRefresh }) {
+function AddExemptedCaseModal({ openModal, toggleModal, mode }) {
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
   const [options, setoptions] = useState();
+  const dispatch = useDispatch();
 
   const getFormData = (object) => {
     const formData = new FormData();
@@ -49,22 +52,18 @@ function AddExemptedCaseModal({ openModal, toggleModal, toggleRefresh }) {
 
   useEffect(() => {
     if (openModal) {
-      axios
-        .get("api/admin/get/permit-types", {
-          //   params: { permit_type: "good_moral" },
-        })
-        .then(
-          (res) => {
-            const options = res.data.map((options) => ({
-              value: options.id,
-              label: options.name,
-            }));
-            setoptions(options);
-          },
-          (error) => {
-            console.log(error);
-          }
-        );
+      axios.get("api/admin/get/permit-types", {}).then(
+        (res) => {
+          const options = res.data.map((options) => ({
+            value: options.id,
+            label: options.name,
+          }));
+          setoptions(options);
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
     }
   }, [openModal]);
 
@@ -78,9 +77,7 @@ function AddExemptedCaseModal({ openModal, toggleModal, toggleRefresh }) {
         size="m"
         className="modal-dialog-centered"
         style={{
-          //  maxHeight: "90vh",
           overflowY: "auto",
-          // maxWidth: "1400px",
         }}
         unmountOnClose
       >
@@ -158,25 +155,7 @@ function AddExemptedCaseModal({ openModal, toggleModal, toggleRefresh }) {
                       </FormGroup>
                     </Col>
                   </Row>
-                  {/* <Row>
-                    <Col md={12}>
-                      <FormGroup>
-                        <Label>Discount Percentage</Label>
-                        <Select
-                          isClearable={true}
-                          name={"discount_percent"}
-                          onChange={(selectedOption) => {
-                            props.setFieldValue(
-                              "discount_percent",
-                              selectedOption?.value || ""
-                            );
-                          }}
-                          placeholder="Select Percentage 1-100"
-                          options={discountOptions}
-                        />
-                      </FormGroup>
-                    </Col>
-                  </Row> */}
+
                   <Row>
                     <Col>
                       <FormGroup>
@@ -227,7 +206,7 @@ function AddExemptedCaseModal({ openModal, toggleModal, toggleRefresh }) {
                   },
                   params: formData,
                 },
-                [toggleRefresh],
+                [dispatch(getExemptedCases())],
                 [toggleModal]
               );
             }}
