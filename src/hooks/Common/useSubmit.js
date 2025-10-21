@@ -51,11 +51,9 @@ const useSubmit = () => {
             }).then(() => {
               forDispatchArray.forEach((forDispatch) => dispatch(forDispatch));
               toggleArray.forEach((toggle) => toggle());
-              // toggleModal();
             });
           })
           .catch((error) => {
-            
             let errorMessage = message?.error
               ? message?.error
               : "Unknown error occurred"; // Default error message

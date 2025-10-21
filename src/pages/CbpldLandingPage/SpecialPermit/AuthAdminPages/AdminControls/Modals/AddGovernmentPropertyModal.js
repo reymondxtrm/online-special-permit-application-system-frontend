@@ -31,6 +31,17 @@ export default function AddGovernmentPropertyModal({
           : { id: property.id, name: values.name };
 
       try {
+        Swal.fire({
+          title: "Processing...",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          allowEnterKey: false,
+          showConfirmButton: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+          showCancelButton: false,
+        });
         const response = await axios.post(url, { ...params });
 
         if (response.status === 200) {

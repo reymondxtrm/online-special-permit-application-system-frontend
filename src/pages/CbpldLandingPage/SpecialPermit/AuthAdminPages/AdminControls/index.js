@@ -9,6 +9,7 @@ import {
   Label,
   Input,
   Button,
+  Container,
 } from "reactstrap";
 import avatar1 from "../../../../../assets/images/users/AvatarTheLegendOfAng.jpg";
 import { useDispatch, useSelector } from "react-redux";
@@ -27,6 +28,7 @@ import {
   getGovernmentProperty,
   getPurpose,
 } from "features/AdminSlice/AdminSlice";
+import useDelete from "hooks/Common/useDelete";
 
 const AdminControls = () => {
   const [editOccupationState, seteditOccupationState] = useState(false);
@@ -45,9 +47,12 @@ const AdminControls = () => {
   const [openPropertyModal, setOpenPropertyModal] = useState(false);
   const [mode, setMode] = useState();
   const [property, setProperty] = useState();
+  const [selectedApplication, setSelectedApplication] = useState();
+  // const [selectedExemption, setSelectedExemption] = useState();
   const dispatch = useDispatch();
 
   const handleSubmit = useSubmit();
+  const deleteHandle = useDelete();
   const formikRef = useRef(null);
   const admin = useSelector((state) => state.batsAdmin);
 
@@ -119,61 +124,46 @@ const AdminControls = () => {
     setOpenPropertyModal((prev) => !prev);
     setMode(mode);
   };
-  const handleDelete = async (id) => {
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "This action will permanently delete the government property.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
-      cancelButtonText: "Cancel",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        const response = await axios.post("api/delete-government-property", {
-          id: id,
-        });
-
-        if (response.status === 200) {
-          Swal.fire({
-            icon: "success",
-            title: "Deleted!",
-            text: "Government property has been deleted successfully.",
-            timer: 2000,
-            showConfirmButton: false,
-          });
-          dispatch(getGovernmentProperty());
-        }
-      } catch (error) {
-        console.error(error);
-
-        Swal.fire({
-          icon: "error",
-          title: "Something went wrong!",
-          text:
-            error.response?.data?.message ||
-            "An error occurred while deleting the record.",
-          confirmButtonColor: "#3085d6",
-        });
-      }
-    }
+  const handleDeleteExemptedCase = (id) => {
+    deleteHandle(
+      { url: "api/admin/delete/exempted-cases", params: { purpose_id: id } },
+      [getExemptedCases()],
+      []
+    );
   };
+
+  const handleDelete = (id) => {
+    deleteHandle(
+      { url: "api/delete-government-property", params: { id: id } },
+      [getGovernmentProperty()],
+      []
+    );
+  };
+  const handleDeleteApplicationPurpose = (id) => {
+    deleteHandle(
+      {
+        url: "api/admin/delete/application-purpose",
+        params: { purpose_id: id },
+      },
+      [getPurpose()],
+      []
+    );
+  };
+
   return (
     <>
-      <AddExemptedCaseModal
+      {/* <AddExemptedCaseModal
         openModal={addExemptedCaseModal}
         toggleModal={toggleExemptedCaseModal}
         toggleRefresh={toggleRefresh}
-        mode={mode}
-      />
+      /> */}
 
       <AddApplicationPurposeModal
         openModal={addApplicationPurposeModal}
         toggleModal={toggleApplicationPurposeModal}
         toggleRefresh={toggleRefresh}
+        mode={mode}
+        applicationPurpose={selectedApplication}
       />
       <FileViewerModal
         toggle={toggleFileViewerModal}
@@ -186,32 +176,275 @@ const AdminControls = () => {
         mode={mode}
         property={property}
       />
-      <div
-        style={{
-          height: "100vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          margin: 0,
-        }}
-      >
-        <Row style={{ flexGrow: 1 }}>
-          <Col>
-            <Row>
+      <div className="page-content">
+        <Container fluid>
+          <Row style={{ flexGrow: 1 }}>
+            <Col>
+              <Row>
+                <Card>
+                  <CardBody>
+                    <Col
+                      md="12"
+                      style={{ overflowY: "auto", maxHeight: "45vh" }}
+                    >
+                      <p
+                        style={{
+                          fontWeight: "bold",
+                          letterSpacing: ".2rem",
+                          fontSize: "18pt",
+                          margin: "0",
+                          padding: "0 0 0 12px", // top, right, bottom, left
+                          color: "#368be0",
+                        }}
+                      >
+                        {"EXEMPTED CASES"}
+                      </p>
+
+                      <div style={{ paddingTop: "15px", paddingLeft: "12px" }}>
+                        <Button
+                          color="success"
+                          style={{
+                            width: "85px",
+                          }}
+                          onClick={() => {
+                            toggleExemptedCaseModal();
+                            setMode("add");
+                          }}
+                        >
+                          Add New
+                        </Button>
+                      </div>
+
+                      <div
+                        style={{
+                          paddingTop: "25px",
+                          maxHeight: "35vh",
+                          overflowY: "auto",
+                        }}
+                      >
+                        <Table striped>
+                          <thead>
+                            <tr>
+                              <th>Permit Type</th>
+                              <th>Case Name</th>
+                              <th>Ordinance</th>
+                              <th>Attachment</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {admin.getExemptedCasesIsFetching ? (
+                              <TableLoaders row={4} col={4} />
+                            ) : (
+                              admin.exemptedCases &&
+                              (admin.exemptedCases.length === 0 ? (
+                                <tr>
+                                  <td
+                                    colSpan={4}
+                                    style={{
+                                      textAlign: "center",
+                                    }}
+                                  >
+                                    No record found
+                                  </td>
+                                </tr>
+                              ) : (
+                                admin.exemptedCases?.map((items, index) => {
+                                  return (
+                                    <tr key={index}>
+                                      <td>
+                                        {isLoading
+                                          ? "loding ..."
+                                          : items.permit_type}
+                                      </td>
+                                      <td>
+                                        {isLoading ? "loding ..." : items.name}
+                                      </td>
+                                      <td>
+                                        {isLoading
+                                          ? "loding ..."
+                                          : items.ordinance}
+                                      </td>
+                                      <td>
+                                        {isLoading ? (
+                                          "loding ..."
+                                        ) : (
+                                          <Button
+                                            size="sm"
+                                            onClick={() => {
+                                              toggleFileViewerModal();
+                                              setSelectedFile(items.attachment);
+                                            }}
+                                            color="primary"
+                                          >
+                                            FILE
+                                          </Button>
+                                        )}
+                                      </td>
+                                      <td>
+                                        <div className="d-flex gap-2">
+                                          <Button
+                                            size="sm"
+                                            color="warning"
+                                            onClick={() => {
+                                              setMode("update");
+                                            }}
+                                          >
+                                            Edit
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            color="danger"
+                                            onClick={() =>
+                                              handleDeleteExemptedCase(items.id)
+                                            }
+                                          >
+                                            Delete
+                                          </Button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  );
+                                })
+                              ))
+                            )}
+                          </tbody>
+                        </Table>
+                      </div>
+                    </Col>
+                  </CardBody>
+                </Card>
+              </Row>
+              <Row>
+                <Card>
+                  <CardBody>
+                    <Col md="12">
+                      <p
+                        style={{
+                          fontWeight: "bold",
+                          letterSpacing: ".2rem",
+                          fontSize: "18pt",
+                          margin: "0",
+                          padding: "0 0 0 12px", // top, right, bottom, left
+                          color: "#368be0",
+                        }}
+                      >
+                        {"Government Property"}
+                      </p>
+
+                      <div style={{ paddingTop: "15px", paddingLeft: "12px" }}>
+                        <Button
+                          color="success"
+                          style={{
+                            width: "85px",
+                          }}
+                          onClick={() => {
+                            togglePropertyModal("add");
+                          }}
+                        >
+                          Add New
+                        </Button>
+                      </div>
+
+                      <div
+                        style={{
+                          paddingTop: "25px",
+                          maxHeight: "35vh",
+                          overflowY: "auto",
+                        }}
+                      >
+                        <Table striped>
+                          <thead>
+                            <tr>
+                              <th>#</th>
+                              <th>Property Name</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {admin.getGovernmentPropertyIsFetching ? (
+                              <TableLoaders row={4} col={4} />
+                            ) : (
+                              admin.governmentProperty &&
+                              (admin.governmentProperty.length === 0 ? (
+                                <tr>
+                                  <td
+                                    colSpan={4}
+                                    style={{
+                                      textAlign: "center",
+                                    }}
+                                  >
+                                    No record found
+                                  </td>
+                                </tr>
+                              ) : (
+                                admin.governmentProperty?.map(
+                                  (items, index) => {
+                                    return (
+                                      <tr key={index}>
+                                        <td>{index + 1}</td>
+                                        <td>
+                                          {isLoading
+                                            ? "loding ..."
+                                            : items.name}
+                                        </td>
+                                        <td>
+                                          {isLoading ? (
+                                            "loding ..."
+                                          ) : (
+                                            <div className="d-flex gap-2">
+                                              <Button
+                                                color="warning"
+                                                size="sm"
+                                                onClick={() => {
+                                                  togglePropertyModal("edit");
+                                                  setProperty(items);
+                                                }}
+                                              >
+                                                Edit
+                                              </Button>
+                                              <Button
+                                                color="danger "
+                                                size="sm"
+                                                onClick={() =>
+                                                  handleDelete(items.id)
+                                                }
+                                              >
+                                                Delete
+                                              </Button>
+                                            </div>
+                                          )}
+                                        </td>
+                                      </tr>
+                                    );
+                                  }
+                                )
+                              ))
+                            )}
+                          </tbody>
+                        </Table>
+                      </div>
+                    </Col>
+                  </CardBody>
+                </Card>
+              </Row>
+            </Col>
+
+            <Col>
               <Card>
                 <CardBody>
-                  <Col md="12" style={{ overflowY: "auto", maxHeight: "45vh" }}>
+                  <Row>
                     <p
                       style={{
                         fontWeight: "bold",
                         letterSpacing: ".2rem",
                         fontSize: "18pt",
                         margin: "0",
-                        padding: "0 0 0 12px", // top, right, bottom, left
+                        padding: "0 0 0 12px",
                         color: "#368be0",
                       }}
                     >
-                      {"EXEMPTED CASES"}
+                      APPLICATION PURPOSE
                     </p>
 
                     <div style={{ paddingTop: "15px", paddingLeft: "12px" }}>
@@ -220,7 +453,10 @@ const AdminControls = () => {
                         style={{
                           width: "85px",
                         }}
-                        onClick={() => toggleExemptedCaseModal()}
+                        onClick={() => {
+                          toggleApplicationPurposeModal();
+                          setMode("add");
+                        }}
                       >
                         Add New
                       </Button>
@@ -229,26 +465,25 @@ const AdminControls = () => {
                     <div
                       style={{
                         paddingTop: "25px",
-                        maxHeight: "35vh",
                         overflowY: "auto",
+                        maxHeight: "35vh",
                       }}
                     >
                       <Table striped>
                         <thead>
                           <tr>
                             <th>Permit Type</th>
-                            <th>Case Name</th>
-                            <th>Ordinance</th>
-                            <th>Attachment</th>
+                            <th>Purpose</th>
+                            <th>Type</th>
                             <th>Actions</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {admin.getExemptedCasesIsFetching ? (
+                          {admin.getPurposeIsFetching ? (
                             <TableLoaders row={4} col={4} />
                           ) : (
-                            admin.exemptedCases &&
-                            (admin.exemptedCases.length === 0 ? (
+                            admin.purposes &&
+                            (admin.purposes.length === 0 ? (
                               <tr>
                                 <td
                                   colSpan={4}
@@ -260,7 +495,7 @@ const AdminControls = () => {
                                 </td>
                               </tr>
                             ) : (
-                              admin.exemptedCases?.map((items, index) => {
+                              admin.purposes?.map((items, index) => {
                                 return (
                                   <tr key={index}>
                                     <td>
@@ -272,44 +507,36 @@ const AdminControls = () => {
                                       {isLoading ? "loding ..." : items.name}
                                     </td>
                                     <td>
-                                      {isLoading
-                                        ? "loding ..."
-                                        : items.ordinance}
+                                      {isLoading ? "loding ..." : items.type}
                                     </td>
-                                    <td>
-                                      {isLoading ? (
-                                        "loding ..."
-                                      ) : (
-                                        <Button
-                                          size="sm"
-                                          onClick={() => {
-                                            toggleFileViewerModal();
-                                            setSelectedFile(items.attachment);
-                                          }}
-                                          color="primary"
-                                        >
-                                          FILE
-                                        </Button>
-                                      )}
-                                    </td>
-                                    <td>
+                                    {items.type === "temporary" ? (
                                       <div className="d-flex gap-2">
                                         <Button
                                           size="sm"
                                           color="warning "
-                                          disabled
+                                          onClick={() => {
+                                            setSelectedApplication(items);
+                                            setMode("update");
+                                            toggleApplicationPurposeModal();
+                                          }}
                                         >
                                           Edit
                                         </Button>
                                         <Button
                                           size="sm"
                                           color="danger"
-                                          disabled
+                                          onClick={() =>
+                                            handleDeleteApplicationPurpose(
+                                              items.id
+                                            )
+                                          }
                                         >
                                           Delete
                                         </Button>
                                       </div>
-                                    </td>
+                                    ) : (
+                                      ""
+                                    )}
                                   </tr>
                                 );
                               })
@@ -318,219 +545,12 @@ const AdminControls = () => {
                         </tbody>
                       </Table>
                     </div>
-                  </Col>
+                  </Row>
                 </CardBody>
               </Card>
-            </Row>
-            <Row>
-              <Card>
-                <CardBody>
-                  <Col md="12">
-                    <p
-                      style={{
-                        fontWeight: "bold",
-                        letterSpacing: ".2rem",
-                        fontSize: "18pt",
-                        margin: "0",
-                        padding: "0 0 0 12px", // top, right, bottom, left
-                        color: "#368be0",
-                      }}
-                    >
-                      {"Government Property"}
-                    </p>
-
-                    <div style={{ paddingTop: "15px", paddingLeft: "12px" }}>
-                      <Button
-                        color="success"
-                        style={{
-                          width: "85px",
-                        }}
-                        onClick={() => {
-                          togglePropertyModal("add");
-                        }}
-                      >
-                        Add New
-                      </Button>
-                    </div>
-
-                    <div
-                      style={{
-                        paddingTop: "25px",
-                        maxHeight: "35vh",
-                        overflowY: "auto",
-                      }}
-                    >
-                      <Table striped>
-                        <thead>
-                          <tr>
-                            <th>#</th>
-                            <th>Property Name</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {admin.getGovernmentPropertyIsFetching ? (
-                            <TableLoaders row={4} col={4} />
-                          ) : (
-                            admin.governmentProperty &&
-                            (admin.governmentProperty.length === 0 ? (
-                              <tr>
-                                <td
-                                  colSpan={4}
-                                  style={{
-                                    textAlign: "center",
-                                  }}
-                                >
-                                  No record found
-                                </td>
-                              </tr>
-                            ) : (
-                              admin.governmentProperty?.map((items, index) => {
-                                return (
-                                  <tr key={index}>
-                                    <td>{index + 1}</td>
-                                    <td>
-                                      {isLoading ? "loding ..." : items.name}
-                                    </td>
-                                    <td>
-                                      {isLoading ? (
-                                        "loding ..."
-                                      ) : (
-                                        <div className="d-flex gap-2">
-                                          <Button
-                                            color="warning"
-                                            size="sm"
-                                            onClick={() => {
-                                              togglePropertyModal("edit");
-                                              setProperty(items);
-                                            }}
-                                          >
-                                            Edit
-                                          </Button>
-                                          <Button
-                                            color="danger "
-                                            size="sm"
-                                            onClick={() =>
-                                              handleDelete(items.id)
-                                            }
-                                          >
-                                            Delete
-                                          </Button>
-                                        </div>
-                                      )}
-                                    </td>
-                                  </tr>
-                                );
-                              })
-                            ))
-                          )}
-                        </tbody>
-                      </Table>
-                    </div>
-                  </Col>
-                </CardBody>
-              </Card>
-            </Row>
-          </Col>
-
-          <Col md="6">
-            <Card>
-              <CardBody>
-                <Row>
-                  <p
-                    style={{
-                      fontWeight: "bold",
-                      letterSpacing: ".2rem",
-                      fontSize: "18pt",
-                      margin: "0",
-                      padding: "0 0 0 12px",
-                      color: "#368be0",
-                    }}
-                  >
-                    APPLICATION PURPOSE
-                  </p>
-
-                  <div style={{ paddingTop: "15px", paddingLeft: "12px" }}>
-                    <Button
-                      color="success"
-                      style={{
-                        width: "85px",
-                      }}
-                      onClick={() => toggleApplicationPurposeModal()}
-                    >
-                      Add New
-                    </Button>
-                  </div>
-
-                  <div
-                    style={{
-                      paddingTop: "25px",
-                      overflowY: "auto",
-                      maxHeight: "35vh",
-                    }}
-                  >
-                    <Table striped>
-                      <thead>
-                        <tr>
-                          <th>Permit Type</th>
-                          <th>Purpose</th>
-                          <th>Type</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {admin.getPurposeIsFetching ? (
-                          <TableLoaders row={4} col={4} />
-                        ) : (
-                          admin.purposes &&
-                          (admin.purposes.length === 0 ? (
-                            <tr>
-                              <td
-                                colSpan={4}
-                                style={{
-                                  textAlign: "center",
-                                }}
-                              >
-                                No record found
-                              </td>
-                            </tr>
-                          ) : (
-                            admin.purposes?.map((items, index) => {
-                              return (
-                                <tr key={index}>
-                                  <td>
-                                    {isLoading
-                                      ? "loding ..."
-                                      : items.permit_type}
-                                  </td>
-                                  <td>
-                                    {isLoading ? "loding ..." : items.name}
-                                  </td>
-                                  <td>
-                                    {isLoading ? "loding ..." : items.type}
-                                  </td>
-
-                                  <div className="d-flex gap-2">
-                                    <Button size="sm" color="warning " disabled>
-                                      Edit
-                                    </Button>
-                                    <Button size="sm" color="danger" disabled>
-                                      Delete
-                                    </Button>
-                                  </div>
-                                </tr>
-                              );
-                            })
-                          ))
-                        )}
-                      </tbody>
-                    </Table>
-                  </div>
-                </Row>
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
+            </Col>
+          </Row>
+        </Container>
       </div>
     </>
   );

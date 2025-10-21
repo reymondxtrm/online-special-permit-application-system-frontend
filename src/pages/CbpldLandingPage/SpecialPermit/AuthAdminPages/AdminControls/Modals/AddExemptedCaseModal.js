@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   Modal,
@@ -14,26 +14,24 @@ import {
   Label,
   FormGroup,
 } from "reactstrap";
-import { faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Select, { StylesConfig } from "react-select";
-import { FieldArray, Formik } from "formik";
+
+import Select from "react-select";
+import { useFormik } from "formik";
 import useSubmit from "hooks/Common/useSubmit";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { getExemptedCases } from "features/AdminSlice/AdminSlice";
 
-function AddExemptedCaseModal({ openModal, toggleModal, mode }) {
+function AddExemptedCaseModal({ openModal, toggleModal, mode, exemptedCase }) {
   const handleSubmit = useSubmit();
-  const formikRef = useRef(null);
-  const [options, setoptions] = useState();
+  const [options, setoptions] = useState([]);
   const dispatch = useDispatch();
-
+  console.log(isOpen, toggleModal);
   const getFormData = (object) => {
     const formData = new FormData();
     Object.keys(object).forEach((key) => {
       if (object[key] instanceof File || object[key] instanceof Blob) {
-        formData.append(key, object[key]); // Directly append files
+        formData.append(key, object[key]);
       } else if (Array.isArray(object[key])) {
         object[key].forEach((item) => formData.append(`${key}[]`, item));
       } else if (typeof object[key] === "object" && object[key] !== null) {
@@ -45,27 +43,77 @@ function AddExemptedCaseModal({ openModal, toggleModal, mode }) {
     return formData;
   };
 
-  const discountOptions = Array.from({ length: 100 }, (_, index) => ({
-    value: index + 1,
-    label: `${index + 1}%`,
-  }));
+  // // const validation = useFormik({
+  // //   enableReinitialize: true,
+  // //   initialValues: {
+  // //     permit_type: "",
+  // //     ordinance: "",
+  // //     attachment: null,
+  // //     name: "",
+  // //   },
+  // //   onSubmit: (values) => {
+  // //     const toProps =
+  // //       mode === "add"
+  // //         ? { ...values }
+  // //         : { ...values, exempted_case_id: exemptedCase.id };
+  // //     const formData = getFormData(toProps);
+  // //     const url =
+  // //       mode === "add"
+  // //         ? "api/admin/create/exempted-case"
+  // //         : "api/admin/update/exempted-cases";
+  // //     handleSubmit(
+  // //       {
+  // //         url: url,
+  // //         headers: {
+  // //           "Content-Type": "multipart/form-data",
+  // //         },
+  // //         message: {
+  // //           title: "Are you sure you want to Proceed?",
+  // //           failedTitle: "FAILED",
+  // //           success: "Success!",
+  // //           error: "unknown error occured",
+  // //         },
+  // //         params: formData,
+  // //       },
 
-  useEffect(() => {
-    if (openModal) {
-      axios.get("api/admin/get/permit-types", {}).then(
-        (res) => {
-          const options = res.data.map((options) => ({
-            value: options.id,
-            label: options.name,
-          }));
-          setoptions(options);
-        },
-        (error) => {
-          console.log(error);
-        }
-      );
-    }
-  }, [openModal]);
+  // //       [() => dispatch(getExemptedCases())],
+  // //       [toggleModal]
+  // //     );
+  // //   },
+  // // });
+
+  // useEffect(() => {
+  //   if (openModal) {
+  //     axios.get("api/admin/get/permit-types").then(
+  //       (res) => {
+  //         const options = res.data.map((options) => ({
+  //           value: options.id,
+  //           label: options.name,
+  //         }));
+  //         setoptions(options);
+  //       },
+  //       (error) => {
+  //         console.log(error);
+  //       }
+  //     );
+  //   }
+  // }, [openModal]);
+
+  // useEffect(() => {
+  //   if (mode === "update") {
+  //     validation.setValues({
+  //       name: exemptedCase?.name || "",
+  //       ordinance: exemptedCase?.ordinance || "",
+  //       permit_type: exemptedCase?.special_permit_type_id ?? "",
+  //     });
+  //   } else {
+  //     validation.setValues({
+  //       name: "",
+  //       ordinance: "",
+  //       permit_type: "",
+  //     });
+  //   }
+  // }, [mode, exemptedCase]);
 
   return (
     <React.Fragment>
@@ -92,93 +140,86 @@ function AddExemptedCaseModal({ openModal, toggleModal, mode }) {
               color: "#368be0",
             }}
           >
-            {"NEW EXEMPTED CASE"}
+            {mode === "add" ? "NEW EXEMPTED CASE" : "UPDATE EXEMPTED CASE"}
           </p>
         </ModalHeader>
         <ModalBody>
-          <Formik
-            innerRef={formikRef}
-            initialValues={{
-              permit_type: "event",
-              name: "sample",
-              ordinance: "",
-              attachment: "sample",
-              discount_percent: "2024-10-19",
-            }}
-            onSubmit={handleSubmit}
-          >
-            {(props) => (
-              <Form>
-                <Col>
-                  <Row>
-                    <Col md={12}>
-                      <FormGroup>
-                        <Label>Permit Type</Label>
-                        <Select
-                          isClearable={true}
-                          name={"permit_type"}
-                          onChange={(selectedOption) => {
-                            props.setFieldValue(
-                              "permit_type",
-                              selectedOption?.value || ""
-                            ); // Send only the value
-                          }}
-                          placeholder="Select Permit Type"
-                          options={options}
-                        />
-                      </FormGroup>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col md={12}>
-                      <FormGroup>
-                        <Label for="ordinance">Ordinance</Label>
-                        <Input
-                          id="ordinance"
-                          name={`ordinance`}
-                          placeholder="Ordinance"
-                          onChange={props.handleChange}
-                        />
-                      </FormGroup>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col md={12}>
-                      <FormGroup>
-                        <Label for="name">Case Name</Label>
-                        <Input
-                          id="name"
-                          name={`name`}
-                          placeholder="Ex. First Time Job Seekers"
-                          onChange={props.handleChange}
-                        />
-                      </FormGroup>
-                    </Col>
-                  </Row>
-
-                  <Row>
-                    <Col>
-                      <FormGroup>
-                        <Label for="attachment">Attachment (Ex. Memo)</Label>
-                        <Input
-                          id="attachment"
-                          name={`attachment`}
-                          onChange={(event) => {
-                            console.log(event);
-                            props.setFieldValue(
-                              "attachment",
-                              event.currentTarget.files[0]
-                            );
-                          }}
-                          type="file"
-                        />
-                      </FormGroup>
-                    </Col>
-                  </Row>
+          <Form>
+            <Col>
+              <Row>
+                <Col md={12}>
+                  <FormGroup>
+                    <Label>Permit Type</Label>
+                    <Select
+                      isClearable={true}
+                      name={"permit_type"}
+                      value={
+                        options
+                          ? options.find(
+                              (opt) =>
+                                opt.value === validation.values.permit_type
+                            )
+                          : null
+                      }
+                      onChange={(selectedOption) => {
+                        validation.setFieldValue(
+                          "permit_type",
+                          selectedOption?.value || ""
+                        );
+                      }}
+                      placeholder="Select Permit Type"
+                      options={options}
+                    />
+                  </FormGroup>
                 </Col>
-              </Form>
-            )}
-          </Formik>
+              </Row>
+              <Row>
+                <Col md={12}>
+                  <FormGroup>
+                    <Label for="ordinance">Ordinance</Label>
+                    <Input
+                      id="ordinance"
+                      name={`ordinance`}
+                      placeholder="Ordinance"
+                      value={validation.values.ordinance}
+                      onChange={validation.handleChange}
+                    />
+                  </FormGroup>
+                </Col>
+              </Row>
+              <Row>
+                <Col md={12}>
+                  <FormGroup>
+                    <Label for="name">Case Name</Label>
+                    <Input
+                      id="name"
+                      name={`name`}
+                      placeholder="Ex. First Time Job Seekers"
+                      value={validation.values.name}
+                      onChange={validation.handleChange}
+                    />
+                  </FormGroup>
+                </Col>
+              </Row>
+
+              <Row>
+                <Col>
+                  <FormGroup>
+                    <Label for="attachment">Attachment (Ex. Memo)</Label>
+                    <Input
+                      id="attachment"
+                      name={`attachment`}
+                      onChange={(event) => {
+                        const file = event.currentTarget.files[0];
+                        validation.setFieldValue("attachment", file || null);
+                      }}
+                      type="file"
+                    />
+                  </FormGroup>
+                </Col>
+              </Row>
+            </Col>
+          </Form>
         </ModalBody>
         <ModalFooter>
           <Button
@@ -190,25 +231,7 @@ function AddExemptedCaseModal({ openModal, toggleModal, mode }) {
               color: "white",
             }}
             onClick={() => {
-              const formik = formikRef.current.values;
-              const formData = getFormData(formik);
-              handleSubmit(
-                {
-                  url: "api/admin/create/exempted-case",
-                  headers: {
-                    "Content-Type": "multipart/form-data",
-                  },
-                  message: {
-                    title: "Are you sure you want to Proceed?",
-                    failedTitle: "FAILED",
-                    success: "Success!",
-                    error: "unknown error occured",
-                  },
-                  params: formData,
-                },
-                [dispatch(getExemptedCases())],
-                [toggleModal]
-              );
+              validation.handleSubmit();
             }}
           >
             Submit

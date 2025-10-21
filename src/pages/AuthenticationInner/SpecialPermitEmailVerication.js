@@ -9,13 +9,15 @@ import cgbLogo from "../../assets/images/cgbLogo.png";
 import Swal from "sweetalert2";
 import { useHistory, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom/cjs/react-router-dom.min";
 
 const SpecialPermitEmailVerication = (props) => {
   document.title = "Email Verification";
-  const location = useLocation();
   const history = useHistory();
   const user = useSelector((state) => state.user);
+  const { email } = useParams();
   const userEmail = user.email;
+  console.log(email);
   const resendVerificationEmail = async () => {
     try {
       Swal.fire({

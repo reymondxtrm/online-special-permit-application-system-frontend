@@ -14,7 +14,7 @@ import {
 import moment from "moment";
 import axios from "axios";
 import useSubmit from "hooks/Common/useSubmit";
-import OverTheCounterModal from "../Modals/OverTheCounterModal";
+import OverTheCounterModal from "../Modals/PaymentModal";
 import ImageViewer from "react-simple-image-viewer";
 import ReuploadModal from "../Modals/ReuploadModal";
 import { formateDateIntoString } from "common/utility/utilityFunction";
@@ -541,7 +541,18 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
 
                   {status === "for_payment" ? (
                     <td>
-                      <UncontrolledDropdown className="me-2" direction="end">
+                      <Button
+                        color="primary"
+                        onClick={() => {
+                          toggleOverTheCounterModal();
+                          setapplicationId(application?.id);
+                          setorderOfPaymentData(application?.order_of_payment);
+                          setamount(application.order_of_payment?.total_amount);
+                        }}
+                      >
+                        Pay
+                      </Button>
+                      {/* <UncontrolledDropdown className="me-2" direction="end">
                         <DropdownToggle caret color="primary">
                           Payment Options
                         </DropdownToggle>
@@ -570,7 +581,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                             Over the Counter
                           </DropdownItem>
                         </DropdownMenu>
-                      </UncontrolledDropdown>
+                      </UncontrolledDropdown> */}
                     </td>
                   ) : null}
 
