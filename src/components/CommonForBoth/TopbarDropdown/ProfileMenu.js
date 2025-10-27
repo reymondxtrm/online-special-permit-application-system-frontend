@@ -16,6 +16,7 @@ import { withRouter, Link } from "react-router-dom";
 // users
 import user1 from "../../../assets/images/users/avatar-1.jpg";
 import { useSelector } from "react-redux";
+
 const ProfileMenu = (props) => {
   // Declare a new state variable, which we'll call "menu"
   const [menu, setMenu] = useState(false);
@@ -35,7 +36,9 @@ const ProfileMenu = (props) => {
       }
     }
   }, [props.success]);
-
+  const user = useSelector((state) => state.user);
+  const link =
+    user.user_type === "admin" ? "/admin/controls" : "/client/profile";
   return (
     <React.Fragment>
       <Dropdown
@@ -59,15 +62,15 @@ const ProfileMenu = (props) => {
           <i className="mdi mdi-chevron-down d-none d-xl-inline-block" />
         </DropdownToggle>
         <DropdownMenu className="dropdown-menu-end">
-          <Link className="dropdown-item" to="/profile">
+          <Link className="dropdown-item" to={link}>
             <i className="bx bx-user font-size-16 align-middle me-1" />
             {props.t("Profile")}
           </Link>
-          <Link className="dropdown-item" to="/#">
+          {/* <Link className="dropdown-item" to="/#">
             <i className="bx bx-lock-open font-size-16 align-middle me-1" />
             {props.t("Lock screen")}
           </Link>
-          <div className="dropdown-divider" />
+          <div className="dropdown-divider" /> */}
 
           <Link to="/logout" className="dropdown-item">
             <i className="bx bx-power-off font-size-16 align-middle me-1 text-danger" />

@@ -32,6 +32,8 @@ import Profile from "store/auth/profile/reducer";
 import rootSaga from "../store/sagas";
 import createSagaMiddleware from "redux-saga";
 import { AdminSlice } from "features/AdminSlice/AdminSlice";
+import { SpecialPermitAdminSlice } from "features/SpecialPermitAdmin";
+import { SpecialPermitClientSlice } from "features/SpecialPermitClient";
 
 const sagaMiddleware = createSagaMiddleware();
 // const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
@@ -59,6 +61,8 @@ const reducers = combineReducers({
   onlineUsers: onlineUserSlice.reducer,
   advanceSearch: advanceSearchSlice.reducer,
   batsAdmin: AdminSlice.reducer,
+  specialPermitAdmin: SpecialPermitAdminSlice.reducer,
+  specialPermitClient: SpecialPermitClientSlice.reducer,
   Layout,
   Account,
   ForgetPassword,

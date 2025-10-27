@@ -1,0 +1,16 @@
+.transaction-table td,
+.transaction-table th {
+  color: white;
+}
+.transaction-table {
+  width: 100%;
+}
+.logo {
+  width: 70px;
+}
+.header p {
+  color: white;
+}
+.transaction-footer p {
+  color: white;
+}

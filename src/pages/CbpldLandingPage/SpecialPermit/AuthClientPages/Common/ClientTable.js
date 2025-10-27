@@ -18,6 +18,12 @@ import OverTheCounterModal from "../Modals/PaymentModal";
 import ImageViewer from "react-simple-image-viewer";
 import ReuploadModal from "../Modals/ReuploadModal";
 import { formateDateIntoString } from "common/utility/utilityFunction";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getClientTableData,
+  SpecialPermitClientSlice,
+} from "features/SpecialPermitClient";
+import Pagination from "components/Pagination";
 const ClientTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
 
@@ -34,9 +40,11 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
   const [amount, setamount] = useState();
   const [orderOfPaymentData, setorderOfPaymentData] = useState();
   const [reuploadModal, setreuploadModal] = useState(false);
+  const dispatch = useDispatch();
   const toggleRefresh = () => {
     setrefreshPage(!refreshPage);
   };
+  const specialPermitClient = useSelector((state) => state.specialPermitClient);
 
   const toggleReUploadModal = () => {
     setreuploadModal(!reuploadModal);
@@ -58,21 +66,24 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
 
   useEffect(() => {
     if (applicationType === activeTab) {
-      setLoading(true);
+      const params = { status: status, permit_type: applicationType };
+      dispatch(getClientTableData(params));
+      dispatch(SpecialPermitClientSlice.actions.setProps(params));
+      // setLoading(true);
 
-      axios
-        .get("api/client/special-permit/applications", {
-          params: { status: status, permit_type: applicationType },
-        })
-        .then(
-          (res) => {
-            setApplications(res.data);
-            setLoading(false);
-          },
-          (error) => {
-            console.log(error);
-          }
-        );
+      // axios
+      //   .get("api/client/special-permit/applications", {
+      //     params: { status: status, permit_type: applicationType },
+      //   })
+      //   .then(
+      //     (res) => {
+      //       setApplications(res.data);
+      //       setLoading(false);
+      //     },
+      //     (error) => {
+      //       console.log(error);
+      //     }
+      //   );
     }
   }, [activeTab, refreshPage]);
 
@@ -246,409 +257,357 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
             </tr>
           </thead>
           <tbody>
-            {loading ? (
+            {specialPermitClient?.getTableDataIsFetching ? (
               <tr>
                 <td colSpan="7" style={{ textAlign: "center" }}>
                   Loading...
                 </td>
               </tr>
-            ) : applications.length > 0 ? (
-              applications.map((application, index) => (
-                <tr key={application.id}>
-                  <td>{`${index + 1}.`}</td>
-                  {status === "for_signature" && (
-                    <td>{application.reference_no}</td>
-                  )}
+            ) : specialPermitClient?.clientTableData?.data?.length > 0 ? (
+              specialPermitClient?.clientTableData?.data.map(
+                (application, index) => (
+                  <tr key={application.id}>
+                    <td>{`${index + 1}.`}</td>
+                    {status === "for_signature" && (
+                      <td>{application.reference_no}</td>
+                    )}
 
-                  {(applicationType === "mayors_permit" ||
-                    applicationType === "good_moral") && (
-                    <>
-                      <td>{application.application_purpose?.name}</td>
+                    {(applicationType === "mayors_permit" ||
+                      applicationType === "good_moral") && (
+                      <>
+                        <td>{application.application_purpose?.name}</td>
 
-                      {(status === "pending" || status === "declined") && (
-                        <>
-                          {applicationType === "good_moral" && (
-                            <>
-                              <td>
-                                {application.permit_application_exemption
-                                  ?.exempted_case_name
-                                  ? application.permit_application_exemption
-                                      .exempted_case_name
-                                  : "N/A"}
-                              </td>
-                              <td>
-                                {application.permit_application_exemption
-                                  ?.status
-                                  ? application.permit_application_exemption
-                                      .status
-                                  : "N/A"}
-                              </td>
-                            </>
+                        {(status === "pending" || status === "declined") && (
+                          <>
+                            {applicationType === "good_moral" && (
+                              <>
+                                <td>
+                                  {application.permit_application_exemption
+                                    ?.exempted_case_name
+                                    ? application.permit_application_exemption
+                                        .exempted_case_name
+                                    : "N/A"}
+                                </td>
+                                <td>
+                                  {application.permit_application_exemption
+                                    ?.status
+                                    ? application.permit_application_exemption
+                                        .status
+                                    : "N/A"}
+                                </td>
+                              </>
+                            )}
+                            <td>
+                              {application.uploaded_file?.police_clearance ? (
+                                <img
+                                  src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.police_clearance}`}
+                                  alt={`Thumbnail`}
+                                  style={{
+                                    width: "100px",
+                                    height: "50px",
+                                    margin: "5px",
+                                    cursor: "pointer",
+                                  }}
+                                  onClick={() =>
+                                    handleViewImage(
+                                      `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.police_clearance}`
+                                    )
+                                  }
+                                />
+                              ) : (
+                                "N/A"
+                              )}
+                            </td>
+                            <td>
+                              {application.uploaded_file?.barangay_clearance &&
+                              status !== "for_payment" ? (
+                                <img
+                                  src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.barangay_clearance}`}
+                                  alt={`Thumbnail`}
+                                  style={{
+                                    width: "100px",
+                                    height: "50px",
+                                    margin: "5px",
+                                    cursor: "pointer",
+                                  }}
+                                  onClick={() =>
+                                    handleViewImage(
+                                      `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.barangay_clearance}`
+                                    )
+                                  }
+                                />
+                              ) : (
+                                "N/A"
+                              )}
+                            </td>
+
+                            <td>
+                              {application.uploaded_file
+                                ?.community_tax_certificate &&
+                              status !== "for_payment" ? (
+                                <img
+                                  src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.community_tax_certificate}`}
+                                  alt={`Thumbnail`}
+                                  style={{
+                                    width: "100px",
+                                    height: "50px",
+                                    margin: "5px",
+                                    cursor: "pointer",
+                                  }}
+                                  onClick={() =>
+                                    handleViewImage(
+                                      `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.community_tax_certificate}`
+                                    )
+                                  }
+                                />
+                              ) : (
+                                "N/A"
+                              )}
+                            </td>
+
+                            <td>
+                              {application.uploaded_file?.fiscal_clearance &&
+                              status !== "for_payment" ? (
+                                <img
+                                  src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.fiscal_clearance}`}
+                                  alt={`Thumbnail`}
+                                  style={{
+                                    width: "100px",
+                                    height: "50px",
+                                    margin: "5px",
+                                    cursor: "pointer",
+                                  }}
+                                  onClick={() =>
+                                    handleViewImage(
+                                      `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.fiscal_clearance}`
+                                    )
+                                  }
+                                />
+                              ) : (
+                                "N/A"
+                              )}
+                            </td>
+                            <td>
+                              {application.uploaded_file?.court_clearance &&
+                              status !== "for_payment" ? (
+                                <img
+                                  src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.court_clearance}`}
+                                  alt={`Thumbnail`}
+                                  style={{
+                                    width: "100px",
+                                    height: "50px",
+                                    margin: "5px",
+                                    cursor: "pointer",
+                                  }}
+                                  onClick={() =>
+                                    handleViewImage(
+                                      `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.court_clearance}`
+                                    )
+                                  }
+                                />
+                              ) : (
+                                "N/A"
+                              )}
+                            </td>
+                          </>
+                        )}
+
+                        {(status === "declined" || status === "returned") && (
+                          <td>
+                            {application.status_histories
+                              ? application.status_histories.map((items) => {
+                                  return items.remarks;
+                                })
+                              : "N/A"}
+                          </td>
+                        )}
+
+                        {status === "returned" &&
+                          application?.order_of_payment?.payment_detail
+                            ?.attachment && (
+                            <td>
+                              <img
+                                src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`}
+                                alt={`Thumbnail`}
+                                style={{
+                                  width: "100px",
+                                  height: "50px",
+                                  margin: "5px",
+                                  cursor: "pointer",
+                                }}
+                                onClick={() =>
+                                  openImageViewer(
+                                    `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`
+                                  )
+                                }
+                              />
+                            </td>
                           )}
-                          <td>
-                            {application.uploaded_file?.police_clearance ? (
-                              <img
-                                src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.police_clearance}`}
-                                alt={`Thumbnail`}
-                                style={{
-                                  width: "100px",
-                                  height: "50px",
-                                  margin: "5px",
-                                  cursor: "pointer",
-                                }}
-                                onClick={() =>
-                                  handleViewImage(
-                                    `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.police_clearance}`
-                                  )
-                                }
-                              />
-                            ) : (
-                              "N/A"
-                            )}
-                          </td>
-                          <td>
-                            {application.uploaded_file?.barangay_clearance &&
-                            status !== "for_payment" ? (
-                              <img
-                                src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.barangay_clearance}`}
-                                alt={`Thumbnail`}
-                                style={{
-                                  width: "100px",
-                                  height: "50px",
-                                  margin: "5px",
-                                  cursor: "pointer",
-                                }}
-                                onClick={() =>
-                                  handleViewImage(
-                                    `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.barangay_clearance}`
-                                  )
-                                }
-                              />
-                            ) : (
-                              "N/A"
-                            )}
-                          </td>
 
+                        {status === "returned" && (
                           <td>
-                            {application.uploaded_file
-                              ?.community_tax_certificate &&
-                            status !== "for_payment" ? (
-                              <img
-                                src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.community_tax_certificate}`}
-                                alt={`Thumbnail`}
-                                style={{
-                                  width: "100px",
-                                  height: "50px",
-                                  margin: "5px",
-                                  cursor: "pointer",
-                                }}
-                                onClick={() =>
-                                  handleViewImage(
-                                    `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.community_tax_certificate}`
-                                  )
-                                }
-                              />
-                            ) : (
-                              "N/A"
-                            )}
-                          </td>
+                            <Button
+                              color="primary"
+                              onClick={() => {
+                                setapplicationId(application?.id);
 
-                          <td>
-                            {application.uploaded_file?.fiscal_clearance &&
-                            status !== "for_payment" ? (
-                              <img
-                                src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.fiscal_clearance}`}
-                                alt={`Thumbnail`}
-                                style={{
-                                  width: "100px",
-                                  height: "50px",
-                                  margin: "5px",
-                                  cursor: "pointer",
-                                }}
-                                onClick={() =>
-                                  handleViewImage(
-                                    `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.fiscal_clearance}`
-                                  )
-                                }
-                              />
-                            ) : (
-                              "N/A"
-                            )}
+                                toggleReUploadModal();
+                              }}
+                            >
+                              Reupload O.R
+                            </Button>
                           </td>
-                          <td>
-                            {application.uploaded_file?.court_clearance &&
-                            status !== "for_payment" ? (
-                              <img
-                                src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.court_clearance}`}
-                                alt={`Thumbnail`}
-                                style={{
-                                  width: "100px",
-                                  height: "50px",
-                                  margin: "5px",
-                                  cursor: "pointer",
-                                }}
-                                onClick={() =>
-                                  handleViewImage(
-                                    `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.court_clearance}`
-                                  )
-                                }
-                              />
-                            ) : (
-                              "N/A"
-                            )}
-                          </td>
-                        </>
-                      )}
+                        )}
 
-                      {(status === "declined" || status === "returned") && (
+                        {(status === "for_payment" ||
+                          status === "for_payment_approval") && (
+                          <>
+                            <td>
+                              {application.order_of_payment?.total_amount}
+                            </td>
+                          </>
+                        )}
+
+                        {(status === "for_signature" ||
+                          status === "completed") && (
+                          <>
+                            {applicationType === "good_moral" && (
+                              <>
+                                <td>
+                                  {application.permit_application_exemption
+                                    ?.exempted_case_name
+                                    ? application.permit_application_exemption
+                                        .exempted_case_name
+                                    : "N/A"}
+                                </td>
+                                <td>
+                                  {application.permit_application_exemption
+                                    ?.status
+                                    ? application.permit_application_exemption
+                                        .status
+                                    : "N/A"}
+                                </td>
+                              </>
+                            )}
+                            <td>
+                              {application.order_of_payment?.total_amount}
+                            </td>
+                          </>
+                        )}
+                      </>
+                    )}
+
+                    {applicationType === "event" ||
+                    applicationType === "motorcade" ||
+                    applicationType === "parade" ||
+                    applicationType === "recorrida" ||
+                    applicationType === "use_of_government_property" ? (
+                      // (applicationType === "use_of_government_property" &&
+                      //   status !== "for_payment")
+
+                      <>
+                        <td>{application?.requestor_name}</td>
+                        <td>{application?.event_name}</td>
                         <td>
-                          {application.status_histories
-                            ? application.status_histories.map((items) => {
-                                return items.remarks;
-                              })
-                            : "N/A"}
-                        </td>
-                      )}
-
-                      {status === "returned" && (
-                        <td>
-                          <img
-                            src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.order_of_payment.payment_detail.attachment}`}
-                            alt={`Thumbnail`}
-                            style={{
-                              width: "100px",
-                              height: "50px",
-                              margin: "5px",
-                              cursor: "pointer",
-                            }}
-                            onClick={() =>
-                              openImageViewer(
-                                `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.order_of_payment.payment_detail.attachment}`
-                              )
-                            }
-                          />
-                        </td>
-                      )}
-
-                      {status === "returned" && (
-                        <td>
-                          <Button
-                            color="primary"
-                            onClick={() => {
-                              setapplicationId(application?.id);
-
-                              toggleReUploadModal();
-                            }}
-                          >
-                            Reupload O.R
-                          </Button>
-                        </td>
-                      )}
-
-                      {(status === "for_payment" ||
-                        status === "for_payment_approval") && (
-                        <>
-                          <td>{application.order_of_payment?.total_amount}</td>
-                        </>
-                      )}
-
-                      {(status === "for_signature" ||
-                        status === "completed") && (
-                        <>
-                          {applicationType === "good_moral" && (
-                            <>
-                              <td>
-                                {application.permit_application_exemption
-                                  ?.exempted_case_name
-                                  ? application.permit_application_exemption
-                                      .exempted_case_name
-                                  : "N/A"}
-                              </td>
-                              <td>
-                                {application.permit_application_exemption
-                                  ?.status
-                                  ? application.permit_application_exemption
-                                      .status
-                                  : "N/A"}
-                              </td>
-                            </>
+                          {dateOfEvent(
+                            application?.event_date_from,
+                            application?.event_date_to
                           )}
-                          <td>{application.order_of_payment?.total_amount}</td>
-                        </>
-                      )}
-                    </>
-                  )}
+                        </td>
 
-                  {applicationType === "event" ||
-                  applicationType === "motorcade" ||
-                  applicationType === "parade" ||
-                  applicationType === "recorrida" ||
-                  applicationType === "use_of_government_property" ? (
-                    // (applicationType === "use_of_government_property" &&
-                    //   status !== "for_payment")
+                        <td>
+                          {dateOfEvent(
+                            application?.event_date_from,
+                            application?.event_date_to
+                          )}
+                        </td>
+                      </>
+                    ) : null}
 
-                    <>
-                      <td>{application?.requestor_name}</td>
-                      <td>{application?.event_name}</td>
+                    {status === "for_payment" ? (
                       <td>
-                        {dateOfEvent(
-                          application?.event_date_from,
-                          application?.event_date_to
-                        )}
-                      </td>
-
-                      <td>
-                        {dateOfEvent(
-                          application?.event_date_from,
-                          application?.event_date_to
-                        )}
-                      </td>
-                      {/* <td>
-                        {application.uploaded_file?.route_plan ? (
-                          <Button
-                            color="primary"
-                            onClick={() =>
-                              handleViewImage(
-                                `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.route_plan}`
-                              )
-                            }
-                          >
-                            View
-                          </Button>
-                        ) : (
-                          "N/A"
-                        )}
-                      </td>
-                      <td>
-                        {application.uploaded_file?.request_letter &&
-                        status !== "for_payment" ? (
-                          <Button
-                            color="primary"
-                            onClick={() =>
-                              handleViewImage(
-                                `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.request_letter}`
-                              )
-                            }
-                          >
-                            View
-                          </Button>
-                        ) : (
-                          "N/A"
-                        )}
-                      </td> */}
-                    </>
-                  ) : null}
-
-                  {status === "for_payment" ? (
-                    <td>
-                      <Button
-                        color="primary"
-                        onClick={() => {
-                          toggleOverTheCounterModal();
-                          setapplicationId(application?.id);
-                          setorderOfPaymentData(application?.order_of_payment);
-                          setamount(application.order_of_payment?.total_amount);
-                        }}
-                      >
-                        Pay
-                      </Button>
-                      {/* <UncontrolledDropdown className="me-2" direction="end">
-                        <DropdownToggle caret color="primary">
-                          Payment Options
-                        </DropdownToggle>
-                        <DropdownMenu
-                          style={{
-                            maxHeight: "200px",
-                            overflowY: "auto",
-                            zIndex: 1050, // High z-index to appear above
-                            position: "absolute", // Ensure it's detached from parent
+                        <Button
+                          color="primary"
+                          onClick={() => {
+                            toggleOverTheCounterModal();
+                            setapplicationId(application?.id);
+                            setorderOfPaymentData(
+                              application?.order_of_payment
+                            );
+                            setamount(
+                              application.order_of_payment?.total_amount
+                            );
                           }}
                         >
-                          <DropdownItem onClick={() => {}}>Online</DropdownItem>
+                          Pay
+                        </Button>
+                      </td>
+                    ) : null}
 
-                          <DropdownItem
-                            onClick={() => {
-                              toggleOverTheCounterModal();
-                              setapplicationId(application?.id);
-                              setorderOfPaymentData(
-                                application?.order_of_payment
-                              );
-                              setamount(
-                                application.order_of_payment?.total_amount
-                              );
-                            }}
-                          >
-                            Over the Counter
-                          </DropdownItem>
-                        </DropdownMenu>
-                      </UncontrolledDropdown> */}
-                    </td>
-                  ) : null}
+                    {status === "completed" ? (
+                      <td>
+                        <div
+                          style={{
+                            display: "flex",
+                          }}
+                        >
+                          <div style={{ paddingRight: "10px" }}>
+                            <Button
+                              color="success"
+                              style={{ width: "95px" }}
+                              onClick={() => {
+                                const fileId = application?.id;
 
-                  {status === "completed" ? (
-                    <td>
-                      <div
-                        style={{
-                          display: "flex",
-                          // justifyContent: "space-between",
-                        }}
-                      >
-                        <div style={{ paddingRight: "10px" }}>
-                          <Button
-                            color="success"
-                            style={{ width: "95px" }}
-                            onClick={() => {
-                              const fileId = application?.id;
-
-                              if (!fileId) {
-                                alert(
-                                  "Special Permit ID is required for download."
-                                );
-                                return;
-                              }
-
-                              axios({
-                                url: `/api/client/download-permit`, // Backend endpoint
-                                method: "GET",
-                                responseType: "blob", // Important for binary data like PDFs
-                                params: {
-                                  special_permit_id: fileId, // Send the permit ID as a query parameter
-                                },
-                              })
-                                .then((response) => {
-                                  // Create a URL for the file and trigger the download
-                                  const url = window.URL.createObjectURL(
-                                    new Blob([response.data])
-                                  );
-                                  const link = document.createElement("a");
-                                  link.href = url;
-                                  link.setAttribute(
-                                    "download",
-                                    `${applicationType}_${fileId}.pdf` // Set a file name
-                                  );
-                                  document.body.appendChild(link);
-                                  link.click();
-                                  link.parentNode.removeChild(link); // Cleanup the link element
-                                })
-                                .catch((error) => {
-                                  console.error(
-                                    "Error downloading file:",
-                                    error
-                                  );
+                                if (!fileId) {
                                   alert(
-                                    "Failed to download the file. Please try again."
+                                    "Special Permit ID is required for download."
                                   );
-                                });
-                            }}
-                          >
-                            Download
-                          </Button>
+                                  return;
+                                }
+
+                                axios({
+                                  url: `/api/client/download-permit`, // Backend endpoint
+                                  method: "GET",
+                                  responseType: "blob", // Important for binary data like PDFs
+                                  params: {
+                                    special_permit_id: fileId, // Send the permit ID as a query parameter
+                                  },
+                                })
+                                  .then((response) => {
+                                    // Create a URL for the file and trigger the download
+                                    const url = window.URL.createObjectURL(
+                                      new Blob([response.data])
+                                    );
+                                    const link = document.createElement("a");
+                                    link.href = url;
+                                    link.setAttribute(
+                                      "download",
+                                      `${applicationType}_${fileId}.pdf` // Set a file name
+                                    );
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    link.parentNode.removeChild(link); // Cleanup the link element
+                                  })
+                                  .catch((error) => {
+                                    console.error(
+                                      "Error downloading file:",
+                                      error
+                                    );
+                                    alert(
+                                      "Failed to download the file. Please try again."
+                                    );
+                                  });
+                              }}
+                            >
+                              Download
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                  ) : null}
-                </tr>
-              ))
+                      </td>
+                    ) : null}
+                  </tr>
+                )
+              )
             ) : (
               <tr>
                 <td colSpan="7" style={{ textAlign: "center" }}>
@@ -658,6 +617,13 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
             )}
           </tbody>
         </Table>
+        <Pagination
+          dataProps={specialPermitClient.clientTableData}
+          setDataProps={SpecialPermitClientSlice.actions.setDataProps}
+          setShowLoading={SpecialPermitClientSlice.actions.setShowLoading}
+          isLoading={specialPermitClient.getTableDataIsFetching}
+          params={specialPermitClient.params}
+        />
       </div>
 
       <Modal isOpen={isModalOpen} toggle={toggleModal} size="lg">

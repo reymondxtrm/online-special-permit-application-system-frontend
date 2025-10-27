@@ -173,6 +173,10 @@ const publicRoutes = [
     path: "/email-verification/:email",
     component: SpecialPermitEmailVerication,
   },
+  {
+    path: "/email-verification",
+    component: SpecialPermitEmailVerication,
+  },
   { path: "/forgot-password", component: ForgetPasswordPage },
   { path: "/verify-email", component: ConfirmMail },
 ];

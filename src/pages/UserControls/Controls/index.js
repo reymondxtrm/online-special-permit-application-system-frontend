@@ -30,22 +30,22 @@ const AssessmentReceiverDashboard = () => {
   const dispatch = useDispatch();
   const filter = useSelector((state) => state.dateFilter.params);
   const userList = useSelector((state) => state.userList);
-  const [roleOptions, setRoleOptions] = useState();
+  // const [roleOptions, setRoleOptions] = useState();
   useEffect(() => {
     dispatch(getUserList());
   }, []);
-  useEffect(() => {
-    axios.get("api/get-roles").then(
-      (res) => {
-        const options = res.data.map((options) => ({
-          value: options.id,
-          label: options.description,
-        }));
-        setRoleOptions(options);
-      },
-      (error) => {}
-    );
-  }, []);
+  // useEffect(() => {
+  //   axios.get("api/get-roles").then(
+  //     (res) => {
+  //       const options = res.data.map((options) => ({
+  //         value: options.id,
+  //         label: options.description,
+  //       }));
+  //       setRoleOptions(options);
+  //     },
+  //     (error) => {}
+  //   );
+  // }, []);
 
   const validation = useFormik({
     enableReinitialize: false,
@@ -55,12 +55,10 @@ const AssessmentReceiverDashboard = () => {
       lname: "",
       password: "",
       confirm_password: "",
-      role_id: [],
     },
     validationSchema: Yup.object().shape({
       fname: Yup.string().required("First Name is required!"),
       lname: Yup.string().required("Last Name is required!"),
-      role_id: Yup.number().required("User role is required"),
       password: Yup.string()
         .required("Password is required!")
         .min(6, "Password must be at least 6 characters long"),
@@ -101,7 +99,7 @@ const AssessmentReceiverDashboard = () => {
       }
     },
   });
-  console.log(validation.errors);
+
   return (
     <React.Fragment>
       <div className="page-content" style={{ height: "100vh" }}>
@@ -122,7 +120,7 @@ const AssessmentReceiverDashboard = () => {
                       marginBottom: "10px",
                     }}
                   >
-                    {"Add New User"}
+                    {"Add New Admin"}
                   </p>
                   <BasicInputField
                     type={"text"}
@@ -190,7 +188,7 @@ const AssessmentReceiverDashboard = () => {
                       value={`${validation.values.fname}.${validation.values.lname}`}
                     />
                   </FormGroup>
-                  <Label>
+                  {/* <Label>
                     User Role<span style={{ color: "red" }}>&nbsp;*</span>
                   </Label>
                   <Select
@@ -199,7 +197,7 @@ const AssessmentReceiverDashboard = () => {
                     onChange={(selected) => {
                       validation.setFieldValue("role_id", selected.values);
                     }}
-                  />
+                  /> */}
                   <Row className="mt-2">
                     <Col>
                       <div className="text-end">

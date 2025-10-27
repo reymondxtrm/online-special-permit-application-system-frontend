@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import cgbLogo from "../../../../../assets/images/cgbLogo.png";
 import butuanOnLogo from "../../../../../assets/images/butuanOnLogo.png";
 import headerLine from "../../../../../assets/images/permitHeaderLine.png";
@@ -20,6 +20,7 @@ import EventName from "./CertificateSections/EventName";
 import Conditions from "./CertificateSections/Conditions";
 import DepartmentHeadSingnatory from "./CertificateSections/DepartmentHeadSingnatory";
 import { REVISION_CODE } from "assets/data/data";
+import { debounce } from "lodash";
 const CertificateFormat = React.forwardRef((props, ref) => {
   const {
     permitType,
@@ -41,40 +42,50 @@ const CertificateFormat = React.forwardRef((props, ref) => {
     eventName,
   } = props;
   const [scale, setScale] = useState(1);
-
   const certificateRef = useRef();
+  const renderer = useRef(true);
+  const previousScale = useRef(1);
+  const previousHeight = useRef(0);
+  const adjusting = useRef(false);
 
+  const adjustLayout = useCallback(() => {
+    if (!certificateRef.current || adjusting.current) return;
+
+    adjusting.current = true;
+
+    const maxHeight =
+      permitType === "good_moral" || permitType === "mayors_certificate"
+        ? 1094
+        : 1244;
+
+    const height = certificateRef.current.scrollHeight;
+    const ratio = maxHeight / height;
+    const newScale = Math.min(ratio, 1); // don’t upscale beyond 1
+
+    // Skip if difference is too small (prevents bouncing)
+    if (Math.abs(newScale - previousScale.current) < 0.02) {
+      adjusting.current = false;
+      return;
+    }
+
+    console.log("ratio", ratio);
+    previousScale.current = newScale;
+    previousHeight.current = height;
+
+    setScale(newScale);
+
+    // allow next adjustment after re-render settles
+    setTimeout(() => (adjusting.current = false), 200);
+  }, [permitType]);
+  const debouncedAdjustLayout = useCallback(debounce(adjustLayout, 300), [
+    adjustLayout,
+  ]);
   useEffect(() => {
-    const adjustLayout = () => {
-      if (certificateRef.current) {
-        const maxHeight =
-          permitType === "good_moral" || permitType === "mayors_certificate"
-            ? 1208
-            : 1244;
-        const height = certificateRef.current.scrollHeight;
-
-        if (height > maxHeight) {
-          const overflow = height - maxHeight;
-          if (overflow < 100) {
-            certificateRef.current.style.lineHeight = "1.3";
-            certificateRef.current.style.padding = "0";
-            setScale(1);
-          } else {
-            const ratio = maxHeight / height;
-            const newScale = Math.max(ratio); //0.75
-            setScale(newScale);
-          }
-        } else {
-          certificateRef.current.style.lineHeight = "";
-          certificateRef.current.style.padding = "";
-          setScale(1);
-        }
-      }
-    };
-
-    // const observer = new ResizeObserver(adjustLayout);
-    // if (certificateRef.current) observer.observe(certificateRef.current);
-    // return () => observer.disconnect();
+    if (renderer.current === true) {
+      renderer.current = false;
+    } else {
+      debouncedAdjustLayout();
+    }
   }, [
     firstParagraph,
     secondParagraph,
@@ -129,6 +140,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
             permitType === "good_moral" || permitType === "mayors_permit"
               ? "208mm"
               : "215.9mm",
+          height: "100%",
         }}
       >
         <table className="certificate-table">

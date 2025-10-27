@@ -14,10 +14,8 @@ import { useParams } from "react-router-dom/cjs/react-router-dom.min";
 const SpecialPermitEmailVerication = (props) => {
   document.title = "Email Verification";
   const history = useHistory();
-  const user = useSelector((state) => state.user);
   const { email } = useParams();
-  const userEmail = user.email;
-  console.log(email);
+
   const resendVerificationEmail = async () => {
     try {
       Swal.fire({
@@ -26,7 +24,7 @@ const SpecialPermitEmailVerication = (props) => {
         didOpen: () => Swal.showLoading(),
       });
       const response = await axios.post("/api/email/resend", {
-        email: userEmail,
+        email: email,
       });
 
       Swal.close();
@@ -87,9 +85,11 @@ const SpecialPermitEmailVerication = (props) => {
                         <h4>Verify your email</h4>
                         <p>
                           We have sent you verification email{" "}
-                          <span className="font-weight-semibold">
-                            {user?.email || "example@abc.com"}
-                          </span>
+                          {email && (
+                            <span className="font-weight-semibold">
+                              {email}
+                            </span>
+                          )}
                           , Please check it
                         </p>
                         <button

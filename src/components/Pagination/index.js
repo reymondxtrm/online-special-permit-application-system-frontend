@@ -2,23 +2,15 @@ import axios from "axios";
 import React, { useEffect } from "react";
 import { Placeholder } from "reactstrap";
 import { useDispatch, useSelector } from "react-redux";
+
 const Pagination = ({
-  searchParams,
   dataProps,
   setDataProps,
   setShowLoading,
   isLoading,
-  // params,
-  forAction,
+  params,
 }) => {
   const dispatch = useDispatch();
-
-  const filters = useSelector((state) => state.dateFilter);
-
-  const getParams = () =>
-    filters.searchMode === 1
-      ? { ...filters.advanceSearchParams, for_action: forAction }
-      : { ...filters.searchParams, for_action: forAction };
 
   const nextPagination = (e, url, keyword) => {
     e.preventDefault();
@@ -26,7 +18,7 @@ const Pagination = ({
     axios({
       url: url,
       method: "GET",
-      params: getParams(),
+      params: { ...params },
     }).then(
       (response) => {
         dispatch(setDataProps(response.data));
@@ -44,7 +36,7 @@ const Pagination = ({
     axios({
       url: url,
       method: "GET",
-      params: getParams(),
+      params: { ...params },
     }).then(
       (response) => {
         dispatch(setDataProps(response.data));
@@ -65,7 +57,7 @@ const Pagination = ({
     axios({
       url: url,
       method: "GET",
-      params: getParams(),
+      params: { ...params },
     }).then(
       (response) => {
         dispatch(setDataProps(response.data));
@@ -95,8 +87,11 @@ const Pagination = ({
             <i>
               <font size={1}>
                 <span>
-                  Showing records {dataProps.from}-{dataProps.to} out of{" "}
-                  {dataProps.total}
+                  Showing records{" "}
+                  {dataProps.from || dataProps.to
+                    ? `${dataProps.from}-${dataProps.to}`
+                    : "0 "}
+                  out of {dataProps.total}
                 </span>
               </font>
             </i>

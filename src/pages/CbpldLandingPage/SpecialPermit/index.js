@@ -168,7 +168,6 @@ function SpecialPermit({ props }) {
                       password: "",
                     }}
                     onSubmit={(values) => {
-                      // console.log(values);
                       dispatch(
                         loginUser({ data: values, history: props.history })
                       );

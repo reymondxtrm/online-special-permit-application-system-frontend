@@ -8,11 +8,12 @@ import ExportButton from "../../pages/Summary/common/ExportButton";
 import { dateFilterSlice } from "features/filters/dateFilterSlice";
 import { useDispatch, useSelector } from "react-redux";
 const DashboardFilters = ({
-  action,
   forAction,
   withStatus,
   statuses,
   withExport = false,
+  tableParams,
+  action,
 }) => {
   const dispatch = useDispatch();
   const [parameters, setParams] = useState("");
@@ -23,14 +24,11 @@ const DashboardFilters = ({
   }, []);
 
   const validation = useFormik({
-    // enableReinitialize : use this flag when initial values needs to be changed
     enableReinitialize: false,
-
     initialValues: {
       keyword: "",
       date_from: "",
       date_to: "",
-      status: status,
     },
     validationSchema: Yup.object({
       keyword: Yup.string().notRequired(),
@@ -39,14 +37,12 @@ const DashboardFilters = ({
     }),
 
     onSubmit: (values) => {
-     
       const params = {
+        ...tableParams,
         ...values,
-        for_action: forAction,
-        status: values?.status?.value || "",
       };
+      console.log(params);
       setParams(params);
-
       dispatch(action(params));
       dispatch(dateFilterSlice.actions.setParams(params));
     },
@@ -54,12 +50,15 @@ const DashboardFilters = ({
   const clearFilter = () => {
     validation.resetForm();
     setParams("");
-    setStatus("");
-    dispatch(action());
+    dispatch(
+      action({
+        status: tableParams.status,
+        permit_type: tableParams.permit_type,
+      })
+    );
     dispatch(dateFilterSlice.actions.clearState());
   };
 
-  // console.log(validation.initialValues);
   return (
     <Form
       className="row row-cols-lg-auto g-3"

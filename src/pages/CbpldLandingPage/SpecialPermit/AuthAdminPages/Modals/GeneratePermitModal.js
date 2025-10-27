@@ -207,25 +207,23 @@ function GeneratePermitModal({
   };
   const addOrgaizationToActiveParagraph = () => {
     if (data?.applicant_name && activeParagraph) {
-      if (activeParagraph === "first") {
-        setFirstParagraph(
-          (prevText) =>
-            prevText +
-            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold; font-size: 14pt; text-decoration: underline;">${data?.requestor_name}</span>`
-        );
-        setFirstParagraphTextArea(
-          (prevText) => prevText + data?.requesSor_name
-        );
-      } else if (activeParagraph === "second") {
-        setSecondParagraph(
-          (prevText) =>
-            prevText +
-            ` <span style="font-family: 'Bookman Old Style', serif; font-weight: bold; font-size: 14pt; text-decoration: underline;">${data?.requestor_name}</span>`
-        );
-        setSecondParagraphTextArea(
-          (prevText) => prevText + data?.requestor_name
-        );
-      }
+      // if (activeParagraph === "first") {
+      setFirstParagraph(
+        (prevText) =>
+          prevText +
+          `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold; font-size: 14pt; text-decoration: underline;">${data?.requestor_name}</span>`
+      );
+      setFirstParagraphTextArea((prevText) => prevText + data?.requestor_name);
+      // } else if (activeParagraph === "second") {
+      //   setSecondParagraph(
+      //     (prevText) =>
+      //       prevText +
+      //       ` <span style="font-family: 'Bookman Old Style', serif; font-weight: bold; font-size: 14pt; text-decoration: underline;">${data?.requestor_name}</span>`
+      //   );
+      //   setSecondParagraphTextArea(
+      //     (prevText) => prevText + data?.requestor_name
+      //   );
+      // }
     }
   };
   const addDateToActiveParagraph = () => {
@@ -486,9 +484,7 @@ function GeneratePermitModal({
                             marginBottom: "15px",
                             padding: "10px",
                             fontSize: "14px",
-                            // backgroundColor: "#144071",
                             backgroundColor: "#0d6dfc",
-
                             marginLeft: "10px",
                           }}
                         >

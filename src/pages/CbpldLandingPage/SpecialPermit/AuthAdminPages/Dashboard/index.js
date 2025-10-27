@@ -26,20 +26,19 @@ import {
   Collapse,
 } from "reactstrap";
 import Breadcrumbs from "components/Common/Breadcrumb";
-import Select from "react-select";
+
 import { useDispatch, useSelector } from "react-redux";
 import Tab from "react-bootstrap/Tab";
-import axios from "axios";
 import Tabs from "react-bootstrap/Tabs";
-import classnames from "classnames";
 
-import Pagination from "components/Pagination";
 import AdminTable from "../Common/AdminTable";
+import DashboardFilters from "pages/Dashboard/dashboardFilters";
+import { getTableData } from "features/SpecialPermitAdmin";
 const Dashboard = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("good_moral");
-
+  const specialPermitAdmin = useSelector((state) => state.specialPermitAdmin);
   const handleTabSelect = (key) => {
     setActiveTab(key);
   };
@@ -72,6 +71,11 @@ const Dashboard = () => {
             <Col xs="12">
               <Card>
                 <CardBody>
+                  <DashboardFilters
+                    action={getTableData}
+                    tableParams={specialPermitAdmin.params}
+                  />
+                  <hr />
                   <Tabs
                     // defaultActiveKey="mayorsCertificate"
 

@@ -1,10 +1,9 @@
 import React from "react";
 
 export default function FirstParagraph({ firstParagraph, scale }) {
-  const baseFontSize = 13; // pt
+  const baseFontSize = 13;
   const fontSize = baseFontSize * scale;
 
-  // Scale margins proportionally
   const marginTop = 10 * scale;
   const marginLeftRight = 1.5 * scale; // cm
   const marginBottom = 0.25 * scale; // cm

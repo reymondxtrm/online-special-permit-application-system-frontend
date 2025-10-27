@@ -1,4 +1,10 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   Button,
   Modal,
@@ -24,6 +30,13 @@ import ImageViewer from "react-simple-image-viewer";
 import useSubmit from "hooks/Common/useSubmit";
 import OrderOfPaymentModal from "./OrderOfPaymentModal";
 import BasicInputField from "components/Forms/BasicInputField";
+import "./PaymentModal.css";
+import cgbLogo from "../../../../../assets/images/cgbLogo.png";
+import landBankLogo from "../../../../../assets/images/logo-landbank.png";
+import spayLogo from "../../../../../assets/images/logo-spay.jpg";
+import gcashLogo from "../../../../../assets/images/logo-gcash.png";
+import grabpayLogo from "../../../../../assets/images/logo-grabpay.png";
+import TermsAndConditions from "./TermsAndConditions";
 
 function PaymentModal({
   openModal,
@@ -34,15 +47,73 @@ function PaymentModal({
   orderOfPaymentData,
   applicationType,
 }) {
-  console.log(orderOfPaymentData);
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
   const [paymentMethod, setPaymenyMethod] = useState("online");
   const [generateModal, setgenerateModal] = useState(false);
-
+  const [clearance, setClearance] = useState([]);
+  const [isLoading, setisLoading] = useState();
+  const [userData, setuserData] = useState();
+  const [termsAndConditionsModal, setTermsAndConditionsModal] = useState(false);
+  const [approveTerm, setApproveTerm] = useState(false);
   const toggleGenerateModal = () => {
     setgenerateModal(!generateModal);
   };
+  const toggleTermsAndConditionsModal = () => {
+    setTermsAndConditionsModal((prev) => !prev);
+  };
+  const formatDate = (dateString) => {
+    if (!dateString) return "No Date Provided"; // Handle missing date
+    const date = new Date(dateString);
+    if (isNaN(date)) return "Invalid Date"; // Handle invalid date
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(date);
+  };
+  useEffect(() => {
+    if (openModal) {
+      setisLoading(true);
+      axios.get("api/client/user-details").then(
+        (res) => {
+          setisLoading(false);
+          setuserData(res.data);
+        },
+        (error) => {
+          setisLoading(false);
+          console.log(error);
+        }
+      );
+    }
+  }, [openModal]);
+  useEffect(() => {
+    if (openModal) {
+      axios({
+        url: "api/get-clearances",
+        method: "GET",
+      })
+        .then((response) => {
+          setClearance(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  }, [openModal]);
+  console.log(approveTerm);
+  const descriptions = [
+    { label: "Mayor's Permit", type: "mayors_permit" },
+    { label: "Event", type: "event" },
+    { label: "Motorcade", type: "motorcade" },
+    { label: "Parade", type: "parade" },
+    { label: "Recorrida", type: "recorrida" },
+    { label: "Use Government Property", type: "government_property" },
+    { label: "Certificate of Good Moral Character", type: "good_moral" },
+    { label: "Fiscal Clearance Fee", type: "fiscal_clearance" },
+    { label: "Court Clearance Fee", type: "court_clearance" },
+    { label: "Occupational Permit", type: "occupational_permit" },
+  ];
   const getFormData = (object) => {
     const formData = new FormData();
     Object.keys(object).forEach((key) => {
@@ -58,6 +129,9 @@ function PaymentModal({
     });
     return formData;
   };
+  const type = useMemo(() => {
+    return descriptions.find((item) => item.type === applicationType);
+  }, [applicationType]);
 
   return (
     <React.Fragment>
@@ -66,6 +140,16 @@ function PaymentModal({
         openModal={generateModal}
         orderOfPaymentData={orderOfPaymentData}
         applicationType={applicationType}
+        isLoading={isLoading}
+        descriptions={descriptions}
+        formatDate={formatDate}
+        userData={userData}
+        clearance={clearance}
+      />
+      <TermsAndConditions
+        isOpen={termsAndConditionsModal}
+        toggle={toggleTermsAndConditionsModal}
+        setApproveTerm={setApproveTerm}
       />
       <Modal
         isOpen={openModal}
@@ -78,20 +162,6 @@ function PaymentModal({
         style={{ overflowY: "auto" }}
         unmountOnClose
       >
-        {/* <ModalHeader toggle={toggleModal}>
-          <p
-            style={{
-              fontWeight: "bold",
-              letterSpacing: ".2rem",
-              fontSize: "18pt",
-              margin: "0",
-              padding: "0",
-              color: "#368be0",
-            }}
-          >
-            {"OVER THE COUNTER"}
-          </p>
-        </ModalHeader> */}
         <ModalBody style={{ backgroundColor: "#DFDFDF" }}>
           {" "}
           <Formik
@@ -111,39 +181,106 @@ function PaymentModal({
             enableReinitialize
           >
             {(props) => (
-              <Form style={{ borderRadius: "10px" }}>
-                <Row className="m-0 p-0" style={{ borderRadius: "10px" }}>
-                  <Col style={{ backgroundColor: "#060527" }}>
+              <Form>
+                <Row className="m-0 p-0">
+                  <Col
+                    style={{
+                      backgroundColor: "#060527",
+                      borderTopLeftRadius: "10px",
+                      borderBottomLeftRadius: "10px",
+                    }}
+                  >
                     <Row style={{ marginTop: "10px" }}>
                       <Col>
-                        <h5 style={{ color: "white" }}>Transaction Details</h5>
+                        <h5
+                          style={{
+                            color: "white",
+                            fontWeight: "bold",
+                            marginBottom: "30px",
+                            marginTop: "20px",
+                          }}
+                        >
+                          Transaction Details
+                        </h5>
                         <Card
                           style={{
                             backgroundColor: "#1B244B",
-                            borderRadius: "10px",
+                            borderRadius: "20px",
                           }}
                         >
                           <CardBody>
-                            <table>
+                            <div className="d-flex">
+                              <Row>
+                                <Col md={3}>
+                                  {" "}
+                                  <img src={cgbLogo} className="logo" />
+                                </Col>
+                                <Col>
+                                  <div className="d-flex align-items-center flex-column  header">
+                                    <p className=" text-center fw-bold">
+                                      Republic of the philippines
+                                    </p>
+                                    <p className="p-0 m-0 text-center fw-bold">
+                                      CITY BUSINESS AND LICENSING DEPARTMENT
+                                    </p>
+                                  </div>
+                                </Col>
+                              </Row>
+                            </div>
+                            <div
+                              className="header fw-normal "
+                              style={{ marginTop: "30px" }}
+                            >
+                              <p className="p-0 m-0">
+                                <span className="fw-bold me-2">
+                                  Requestor Name:{" "}
+                                </span>
+                                {isLoading ? "loading" : userData?.full_name}
+                              </p>
+                            </div>
+                            <Table className="transaction-table" bordered>
+                              <thead>
+                                <tr>
+                                  <th>Description</th>
+                                  <th>Amount</th>
+                                </tr>
+                              </thead>
                               <tbody>
                                 <tr>
-                                  <td>Description:</td>
-                                  <td>: Good Moral</td>
+                                  <td>{type.label}</td>
+                                  <td>{`₱ ${orderOfPaymentData?.billed_amount}`}</td>
+                                </tr>
+                                {clearance &&
+                                  clearance.map((item) => (
+                                    <tr key={item.id}>
+                                      <td> {item.name}</td>
+                                      <td>{`₱ ${item.amount}`}</td>
+                                    </tr>
+                                  ))}
+                                <tr style={{ height: "100px" }}>
+                                  <td></td>
+                                  <td></td>
                                 </tr>
                                 <tr>
-                                  <td>Amount</td>
-                                  <td>: P1032</td>
-                                </tr>
-                                <tr>
-                                  <td>Requestor Name</td>
-                                  <td>: Vis VIs</td>
-                                </tr>
-                                <tr>
-                                  <td>Evaluated </td>
-                                  <td>: Sample</td>
+                                  <td>Total</td>
+                                  <td>{`₱ ${orderOfPaymentData?.total_amount}`}</td>
                                 </tr>
                               </tbody>
-                            </table>
+                            </Table>
+                            <div className="transaction-footer">
+                              <p className="p-0 m-0">
+                                <span className="fw-bold me-2">
+                                  Evaluated by:
+                                </span>{" "}
+                                {orderOfPaymentData?.fullname}
+                              </p>
+                              <p className="p-0 m-0">
+                                <span className="fw-bold me-2">
+                                  Date and TIme:{" "}
+                                </span>{" "}
+                                {formatDate(orderOfPaymentData?.created_at)}
+                              </p>
+                            </div>
                           </CardBody>
                         </Card>
                       </Col>
@@ -192,7 +329,9 @@ function PaymentModal({
                                       ></i>
                                       <input
                                         type="radio"
-                                        checked={paymentMethod === "online"}
+                                        checked={
+                                          paymentMethod === "online" || false
+                                        }
                                       ></input>
                                     </div>
                                     <p className="m-0 p-0 text-center fw-bold">
@@ -226,8 +365,10 @@ function PaymentModal({
                                       ></i>
                                       <input
                                         type="radio"
-                                        checked={paymentMethod === "counter"}
-                                      ></input>
+                                        checked={
+                                          paymentMethod === "counter" || false
+                                        }
+                                      />
                                     </div>
                                     <p className="m-0 p-0 text-center fw-bold">
                                       Over the Counter
@@ -241,138 +382,217 @@ function PaymentModal({
                       </Col>
                     </Row>
                     {paymentMethod === "online" ? (
-                      <Card>
-                        <CardBody>
-                          <Row>
-                            <Col>
-                              <Card
-                                style={{ border: "2px solid #043270" }}
-                                onClick={() =>
-                                  props.setFieldValue(
-                                    "card_type",
-                                    "credit_card"
-                                  )
-                                }
-                              >
-                                <CardBody style={{ padding: "5px" }}>
-                                  <div
-                                    className="d-flex  justify-content-between"
-                                    style={{
-                                      borderColor:
-                                        props?.values?.card_type ===
-                                        "credit_card"
-                                          ? "#5587F9"
-                                          : "#243375ff",
-                                      cursor: "pointer",
-                                    }}
-                                  >
-                                    <div className="d-flex align-items-center gap-3">
-                                      <i className="mdi mdi-credit-card fs-2 "></i>
-                                      <p className="p-0 m-0">Credit Card</p>
-                                    </div>
-                                    <input
-                                      type="radio"
-                                      checked={
-                                        props?.values?.card_type ===
-                                        "credit_card"
-                                      }
+                      <>
+                        <Card style={{ margin: "0px" }}>
+                          <CardBody
+                            style={{
+                              border: "1px solid #a2a2a1",
+                              borderRadius: "10px",
+                            }}
+                          >
+                            <Row>
+                              <Col className="d-flex gap-2">
+                                <div>
+                                  <Input type="radio" />
+                                </div>
+                                <div>
+                                  <div>
+                                    <p
+                                      className="m-0 p-0 fw-bold"
+                                      style={{ fontSize: "10px" }}
+                                    >
+                                      Landbank (ePayment Portal)
+                                    </p>
+                                    <p style={{ fontSize: "10px" }}>
+                                      {" "}
+                                      Rate: LBP ATM/Visa Debit Card - P 7 per
+                                      transaction | BancNet-Member Bank
+                                      ATM/Debit Cards - P17 per transaction |
+                                      Cash Payment and e-Wallet (GCash,
+                                      ShopeePay and GrabPay - P 30 per
+                                      transaction)
+                                    </p>
+                                  </div>
+                                  <div className="d-flex gap-2">
+                                    <img
+                                      style={{ width: "60px", height: "40px" }}
+                                      src={landBankLogo}
+                                      alt="Landbank Logo"
+                                    />
+                                    <img
+                                      style={{ width: "40px", height: "40px" }}
+                                      src={spayLogo}
+                                      alt="spay Logo"
+                                    />
+                                    <img
+                                      style={{ width: "50px", height: "40px" }}
+                                      src={gcashLogo}
+                                      alt="gcash Logo"
+                                    />
+                                    <img
+                                      style={{ width: "40px", height: "40px" }}
+                                      src={grabpayLogo}
+                                      alt="grabpay Logo"
                                     />
                                   </div>
-                                </CardBody>
-                              </Card>
-                            </Col>
-                          </Row>
-                          <Row>
-                            <Col>
-                              <Card
-                                style={{ border: "2px solid #043270" }}
-                                onClick={() =>
-                                  props.setFieldValue("card_type", "debit_card")
-                                }
+                                </div>
+                              </Col>
+                            </Row>
+                          </CardBody>
+                        </Card>
+                        <Row>
+                          <div className="d-flex gap-2">
+                            <Input
+                              type="checkbox"
+                              defaultChecked={approveTerm}
+                              onChange={(e) => {
+                                setApproveTerm(e.target.checked);
+                              }}
+                            />
+                            <p>
+                              I have read and agreed to the{" "}
+                              <span
+                                style={{ color: "red", cursor: "pointer" }}
+                                onClick={toggleTermsAndConditionsModal}
                               >
-                                <CardBody
-                                  style={{
-                                    padding: "5px",
-                                    borderColor:
-                                      props?.values?.card_type === "credit_card"
-                                        ? "#5587F9"
-                                        : "#243375ff",
-                                    cursor: "pointer",
-                                  }}
-                                >
-                                  <div className="d-flex  justify-content-between">
-                                    <div className="d-flex align-items-center gap-3">
-                                      <i className="mdi mdi-credit-card-outline fs-2 "></i>
-                                      <p className="p-0 m-0">Debit Card</p>
-                                    </div>
-                                    <input
-                                      type="radio"
-                                      checked={
-                                        props?.values?.card_type ===
-                                        "debit_card"
-                                      }
-                                    />
-                                  </div>
-                                </CardBody>
-                              </Card>
-                            </Col>
-                          </Row>
-                          <Row>
-                            <BasicInputField
-                              type={"text"}
-                              validation={props}
-                              name="name"
-                              label="Name"
-                              touched={props.touched.name}
-                              placeholder="Ex. Juan Dela Cruz"
-                              errors={props.errors.name}
-                              value={props.values.name}
-                              required
-                            />
-                          </Row>
-                          <Row>
-                            <BasicInputField
-                              type={"text"}
-                              validation={props}
-                              name="card_number"
-                              label="Card Number"
-                              placeholder="XXXX XXXX XXXX XXXX"
-                              touched={props.touched.card_number}
-                              errors={props.errors.card_number}
-                              value={props.values.card_number}
-                              required
-                            />
-                          </Row>
-                          <Row>
-                            <Col>
-                              <BasicInputField
-                                type={"date"}
-                                validation={props}
-                                name="expiry_date"
-                                label="Expiry Date"
-                                touched={props.touched.expiry_date}
-                                errors={props.errors.expiry_date}
-                                value={props.values.expiry_date}
-                                required
-                              />
-                            </Col>
-                            <Col>
-                              <BasicInputField
-                                type={"text"}
-                                validation={props}
-                                name="cvv"
-                                label="CVV"
-                                touched={props.touched.cvv}
-                                errors={props.errors.cvv}
-                                value={props.values.cvv}
-                                required
-                                placeholder="Ex. 123"
-                              />
-                            </Col>
-                          </Row>
-                        </CardBody>
-                      </Card>
+                                Terms and conditions
+                              </span>
+                            </p>
+                          </div>
+                        </Row>
+                      </>
                     ) : (
+                      // <Card>
+                      //   <CardBody>
+                      //     <Row>
+                      //       <Col>
+                      //         <Card
+                      //           style={{ border: "2px solid #043270" }}
+                      //           onClick={() =>
+                      //             props.setFieldValue(
+                      //               "card_type",
+                      //               "credit_card"
+                      //             )
+                      //           }
+                      //         >
+                      //           <CardBody style={{ padding: "5px" }}>
+                      //             <div
+                      //               className="d-flex  justify-content-between"
+                      //               style={{
+                      //                 borderColor:
+                      //                   props?.values?.card_type ===
+                      //                   "credit_card"
+                      //                     ? "#5587F9"
+                      //                     : "#243375ff",
+                      //                 cursor: "pointer",
+                      //               }}
+                      //             >
+                      //               <div className="d-flex align-items-center gap-3">
+                      //                 <i className="mdi mdi-credit-card fs-2 "></i>
+                      //                 <p className="p-0 m-0">Credit Card</p>
+                      //               </div>
+                      //               <input
+                      //                 type="radio"
+                      //                 checked={
+                      //                   props?.values?.card_type ===
+                      //                   "credit_card"
+                      //                 }
+                      //               />
+                      //             </div>
+                      //           </CardBody>
+                      //         </Card>
+                      //       </Col>
+                      //     </Row>
+                      //     <Row>
+                      //       <Col>
+                      //         <Card
+                      //           style={{ border: "2px solid #043270" }}
+                      //           onClick={() =>
+                      //             props.setFieldValue("card_type", "debit_card")
+                      //           }
+                      //         >
+                      //           <CardBody
+                      //             style={{
+                      //               padding: "5px",
+                      //               borderColor:
+                      //                 props?.values?.card_type === "credit_card"
+                      //                   ? "#5587F9"
+                      //                   : "#243375ff",
+                      //               cursor: "pointer",
+                      //             }}
+                      //           >
+                      //             <div className="d-flex  justify-content-between">
+                      //               <div className="d-flex align-items-center gap-3">
+                      //                 <i className="mdi mdi-credit-card-outline fs-2 "></i>
+                      //                 <p className="p-0 m-0">Debit Card</p>
+                      //               </div>
+                      //               <input
+                      //                 type="radio"
+                      //                 checked={
+                      //                   props?.values?.card_type ===
+                      //                   "debit_card"
+                      //                 }
+                      //               />
+                      //             </div>
+                      //           </CardBody>
+                      //         </Card>
+                      //       </Col>
+                      //     </Row>
+                      //     <Row>
+                      //       <BasicInputField
+                      //         type={"text"}
+                      //         validation={props}
+                      //         name="name"
+                      //         label="Name"
+                      //         touched={props.touched.name}
+                      //         placeholder="Ex. Juan Dela Cruz"
+                      //         errors={props.errors.name}
+                      //         value={props.values.name}
+                      //         required
+                      //       />
+                      //     </Row>
+                      //     <Row>
+                      //       <BasicInputField
+                      //         type={"text"}
+                      //         validation={props}
+                      //         name="card_number"
+                      //         label="Card Number"
+                      //         placeholder="XXXX XXXX XXXX XXXX"
+                      //         touched={props.touched.card_number}
+                      //         errors={props.errors.card_number}
+                      //         value={props.values.card_number}
+                      //         required
+                      //       />
+                      //     </Row>
+                      //     <Row>
+                      //       <Col>
+                      //         <BasicInputField
+                      //           type={"date"}
+                      //           validation={props}
+                      //           name="expiry_date"
+                      //           label="Expiry Date"
+                      //           touched={props.touched.expiry_date}
+                      //           errors={props.errors.expiry_date}
+                      //           value={props.values.expiry_date}
+                      //           required
+                      //         />
+                      //       </Col>
+                      //       <Col>
+                      //         <BasicInputField
+                      //           type={"text"}
+                      //           validation={props}
+                      //           name="cvv"
+                      //           label="CVV"
+                      //           touched={props.touched.cvv}
+                      //           errors={props.errors.cvv}
+                      //           value={props.values.cvv}
+                      //           required
+                      //           placeholder="Ex. 123"
+                      //         />
+                      //       </Col>
+                      //     </Row>
+                      //   </CardBody>
+                      // </Card>
                       <>
                         <Card>
                           <CardBody>
@@ -479,6 +699,49 @@ function PaymentModal({
                         </Card>
                       </>
                     )}
+                    <Row>
+                      <div className="text-end">
+                        <Button
+                          className="me-2"
+                          style={{
+                            backgroundColor: "#1a56db",
+                            fontWeight: "600",
+                            fontFamily:
+                              "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
+                            color: "white",
+                          }}
+                          onClick={() => {
+                            const formik = formikRef.current.values;
+                            const formData = getFormData(formik);
+                            formData.append(
+                              "special_permit_application_id",
+                              applicationId
+                            );
+                            handleSubmit(
+                              {
+                                url: "api/client/pay-permit",
+
+                                message: {
+                                  title: "Are you sure you want to Proceed?",
+                                  failedTitle: "FAILED",
+                                  success: "Success!",
+                                  error: "unknown error occured",
+                                },
+                                params: formData,
+                              },
+                              [],
+                              [toggleRefresh, toggleModal]
+                            );
+                          }}
+                          disabled={!approveTerm}
+                        >
+                          SAVE
+                        </Button>
+                        <Button color="secondary" onClick={toggleModal}>
+                          Close
+                        </Button>
+                      </div>
+                    </Row>
                   </Col>
                 </Row>
               </Form>

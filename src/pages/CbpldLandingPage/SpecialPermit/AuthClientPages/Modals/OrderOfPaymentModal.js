@@ -9,36 +9,13 @@ function OrderOfPaymentModal({
   toggleModal,
   orderOfPaymentData,
   applicationType,
+  isLoading,
+  descriptions,
+  formatDate,
+  userData,
+  clearance,
 }) {
   const ref = useRef();
-  const [isLoading, setisLoading] = useState();
-  const [userData, setuserData] = useState();
-  const formatDate = (dateString) => {
-    if (!dateString) return "No Date Provided"; // Handle missing date
-    const date = new Date(dateString);
-    if (isNaN(date)) return "Invalid Date"; // Handle invalid date
-    return new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }).format(date);
-  };
-  useEffect(() => {
-    if (openModal) {
-      setisLoading(true);
-      axios.get("api/client/user-details").then(
-        (res) => {
-          setisLoading(false);
-          setuserData(res.data);
-        },
-        (error) => {
-          setisLoading(false);
-          console.log(error);
-        }
-      );
-    }
-  }, [openModal]);
-
   const downloadImage = () => {
     if (ref.current) {
       toJpeg(ref.current, { quality: 0.95, backgroundColor: "#ffffff" })
@@ -53,19 +30,6 @@ function OrderOfPaymentModal({
         });
     }
   };
-
-  const descriptions = [
-    { label: "Mayor's Permit", type: "mayors_permit" },
-    { label: "Event", type: "event" },
-    { label: "Motorcade", type: "motorcade" },
-    { label: "Parade", type: "parade" },
-    { label: "Recorrida", type: "recorrida" },
-    { label: "Use Government Property", type: "government_property" },
-    { label: "Certificate of Good Moral Character", type: "good_moral" },
-    { label: "Fiscal Clearance Fee", type: "fiscal_clearance" },
-    { label: "Court Clearance Fee", type: "court_clearance" },
-    { label: "Occupational Permit", type: "occupational_permit" },
-  ];
 
   return (
     <React.Fragment>
@@ -191,11 +155,31 @@ function OrderOfPaymentModal({
                           }}
                         >
                           {applicationType === desc.type
-                            ? orderOfPaymentData?.total_amount
+                            ? orderOfPaymentData?.billed_amount
                             : null}
                         </td>
                       </tr>
                     ))}
+                    {clearance &&
+                      clearance.map((item) => (
+                        <tr key={item.id}>
+                          <td
+                            style={{
+                              border: "1px solid black",
+                              padding: "8px",
+                            }}
+                          >
+                            &bull; {item.name}
+                          </td>
+                          <td
+                            style={{
+                              border: "1px solid black",
+                              padding: "8px",
+                              textAlign: "right",
+                            }}
+                          >{`${item.amount}`}</td>
+                        </tr>
+                      ))}
                     <tr>
                       <td
                         style={{

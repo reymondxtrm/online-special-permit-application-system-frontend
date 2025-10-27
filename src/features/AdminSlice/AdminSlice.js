@@ -1,3 +1,4 @@
+import { faBullseye } from "@fortawesome/free-solid-svg-icons";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
@@ -70,6 +71,24 @@ export const getPurpose = createAsyncThunk(
     }
   }
 );
+export const getClearances = createAsyncThunk(
+  "admin/getClearances",
+  async (thunkAPI) => {
+    try {
+      const response = await axios({
+        url: "api/get-clearances",
+        method: "GET",
+      });
+      if (!response) {
+        return thunkAPI.rejectWithValue(response.data);
+      }
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
 export const AdminSlice = createSlice({
   name: "batsAdmin",
   initialState: {
@@ -82,7 +101,10 @@ export const AdminSlice = createSlice({
     getGovernmentPropertyIsFetching: false,
     purposes: [],
     getPurposeIsFetching: false,
+    clearances: [],
+    getClearancesIsFetching: false,
   },
+
   extraReducers: {
     [getBusinessStageData.pending]: (state) => {
       state.getBusinessStageDataIsFetching = true;
@@ -126,6 +148,17 @@ export const AdminSlice = createSlice({
     },
     [getPurpose.rejected]: (state, { payload }) => {
       state.getPurposeIsFetching = false;
+      state.errors = payload;
+    },
+    [getClearances.pending]: (state) => {
+      state.getClearancesIsFetching = true;
+    },
+    [getClearances.fulfilled]: (state, { payload }) => {
+      state.getClearancesIsFetching = false;
+      state.clearances = payload;
+    },
+    [getClearances.rejected]: (state, { payload }) => {
+      state.getClearancesIsFetching = false;
       state.errors = payload;
     },
   },

@@ -26,7 +26,8 @@ function AddExemptedCaseModal({ openModal, toggleModal, mode, exemptedCase }) {
   const handleSubmit = useSubmit();
   const [options, setoptions] = useState([]);
   const dispatch = useDispatch();
-  console.log(isOpen, toggleModal);
+  console.log(exemptedCase, mode);
+
   const getFormData = (object) => {
     const formData = new FormData();
     Object.keys(object).forEach((key) => {
@@ -43,78 +44,78 @@ function AddExemptedCaseModal({ openModal, toggleModal, mode, exemptedCase }) {
     return formData;
   };
 
-  // // const validation = useFormik({
-  // //   enableReinitialize: true,
-  // //   initialValues: {
-  // //     permit_type: "",
-  // //     ordinance: "",
-  // //     attachment: null,
-  // //     name: "",
-  // //   },
-  // //   onSubmit: (values) => {
-  // //     const toProps =
-  // //       mode === "add"
-  // //         ? { ...values }
-  // //         : { ...values, exempted_case_id: exemptedCase.id };
-  // //     const formData = getFormData(toProps);
-  // //     const url =
-  // //       mode === "add"
-  // //         ? "api/admin/create/exempted-case"
-  // //         : "api/admin/update/exempted-cases";
-  // //     handleSubmit(
-  // //       {
-  // //         url: url,
-  // //         headers: {
-  // //           "Content-Type": "multipart/form-data",
-  // //         },
-  // //         message: {
-  // //           title: "Are you sure you want to Proceed?",
-  // //           failedTitle: "FAILED",
-  // //           success: "Success!",
-  // //           error: "unknown error occured",
-  // //         },
-  // //         params: formData,
-  // //       },
+  const validation = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      permit_type: "",
+      ordinance: "",
+      attachment: null,
+      name: "",
+    },
+    onSubmit: (values) => {
+      const toProps =
+        mode === "add"
+          ? { ...values }
+          : { ...values, exempted_case_id: exemptedCase.id };
+      const formData = getFormData(toProps);
+      const url =
+        mode === "add"
+          ? "api/admin/create/exempted-case"
+          : "api/admin/update/exempted-cases";
+      handleSubmit(
+        {
+          url: url,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          message: {
+            title: "Are you sure you want to Proceed?",
+            failedTitle: "FAILED",
+            success: "Success!",
+            error: "unknown error occured",
+          },
+          params: formData,
+        },
 
-  // //       [() => dispatch(getExemptedCases())],
-  // //       [toggleModal]
-  // //     );
-  // //   },
-  // // });
+        [() => dispatch(getExemptedCases())],
+        [toggleModal]
+      );
+    },
+  });
 
-  // useEffect(() => {
-  //   if (openModal) {
-  //     axios.get("api/admin/get/permit-types").then(
-  //       (res) => {
-  //         const options = res.data.map((options) => ({
-  //           value: options.id,
-  //           label: options.name,
-  //         }));
-  //         setoptions(options);
-  //       },
-  //       (error) => {
-  //         console.log(error);
-  //       }
-  //     );
-  //   }
-  // }, [openModal]);
+  useEffect(() => {
+    if (openModal) {
+      axios.get("api/admin/get/permit-types").then(
+        (res) => {
+          const options = res.data.map((options) => ({
+            value: options.id,
+            label: options.name,
+          }));
+          setoptions(options);
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
+    }
+  }, [openModal]);
 
-  // useEffect(() => {
-  //   if (mode === "update") {
-  //     validation.setValues({
-  //       name: exemptedCase?.name || "",
-  //       ordinance: exemptedCase?.ordinance || "",
-  //       permit_type: exemptedCase?.special_permit_type_id ?? "",
-  //     });
-  //   } else {
-  //     validation.setValues({
-  //       name: "",
-  //       ordinance: "",
-  //       permit_type: "",
-  //     });
-  //   }
-  // }, [mode, exemptedCase]);
-
+  useEffect(() => {
+    if (mode === "update") {
+      validation.setValues({
+        name: exemptedCase?.name || "",
+        ordinance: exemptedCase?.ordinance || "",
+        permit_type: exemptedCase?.special_permit_type_id ?? "",
+      });
+    } else {
+      validation.setValues({
+        name: "",
+        ordinance: "",
+        permit_type: "",
+      });
+    }
+  }, [mode, exemptedCase]);
+  console.log(validation.values);
   return (
     <React.Fragment>
       <Modal
@@ -201,17 +202,18 @@ function AddExemptedCaseModal({ openModal, toggleModal, mode, exemptedCase }) {
                   </FormGroup>
                 </Col>
               </Row>
-
               <Row>
                 <Col>
                   <FormGroup>
                     <Label for="attachment">Attachment (Ex. Memo)</Label>
                     <Input
                       id="attachment"
-                      name={`attachment`}
+                      name="attachment"
                       onChange={(event) => {
-                        const file = event.currentTarget.files[0];
-                        validation.setFieldValue("attachment", file || null);
+                        validation.setFieldValue(
+                          "attachment",
+                          event.target.files[0]
+                        );
                       }}
                       type="file"
                     />

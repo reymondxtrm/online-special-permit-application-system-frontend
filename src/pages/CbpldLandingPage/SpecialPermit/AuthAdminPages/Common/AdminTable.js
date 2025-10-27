@@ -1,6 +1,12 @@
 // /* eslint-disable padded-blocks */
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   Table,
   Button,
@@ -36,12 +42,16 @@ import {
 import { motion } from "motion/react";
 import RequestForm from "../Printables/RequestForm";
 import MayorsAndGoodMoralRequestForm from "../Printables/MayorsAndGoodMoralRequestForm";
+import Pagination from "components/Pagination";
+import {
+  getTableData,
+  SpecialPermitAdminSlice,
+} from "features/SpecialPermitAdmin";
+import { useDispatch, useSelector } from "react-redux";
 
 const AdminTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
-  const [applications, setApplications] = useState([]); // State for storing API data
-  const [loading, setLoading] = useState(false); // State for loader
   const [isModalOpen, setIsModalOpen] = useState(false); // State for image viewer modal
   const [attachmentModal, setAttachmentModal] = useState(false);
   const [reviewPurposeModal, setreviewPurposeModal] = useState(false);
@@ -73,6 +83,19 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
     openMayorsAndGoodMoralRequestForm,
     setOpenMayorsAndGoodMoralRequestForm,
   ] = useState(false);
+  const dispatch = useDispatch();
+  const admin = useSelector((state) => state.specialPermitAdmin);
+  const filter = useSelector((state) => state.dateFilter);
+  const params = useMemo(() => {
+    return status === "completed"
+      ? {
+          ...filter.searchParams,
+          status: status,
+          permit_type: applicationType,
+        }
+      : { status: status, permit_type: applicationType };
+  }, [applicationType]);
+
   const formatName = (name) => {
     const nameParts = name.split(" ");
     const firstName = nameParts[0]?.toUpperCase();
@@ -81,13 +104,12 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
 
     return `${firstName} ${middleName} ${lastName}`;
   };
+
   const toggleGenerateModal = () => {
     setgenerateModal(!generateModal);
   };
 
   const toggleRemarksModal = useCallback(() => {
-    // use functional updater to avoid stale closure issues when this
-    // callback is invoked from dropdowns / child components
     setremarksModal((prev) => !prev);
   }, []);
   const openImageViewer = useCallback((imageUrl) => {
@@ -115,7 +137,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
     setScale((prev) => Math.min(Math.max(prev + delta, 1), 3));
   };
-  //mayors and good moral request form
 
   const toggleMayorsAndGoodMoralRequestModal = () => {
     setOpenMayorsAndGoodMoralRequestForm((prev) => !prev);
@@ -140,7 +161,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
           }
         );
     }
-  }, [activeTab]);
+  }, []);
 
   const togglePurposeModal = () => {
     setreviewPurposeModal(!reviewPurposeModal);
@@ -149,23 +170,11 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const toggleExemptionModal = () => {
     setreviewExemptionModal(!reviewExemptionModal);
   };
+
   useEffect(() => {
     if (applicationType === activeTab) {
-      setLoading(true);
-
-      axios
-        .get("api/admin/special-permit/applications", {
-          params: { status: status, permit_type: applicationType },
-        })
-        .then(
-          (res) => {
-            setApplications(res.data);
-            setLoading(false);
-          },
-          (error) => {
-            console.log(error);
-          }
-        );
+      dispatch(getTableData(params));
+      dispatch(SpecialPermitAdminSlice.actions.setParams(params));
     }
   }, [activeTab, refreshPage]);
 
@@ -226,22 +235,8 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
     setOpenRequestFormModal((prev) => !prev);
   };
 
-  // useEffect(() => {
-  //   const channel = echo.channel("permits");
-
-  //   channel.listen(`permit.${permitType}`, (event) => {
-  //     console.log("Permit approved:", event);
-  //     alert(`Permit #${event.permit.id} has been approved!`);
-  //   });
-
-  //   return () => {
-  //     channel.stopListening("PermitApproved");
-  //     echo.leaveChannel("permits");
-  //   };
-  // }, []);
   const handleRowOnclick = (permit_id) => {
     const response = updateTabNotification(applicationType, permit_id, status);
-    console.log(response);
   };
   return (
     <>
@@ -333,18 +328,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
         <div>
           {isViewerOpen && currentImage && (
             <>
-              {/* <ImageViewer
-                src={[currentImage]} // Pass the current image as an array
-                currentIndex={0}
-                onClose={closeImageViewer}
-                closeOnClickOutside={true}
-                backgroundStyle={{
-                  backgroundColor: "rgba(0,0,0,0.8)",
-                  transform: `scale(${imageViewerScale})`,
-                  transition: "transform 0.2s",
-                }}
-              /> */}
-
               <Viewer
                 visible={isViewerOpen}
                 onClose={closeImageViewer}
@@ -359,7 +342,16 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
             </>
           )}
         </div>
-
+        <tr>
+          <Button
+            color="primary"
+            style={{ position: "absolute", right: "20px", top: "14px" }}
+            onClick={toggleRefresh}
+          >
+            <i className="mdi mdi-reload me-2 fs-5" />
+            Reload
+          </Button>
+        </tr>
         <Table hover>
           <thead
             className="table-light"
@@ -429,23 +421,16 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
               {status === "for_payment_approval" ? <th>Actions</th> : null}
             </tr>
           </thead>
-          <Button
-            color="primary"
-            style={{ position: "absolute", right: "20px", top: "14px" }}
-            onClick={toggleRefresh}
-          >
-            <i className="mdi mdi-reload me-2 fs-5" />
-            Reload
-          </Button>
+
           <tbody>
-            {loading ? (
+            {admin.getTableDataIsFetching ? (
               <tr>
                 <td colSpan="7" style={{ textAlign: "center" }}>
                   Loading...
                 </td>
               </tr>
-            ) : applications.length > 0 ? (
-              applications.map((application, index) => (
+            ) : admin?.tableData?.data?.length > 0 ? (
+              admin?.tableData?.data?.map((application, index) => (
                 <React.Fragment key={application.id}>
                   <tr
                     onClick={() => {
@@ -470,7 +455,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                             {application?.mark_as_read ? (
                               ""
                             ) : (
-                              <Badge color="danger"> Unread</Badge>
+                              <Badge color="primary"> Unread</Badge>
                             )}
                           </td>
                         ) : null}
@@ -571,7 +556,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                       {status === "for_payment_approval" ||
                       status === "returned" ? (
                         <img
-                          src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.order_of_payment.payment_detail.attachment}`}
+                          src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`}
                           alt={`Thumbnail`}
                           style={{
                             width: "100px",
@@ -581,7 +566,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                           }}
                           onClick={() =>
                             openImageViewer(
-                              `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.order_of_payment.payment_detail.attachment}`
+                              `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`
                             )
                           }
                         />
@@ -844,6 +829,13 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
             )}
           </tbody>
         </Table>
+        <Pagination
+          dataProps={admin.tableData}
+          setDataProps={SpecialPermitAdminSlice.actions.setDataProps}
+          setShowLoading={SpecialPermitAdminSlice.actions.setShowLoading}
+          isLoading={admin.getTableDataIsFetching}
+          params={params}
+        />
       </div>
 
       {/* Image Viewer Modal */}

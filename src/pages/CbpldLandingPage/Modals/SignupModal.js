@@ -85,31 +85,28 @@ function SignupModal({ openModal, toggleModal, props }) {
   ];
   useEffect(() => {
     if (openModal) {
-      axios
-        .get("api/geolocation/caraga", {
-          params: { permit_type: "good_moral" },
-        })
-        .then(
-          (res) => {
-            const barangays = res.data.region.provinces[0]?.cities[1].barangays;
-
-            const uniqueBarangays = [];
-            const seen = new Set();
-            for (const item of barangays) {
-              if (!seen.has(item.psgc_id)) {
-                seen.add(item.psgc_id);
-                uniqueBarangays.push(item);
-              }
+      axios.get("api/geolocation/caraga").then(
+        (res) => {
+          const barangays = res.data.region.provinces[0]?.cities[2].barangays;
+          // const barangays = res.data.region.provinces[0]?.cities[1].barangays;
+          console.log(barangays);
+          const uniqueBarangays = [];
+          const seen = new Set();
+          for (const item of barangays) {
+            if (!seen.has(item.psgc_id)) {
+              seen.add(item.psgc_id);
+              uniqueBarangays.push(item);
             }
-            const options = uniqueBarangays.map((item) => {
-              return { value: item.barangay_id, label: item.name };
-            });
-            setBarangaysOptions(options);
-          },
-          (error) => {
-            console.log(error);
           }
-        );
+          const options = uniqueBarangays.map((item) => {
+            return { value: item.barangay_id, label: item.name };
+          });
+          setBarangaysOptions(options);
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
     }
   }, [openModal]);
 
@@ -273,12 +270,6 @@ function SignupModal({ openModal, toggleModal, props }) {
             }}
             validationSchema={validationSchema}
             onSubmit={async (values) => {
-              const params = {
-                ...values,
-
-                username: `${values.first_name}.${values.surname}`,
-              };
-
               Swal.fire({
                 title: "Submitting...",
                 allowOutsideClick: false,
@@ -286,6 +277,10 @@ function SignupModal({ openModal, toggleModal, props }) {
                   Swal.showLoading();
                 },
               });
+              const params = {
+                ...values,
+                username: `${values.first_name}.${values.surname}`,
+              };
 
               const res = await dispatch(
                 specialPermitClientRegister({ params, history })

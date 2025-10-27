@@ -20,8 +20,15 @@ import Select, { StylesConfig } from "react-select";
 import { FieldArray, Formik } from "formik";
 import useSubmit from "hooks/Common/useSubmit";
 import axios from "axios";
+import BasicInputField from "components/Forms/BasicInputField";
 
-function AddApplicationPurposeModal({ openModal, toggleModal, toggleRefresh }) {
+function AddApplicationPurposeModal({
+  openModal,
+  toggleModal,
+  toggleRefresh,
+  mode,
+  applicationPurpose,
+}) {
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
   const [options, setoptions] = useState();
@@ -49,24 +56,36 @@ function AddApplicationPurposeModal({ openModal, toggleModal, toggleRefresh }) {
 
   useEffect(() => {
     if (openModal) {
-      axios
-        .get("api/admin/get/permit-types", {
-          //   params: { permit_type: "good_moral" },
-        })
-        .then(
-          (res) => {
-            const options = res.data.map((options) => ({
-              value: options.id,
-              label: options.name,
-            }));
-            setoptions(options);
-          },
-          (error) => {
-            console.log(error);
-          }
-        );
+      axios.get("api/admin/get/permit-types").then(
+        (res) => {
+          const options = res.data.map((options) => ({
+            value: options.id,
+            label: options.name,
+          }));
+          setoptions(options);
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
     }
   }, [openModal]);
+  // console.log(applicationPurpose, mode);
+  // useEffect(() => {
+  //   if (mode === "update") {
+  //     formikRef?.current?.setValues({
+  //       name: applicationPurpose.name,
+  //       permit_type: applicationPurpose.special_permit_type_id,
+  //     });
+  //     setrefresh((prev) => !prev);
+  //   } else {
+  //     formikRef?.current?.setValues({
+  //       name: "",
+  //       permit_type: "",
+  //     });
+  //     setrefresh((prev) => !prev);
+  //   }
+  // }, [openModal, applicationPurpose, mode]);
 
   return (
     <React.Fragment>
@@ -78,9 +97,7 @@ function AddApplicationPurposeModal({ openModal, toggleModal, toggleRefresh }) {
         size="m"
         className="modal-dialog-centered"
         style={{
-          //  maxHeight: "90vh",
           overflowY: "auto",
-          // maxWidth: "1400px",
         }}
         unmountOnClose
       >
@@ -95,17 +112,21 @@ function AddApplicationPurposeModal({ openModal, toggleModal, toggleRefresh }) {
               color: "#368be0",
             }}
           >
-            {"NEW APPLICATION PURPOSE"}
+            {mode === "add"
+              ? "NEW APPLICATION PURPOSE"
+              : "UPDATE APPLICATION PURPOSE"}
           </p>
         </ModalHeader>
         <ModalBody>
           <Formik
             innerRef={formikRef}
+            enableReinitialize
             initialValues={{
-              permit_type: "event",
-              name: "sample",
-              attachment: "sample",
-              discount_percent: "2024-10-19",
+              permit_type:
+                mode === "update"
+                  ? applicationPurpose?.special_permit_type_id || ""
+                  : "",
+              name: mode === "update" ? applicationPurpose?.name || "" : "",
             }}
             onSubmit={handleSubmit}
           >
@@ -117,13 +138,21 @@ function AddApplicationPurposeModal({ openModal, toggleModal, toggleRefresh }) {
                       <FormGroup>
                         <Label>Permit Type</Label>
                         <Select
-                          isClearable={true}
-                          name={"permit_type"}
+                          isClearable
+                          name="permit_type"
+                          value={
+                            options
+                              ? options.find(
+                                  (opt) =>
+                                    opt.value === props.values.permit_type
+                                )
+                              : null
+                          }
                           onChange={(selectedOption) => {
                             props.setFieldValue(
                               "permit_type",
                               selectedOption?.value || ""
-                            ); // Send only the value
+                            );
                           }}
                           placeholder="Select Permit Type"
                           options={options}
@@ -132,55 +161,16 @@ function AddApplicationPurposeModal({ openModal, toggleModal, toggleRefresh }) {
                     </Col>
                   </Row>
                   <Row>
-                    <Col md={12}>
-                      <FormGroup>
-                        <Label for="name">Case Name</Label>
-                        <Input
-                          id="name"
-                          name={`name`}
-                          placeholder="Ex. First Time Job Seekers"
-                          onChange={props.handleChange}
-                        />
-                      </FormGroup>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col md={12}>
-                      <FormGroup>
-                        <Label>Discount Percentage</Label>
-                        <Select
-                          isClearable={true}
-                          name={"discount_percent"}
-                          onChange={(selectedOption) => {
-                            props.setFieldValue(
-                              "discount_percent",
-                              selectedOption?.value || ""
-                            );
-                          }}
-                          placeholder="Select Percentage 1-100"
-                          options={discountOptions}
-                        />
-                      </FormGroup>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col>
-                      <FormGroup>
-                        <Label for="attachment">Attachment (Ex. Memo)</Label>
-                        <Input
-                          id="attachment"
-                          name={`attachment`}
-                          onChange={(event) => {
-                            console.log(event);
-                            props.setFieldValue(
-                              "attachment",
-                              event.currentTarget.files[0]
-                            );
-                          }}
-                          type="file"
-                        />
-                      </FormGroup>
-                    </Col>
+                    <BasicInputField
+                      type="text"
+                      label="Purpose"
+                      value={props.values.name}
+                      validation={props}
+                      errors={props.errors.name}
+                      touched={props.touched.name}
+                      name="name"
+                      placeholder="Ex. Purpose...."
+                    />
                   </Row>
                 </Col>
               </Form>
@@ -198,12 +188,19 @@ function AddApplicationPurposeModal({ openModal, toggleModal, toggleRefresh }) {
             }}
             onClick={() => {
               const formik = formikRef.current.values;
-              console.log(formik);
-              const formData = getFormData(formik);
-              console.log(formData);
+
+              const consolidatedData =
+                mode === "add"
+                  ? { ...formik }
+                  : { ...formik, purpose_id: applicationPurpose.id };
+              const formData = getFormData(consolidatedData);
+              const url =
+                mode === "add"
+                  ? "api/admin/create/application-purpose"
+                  : "api/admin/update/application-purpose";
               handleSubmit(
                 {
-                  url: "api/admin/create/discount-case",
+                  url: url,
                   headers: {
                     "Content-Type": "multipart/form-data",
                   },

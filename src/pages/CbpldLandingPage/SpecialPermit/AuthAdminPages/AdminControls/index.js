@@ -24,11 +24,13 @@ import FileViewerModal from "./Modals/FileViewerModal";
 import AddGovernmentPropertyModal from "./Modals/AddGovernmentPropertyModal";
 import Swal from "sweetalert2";
 import {
+  getClearances,
   getExemptedCases,
   getGovernmentProperty,
   getPurpose,
 } from "features/AdminSlice/AdminSlice";
 import useDelete from "hooks/Common/useDelete";
+import UpdateClearanceModal from "./Modals/UpdateClearanceModal";
 
 const AdminControls = () => {
   const [editOccupationState, seteditOccupationState] = useState(false);
@@ -48,7 +50,9 @@ const AdminControls = () => {
   const [mode, setMode] = useState();
   const [property, setProperty] = useState();
   const [selectedApplication, setSelectedApplication] = useState();
-  // const [selectedExemption, setSelectedExemption] = useState();
+  const [selectedExemption, setSelectedExemption] = useState();
+  const [selectedClearance, setSelectedClearance] = useState();
+  const [openUpdateCleranceModal, setOpenUpdateClearanceModal] = useState();
   const dispatch = useDispatch();
 
   const handleSubmit = useSubmit();
@@ -61,19 +65,23 @@ const AdminControls = () => {
   };
 
   const toggleApplicationPurposeModal = () => {
-    setaddApplicationPurposeModal(!addApplicationPurposeModal);
+    setaddApplicationPurposeModal((prev) => !prev);
   };
   const toggleExemptedCaseModal = () => {
-    setaddExemptedCaseModal(!addExemptedCaseModal);
+    setaddExemptedCaseModal((prev) => !prev);
   };
   const toggleFileViewerModal = () => {
     setOpenFileModal((prev) => !prev);
+  };
+  const toggleUdpateClearanceModal = () => {
+    setOpenUpdateClearanceModal((prev) => !prev);
   };
 
   useEffect(() => {
     dispatch(getGovernmentProperty());
     dispatch(getPurpose());
     dispatch(getExemptedCases());
+    dispatch(getClearances());
   }, [refresh]);
 
   const initialValues = {
@@ -152,11 +160,13 @@ const AdminControls = () => {
 
   return (
     <>
-      {/* <AddExemptedCaseModal
+      <AddExemptedCaseModal
         openModal={addExemptedCaseModal}
         toggleModal={toggleExemptedCaseModal}
         toggleRefresh={toggleRefresh}
-      /> */}
+        mode={mode}
+        exemptedCase={selectedExemption}
+      />
 
       <AddApplicationPurposeModal
         openModal={addApplicationPurposeModal}
@@ -175,6 +185,11 @@ const AdminControls = () => {
         isOpen={openPropertyModal}
         mode={mode}
         property={property}
+      />
+      <UpdateClearanceModal
+        isOpen={openUpdateCleranceModal}
+        toggle={toggleUdpateClearanceModal}
+        selectedClearance={selectedClearance}
       />
       <div className="page-content">
         <Container fluid>
@@ -225,6 +240,7 @@ const AdminControls = () => {
                         <Table striped>
                           <thead>
                             <tr>
+                              <th>#</th>
                               <th>Permit Type</th>
                               <th>Case Name</th>
                               <th>Ordinance</th>
@@ -252,6 +268,9 @@ const AdminControls = () => {
                                 admin.exemptedCases?.map((items, index) => {
                                   return (
                                     <tr key={index}>
+                                      <td>
+                                        {isLoading ? "loding ..." : index + 1}
+                                      </td>
                                       <td>
                                         {isLoading
                                           ? "loding ..."
@@ -288,6 +307,8 @@ const AdminControls = () => {
                                             color="warning"
                                             onClick={() => {
                                               setMode("update");
+                                              toggleExemptedCaseModal();
+                                              setSelectedExemption(items);
                                             }}
                                           >
                                             Edit
@@ -472,9 +493,9 @@ const AdminControls = () => {
                       <Table striped>
                         <thead>
                           <tr>
+                            <td>#</td>
                             <th>Permit Type</th>
                             <th>Purpose</th>
-                            <th>Type</th>
                             <th>Actions</th>
                           </tr>
                         </thead>
@@ -499,6 +520,9 @@ const AdminControls = () => {
                                 return (
                                   <tr key={index}>
                                     <td>
+                                      {isLoading ? "loding ..." : index + 1}
+                                    </td>
+                                    <td>
                                       {isLoading
                                         ? "loding ..."
                                         : items.permit_type}
@@ -506,37 +530,127 @@ const AdminControls = () => {
                                     <td>
                                       {isLoading ? "loding ..." : items.name}
                                     </td>
+
+                                    <div className="d-flex gap-2">
+                                      <Button
+                                        size="sm"
+                                        color="warning "
+                                        onClick={() => {
+                                          setSelectedApplication(items);
+                                          setMode("update");
+                                          toggleApplicationPurposeModal();
+                                        }}
+                                      >
+                                        Edit
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        color="danger"
+                                        onClick={() =>
+                                          handleDeleteApplicationPurpose(
+                                            items.id
+                                          )
+                                        }
+                                      >
+                                        Delete
+                                      </Button>
+                                    </div>
+                                  </tr>
+                                );
+                              })
+                            ))
+                          )}
+                        </tbody>
+                      </Table>
+                    </div>
+                  </Row>
+                </CardBody>
+              </Card>
+              <Card>
+                <CardBody>
+                  <Row>
+                    <p
+                      style={{
+                        fontWeight: "bold",
+                        letterSpacing: ".2rem",
+                        fontSize: "18pt",
+                        margin: "0",
+                        padding: "0 0 0 12px",
+                        color: "#368be0",
+                      }}
+                    >
+                      Clearances
+                    </p>
+                    <div
+                      style={{
+                        paddingTop: "25px",
+                        overflowY: "auto",
+                        maxHeight: "35vh",
+                      }}
+                    >
+                      <Table striped>
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Clearances</th>
+                            <th>Amount</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {admin.getClearancesIsFetching ? (
+                            <TableLoaders row={4} col={4} />
+                          ) : (
+                            admin.clearances &&
+                            (admin.clearances.length === 0 ? (
+                              <tr>
+                                <td
+                                  colSpan={4}
+                                  style={{
+                                    textAlign: "center",
+                                  }}
+                                >
+                                  No record found
+                                </td>
+                              </tr>
+                            ) : (
+                              admin.clearances?.map((items, index) => {
+                                return (
+                                  <tr key={index}>
                                     <td>
-                                      {isLoading ? "loding ..." : items.type}
+                                      {isLoading ? "loding ..." : index + 1}
                                     </td>
-                                    {items.type === "temporary" ? (
-                                      <div className="d-flex gap-2">
-                                        <Button
-                                          size="sm"
-                                          color="warning "
-                                          onClick={() => {
-                                            setSelectedApplication(items);
-                                            setMode("update");
-                                            toggleApplicationPurposeModal();
-                                          }}
-                                        >
-                                          Edit
-                                        </Button>
-                                        <Button
-                                          size="sm"
-                                          color="danger"
-                                          onClick={() =>
-                                            handleDeleteApplicationPurpose(
-                                              items.id
-                                            )
-                                          }
-                                        >
-                                          Delete
-                                        </Button>
-                                      </div>
-                                    ) : (
-                                      ""
-                                    )}
+
+                                    <td>
+                                      {isLoading ? "loding ..." : items.name}
+                                    </td>
+                                    <td>
+                                      {isLoading ? "loding ..." : items.amount}
+                                    </td>
+
+                                    <div className="d-flex gap-2">
+                                      <Button
+                                        size="sm"
+                                        color="warning "
+                                        onClick={() => {
+                                          setSelectedClearance(items);
+                                          toggleUdpateClearanceModal();
+                                        }}
+                                      >
+                                        Update
+                                      </Button>
+                                      {/* <Button
+                                        size="sm"
+                                        color="danger"
+                                        onClick={() =>
+                                          handleDeleteApplicationPurpose(
+                                            items.id
+                                          )
+                                        }
+                                      >
+                                        Delete
+                                      </Button> */}
+                                    </div>
                                   </tr>
                                 );
                               })
