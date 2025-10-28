@@ -27,7 +27,7 @@ export default function SecondParagraph({ secondParagraph, scale }) {
             fontSize: `${fontSize}pt`,
             fontWeight: "bold",
             textIndent: `${textIndent}px`,
-            marginBottom: "1em", // em scales with font size automatically
+            marginBottom: "1em",
             textAlign: "justify",
             lineHeight: "1.5",
           }}

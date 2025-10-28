@@ -36,7 +36,7 @@ const ConfirmMail = () => {
           withCredentials: true,
         });
         setMessage("✅ Email verified successfully!");
-        setTimeout(() => history.push("/home"), 2000); // redirect to login after 2s
+        setTimeout(() => history.push("/home"), 2000);
         setIsFetching(false);
       } catch (error) {
         setIsFetching(false);
@@ -88,17 +88,27 @@ const ConfirmMail = () => {
                         </div>
                       </div>
                       <div className="p-2 mt-4">
-                        <div className="mt-4">
+                        <div className="mt-4 text-center">
+                          <p className="fs-4">{message}</p>
                           {isFetching ? (
-                            <Button color="primary" disabled>
-                              <Spinner size="sm">Loading...</Spinner>
-                              <span> Loading</span>
-                            </Button>
-                          ) : (
-                            <Link to="/home" className="btn btn-success">
-                              Back to Home
-                            </Link>
-                          )}
+                            <div className="d-flex gap-1 justify-content-center">
+                              <Spinner color="primary" type="grow" size={"sm"}>
+                                Loading...
+                              </Spinner>
+                              <Spinner color="primary" type="grow" size={"sm"}>
+                                Loading...
+                              </Spinner>
+                              <Spinner color="primary" type="grow" size={"sm"}>
+                                Loading...
+                              </Spinner>
+                              <Spinner color="primary" type="grow" size={"sm"}>
+                                Loading...
+                              </Spinner>
+                              <Spinner color="primary" type="grow" size={"sm"}>
+                                Loading...
+                              </Spinner>
+                            </div>
+                          ) : null}
                         </div>
                       </div>
                     </div>

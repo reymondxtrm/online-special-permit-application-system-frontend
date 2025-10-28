@@ -176,10 +176,10 @@ function GeneratePermitModal({
 
   const handleDefaultFileNmae = async () => {
     const originalTitle = document.title;
-    document.title = data?.application_reference; // Set your desired default file name here
+    document.title = data?.application_reference;
     setTimeout(() => {
-      document.title = originalTitle; // Restore the original title after the print dialog opens
-    }, 5000); // Slight delay to ensure the print dialog uses the updated title
+      document.title = originalTitle;
+    }, 5000);
   };
 
   const addNameToActiveParagraph = () => {
@@ -188,7 +188,7 @@ function GeneratePermitModal({
         setFirstParagraph(
           (prevText) =>
             prevText +
-            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold; font-size: 14pt; text-decoration: underline;">${data?.applicant_name}</span>`
+            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${data?.applicant_name}</span>`
         );
         setFirstParagraphTextArea(
           (prevText) => prevText + data?.applicant_name
@@ -197,7 +197,7 @@ function GeneratePermitModal({
         setSecondParagraph(
           (prevText) =>
             prevText +
-            ` <span style="font-family: 'Bookman Old Style', serif; font-weight: bold; font-size: 14pt; text-decoration: underline;">${data?.applicant_name}</span>`
+            ` <span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${data?.applicant_name}</span>`
         );
         setSecondParagraphTextArea(
           (prevText) => prevText + data?.applicant_name
@@ -207,23 +207,25 @@ function GeneratePermitModal({
   };
   const addOrgaizationToActiveParagraph = () => {
     if (data?.applicant_name && activeParagraph) {
-      // if (activeParagraph === "first") {
-      setFirstParagraph(
-        (prevText) =>
-          prevText +
-          `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold; font-size: 14pt; text-decoration: underline;">${data?.requestor_name}</span>`
-      );
-      setFirstParagraphTextArea((prevText) => prevText + data?.requestor_name);
-      // } else if (activeParagraph === "second") {
-      //   setSecondParagraph(
-      //     (prevText) =>
-      //       prevText +
-      //       ` <span style="font-family: 'Bookman Old Style', serif; font-weight: bold; font-size: 14pt; text-decoration: underline;">${data?.requestor_name}</span>`
-      //   );
-      //   setSecondParagraphTextArea(
-      //     (prevText) => prevText + data?.requestor_name
-      //   );
-      // }
+      if (activeParagraph === "first") {
+        setFirstParagraph(
+          (prevText) =>
+            prevText +
+            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${data?.requestor_name}</span>`
+        );
+        setFirstParagraphTextArea(
+          (prevText) => prevText + data?.requestor_name
+        );
+      } else if (activeParagraph === "second") {
+        setSecondParagraph(
+          (prevText) =>
+            prevText +
+            ` <span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${data?.requestor_name}</span>`
+        );
+        setSecondParagraphTextArea(
+          (prevText) => prevText + data?.requestor_name
+        );
+      }
     }
   };
   const addDateToActiveParagraph = () => {
@@ -232,14 +234,14 @@ function GeneratePermitModal({
         setFirstParagraph(
           (prevText) =>
             prevText +
-            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold; font-size: 14pt; text-decoration: underline;">${concatEventDate}</span>`
+            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${concatEventDate}</span>`
         );
         setFirstParagraphTextArea((prevText) => prevText + concatEventDate);
       } else if (activeParagraph === "second") {
         setSecondParagraph(
           (prevText) =>
             prevText +
-            ` <span style="font-family: 'Bookman Old Style', serif; font-weight: bold; font-size: 14pt; text-decoration: underline;">${concatEventDate}</span>`
+            ` <span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${concatEventDate}</span>`
         );
         setSecondParagraphTextArea((prevText) => prevText + concatEventDate);
       }
@@ -251,7 +253,7 @@ function GeneratePermitModal({
         setFirstParagraph(
           (prevText) =>
             prevText +
-            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold; font-size: 14pt; text-decoration: underline;">${data?.name_of_property}</span>`
+            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${data?.name_of_property}</span>`
         );
         setFirstParagraphTextArea(
           (prevText) => prevText + data?.name_of_property
@@ -260,7 +262,7 @@ function GeneratePermitModal({
         setSecondParagraph(
           (prevText) =>
             prevText +
-            ` <span style="font-family: 'Bookman Old Style', serif; font-weight: bold; font-size: 14pt; text-decoration: underline;">${data?.name_of_property}</span>`
+            ` <span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${data?.name_of_property}</span>`
         );
         setSecondParagraphTextArea(
           (prevText) => prevText + data?.name_of_property
@@ -397,20 +399,20 @@ function GeneratePermitModal({
                         if (applicantName) {
                           styledHTML = styledHTML.replace(
                             new RegExp(applicantName, "g"),
-                            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold; font-size: 14pt; text-decoration: underline;">${applicantName}</span>`
+                            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${applicantName}</span>`
                           );
                         }
 
                         if (requestorName) {
                           styledHTML = styledHTML.replace(
                             new RegExp(requestorName, "g"),
-                            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold; font-size: 14pt; text-decoration: underline;">${requestorName}</span>`
+                            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${requestorName}</span>`
                           );
                         }
                         if (propertyName) {
                           styledHTML = styledHTML.replace(
                             new RegExp(propertyName, "g"),
-                            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold; font-size: 14pt; text-decoration: underline;">${propertyName}</span>`
+                            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${propertyName}</span>`
                           );
                         }
 
@@ -419,7 +421,7 @@ function GeneratePermitModal({
 
                           styledHTML = styledHTML.replace(
                             new RegExp(safeEventDate, "g"),
-                            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold; font-size: 14pt; text-decoration: underline;">${eventDate}</span>`
+                            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${eventDate}</span>`
                           );
                         }
 
@@ -485,6 +487,7 @@ function GeneratePermitModal({
                             padding: "10px",
                             fontSize: "14px",
                             backgroundColor: "#0d6dfc",
+
                             marginLeft: "10px",
                           }}
                         >
@@ -619,7 +622,7 @@ function GeneratePermitModal({
                         if (applicantName) {
                           const styledHTML = plainText.replace(
                             new RegExp(applicantName, "g"),
-                            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold; font-size: 14pt; text-decoration: underline;">${applicantName}</span>`
+                            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold; text-decoration: underline;">${applicantName}</span>`
                           );
                           setSecondParagraph(styledHTML);
                         } else {

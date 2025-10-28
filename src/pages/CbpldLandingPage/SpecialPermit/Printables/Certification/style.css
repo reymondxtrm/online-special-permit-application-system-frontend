@@ -143,8 +143,8 @@
 
   .certificate-wrapper.a4 {
     width: 210mm;
-    height: 295mm !important;
-    max-height: 295mm !important;
+    height: 292mm !important;
+    max-height: 292mm !important;
     page-break-after: always;
   }
 

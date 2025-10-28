@@ -26,7 +26,7 @@ export default function EventName({ eventName, permitType, scale }) {
               fontFamily: "Cambria, serif",
               fontSize: `${fontSize}pt`, // Font size for the rest of the text
               fontWeight: "bold", // Bold for the rest of the text
-              marginBottom: "1em", // Add spacing for readability
+              marginBottom: `${scale * 14}px`, // Add spacing for readability
               textAlign: "center", // Justify the text
               lineHeight: "1.5", // Set line height for readability
             }}

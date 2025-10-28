@@ -50,31 +50,21 @@ const CertificateFormat = React.forwardRef((props, ref) => {
 
   const adjustLayout = useCallback(() => {
     if (!certificateRef.current || adjusting.current) return;
-
     adjusting.current = true;
-
     const maxHeight =
       permitType === "good_moral" || permitType === "mayors_certificate"
         ? 1094
         : 1244;
-
     const height = certificateRef.current.scrollHeight;
     const ratio = maxHeight / height;
-    const newScale = Math.min(ratio, 1); // don’t upscale beyond 1
-
-    // Skip if difference is too small (prevents bouncing)
+    const newScale = Math.min(ratio, 1);
     if (Math.abs(newScale - previousScale.current) < 0.02) {
       adjusting.current = false;
       return;
     }
-
-    console.log("ratio", ratio);
     previousScale.current = newScale;
     previousHeight.current = height;
-
     setScale(newScale);
-
-    // allow next adjustment after re-render settles
     setTimeout(() => (adjusting.current = false), 200);
   }, [permitType]);
   const debouncedAdjustLayout = useCallback(debounce(adjustLayout, 300), [
@@ -136,14 +126,25 @@ const CertificateFormat = React.forwardRef((props, ref) => {
       <div
         ref={certificateRef}
         style={{
-          width:
-            permitType === "good_moral" || permitType === "mayors_permit"
-              ? "208mm"
-              : "215.9mm",
-          height: "100%",
+          width: "100%",
+          // permitType === "good_moral" || permitType === "mayors_permit"
+          //   ? "208mm"
+          //   : "215.9mm",
+          height: "292mm",
+          position: "relative",
+          // overflow: "hidden",
         }}
       >
-        <table className="certificate-table">
+        <div
+          style={{
+            position: "absolute",
+            zIndex: "690000000",
+            backgroundColor: "#ff00008a",
+            height: "100%",
+            width: "100%",
+          }}
+        ></div>
+        <table className="certificate-table" style={{ height: "1034px" }}>
           <tbody>
             <tr className="certificate-header">
               <td colSpan="2">
@@ -181,7 +182,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
               <td colSpan="2" style={{ textAlign: "right" }}>
                 <p
                   style={{
-                    fontSize: "14pt",
+                    fontSize: `${scale * 14}pt`,
                     fontWeight: "bold",
                     color: "#4C9F70",
                     marginRight: "1.5cm",
@@ -192,7 +193,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
               </td>
             </tr>
             <tr>
-              <td colSpan="2">
+              <td colSpan="2" style={{ paddingTop: `-${scale * 1}` }}>
                 <HeadersTitle headerTitle={headerTitle} scale={scale} />
                 <SubHeader
                   permitType={permitType}

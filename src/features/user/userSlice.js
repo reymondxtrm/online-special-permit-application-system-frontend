@@ -68,7 +68,7 @@ export const specialPermitClientRegister = createAsyncThunk(
         data: params,
       });
       if (response.status === 200) {
-        history.push(`/email-verification/${params.email}`);
+        history.push(`/email-verification`);
         return response;
       }
       return thunkAPI.rejectWithValue(response.data);

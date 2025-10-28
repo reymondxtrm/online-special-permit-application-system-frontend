@@ -87,9 +87,10 @@ function SignupModal({ openModal, toggleModal, props }) {
     if (openModal) {
       axios.get("api/geolocation/caraga").then(
         (res) => {
-          const barangays = res.data.region.provinces[0]?.cities[2].barangays;
-          // const barangays = res.data.region.provinces[0]?.cities[1].barangays;
-          console.log(barangays);
+          const barangays = res.data.region.provinces
+            .find((item) => item.name === "Agusan del Norte")
+            .cities.find((item) => item.name === "City of Butuan ").barangays;
+
           const uniqueBarangays = [];
           const seen = new Set();
           for (const item of barangays) {
@@ -279,7 +280,7 @@ function SignupModal({ openModal, toggleModal, props }) {
               });
               const params = {
                 ...values,
-                username: `${values.first_name}.${values.surname}`,
+                username: `${values.first_name.toLowerCase()}.${values.surname.toLowerCase()}`,
               };
 
               const res = await dispatch(
@@ -384,17 +385,6 @@ function SignupModal({ openModal, toggleModal, props }) {
                           errors={props.errors.surname}
                           validation={props}
                           required
-                          onCustomChange={(e) => {
-                            const firstName =
-                              props.values.first_name?.trim().toLowerCase() ||
-                              "";
-                            const surname = e.target.value.trim().toLowerCase();
-                            const username =
-                              firstName && surname
-                                ? `${firstName}.${surname}`
-                                : "";
-                            props.setFieldValue("username", username);
-                          }}
                         />
                       </Col>
 
@@ -998,7 +988,9 @@ function SignupModal({ openModal, toggleModal, props }) {
                         <Input
                           disabled
                           value={
-                            props.values.first_name + "." + props.values.surname
+                            props.values.first_name.toLowerCase() +
+                            "." +
+                            props.values.surname.toLowerCase()
                           }
                         />
                       </FormGroup>

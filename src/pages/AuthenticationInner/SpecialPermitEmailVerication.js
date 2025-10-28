@@ -14,7 +14,7 @@ import { useParams } from "react-router-dom/cjs/react-router-dom.min";
 const SpecialPermitEmailVerication = (props) => {
   document.title = "Email Verification";
   const history = useHistory();
-  const { email } = useParams();
+  const user = useSelector((state) => state.user);
 
   const resendVerificationEmail = async () => {
     try {
@@ -84,13 +84,7 @@ const SpecialPermitEmailVerication = (props) => {
                       <div className="p-2 mt-4">
                         <h4>Verify your email</h4>
                         <p>
-                          We have sent you verification email{" "}
-                          {email && (
-                            <span className="font-weight-semibold">
-                              {email}
-                            </span>
-                          )}
-                          , Please check it
+                          We have sent you verification email, Please check it
                         </p>
                         <button
                           className="btn btn-primary mt-3"

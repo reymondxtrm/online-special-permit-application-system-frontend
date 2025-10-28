@@ -5,8 +5,8 @@ export default function FirstParagraph({ firstParagraph, scale }) {
   const fontSize = baseFontSize * scale;
 
   const marginTop = 10 * scale;
-  const marginLeftRight = 1.5 * scale; // cm
-  const marginBottom = 0.25 * scale; // cm
+  const marginLeftRight = 1.5 * scale;
+  const marginBottom = 0.25 * scale;
   const textIndent = 50 * scale; // px
 
   return (
