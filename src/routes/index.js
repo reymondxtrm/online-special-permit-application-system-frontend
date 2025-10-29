@@ -75,6 +75,9 @@ import SpecialPermitEmailVerication from "pages/AuthenticationInner/SpecialPermi
 import ForgetPasswordPage from "pages/AuthenticationInner/ForgetPassword";
 import ConfirmMail from "pages/AuthenticationInner/page-confirm-mail";
 
+//QR code
+import SpecialPermitDetailsQr from "pages/CbpldLandingPage/SpecialPermit/SpecialPermitDetailsQr";
+
 const authProtectedRoutes = [
   { path: "/dashboard", component: Analytics },
 
@@ -176,6 +179,7 @@ const publicRoutes = [
   },
   { path: "/forgot-password", component: ForgetPasswordPage },
   { path: "/verify-email", component: ConfirmMail },
+  { path: "/special-permit-qr-details/:id", component: SpecialPermitDetailsQr },
 ];
 
 export { authProtectedRoutes, publicRoutes };

@@ -88,6 +88,7 @@
     "react-pdf": "^5.7.2",
     "react-perfect-scrollbar": "^1.5.8",
     "react-photo-view": "^1.2.7",
+    "react-qr-code": "^2.0.18",
     "react-rangeslider": "^2.2.0",
     "react-rating": "^2.0.5",
     "react-rating-tooltip": "^1.2.0",

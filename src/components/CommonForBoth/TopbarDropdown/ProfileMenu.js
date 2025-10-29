@@ -64,7 +64,11 @@ const ProfileMenu = (props) => {
         <DropdownMenu className="dropdown-menu-end">
           <Link className="dropdown-item" to={link}>
             <i className="bx bx-user font-size-16 align-middle me-1" />
-            {props.t("Profile")}
+            {props.t(
+              `${
+                userDetails.user_type === "admin" ? "Admin Control" : "Profile"
+              }`
+            )}
           </Link>
           {/* <Link className="dropdown-item" to="/#">
             <i className="bx bx-lock-open font-size-16 align-middle me-1" />

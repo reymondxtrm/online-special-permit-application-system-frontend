@@ -37,12 +37,13 @@
 }
 
 .header-logo {
-  width: 150px;
-  height: auto;
+  width: 120px !important;
+  height: 120px !important;
 }
 
 .header-line {
   width: 100%;
+  margin-left: -30px;
 }
 
 .header-text {
@@ -128,6 +129,13 @@
   font-weight: bold;
   color: black;
 }
+.qr-wrapper {
+  margin-left: auto; /* pushes it to the end */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-right: 15px;
+}
 
 /* Print Styles */
 @media print {
@@ -136,11 +144,16 @@
     padding: 0;
     background: white;
   }
+  .qr-wrapper {
+    margin-left: auto !important;
+    justify-content: flex-end !important;
+    margin-right: 15px !important;
+  }
 
   .print-btn {
     display: none;
   }
-
+  /* 
   .certificate-wrapper.a4 {
     width: 210mm;
     height: 292mm !important;
@@ -151,8 +164,9 @@
   .certificate-wrapper.folio {
     width: 215.9mm;
     height: 330.2mm !important;
+    max-height: 330.2mm !important;
     page-break-after: always;
-  }
+  } */
 
   .certificate-table {
     width: 100%;
@@ -175,8 +189,38 @@
     justify-content: space-between;
   }
 
+  /* ✅ Fix logo scaling and color */
+  .header-logo {
+    width: 120px !important;
+    height: 120px !important;
+    object-fit: contain;
+    object-position: center;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* ✅ Keep header text size consistent in print */
+  .header-text {
+    font-size: 11pt !important;
+    line-height: 1.2 !important;
+    color: #154172 !important;
+    padding-top: 20px !important;
+    margin-left: 5px !important;
+    transform: scale(1) !important;
+    transform-origin: top left !important;
+  }
+
+  /* ✅ Keep header title bold and same size */
+  .header-title {
+    font-size: 12pt !important;
+    font-weight: bold !important;
+    color: #154172 !important;
+    letter-spacing: 0.3px;
+  }
+
+  /* ✅ Prevent unwanted image scaling globally */
   img {
-    max-width: 100%;
-    max-height: 150px;
+    max-width: none !important;
+    max-height: none !important;
   }
 }

@@ -30,6 +30,7 @@ export default function FirstParagraph({ firstParagraph, scale }) {
               marginBottom: "1em", // em scales with font size automatically
               textAlign: "justify",
               lineHeight: "1.5",
+              flexWrap: "wrap",
             }}
             dangerouslySetInnerHTML={{ __html: firstParagraph }}
           ></p>

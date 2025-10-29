@@ -43,7 +43,6 @@ const ConfirmMail = () => {
         setMessage("❌ Verification link is invalid or expired.");
       }
     };
-
     if (verificationUrl) {
       verifyEmail();
     }

@@ -78,6 +78,7 @@ export const specialPermitClientRegister = createAsyncThunk(
   }
 );
 
+
 export const logoutUser = createAsyncThunk(
   "user/logoutUser",
   async ({ history, userType }, thunkAPI) => {

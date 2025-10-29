@@ -793,6 +793,7 @@ function GeneratePermitModal({
               ordinance={data?.exempted_case_ordinance}
               conditions={conditions}
               eventName={data?.event_name}
+              specialPermitApplicationId={data?.special_permit_application_id}
             />
           </Col>
         </Row>
