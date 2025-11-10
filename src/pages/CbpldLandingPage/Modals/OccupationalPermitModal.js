@@ -19,15 +19,34 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Select, { StylesConfig } from "react-select";
 import { FieldArray, Formik } from "formik";
 import useSubmit from "hooks/Common/useSubmit";
+import axios from "axios";
 
 function OccupationalPermitModal({ openModal, toggleModal }) {
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
+  const [tableData, setTableData] = useState();
+  const [isFetching, setIsFetching] = useState(false);
 
-  const purposeOptions = [
-    { value: 1, label: "Local Employment" },
-    { value: 2, label: "International Employment" },
-  ];
+  useEffect(() => {
+    if (openModal) {
+      const fetchData = async () => {
+        try {
+          setIsFetching(true);
+          const response = await axios.get(
+            "api/client/get-user-occupation-details"
+          );
+          if (response) {
+            setTableData(response.data);
+            setIsFetching(false);
+          }
+        } catch (error) {
+          console.log(error.response);
+          setIsFetching(false);
+        }
+      };
+      fetchData();
+    }
+  }, [openModal]);
 
   const getFormData = (object) => {
     const formData = new FormData();
@@ -51,14 +70,9 @@ function OccupationalPermitModal({ openModal, toggleModal }) {
         isOpen={openModal}
         toggle={toggleModal}
         fade={true}
+        size="lg"
         backdrop="static"
-        size="xl"
         className="modal-dialog-centered"
-        style={{
-          //  maxHeight: "90vh",
-          overflowY: "auto",
-          maxWidth: "1400px",
-        }}
         unmountOnClose
       >
         <ModalHeader toggle={toggleModal}>
@@ -78,399 +92,152 @@ function OccupationalPermitModal({ openModal, toggleModal }) {
         <ModalBody style={{ overflowX: "auto" }}>
           <Formik
             innerRef={formikRef}
+            enableReinitialize
             initialValues={{
               type: "occupational_permit",
-              surname: "",
-              first_name: "",
-              middle_initial: "",
-              suffix: "",
-              date_of_birth: "",
-              place_of_birth: "",
-              civil_status: "",
-              sex: "",
-              contact_no: "",
-              email: "",
-              educational_attainment: "",
-              occupation: "",
-              province: "",
-              city: "",
-              barangay: "",
-              additional_address: "",
+
               certificate_of_employment: "",
               community_tax_certificate: "",
               id_picture: "",
-              health_certificate: "",
               training_certificate: "",
-              official_receipt: "",
-              or_no: "",
-              paid_amount: "",
+              monthly_income: "",
+              company_name: tableData?.company_name || "",
+              company_address: tableData?.full_address || "",
+              position: tableData?.position || "",
             }}
             onSubmit={handleSubmit}
           >
             {(props) => (
               <Form>
                 <Row>
-                  {/* 1st main Col */}
-                  <Col
-                    md={8}
-                    style={{ borderRight: "2px solid", borderColor: "#f0f3f7" }}
-                  >
-                    <Row>
-                      <Col md={4}>
-                        <FormGroup>
-                          <Label for="surname">Surname</Label>
-                          <Input
-                            id="surname"
-                            name={"surname"}
-                            placeholder="Enter Surname"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col md={4}>
-                        <FormGroup>
-                          <Label for="firstName">First Name</Label>
-                          <Input
-                            id="firstName"
-                            name={"first_name"}
-                            placeholder="Enter First Name"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col md={2}>
-                        <FormGroup>
-                          <Label for="middleInitial">M.I</Label>
-                          <Input
-                            id="middleInitial"
-                            name={`middle_initial`}
-                            placeholder="M.I"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-
-                      <Col md={2}>
-                        <FormGroup>
-                          <Label for="suffix">Suffix</Label>
-                          <Input
-                            id="suffix"
-                            name={"suffix"}
-                            placeholder="Ext"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col md={6}>
-                        <FormGroup>
-                          <Label for="dateOfBirth">Date of Birth</Label>
-                          <Input
-                            id="dateOfBirth"
-                            name={"date_of_birth"}
-                            placeholder="Ext"
-                            onChange={props.handleChange}
-                            type="date"
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col md={6}>
-                        <FormGroup>
-                          <Label for="placeOfBirth">Place of Birth</Label>
-                          <Input
-                            id="placeOfBirth"
-                            name={"place_of_birth"}
-                            placeholder="Place of Birth"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col md={4}>
-                        <FormGroup>
-                          <Label for="civilStatus">Civil Status</Label>
-                          <Input
-                            id="civilStatus"
-                            name={"civil_status"}
-                            placeholder="Civil Status"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col md={4}>
-                        <FormGroup>
-                          <Label for="sex">Sex</Label>
-                          <Input
-                            id="sex"
-                            name={"sex"}
-                            placeholder="Sex"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col md={4}>
-                        <FormGroup>
-                          <Label for="contactNo">Contact Number</Label>
-                          <Input
-                            id="contactNo"
-                            name={"contact_no"}
-                            placeholder="Enter Contact No."
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col md={12}>
-                        <FormGroup>
-                          <Label for="email">Email Address</Label>
-                          <Input
-                            id="email"
-                            name={"email"}
-                            placeholder="Enter Email Address"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col md={6}>
-                        <FormGroup>
-                          <Label for="educationalAttainment">
-                            Educational Attainment
-                          </Label>
-                          <Input
-                            id="educationalAttainment"
-                            name={"educational_attainment"}
-                            placeholder="Educational Attainment"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col md={6}>
-                        <FormGroup>
-                          <Label for="occupation">Occupation</Label>
-                          <Input
-                            id="occupation"
-                            name={"occupation"}
-                            placeholder="Enter Occupation"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col md={4}>
-                        <FormGroup>
-                          <Label for="province">Province</Label>
-                          <Select
-                            name={"province"}
-                            // isMulti
-                            isClearable={true}
-                            placeholder="Select Province"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col md={4}>
-                        <FormGroup>
-                          <Label for="province">City</Label>
-                          <Select
-                            name={"city"}
-                            // isMulti
-                            isClearable={true}
-                            placeholder="Select City"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col md={4}>
-                        <FormGroup>
-                          <Label for="province">Barangay</Label>
-                          <Select
-                            name={"barangay"}
-                            // isMulti
-                            isClearable={true}
-                            placeholder="Select Barangay"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col md={12}>
-                        <FormGroup>
-                          <Label for="additionalAddress">
-                            Additional Address
-                          </Label>
-                          <Input
-                            id="additionalAddress"
-                            name={"additional_address"}
-                            placeholder="Enter Additional Address"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                  </Col>
-                  {/* 2nd Main Col */}
                   <Col>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <Label for="certificateOfEmployment">
-                            Certificate of Employment
-                          </Label>
-                          <Input
-                            id="certificateOfEmployment"
-                            name={`certificate_of_employment`}
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "certificate_of_employment",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            type="file"
-                          />
-                          {/* <FormText>
-                        This is some placeholder block-level help text for the
-                        above input. It‘s a bit lighter and easily wraps to a
-                        new line.
-                      </FormText> */}
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <Label for="taxCert">Community Tax Certificate</Label>
-                          <Input
-                            id="taxCert"
-                            name={`community_tax_certificate`}
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "community_tax_certificate",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            type="file"
-                          />
-                          {/* <FormText>
-                        This is some placeholder block-level help text for the
-                        above input. It‘s a bit lighter and easily wraps to a
-                        new line.
-                      </FormText> */}
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <Label for="idPicture">ID Picture</Label>
-                          <Input
-                            id="idPicture"
-                            name={`id_picture`}
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "id_picture",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            type="file"
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <Label for="healthCertificate">
-                            Health Certificate
-                          </Label>
-                          <Input
-                            id="healthCertificate"
-                            name={`health_certificate`}
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "health_certificate",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            type="file"
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <Label for="trainingCertificate">
-                            Training Certificate
-                          </Label>
-                          <Input
-                            id="trainingCertificate"
-                            name={`training_certificate`}
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "training_certificate",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            type="file"
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <Label for="orNo">Official Receipt (OR)</Label>
-                          <Input
-                            id="orNo"
-                            name={`orNo`}
-                            onChange={props.handleChange}
-                            placeholder="Enter O.R No."
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col>
-                        <FormGroup>
-                          <Label for="amountPaid">Amount Paid</Label>
-                          <Input
-                            id="amountPaid"
-                            name={`paid_amount`}
-                            onChange={props.handleChange}
-                            placeholder="Enter Amount"
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <Label for="officialReceipt">Official Receipt</Label>
-                          <Input
-                            id="officialReceipt"
-                            name={`official_receipt`}
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "official_receipt",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            type="file"
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
+                    <Table borderless>
+                      <tbody>
+                        <tr>
+                          <td className="text-end">
+                            <Label>Company Name:</Label>
+                          </td>
+                          <td>
+                            <Input value={props.values.company_name} disabled />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="text-end">
+                            <Label>Company Address:</Label>
+                          </td>
+                          <td>
+                            <Input
+                              value={props.values.company_address}
+                              disabled
+                            />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="text-end">
+                            <Label>Occupation:</Label>
+                          </td>
+                          <td>
+                            <Input value={props.values.position} disabled />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="text-end">
+                            <Label>Monthly Income:</Label>
+                          </td>
+                          <td>
+                            <Input
+                              id="monthy_income"
+                              name={"monthly_income"}
+                              placeholder="0.00"
+                              type="number"
+                              step="0.01"
+                              onChange={props.handleChange}
+                              value={props.values.monthly_income}
+                            />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="text-end">
+                            <Label>Certificate of Employment:</Label>
+                          </td>
+                          <td>
+                            <Input
+                              accept="image/*"
+                              id="certificateOfEmployment"
+                              name={`certificate_of_employment`}
+                              onChange={(event) => {
+                                console.log(event);
+                                props.setFieldValue(
+                                  "certificate_of_employment",
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              type="file"
+                            />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="text-end">
+                            <Label>Community Tax Certificate:</Label>
+                          </td>
+                          <td>
+                            <Input
+                              accept="image/*"
+                              id="communityTaxCertificate"
+                              name={`community_tax_certificate`}
+                              onChange={(event) => {
+                                console.log(event);
+                                props.setFieldValue(
+                                  "community_tax_certificate",
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              type="file"
+                            />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="text-end">
+                            <Label>ID Picture:</Label>
+                          </td>
+                          <td>
+                            <Input
+                              accept="image/*"
+                              id="idPicture"
+                              name={`id_picture`}
+                              onChange={(event) => {
+                                console.log(event);
+                                props.setFieldValue(
+                                  "id_picture",
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              type="file"
+                            />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="text-end">
+                            <Label>Training Certificate:</Label>
+                          </td>
+                          <td>
+                            <Input
+                              id="trainingCertificate"
+                              accept="image/*"
+                              name={`training_certificate`}
+                              onChange={(event) => {
+                                console.log(event);
+                                props.setFieldValue(
+                                  "training_certificate",
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              type="file"
+                            />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </Table>
                   </Col>
                 </Row>
               </Form>
@@ -488,14 +255,13 @@ function OccupationalPermitModal({ openModal, toggleModal }) {
             }}
             onClick={() => {
               const formik = formikRef.current.values;
-              // console.log(formik);
-              // console.log(formik.amountPaid);
-              // var bodyFormData = getFormData(formik);
               const formData = getFormData(formik);
-              console.log(formData);
+              // console.log(formik);
+              // return;
+
               handleSubmit(
                 {
-                  url: "api/client/special-permit/occupational-permit",
+                  url: "api/client/single-occupational-permit-application",
                   headers: {
                     "Content-Type": "multipart/form-data",
                   },

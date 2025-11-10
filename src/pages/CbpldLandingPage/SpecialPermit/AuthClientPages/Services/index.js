@@ -179,8 +179,8 @@ function Services() {
                       />
                       <PermitCard
                         title={"OCCUPATIONAL PERMIT"}
-                        isDisabled={true}
-                        content={"Coming Soon..."}
+                        isDisabled={false}
+                        content={"Click go to Form to Apply..."}
                         onClick={() => {
                           toggleModal("OCCUPATIONAL PERMIT");
                         }}

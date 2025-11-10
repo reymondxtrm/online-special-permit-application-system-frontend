@@ -52,21 +52,23 @@ function UseOfGovernmentPropertyModal({ openModal, toggleModal }) {
     setIsProceed((prev) => !prev);
   };
   useEffect(() => {
-    const fetch = async () => {
-      try {
-        const response = await axios.get("api/get-government-property");
-        if (response) {
-          const options = response.data.map((item) => {
-            return { value: item.id, label: item.name };
-          });
-          setPropertyOptions(options);
+    if (openModal) {
+      const fetch = async () => {
+        try {
+          const response = await axios.get("api/get-government-property");
+          if (response) {
+            const options = response.data.map((item) => {
+              return { value: item.id, label: item.name };
+            });
+            setPropertyOptions(options);
+          }
+        } catch (error) {
+          console.log(error);
         }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetch();
-  }, []);
+      };
+      fetch();
+    }
+  }, [openModal]);
   return (
     <React.Fragment>
       <Modal
