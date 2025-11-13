@@ -7,7 +7,7 @@ import useSubmit from "hooks/Common/useSubmit";
 
 import Swal from "sweetalert2";
 import axios from "axios";
-
+// migrate this one into authentication pages
 export default function CompanyRegistrationForm({
   brangaysOptions,
   toggleModal,
@@ -31,7 +31,6 @@ export default function CompanyRegistrationForm({
       username: "",
     },
     onSubmit: async (values, { resetForm }) => {
-      //make this into redux astate and create dispatch on this
       try {
         Swal.fire({
           title: "Processing...",

@@ -151,7 +151,7 @@ const ClientDashboard = () => {
                         applicationType={"use_of_government_property"}
                       />
                     </Tab>
-                    {/* <Tab
+                    <Tab
                       eventKey="occupational_permit"
                       title="OCCUPATIONAL PERMIT"
                     >
@@ -160,7 +160,7 @@ const ClientDashboard = () => {
                         activeTab={activeTab}
                         applicationType={"occupational_permit"}
                       />
-                    </Tab> */}
+                    </Tab>
                   </Tabs>
                 </CardBody>
               </Card>

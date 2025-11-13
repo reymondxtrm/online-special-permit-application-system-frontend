@@ -31,7 +31,7 @@ function EventModal({ openModal, toggleModal }) {
     const formData = new FormData();
     Object.keys(object).forEach((key) => {
       if (object[key] instanceof File || object[key] instanceof Blob) {
-        formData.append(key, object[key]); // Directly append files
+        formData.append(key, object[key]); 
       } else if (Array.isArray(object[key])) {
         object[key].forEach((item) => formData.append(`${key}[]`, item));
       } else if (typeof object[key] === "object" && object[key] !== null) {

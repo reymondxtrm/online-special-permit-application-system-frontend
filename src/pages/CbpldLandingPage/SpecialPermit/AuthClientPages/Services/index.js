@@ -18,6 +18,8 @@ import ParadeModal from "../../../Modals/ParadeModal";
 import RecorridaModal from "../../../Modals/RecorridaModal";
 import UseOfGovernmentPropertyModal from "../../../Modals/UseOfGovernmentPropertyModal";
 import OccupationalPermitModal from "../../../Modals/OccupationalPermitModal";
+import { useSelector } from "react-redux";
+import CompanyOccupationalPermitModal from "pages/CbpldLandingPage/Modals/CompanyOccupationalPermitModal";
 const PermitCard = ({ title, content, onClick, isDisabled }) => (
   <Col sm="3">
     <Card style={styles.card}>
@@ -40,6 +42,11 @@ function Services() {
   const [recorridaModal, setrecorridaModal] = useState(false);
   const [useOfGovPropModal, setuseOfGovPropModal] = useState(false);
   const [occupationalPermitModal, setoccupationalPermitModal] = useState(false);
+  const [
+    companyOccupationApplicationModal,
+    setCompanyOccupationalApplicationModal,
+  ] = useState(false);
+  const user = useSelector((state) => state.user);
 
   const toggleModal = (permitType) => {
     switch (permitType) {
@@ -58,7 +65,11 @@ function Services() {
       case "USE OF GOVERNMENT PROPERTY":
         return setuseOfGovPropModal((prevState) => !prevState);
       case "OCCUPATIONAL PERMIT":
-        return setoccupationalPermitModal((prevState) => !prevState);
+        if (user.accountType === "individual") {
+          return setoccupationalPermitModal((prevState) => !prevState);
+        } else {
+          return setCompanyOccupationalApplicationModal((prev) => !prev);
+        }
       default:
         return <p>Select a permit type to see the form.</p>;
     }
@@ -74,7 +85,6 @@ function Services() {
         openModal={goodMoralModal}
         toggleModal={() => toggleModal("GOOD MORAL")}
       />
-
       <EventModal
         openModal={eventModal}
         toggleModal={() => toggleModal("EVENT")}
@@ -104,6 +114,10 @@ function Services() {
         openModal={occupationalPermitModal}
         toggleModal={() => toggleModal("OCCUPATIONAL PERMIT")}
       />
+      <CompanyOccupationalPermitModal
+        isOpen={companyOccupationApplicationModal}
+        toggleModal={() => toggleModal("OCCUPATIONAL PERMIT")}
+      />
       <div className="page-content" style={styles.section}>
         <Container fluid>
           <Breadcrumbs title="Services" breadcrumbItem="Application Forms" />
@@ -120,63 +134,69 @@ function Services() {
                           </div> */}
                       </Col>
                     </Row>
+
                     <Row style={{ paddingTop: "90px" }}>
-                      <PermitCard
-                        title={"MAYORS CERTIFICATE"}
-                        isDisabled={false}
-                        content={"Click go to Form to Apply..."}
-                        onClick={() => {
-                          toggleModal("MAYORS CERTIFICATE");
-                        }}
-                      />
-                      <PermitCard
-                        title={"GOOD MORAL"}
-                        isDisabled={false}
-                        content={"Click go to Form to Apply..."}
-                        onClick={() => {
-                          toggleModal("GOOD MORAL");
-                        }}
-                      />
-                      <PermitCard
-                        title={"EVENT"}
-                        isDisabled={false}
-                        content={"Click go to Form to Apply..."}
-                        onClick={() => {
-                          toggleModal("EVENT");
-                        }}
-                      />
-                      <PermitCard
-                        title={"MOTORCADE"}
-                        isDisabled={false}
-                        content={"Click go to Form to Apply..."}
-                        onClick={() => {
-                          toggleModal("MOTORCADE");
-                        }}
-                      />
-                      <PermitCard
-                        title={"PARADE"}
-                        isDisabled={false}
-                        content={"Click go to Form to Apply..."}
-                        onClick={() => {
-                          toggleModal("PARADE");
-                        }}
-                      />
-                      <PermitCard
-                        title={"RECORRIDA"}
-                        isDisabled={false}
-                        content={"Click go to Form to Apply..."}
-                        onClick={() => {
-                          toggleModal("RECORRIDA");
-                        }}
-                      />
-                      <PermitCard
-                        title={"USE OF GOVERNMENT PROPERTY"}
-                        isDisabled={false}
-                        content={"Click go to Form to Apply..."}
-                        onClick={() => {
-                          toggleModal("USE OF GOVERNMENT PROPERTY");
-                        }}
-                      />
+                      {user.accountType === "individual" && (
+                        <>
+                          <PermitCard
+                            title={"MAYORS CERTIFICATE"}
+                            isDisabled={false}
+                            content={"Click go to Form to Apply..."}
+                            onClick={() => {
+                              toggleModal("MAYORS CERTIFICATE");
+                            }}
+                          />
+                          <PermitCard
+                            title={"GOOD MORAL"}
+                            isDisabled={false}
+                            content={"Click go to Form to Apply..."}
+                            onClick={() => {
+                              toggleModal("GOOD MORAL");
+                            }}
+                          />
+                          <PermitCard
+                            title={"EVENT"}
+                            isDisabled={false}
+                            content={"Click go to Form to Apply..."}
+                            onClick={() => {
+                              toggleModal("EVENT");
+                            }}
+                          />
+                          <PermitCard
+                            title={"MOTORCADE"}
+                            isDisabled={false}
+                            content={"Click go to Form to Apply..."}
+                            onClick={() => {
+                              toggleModal("MOTORCADE");
+                            }}
+                          />
+                          <PermitCard
+                            title={"PARADE"}
+                            isDisabled={false}
+                            content={"Click go to Form to Apply..."}
+                            onClick={() => {
+                              toggleModal("PARADE");
+                            }}
+                          />
+                          <PermitCard
+                            title={"RECORRIDA"}
+                            isDisabled={false}
+                            content={"Click go to Form to Apply..."}
+                            onClick={() => {
+                              toggleModal("RECORRIDA");
+                            }}
+                          />
+                          <PermitCard
+                            title={"USE OF GOVERNMENT PROPERTY"}
+                            isDisabled={false}
+                            content={"Click go to Form to Apply..."}
+                            onClick={() => {
+                              toggleModal("USE OF GOVERNMENT PROPERTY");
+                            }}
+                          />
+                        </>
+                      )}
+
                       <PermitCard
                         title={"OCCUPATIONAL PERMIT"}
                         isDisabled={false}

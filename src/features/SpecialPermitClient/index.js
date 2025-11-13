@@ -20,11 +20,13 @@ export const getClientTableData = createAsyncThunk(
     }
   }
 );
+
 export const SpecialPermitClientSlice = createSlice({
   name: "specialPermitClient",
   initialState: {
     clientTableData: [],
     getTableDataIsFetching: false,
+
     errors: "",
     params: {},
   },

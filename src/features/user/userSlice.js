@@ -78,7 +78,6 @@ export const specialPermitClientRegister = createAsyncThunk(
   }
 );
 
-
 export const logoutUser = createAsyncThunk(
   "user/logoutUser",
   async ({ history, userType }, thunkAPI) => {
@@ -139,6 +138,7 @@ export const userSlice = createSlice({
     roles: [],
     user_type: "",
     username: "",
+    accountType: "",
     withCompanyDetails: "",
     isFetching: false,
     isSuccess: false,
@@ -190,6 +190,7 @@ export const userSlice = createSlice({
       state.email = payload.user.email;
       state.id = payload.user.id;
       state.user_type = payload.user.user_type;
+      state.accountType = payload.user.account_type;
       state.roles = payload.roles;
       state.username = payload.user.username;
       state.isFetching = false;

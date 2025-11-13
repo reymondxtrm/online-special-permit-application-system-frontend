@@ -6,18 +6,14 @@ import {
   ModalBody,
   ModalFooter,
   Table,
-  Badge,
   Form,
   Row,
   Col,
   Input,
   Label,
-  FormGroup,
 } from "reactstrap";
-import { faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Select, { StylesConfig } from "react-select";
-import { FieldArray, Formik } from "formik";
+
+import { Formik } from "formik";
 import useSubmit from "hooks/Common/useSubmit";
 import axios from "axios";
 

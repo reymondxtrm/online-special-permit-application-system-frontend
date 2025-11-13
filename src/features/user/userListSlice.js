@@ -29,7 +29,26 @@ export const getUserList = createAsyncThunk(
         method: "GET",
         params: filters,
       });
-      // console.log(response.data);
+      if (response.data) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(response);
+      }
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
+export const getCompanyListUnvalidated = createAsyncThunk(
+  "users/getCompanyListUnvalidated",
+  async (filters, thunkAPI) => {
+    try {
+      const response = await axios({
+        url: "api/admin/get-OSPAS-users",
+        method: "GET",
+        params: { ...filters },
+      });
+
       if (response.data) {
         return response.data;
       } else {
@@ -48,7 +67,7 @@ export const getUserListControls = createAsyncThunk(
       const response = await axios({
         url: "api/admin/get-user-list-controls",
         method: "GET",
-        params: filters,
+        params: { ...filters },
       });
       if (response.data.status === 200) {
         return { ...response.data };
@@ -81,20 +100,23 @@ export const userListSlice = createSlice({
   name: "userList",
   initialState: {
     users: [],
+    unvalidatedUser: [],
     divisions: [],
     userRoles: [],
     personnel: [],
     errors: "",
     isFetching: false,
+    getCompanyListUnvalidatedIsFetching: false,
   },
   reducers: {
     clearState: (state) => {
       state.users = [];
-      state.divisions = [];
+      state.state.divisions = [];
       state.userRoles = [];
       state.personnel = [];
       state.errors = "";
       state.isFetching = false;
+      state.unvalidatedUser;
       return state;
     },
     setListState: (state, action) => {
@@ -105,6 +127,12 @@ export const userListSlice = createSlice({
       state.users = action.payload;
     },
     setShowLoading: (state, action) => {
+      state.isFetching = action.payload;
+    },
+    setDataUnvalidatedUserProps: (state, action) => {
+      state.users = action.payload;
+    },
+    setShowUnvalidatedIsLoading: (state, action) => {
       state.isFetching = action.payload;
     },
   },
@@ -152,6 +180,16 @@ export const userListSlice = createSlice({
       state.personnel = payload.data;
     },
     [getPersonnel.rejected]: (state, { payload }) => {
+      state.isFetching = false;
+    },
+    [getCompanyListUnvalidated.pending]: (state) => {
+      state.isFetching = true;
+    },
+    [getCompanyListUnvalidated.fulfilled]: (state, { payload }) => {
+      state.isFetching = false;
+      state.unvalidatedUser = payload;
+    },
+    [getCompanyListUnvalidated.rejected]: (state, { payload }) => {
       state.isFetching = false;
     },
   },

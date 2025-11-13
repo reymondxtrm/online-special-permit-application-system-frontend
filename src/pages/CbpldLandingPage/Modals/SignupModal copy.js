@@ -29,6 +29,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { specialPermitClientRegister } from "features/user/userSlice";
 import Swal from "sweetalert2";
 import { useHistory } from "react-router-dom/cjs/react-router-dom";
+import { BLOOD_TYPE_OPTIONS } from "../../../assets/data/data";
 
 function SignupModal({ openModal, toggleModal, props }) {
   const formikRef = useRef(null);
@@ -69,16 +70,7 @@ function SignupModal({ openModal, toggleModal, props }) {
     { value: "student", label: "Student" },
     { value: "retired", label: "Retired" },
   ];
-  const bloodTypeOptions = [
-    { value: "A+", label: "A+" },
-    { value: "A-", label: "A-" },
-    { value: "B+", label: "B+" },
-    { value: "B-", label: "B-" },
-    { value: "AB+", label: "AB+" },
-    { value: "AB-", label: "AB-" },
-    { value: "O+", label: "O+" },
-    { value: "O-", label: "O-" },
-  ];
+
   const needCompanyDetailsEmploymentStatus = [
     "employed",
     "mixed_income_earner",
@@ -458,9 +450,9 @@ function SignupModal({ openModal, toggleModal, props }) {
                             isClearable
                             placeholder="Blood Type"
                             name="blood_type"
-                            options={bloodTypeOptions}
+                            options={BLOOD_TYPE_OPTIONS}
                             value={
-                              bloodTypeOptions?.find(
+                              BLOOD_TYPE_OPTIONS?.find(
                                 (option) =>
                                   option.value === props.values.blood_type
                               ) || null
