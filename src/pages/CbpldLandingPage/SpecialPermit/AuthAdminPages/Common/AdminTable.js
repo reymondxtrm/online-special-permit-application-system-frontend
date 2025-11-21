@@ -104,7 +104,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
 
     return `${firstName} ${middleName} ${lastName}`;
   };
-
   const toggleGenerateModal = () => {
     setgenerateModal(!generateModal);
   };
@@ -771,18 +770,10 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                           >
                             <DropdownItem
                               onClick={() => {
-                                // const formik = formikRef.current.values;
-                                // const formData = getFormData(formik);
-                                // formData.append(
-                                //   "special_permit_application_id",
-                                //   applicationId
-                                // );
                                 handleSubmit(
                                   {
                                     url: "api/admin/approve-payment",
-                                    // headers: {
-                                    //   "Content-Type": "multipart/form-data",
-                                    // },
+
                                     message: {
                                       title:
                                         "Are you sure you want to Proceed?",

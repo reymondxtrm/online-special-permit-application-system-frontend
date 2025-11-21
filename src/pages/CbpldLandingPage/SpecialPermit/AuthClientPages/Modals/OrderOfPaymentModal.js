@@ -14,6 +14,8 @@ function OrderOfPaymentModal({
   formatDate,
   userData,
   clearance,
+  quantity = 1,
+  paymentDetails,
 }) {
   const ref = useRef();
   const downloadImage = () => {
@@ -30,6 +32,7 @@ function OrderOfPaymentModal({
         });
     }
   };
+  // console.log(created_at, fullname);
 
   return (
     <React.Fragment>
@@ -130,6 +133,17 @@ function OrderOfPaymentModal({
                         style={{
                           border: "1px solid black",
                           padding: "8px",
+                          textAlign: "left",
+                          fontWeight: "bold",
+                          backgroundColor: "#f0f0f0",
+                        }}
+                      >
+                        Quantity
+                      </th>
+                      <th
+                        style={{
+                          border: "1px solid black",
+                          padding: "8px",
                           textAlign: "right",
                           fontWeight: "bold",
                           backgroundColor: "#f0f0f0",
@@ -141,35 +155,15 @@ function OrderOfPaymentModal({
                   </thead>
                   <tbody>
                     {descriptions.map((desc, idx) => (
-                      <tr key={idx}>
-                        <td
-                          style={{ border: "1px solid black", padding: "8px" }}
-                        >
-                          &bull; {desc.label}
-                        </td>
-                        <td
-                          style={{
-                            border: "1px solid black",
-                            padding: "8px",
-                            textAlign: "right",
-                          }}
-                        >
-                          {applicationType === desc.type
-                            ? orderOfPaymentData?.billed_amount
-                            : null}
-                        </td>
-                      </tr>
-                    ))}
-                    {clearance &&
-                      clearance.map((item) => (
-                        <tr key={item.id}>
+                      <React.Fragment key={idx}>
+                        <tr>
                           <td
                             style={{
                               border: "1px solid black",
                               padding: "8px",
                             }}
                           >
-                            &bull; {item.name}
+                            &bull; {desc.label}
                           </td>
                           <td
                             style={{
@@ -177,9 +171,25 @@ function OrderOfPaymentModal({
                               padding: "8px",
                               textAlign: "right",
                             }}
-                          >{`${item.amount}`}</td>
+                          >
+                            {applicationType === desc.type
+                              ? paymentDetails.quantity
+                              : null}
+                          </td>
+                          <td
+                            style={{
+                              border: "1px solid black",
+                              padding: "8px",
+                              textAlign: "right",
+                            }}
+                          >
+                            {applicationType === desc.type
+                              ? paymentDetails.billed_amount
+                              : null}
+                          </td>
                         </tr>
-                      ))}
+                      </React.Fragment>
+                    ))}
                     <tr>
                       <td
                         style={{
@@ -194,10 +204,18 @@ function OrderOfPaymentModal({
                         style={{
                           border: "1px solid black",
                           padding: "8px",
+                        }}
+                      >
+                        {paymentDetails?.quantity}
+                      </td>
+                      <td
+                        style={{
+                          border: "1px solid black",
+                          padding: "8px",
                           textAlign: "right",
                         }}
                       >
-                        {orderOfPaymentData?.total_amount}
+                        {`₱ ${paymentDetails.total_amount}`}
                       </td>
                     </tr>
                   </tbody>
@@ -208,10 +226,10 @@ function OrderOfPaymentModal({
               <div style={{ marginTop: "20px", textAlign: "left" }}>
                 <p>
                   <strong>Evaluated by:</strong>{" "}
-                  <strong>{orderOfPaymentData?.fullname}</strong>
+                  <strong>{paymentDetails?.fullname}</strong>
                   <br />
                   <strong>Date and Time: </strong>
-                  {formatDate(orderOfPaymentData?.created_at)}
+                  {formatDate(paymentDetails?.created_at)}
                 </p>
                 <p
                   style={{

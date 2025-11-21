@@ -37,14 +37,17 @@ import spayLogo from "../../../../../assets/images/logo-spay.jpg";
 import gcashLogo from "../../../../../assets/images/logo-gcash.png";
 import grabpayLogo from "../../../../../assets/images/logo-grabpay.png";
 import TermsAndConditions from "./TermsAndConditions";
+import CryptoJS from "crypto-js";
+import { useSelector } from "react-redux";
+import UserDetails from "components/Modals/UserDetails";
+import { v4 as uuidv4 } from "uuid";
 
 function PaymentModal({
   openModal,
   toggleModal,
   toggleRefresh,
   applicationId,
-  amount,
-  orderOfPaymentData,
+  paymentDetails,
   applicationType,
 }) {
   const handleSubmit = useSubmit();
@@ -62,6 +65,8 @@ function PaymentModal({
   const toggleTermsAndConditionsModal = () => {
     setTermsAndConditionsModal((prev) => !prev);
   };
+
+  const user = useSelector((state) => state.user);
   const formatDate = (dateString) => {
     if (!dateString) return "No Date Provided"; // Handle missing date
     const date = new Date(dateString);
@@ -72,6 +77,7 @@ function PaymentModal({
       year: "numeric",
     }).format(date);
   };
+
   useEffect(() => {
     if (openModal) {
       setisLoading(true);
@@ -101,7 +107,7 @@ function PaymentModal({
         });
     }
   }, [openModal]);
-  console.log(approveTerm);
+
   const descriptions = [
     { label: "Mayor's Permit", type: "mayors_permit" },
     { label: "Event", type: "event" },
@@ -110,9 +116,9 @@ function PaymentModal({
     { label: "Recorrida", type: "recorrida" },
     { label: "Use Government Property", type: "government_property" },
     { label: "Certificate of Good Moral Character", type: "good_moral" },
+    { label: "Occupational Permit", type: "occupational_permit" },
     { label: "Fiscal Clearance Fee", type: "fiscal_clearance" },
     { label: "Court Clearance Fee", type: "court_clearance" },
-    { label: "Occupational Permit", type: "occupational_permit" },
   ];
   const getFormData = (object) => {
     const formData = new FormData();
@@ -133,18 +139,40 @@ function PaymentModal({
     return descriptions.find((item) => item.type === applicationType);
   }, [applicationType]);
 
+  const eor_collection = useMemo(() => {
+    let collection = [
+      {
+        name: type?.label,
+        amount: paymentDetails.total_amount,
+        quantity: paymentDetails.quantity,
+        account_code: "",
+      },
+    ];
+    if (applicationType === "good_moral") {
+      clearance.map((item) => {
+        collection.push({
+          name: item.name,
+          amount: item.amount * paymentDetails?.quantity,
+          quantity: paymentDetails?.quantity,
+          account_code: "",
+        });
+      });
+    }
+    return collection;
+  }, [applicationType, applicationId, type]);
+  console.log(eor_collection);
   return (
     <React.Fragment>
       <OrderOfPaymentModal
         toggleModal={toggleGenerateModal}
         openModal={generateModal}
-        orderOfPaymentData={orderOfPaymentData}
         applicationType={applicationType}
         isLoading={isLoading}
         descriptions={descriptions}
         formatDate={formatDate}
         userData={userData}
         clearance={clearance}
+        paymentDetails={paymentDetails}
       />
       <TermsAndConditions
         isOpen={termsAndConditionsModal}
@@ -157,7 +185,6 @@ function PaymentModal({
         fade={true}
         backdrop="static"
         size="lg"
-        // fullscreen
         className="modal-dialog-centered"
         style={{ overflowY: "auto" }}
         unmountOnClose
@@ -167,7 +194,7 @@ function PaymentModal({
           <Formik
             innerRef={formikRef}
             initialValues={{
-              paid_amount: amount,
+              // paid_amount: amount,
               or_no: "",
               date_of_payment: "",
               attachment: "",
@@ -242,28 +269,39 @@ function PaymentModal({
                               <thead>
                                 <tr>
                                   <th>Description</th>
+                                  <th>quantity</th>
                                   <th>Amount</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 <tr>
                                   <td>{type.label}</td>
-                                  <td>{`₱ ${orderOfPaymentData?.billed_amount}`}</td>
+                                  <td>{paymentDetails?.quantity}</td>
+                                  <td>{`₱${paymentDetails?.billed_amount}.00`}</td>
+                                  {/* <td>{`₱ ${orderOfPaymentData?.billed_amount}`}</td> */}
                                 </tr>
-                                {clearance &&
-                                  clearance.map((item) => (
-                                    <tr key={item.id}>
-                                      <td> {item.name}</td>
-                                      <td>{`₱ ${item.amount}`}</td>
-                                    </tr>
-                                  ))}
+                                {applicationType === "good_moral"
+                                  ? clearance &&
+                                    clearance.map((item) => (
+                                      <tr key={item.id}>
+                                        <td> {item.name}</td>
+                                        <td> {paymentDetails.quantity}</td>
+                                        <td>{`₱ ${item.amount}`}</td>
+                                      </tr>
+                                    ))
+                                  : null}
                                 <tr style={{ height: "100px" }}>
                                   <td></td>
                                   <td></td>
                                 </tr>
                                 <tr>
                                   <td>Total</td>
-                                  <td>{`₱ ${orderOfPaymentData?.total_amount}`}</td>
+                                  <td>{`${
+                                    applicationType === "good_moral"
+                                      ? paymentDetails.quantity * 3
+                                      : paymentDetails.quantity
+                                  }`}</td>
+                                  <td>{`₱ ${paymentDetails.total_amount}`}</td>
                                 </tr>
                               </tbody>
                             </Table>
@@ -272,13 +310,13 @@ function PaymentModal({
                                 <span className="fw-bold me-2">
                                   Evaluated by:
                                 </span>{" "}
-                                {orderOfPaymentData?.fullname}
+                                {paymentDetails?.fullname}
                               </p>
                               <p className="p-0 m-0">
                                 <span className="fw-bold me-2">
                                   Date and TIme:{" "}
                                 </span>{" "}
-                                {formatDate(orderOfPaymentData?.created_at)}
+                                {formatDate(paymentDetails?.created_at)}
                               </p>
                             </div>
                           </CardBody>
@@ -462,137 +500,6 @@ function PaymentModal({
                         </Row>
                       </>
                     ) : (
-                      // <Card>
-                      //   <CardBody>
-                      //     <Row>
-                      //       <Col>
-                      //         <Card
-                      //           style={{ border: "2px solid #043270" }}
-                      //           onClick={() =>
-                      //             props.setFieldValue(
-                      //               "card_type",
-                      //               "credit_card"
-                      //             )
-                      //           }
-                      //         >
-                      //           <CardBody style={{ padding: "5px" }}>
-                      //             <div
-                      //               className="d-flex  justify-content-between"
-                      //               style={{
-                      //                 borderColor:
-                      //                   props?.values?.card_type ===
-                      //                   "credit_card"
-                      //                     ? "#5587F9"
-                      //                     : "#243375ff",
-                      //                 cursor: "pointer",
-                      //               }}
-                      //             >
-                      //               <div className="d-flex align-items-center gap-3">
-                      //                 <i className="mdi mdi-credit-card fs-2 "></i>
-                      //                 <p className="p-0 m-0">Credit Card</p>
-                      //               </div>
-                      //               <input
-                      //                 type="radio"
-                      //                 checked={
-                      //                   props?.values?.card_type ===
-                      //                   "credit_card"
-                      //                 }
-                      //               />
-                      //             </div>
-                      //           </CardBody>
-                      //         </Card>
-                      //       </Col>
-                      //     </Row>
-                      //     <Row>
-                      //       <Col>
-                      //         <Card
-                      //           style={{ border: "2px solid #043270" }}
-                      //           onClick={() =>
-                      //             props.setFieldValue("card_type", "debit_card")
-                      //           }
-                      //         >
-                      //           <CardBody
-                      //             style={{
-                      //               padding: "5px",
-                      //               borderColor:
-                      //                 props?.values?.card_type === "credit_card"
-                      //                   ? "#5587F9"
-                      //                   : "#243375ff",
-                      //               cursor: "pointer",
-                      //             }}
-                      //           >
-                      //             <div className="d-flex  justify-content-between">
-                      //               <div className="d-flex align-items-center gap-3">
-                      //                 <i className="mdi mdi-credit-card-outline fs-2 "></i>
-                      //                 <p className="p-0 m-0">Debit Card</p>
-                      //               </div>
-                      //               <input
-                      //                 type="radio"
-                      //                 checked={
-                      //                   props?.values?.card_type ===
-                      //                   "debit_card"
-                      //                 }
-                      //               />
-                      //             </div>
-                      //           </CardBody>
-                      //         </Card>
-                      //       </Col>
-                      //     </Row>
-                      //     <Row>
-                      //       <BasicInputField
-                      //         type={"text"}
-                      //         validation={props}
-                      //         name="name"
-                      //         label="Name"
-                      //         touched={props.touched.name}
-                      //         placeholder="Ex. Juan Dela Cruz"
-                      //         errors={props.errors.name}
-                      //         value={props.values.name}
-                      //         required
-                      //       />
-                      //     </Row>
-                      //     <Row>
-                      //       <BasicInputField
-                      //         type={"text"}
-                      //         validation={props}
-                      //         name="card_number"
-                      //         label="Card Number"
-                      //         placeholder="XXXX XXXX XXXX XXXX"
-                      //         touched={props.touched.card_number}
-                      //         errors={props.errors.card_number}
-                      //         value={props.values.card_number}
-                      //         required
-                      //       />
-                      //     </Row>
-                      //     <Row>
-                      //       <Col>
-                      //         <BasicInputField
-                      //           type={"date"}
-                      //           validation={props}
-                      //           name="expiry_date"
-                      //           label="Expiry Date"
-                      //           touched={props.touched.expiry_date}
-                      //           errors={props.errors.expiry_date}
-                      //           value={props.values.expiry_date}
-                      //           required
-                      //         />
-                      //       </Col>
-                      //       <Col>
-                      //         <BasicInputField
-                      //           type={"text"}
-                      //           validation={props}
-                      //           name="cvv"
-                      //           label="CVV"
-                      //           touched={props.touched.cvv}
-                      //           errors={props.errors.cvv}
-                      //           value={props.values.cvv}
-                      //           required
-                      //           placeholder="Ex. 123"
-                      //         />
-                      //       </Col>
-                      //     </Row>
-                      //   </CardBody>
-                      // </Card>
                       <>
                         <Card>
                           <CardBody>
@@ -699,6 +606,7 @@ function PaymentModal({
                         </Card>
                       </>
                     )}
+
                     <Row>
                       <div className="text-end">
                         <Button
@@ -712,30 +620,112 @@ function PaymentModal({
                           }}
                           onClick={() => {
                             const formik = formikRef.current.values;
-                            const formData = getFormData(formik);
-                            formData.append(
-                              "special_permit_application_id",
-                              applicationId
-                            );
-                            handleSubmit(
-                              {
-                                url: "api/client/pay-permit",
 
-                                message: {
-                                  title: "Are you sure you want to Proceed?",
-                                  failedTitle: "FAILED",
-                                  success: "Success!",
-                                  error: "unknown error occured",
+                            if (paymentMethod === "online") {
+                              // const secretKey = process.env.REACT_SECRET_KEY;
+                              const secretKey =
+                                "dbb0cf7063d880f7d416cc137a24f3625be78529196e8d91d360fef1994e76ef";
+                              const obj = {
+                                amount: paymentDetails.total_amount,
+                                transaction_type: "Tax/Fees",
+                                // merchant_reference_number: `B-434`,
+                                merchant_reference_number: `B-${uuidv4()}`,
+                                full_name: user.name,
+                                user_id: user.id,
+                                ref_no: "1",
+                                ref_no2: "0",
+                                or_no: "12-312-312",
+                                eor: true,
+                                cedula: false,
+                                cedula_type: "individual",
+                                ref_no3: "0",
+                                special_permit_application_id: applicationId,
+                                invoice_no: "12345",
+                                department: "BPLD",
+                                type_application: "miscellaneous",
+                                email: user.email,
+                                remarks: "Remarks",
+                                callback_url:
+                                  "https://saas.butuan.gov.ph/paymentreturn.php",
+                                backUrl:
+                                  "http://localhost:3000/client/for-payment/dashboard",
+                                new_collection: eor_collection,
+                                onSuccessCallbackUrl: {
+                                  params: [
+                                    "special_permit_application_id",
+                                    "or_no",
+                                    "user_id",
+                                    "newCollection",
+                                  ],
+                                  defaults: {
+                                    Checksum: "", // sum reference
+                                    ErrorCode: "", // error code
+                                    LBPConfDate: "date_of_payment", // date
+                                    LBPConfNum: "LBPConfNum", // confirmation number
+                                    LBPRefNum: "", // some series numbers
+                                    MerchantRefNum: "", // merchant number
+                                    TrxnAmount: "paid_amount", // return ammount
+                                  },
+                                  link: `http://localhost:8000/api/update-payment-status`,
                                 },
-                                params: formData,
-                              },
-                              [],
-                              [toggleRefresh, toggleModal]
-                            );
+                              };
+
+                              const jsonString = JSON.stringify(obj);
+                              const encrypted = CryptoJS.AES.encrypt(
+                                jsonString,
+                                secretKey
+                              ).toString();
+                              const encoded = encodeURIComponent(encrypted);
+                              const url = `http://ctd01.a.testing.butuan.gov.ph/payment?data=${encoded}`;
+                              const create = async () => {
+                                try {
+                                  const response = await axios({
+                                    method: "POST",
+                                    url: "api/client/create-db-state",
+                                    params: {
+                                      application_type: "occupational_permit",
+                                      special_permit_application_id: [
+                                        ...applicationId,
+                                      ],
+                                    },
+                                  });
+                                  if (response) {
+                                    console.log("success");
+                                    setTimeout(() => {
+                                      // window.open(url, "_blank");
+                                      window.location.href;
+                                    }, 1000);
+                                  }
+                                } catch (error) {
+                                  console.log(error.response);
+                                }
+                              };
+                              create();
+                            } else {
+                              const formData = getFormData(formik);
+                              formData.append(
+                                "special_permit_application_id",
+                                applicationId
+                              );
+                              handleSubmit(
+                                {
+                                  url: "api/client/pay-permit",
+                                  message: {
+                                    title: "Are you sure you want to Proceed?",
+                                    failedTitle: "FAILED",
+                                    success: "Success!",
+                                    error: "unknown error occured",
+                                  },
+                                  params: formData,
+                                },
+                                [],
+                                [toggleRefresh, toggleModal]
+                              );
+                            }
                           }}
-                          disabled={!approveTerm}
+                          disabled={!approveTerm && paymentMethod === "online"}
                         >
-                          SAVE
+                          {paymentMethod === "online" ? "Pay" : "Save"}
                         </Button>
                         <Button color="secondary" onClick={toggleModal}>
                           Close

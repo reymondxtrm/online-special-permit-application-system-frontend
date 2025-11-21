@@ -20,12 +20,34 @@ export const getClientTableData = createAsyncThunk(
     }
   }
 );
+export const getCompanyClientTable = createAsyncThunk(
+  "specialPermitClient/getCompanyClientTable",
+  async (params, thunkAPI) => {
+    try {
+      const response = await axios({
+        // url: "api/client/special-permit/applications",
+        method: "GET",
+        params: { ...params },
+      });
+      if (response.data) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(response.data);
+      }
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
 
 export const SpecialPermitClientSlice = createSlice({
   name: "specialPermitClient",
   initialState: {
     clientTableData: [],
     getTableDataIsFetching: false,
+    clientCompanyTable: [],
+
+    getClientCompanyTableIsFetching: false,
 
     errors: "",
     params: {},
@@ -51,6 +73,17 @@ export const SpecialPermitClientSlice = createSlice({
     },
     [getClientTableData.rejected]: (state, action) => {
       state.getTableDataIsFetching = false;
+      state.errors = action.payload;
+    },
+    [getCompanyClientTable.pending]: (state) => {
+      state.getClientCompanyTableIsFetching = true;
+    },
+    [getCompanyClientTable.fulfilled]: (state, action) => {
+      state.getClientCompanyTableIsFetching = false;
+      state.clientCompanyTable = action.payload;
+    },
+    [getCompanyClientTable.rejected]: (state, action) => {
+      state.getClientCompanyTableIsFetching = false;
       state.errors = action.payload;
     },
   },

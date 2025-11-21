@@ -1,68 +1,26 @@
 /* eslint-disable padded-blocks */
 import React, { useEffect, useState } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  CardBody,
-  CardHeader,
-  Button,
-  Label,
-  Nav,
-  NavItem,
-  Dropdown,
-  DropdownItem,
-  DropdownToggle,
-  DropdownMenu,
-  NavLink,
-  TabContent,
-  TabPane,
-  CardTitle,
-  CardText,
-  Navbar,
-  NavbarBrand,
-  NavbarToggler,
-  Collapse,
-} from "reactstrap";
+import { Container, Row, Col, Card, CardBody } from "reactstrap";
 import Breadcrumbs from "components/Common/Breadcrumb";
 import Select from "react-select";
 import { useDispatch, useSelector } from "react-redux";
 import Tab from "react-bootstrap/Tab";
-import axios from "axios";
+
 import Tabs from "react-bootstrap/Tabs";
-import classnames from "classnames";
 
 import Pagination from "components/Pagination";
 import ClientTable from "../../Common/ClientTable";
 const Returned = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("mayors_permit");
-
+  const user = useSelector((state) => state.user);
+  const [activeTab, setActiveTab] = useState(
+    user.accountType === "company" ? "occupational_permit" : "mayors_permit"
+  );
   const handleTabSelect = (key) => {
     setActiveTab(key);
   };
-  const options = [
-    { value: 1, label: "2023" },
-    { value: 2, label: "2024" },
-  ];
-  const opcr = useSelector((state) => state.opcr);
 
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
-  };
-
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-
-  const toggleupdateModal = () => {
-    setIsUpdateModalOpen(!isUpdateModalOpen);
-  };
-
-  const [newMfoModal, setNewMfoModal] = useState(false);
-  const toggleNewMfoModal = () => {
-    setNewMfoModal(!newMfoModal);
-  };
   return (
     <React.Fragment>
       <div className="page-content">
@@ -92,76 +50,83 @@ const Returned = () => {
             <Col xs="12">
               <Card>
                 <CardBody>
-                  <Tabs
-                    // defaultActiveKey="mayorsCertificate"
+                  {user.accountType === "individual" ? (
+                    <Tabs
+                      className="mb-3"
+                      activeKey={activeTab}
+                      onSelect={handleTabSelect}
+                    >
+                      <Tab eventKey="mayors_permit" title="MAYORS CERTIFICATE">
+                        <ClientTable
+                          status={"returned"}
+                          activeTab={activeTab}
+                          applicationType={"mayors_permit"}
+                        />
+                      </Tab>
+                      <Tab eventKey="good_moral" title="GOOD MORAL">
+                        <ClientTable
+                          status={"returned"}
+                          activeTab={activeTab}
+                          applicationType={"good_moral"}
+                        />
+                      </Tab>
+                      <Tab eventKey="event" title="EVENT">
+                        <ClientTable
+                          status={"returned"}
+                          activeTab={activeTab}
+                          applicationType={"event"}
+                        />
+                      </Tab>
+                      <Tab eventKey="motorcade" title="MOTORCADE">
+                        <ClientTable
+                          status={"returned"}
+                          activeTab={activeTab}
+                          applicationType={"motorcade"}
+                        />
+                      </Tab>
+                      <Tab eventKey="parade" title="PARADE">
+                        <ClientTable
+                          status={"returned"}
+                          activeTab={activeTab}
+                          applicationType={"parade"}
+                        />
+                      </Tab>
+                      <Tab eventKey="recorrida" title="RECORRIDA">
+                        <ClientTable
+                          status={"returned"}
+                          activeTab={activeTab}
+                          applicationType={"recorrida"}
+                        />
+                      </Tab>
+                      <Tab
+                        eventKey="use_of_government_property"
+                        title="USE OF GOVERNMENT PROPERTY"
+                      >
+                        <ClientTable
+                          status={"returned"}
+                          activeTab={activeTab}
+                          applicationType={"use_of_government_property"}
+                        />
+                      </Tab>
 
-                    className="mb-3"
-                    activeKey={activeTab}
-                    onSelect={handleTabSelect}
-                  >
-                    <Tab eventKey="mayors_permit" title="MAYORS CERTIFICATE">
-                      <ClientTable
-                        status={"returned"}
-                        activeTab={activeTab}
-                        applicationType={"mayors_permit"}
-                      />
-                    </Tab>
-                    <Tab eventKey="good_moral" title="GOOD MORAL">
-                      <ClientTable
-                        status={"returned"}
-                        activeTab={activeTab}
-                        applicationType={"good_moral"}
-                      />
-                    </Tab>
-                    <Tab eventKey="event" title="EVENT">
-                      <ClientTable
-                        status={"for_payment_approval"}
-                        activeTab={activeTab}
-                        applicationType={"event"}
-                      />
-                    </Tab>
-                    <Tab eventKey="motorcade" title="MOTORCADE">
-                      <ClientTable
-                        status={"for_payment_approval"}
-                        activeTab={activeTab}
-                        applicationType={"motorcade"}
-                      />
-                    </Tab>
-                    <Tab eventKey="parade" title="PARADE">
-                      <ClientTable
-                        status={"for_payment_approval"}
-                        activeTab={activeTab}
-                        applicationType={"parade"}
-                      />
-                    </Tab>
-                    <Tab eventKey="recorrida" title="RECORRIDA">
-                      <ClientTable
-                        status={"for_payment_approval"}
-                        activeTab={activeTab}
-                        applicationType={"recorrida"}
-                      />
-                    </Tab>
-                    <Tab
-                      eventKey="use_of_government_property"
-                      title="USE OF GOVERNMENT PROPERTY"
-                    >
-                      <ClientTable
-                        status={"for_payment_approval"}
-                        activeTab={activeTab}
-                        applicationType={"use_of_government_property"}
-                      />
-                    </Tab>
-                    {/* <Tab
-                      eventKey="occupational_permit"
-                      title="OCCUPATIONAL PERMIT"
-                    >
-                      <ClientTable
-                        status={"for_payment_approval"}
-                        activeTab={activeTab}
-                        applicationType={"occupational_permit"}
-                      />
-                    </Tab> */}
-                  </Tabs>
+                      <Tab
+                        eventKey="occupational_permit"
+                        title="OCCUPATIONAL PERMIT"
+                      >
+                        <ClientTable
+                          status={"returned"}
+                          activeTab={activeTab}
+                          applicationType={"occupational_permit"}
+                        />
+                      </Tab>
+                    </Tabs>
+                  ) : (
+                    <ClientTable
+                      status={"returned"}
+                      activeTab={activeTab}
+                      applicationType={"occupational_permit"}
+                    />
+                  )}
                 </CardBody>
               </Card>
             </Col>

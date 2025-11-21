@@ -38,7 +38,10 @@ import ClientTable from "../Common/ClientTable";
 const ClientDashboard = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("good_moral");
+  const user = useSelector((state) => state.user);
+  const [activeTab, setActiveTab] = useState(
+    user.accountType === "company" ? "occupational_permit" : "mayors_permit"
+  );
 
   const handleTabSelect = (key) => {
     setActiveTab(key);
@@ -92,76 +95,83 @@ const ClientDashboard = () => {
             <Col xs="12">
               <Card>
                 <CardBody>
-                  <Tabs
-                    // defaultActiveKey="mayorsCertificate"
+                  {user.accountType === "individual" ? (
+                    <Tabs
+                      className="mb-3"
+                      activeKey={activeTab}
+                      onSelect={handleTabSelect}
+                    >
+                      <Tab eventKey="mayors_permit" title="MAYORS CERTIFICATE">
+                        <ClientTable
+                          status={"completed"}
+                          activeTab={activeTab}
+                          applicationType={"mayors_permit"}
+                        />
+                      </Tab>
+                      <Tab eventKey="good_moral" title="GOOD MORAL">
+                        <ClientTable
+                          status={"completed"}
+                          activeTab={activeTab}
+                          applicationType={"good_moral"}
+                        />
+                      </Tab>
+                      <Tab eventKey="event" title="EVENT">
+                        <ClientTable
+                          status={"completed"}
+                          activeTab={activeTab}
+                          applicationType={"event"}
+                        />
+                      </Tab>
+                      <Tab eventKey="motorcade" title="MOTORCADE">
+                        <ClientTable
+                          status={"completed"}
+                          activeTab={activeTab}
+                          applicationType={"motorcade"}
+                        />
+                      </Tab>
+                      <Tab eventKey="parade" title="PARADE">
+                        <ClientTable
+                          status={"completed"}
+                          activeTab={activeTab}
+                          applicationType={"parade"}
+                        />
+                      </Tab>
+                      <Tab eventKey="recorrida" title="RECORRIDA">
+                        <ClientTable
+                          status={"completed"}
+                          activeTab={activeTab}
+                          applicationType={"recorrida"}
+                        />
+                      </Tab>
+                      <Tab
+                        eventKey="use_of_government_property"
+                        title="USE OF GOVERNMENT PROPERTY"
+                      >
+                        <ClientTable
+                          status={"completed"}
+                          activeTab={activeTab}
+                          applicationType={"use_of_government_property"}
+                        />
+                      </Tab>
 
-                    className="mb-3"
-                    activeKey={activeTab}
-                    onSelect={handleTabSelect}
-                  >
-                    <Tab eventKey="mayors_permit" title="MAYORS CERTIFICATE">
-                      <ClientTable
-                        status={"completed"}
-                        activeTab={activeTab}
-                        applicationType={"mayors_permit"}
-                      />
-                    </Tab>
-                    <Tab eventKey="good_moral" title="GOOD MORAL">
-                      <ClientTable
-                        status={"completed"}
-                        activeTab={activeTab}
-                        applicationType={"good_moral"}
-                      />
-                    </Tab>
-                    <Tab eventKey="event" title="EVENT">
-                      <ClientTable
-                        status={"completed"}
-                        activeTab={activeTab}
-                        applicationType={"event"}
-                      />
-                    </Tab>
-                    <Tab eventKey="motorcade" title="MOTORCADE">
-                      <ClientTable
-                        status={"completed"}
-                        activeTab={activeTab}
-                        applicationType={"motorcade"}
-                      />
-                    </Tab>
-                    <Tab eventKey="parade" title="PARADE">
-                      <ClientTable
-                        status={"completed"}
-                        activeTab={activeTab}
-                        applicationType={"parade"}
-                      />
-                    </Tab>
-                    <Tab eventKey="recorrida" title="RECORRIDA">
-                      <ClientTable
-                        status={"completed"}
-                        activeTab={activeTab}
-                        applicationType={"recorrida"}
-                      />
-                    </Tab>
-                    <Tab
-                      eventKey="use_of_government_property"
-                      title="USE OF GOVERNMENT PROPERTY"
-                    >
-                      <ClientTable
-                        status={"completed"}
-                        activeTab={activeTab}
-                        applicationType={"use_of_government_property"}
-                      />
-                    </Tab>
-                    <Tab
-                      eventKey="occupational_permit"
-                      title="OCCUPATIONAL PERMIT"
-                    >
-                      <ClientTable
-                        status={"completed"}
-                        activeTab={activeTab}
-                        applicationType={"occupational_permit"}
-                      />
-                    </Tab>
-                  </Tabs>
+                      <Tab
+                        eventKey="occupational_permit"
+                        title="OCCUPATIONAL PERMIT"
+                      >
+                        <ClientTable
+                          status={"completed"}
+                          activeTab={activeTab}
+                          applicationType={"occupational_permit"}
+                        />
+                      </Tab>
+                    </Tabs>
+                  ) : (
+                    <ClientTable
+                      status={"completed"}
+                      activeTab={activeTab}
+                      applicationType={"occupational_permit"}
+                    />
+                  )}
                 </CardBody>
               </Card>
             </Col>

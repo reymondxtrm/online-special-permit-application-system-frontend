@@ -6,10 +6,7 @@ import {
   Modal,
   ModalHeader,
   ModalBody,
-  UncontrolledDropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
+  Input,
 } from "reactstrap";
 import moment from "moment";
 import axios from "axios";
@@ -24,22 +21,23 @@ import {
   SpecialPermitClientSlice,
 } from "features/SpecialPermitClient";
 import Pagination from "components/Pagination";
+import CedulaApplicationFormModal from "../../AuthAdminPages/Modals/CedulaApplicationFormModal";
 const ClientTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
-
   const [currentImage, setCurrentImage] = useState(null);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
-
-  const [applications, setApplications] = useState([]); // State for storing API data
-  const [loading, setLoading] = useState(false); // State for loader
   const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
   const [selectedImage, setSelectedImage] = useState("");
   const [refreshPage, setrefreshPage] = useState(false);
   const [overTheCounterModal, setoverTheCounterModal] = useState(false); // State for selected application's uploaded files
-  const [applicationId, setapplicationId] = useState();
+  const [selectedRow, setSelectedRow] = useState([]);
   const [amount, setamount] = useState();
   const [orderOfPaymentData, setorderOfPaymentData] = useState();
   const [reuploadModal, setreuploadModal] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useState([]);
+  const [cedulaApplicationModal, setCedulaApplicationModal] = useState(false);
+
+  const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const toggleRefresh = () => {
     setrefreshPage(!refreshPage);
@@ -63,60 +61,75 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
   const toggleOverTheCounterModal = () => {
     setoverTheCounterModal(!overTheCounterModal);
   };
-
+  const toggleCedulaApplicationForm = () => {
+    setCedulaApplicationModal((prev) => !prev);
+  };
   useEffect(() => {
+    const params = { status: status, permit_type: applicationType };
     if (applicationType === activeTab) {
-      const params = { status: status, permit_type: applicationType };
       dispatch(getClientTableData(params));
       dispatch(SpecialPermitClientSlice.actions.setProps(params));
-      // setLoading(true);
-
-      // axios
-      //   .get("api/client/special-permit/applications", {
-      //     params: { status: status, permit_type: applicationType },
-      //   })
-      //   .then(
-      //     (res) => {
-      //       setApplications(res.data);
-      //       setLoading(false);
-      //     },
-      //     (error) => {
-      //       console.log(error);
-      //     }
-      //   );
     }
   }, [activeTab, refreshPage]);
 
-  // Function to handle opening the modal
   const handleViewImage = (imageUrl) => {
     setSelectedImage(imageUrl);
     setIsModalOpen(true);
   };
 
-  // Function to toggle modal
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
   const dateOfEvent = (date, time) => {
     if (date || time) {
-      // if (date === date && time) {
-      //   return (
-      //     formateDateIntoString(date) +
-      //     " " +
-      //     moment(time, "h:mm A").format("h:mm A") +
-      //     " to " +
-      //     moment(time, "h:mm A").format("h:mm A")
-      //   );
-      // }
       return (
         formateDateIntoString(date) +
         " " +
         moment(time, "h:mm A").format("h:mm A")
       );
     }
-
     return "";
   };
+  const handleSelect = (id) => {
+    setSelectedRow((prev) => {
+      const rows = Array.isArray(prev) ? [...prev] : [];
+      if (rows.includes(id)) {
+        return rows.filter((item) => item !== id);
+      } else {
+        return [...rows, id];
+      }
+    });
+  };
+
+  const handleSelectAll = (rows) => {
+    if (selectedRow.length === rows.length) {
+      setSelectedRow([]);
+    } else {
+      setSelectedRow(rows.map((r) => r.id));
+    }
+  };
+
+  useEffect(() => {
+    if (selectedRow && specialPermitClient?.clientTableData?.data?.length > 0) {
+      const selectedTotal = specialPermitClient?.clientTableData?.data
+        ?.filter((app) => selectedRow.includes(app.id))
+        ?.reduce(
+          (acc, app) => {
+            const billed = app.order_of_payment?.billed_amount || 0;
+            const total = app.order_of_payment?.total_amount || 0;
+            acc.billed_amount += billed;
+            acc.total_amount += total;
+            acc.fullname = app.order_of_payment?.fullname || "";
+            acc.created_at = app.order_of_payment?.created_at || "";
+            acc.quantity += 1;
+            return acc;
+          },
+          { billed_amount: 0, total_amount: 0, quantity: 0 }
+        );
+      setPaymentDetails(selectedTotal);
+    }
+  }, [selectedRow, specialPermitClient?.clientTableData?.data?.length]);
+
   return (
     <>
       {isViewerOpen && currentImage && (
@@ -132,19 +145,45 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
         <ReuploadModal
           toggleModal={toggleReUploadModal}
           openModal={reuploadModal}
-          applicationId={applicationId}
+          applicationId={selectedRow}
           toggleRefresh={toggleRefresh}
         />
       ) : null}
+      <CedulaApplicationFormModal
+        openModal={cedulaApplicationModal}
+        toggleModal={toggleCedulaApplicationForm}
+      />
       <OverTheCounterModal
         toggleModal={toggleOverTheCounterModal}
         openModal={overTheCounterModal}
-        applicationId={applicationId}
-        amount={amount}
+        applicationId={selectedRow}
         toggleRefresh={toggleRefresh}
-        orderOfPaymentData={orderOfPaymentData}
         applicationType={applicationType}
+        paymentDetails={paymentDetails}
       />
+      <div className="d-flex gap-2">
+        <div>
+          {status === "for_payment" && user?.accountType === "company" ? (
+            <Button
+              color="primary"
+              onClick={() => {
+                toggleOverTheCounterModal();
+              }}
+              disabled={selectedRow.length <= 0}
+            >
+              <i className="fa fas fa-money-bill-wave"></i>
+              <span> Pay</span>
+            </Button>
+          ) : null}
+        </div>
+        <div>
+          <Button color="success">
+            <i className="mdi mdi-printer "></i>{" "}
+            <span> Print Cedula Application Form</span>{" "}
+          </Button>
+        </div>
+      </div>
+
       <div className="tableFixHead">
         <Table hover>
           <thead
@@ -152,7 +191,28 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
               backgroundColor: "white",
             }}
           >
+            {user?.accountType === "company" && status === "for_payment" && (
+              <tr></tr>
+            )}
             <tr>
+              <th style={{ width: "5%" }}>
+                {status === "for_payment" && user?.accountType === "company" ? (
+                  <Input
+                    type="checkbox"
+                    checked={
+                      selectedRow?.length ===
+                        specialPermitClient?.clientTableData.data?.length &&
+                      specialPermitClient?.clientTableData?.data?.length !== 0
+                    }
+                    onClick={() => {
+                      handleSelectAll(
+                        specialPermitClient?.clientTableData?.data
+                      );
+                    }}
+                    style={{ width: "20px", height: "20px" }}
+                  />
+                ) : null}
+              </th>
               <th>#</th>
               {status === "for_signature" && <th>Reference No</th>}
 
@@ -222,37 +282,30 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                 applicationType === "recorrida" ||
                 applicationType === "use_of_government_property") && (
                 <>
-                  <th>Name of Requestor/Organization</th>
                   <th>Name of Event</th>
                   <th>Date From</th>
                   <th>Date To</th>
                 </>
               )}
 
-              {applicationType === "occupational_permit" &&
-              status !== "for_payment" ? (
+              {applicationType === "occupational_permit" && (
                 <>
-                  <th>Certificate Of Employment</th>
+                  {user?.accountType === "company" && (
+                    <>
+                      <th>Name of Requestor</th>
+                      <th>Gender</th>
+                      <th>Address</th>
+                    </>
+                  )}
+                  {(status === "for_payment" ||
+                    status === "for_payment_approval" ||
+                    status === "declined") && <th> Amount</th>}
                 </>
+              )}
+              {status === "for_payment" &&
+              user?.accountType === "individual" ? (
+                <th>Actions</th>
               ) : null}
-
-              {applicationType === "occupational_permit" &&
-              status !== "for_payment" ? (
-                <>
-                  <th>Community Tax Certificate</th>
-                </>
-              ) : null}
-
-              {applicationType === "occupational_permit" &&
-              status !== "for_payment" ? (
-                <>
-                  <th>ID Picture</th>
-                  <th>Health Certificate</th>
-                  <th>Training Certificate</th>
-                </>
-              ) : null}
-
-              {status === "for_payment" ? <th>Actions</th> : null}
               {status === "completed" ? <th>Special Permit</th> : null}
             </tr>
           </thead>
@@ -267,6 +320,20 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
               specialPermitClient?.clientTableData?.data.map(
                 (application, index) => (
                   <tr key={application.id}>
+                    <td>
+                      {user?.accountType === "company" &&
+                        status === "for_payment" && (
+                          <Input
+                            type="checkbox"
+                            checked={selectedRow?.includes(application.id)}
+                            onClick={(e) => {
+                              handleSelect(application.id);
+                            }}
+                            style={{ width: "20px", height: "20px" }}
+                          />
+                        )}
+                    </td>
+
                     <td>{`${index + 1}.`}</td>
                     {status === "for_signature" && (
                       <td>{application.reference_no}</td>
@@ -449,7 +516,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                             <Button
                               color="primary"
                               onClick={() => {
-                                setapplicationId(application?.id);
+                                setSelectedRow([application?.id]);
 
                                 toggleReUploadModal();
                               }}
@@ -496,6 +563,25 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         )}
                       </>
                     )}
+                    {applicationType === "occupational_permit" ? (
+                      <>
+                        {user?.accountType === "company" && (
+                          <>
+                            <td>{application?.requestor_name}</td>
+                            <td>{application?.corporation_member?.sex}</td>
+                            <td>
+                              {
+                                application?.corporation_member
+                                  ?.user_addresses_morph?.[0]
+                                  ?.corporation_full_address
+                              }
+                            </td>
+                          </>
+                        )}
+
+                        <td>{application?.order_of_payment?.total_amount}</td>
+                      </>
+                    ) : null}
 
                     {applicationType === "event" ||
                     applicationType === "motorcade" ||
@@ -523,27 +609,20 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         </td>
                       </>
                     ) : null}
-
-                    {status === "for_payment" ? (
+                    {status === "for_payment" &&
+                    user?.accountType === "individual" ? (
                       <td>
                         <Button
                           color="primary"
                           onClick={() => {
                             toggleOverTheCounterModal();
-                            setapplicationId(application?.id);
-                            setorderOfPaymentData(
-                              application?.order_of_payment
-                            );
-                            setamount(
-                              application.order_of_payment?.total_amount
-                            );
+                            setSelectedRow([application?.id]);
                           }}
                         >
                           Pay
                         </Button>
                       </td>
                     ) : null}
-
                     {status === "completed" ? (
                       <td>
                         <div

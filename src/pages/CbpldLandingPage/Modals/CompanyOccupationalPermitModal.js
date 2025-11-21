@@ -148,16 +148,19 @@ export default function CompanyOccupationalPermitModal({
             }}
             onSubmit={(values) => {
               const request = getFormData(values);
-              console.log(values, request);
-              handleSubmit(
+
+              const response = handleSubmit(
                 {
                   url: "api/client/company-occupational-permit-application",
                   method: "POST",
                   params: request,
                 },
                 [],
-                []
+                [toggleModal]
               );
+              if (response) {
+                formikRef.current.reset();
+              }
             }}
           >
             {(props) => (
@@ -172,7 +175,6 @@ export default function CompanyOccupationalPermitModal({
                             <th>NAME</th>
                             <th>DATE BIRTH</th>
                             <th>GENDER</th>
-
                             <th>HOME ADDRESS</th>
                             <th>CONTACT NO.</th>
                             <th>ID PICTURE</th>
@@ -316,7 +318,7 @@ export default function CompanyOccupationalPermitModal({
                                   touched={
                                     props?.touched?.employees?.[index]?.city
                                   }
-                                  placeholder={"City"}
+                                  placeholder={"City/Municipality"}
                                 />
                                 <BasicInputField
                                   validation={props}
@@ -444,7 +446,7 @@ export default function CompanyOccupationalPermitModal({
                                 training_certificate: null,
                                 no_cedula: false,
                                 citizenship: "",
-                                civi_status: "",
+                                civil_status: "",
                                 place_of_birth: "",
                                 blood_type: "",
                                 height: "",

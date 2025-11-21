@@ -231,7 +231,6 @@ function AmountModal({
                 [],
                 [
                   toggleRefresh,
-                  // ensure modal closes and form resets after action
                   () => {
                     toggleModal();
                     if (

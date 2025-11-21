@@ -24,6 +24,7 @@ import {
   NavbarBrand,
   NavbarToggler,
   Collapse,
+  Badge,
 } from "reactstrap";
 import Breadcrumbs from "components/Common/Breadcrumb";
 
@@ -34,6 +35,7 @@ import Tabs from "react-bootstrap/Tabs";
 import AdminTable from "../Common/AdminTable";
 import DashboardFilters from "pages/Dashboard/dashboardFilters";
 import { getTableData } from "features/SpecialPermitAdmin";
+import OccupationalTables from "../Common/OccupationalTables";
 const Dashboard = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -149,18 +151,12 @@ const Dashboard = () => {
                         />
                       ) : null}
                     </Tab>
-                    {/* <Tab
-                      eventKey="occupational_permit"
-                      title="OCCUPATIONAL PERMIT"
+                    <Tab
+                      eventKey="occupational"
+                      title={<>OCCUPATIONAL PERMIT </>}
                     >
-                      {activeTab === "occupational_permit" ? (
-                        <AdminTable
-                          status={"for_payment"}
-                          activeTab={activeTab}
-                          applicationType={"occupational_permit"}
-                        />
-                      ) : null}
-                    </Tab> */}
+                      <OccupationalTables status={"completed"} />
+                    </Tab>
                   </Tabs>
                 </CardBody>
               </Card>

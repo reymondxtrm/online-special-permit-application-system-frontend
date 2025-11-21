@@ -37,10 +37,14 @@ import echo from "../Common/echo";
 import Pagination from "components/Pagination";
 import AdminTable from "../Common/AdminTable";
 import { set } from "lodash";
+import OccupationalTables from "../Common/OccupationalTables.js";
+
 const Pending = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("good_moral");
+  const user = useSelector((state) => state.user);
+
   const [newCounts, setNewCounts] = useState({
     mayors_permit: 0,
     good_moral: 0,
@@ -267,6 +271,21 @@ const Pending = () => {
                         activeTab={activeTab}
                         applicationType="use_of_government_property"
                       />
+                    </Tab>
+                    <Tab
+                      eventKey="occupational"
+                      title={
+                        <>
+                          OCCUPATIONAL PERMIT{" "}
+                          {newCounts.use_of_government_property !== 0 && (
+                            <Badge color="danger" className="ms-1">
+                              {newCounts.use_of_government_property}
+                            </Badge>
+                          )}
+                        </>
+                      }
+                    >
+                      <OccupationalTables status={"pending"} />
                     </Tab>
                   </Tabs>
                 </CardBody>

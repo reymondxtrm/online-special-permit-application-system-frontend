@@ -252,8 +252,7 @@ function OccupationalPermitModal({ openModal, toggleModal }) {
             onClick={() => {
               const formik = formikRef.current.values;
               const formData = getFormData(formik);
-              // console.log(formik);
-              // return;
+            
 
               handleSubmit(
                 {

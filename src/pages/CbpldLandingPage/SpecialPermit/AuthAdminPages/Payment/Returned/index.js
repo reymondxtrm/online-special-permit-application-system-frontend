@@ -36,6 +36,7 @@ import classnames from "classnames";
 
 import Pagination from "components/Pagination";
 import AdminTable from "../../Common/AdminTable";
+import OccupationalTables from "../../Common/OccupationalTables";
 const Returned = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -286,18 +287,21 @@ const Returned = () => {
                         />
                       ) : null}
                     </Tab>
-                    {/* <Tab
-                      eventKey="occupational_permit"
-                      title="OCCUPATIONAL PERMIT"
+                    <Tab
+                      eventKey="occupational"
+                      title={
+                        <>
+                          OCCUPATIONAL PERMIT{" "}
+                          {newCounts.use_of_government_property !== 0 && (
+                            <Badge color="danger" className="ms-1">
+                              {newCounts.use_of_government_property}
+                            </Badge>
+                          )}
+                        </>
+                      }
                     >
-                      {activeTab === "occupational_permit" ? (
-                        <AdminTable
-                          status={"for_payment_approval"}
-                          activeTab={activeTab}
-                          applicationType={"occupational_permit"}
-                        />
-                      ) : null}
-                    </Tab> */}
+                      <OccupationalTables status={"returned"} />
+                    </Tab>
                   </Tabs>
                 </CardBody>
               </Card>

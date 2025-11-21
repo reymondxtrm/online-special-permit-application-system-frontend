@@ -21,11 +21,30 @@ export const getTableData = createAsyncThunk(
   }
 );
 export const getCompanyOccupatinalData = createAsyncThunk(
-  "specialPermitClient/getCompanyOccupatinalData",
+  "specialPermitAdmin/getCompanyOccupatinalData",
   async (params, thunkAPI) => {
     try {
       const response = await axios({
-        // url: "api/client/get-companies-occupational-applications",
+        url: "api/admin/get-companies-occupational-applications",
+        method: "GET",
+        params: { ...params },
+      });
+      if (response.data) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(response.data);
+      }
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+export const getIndividualOccupationalApplications = createAsyncThunk(
+  "specialPermitAdmin/getIndividualOccupationalApplications",
+  async (params, thunkAPI) => {
+    try {
+      const response = await axios({
+        url: "api/admin/get-individual-occupational-applications",
         method: "GET",
         params: { ...params },
       });
@@ -45,7 +64,10 @@ export const SpecialPermitAdminSlice = createSlice({
     tableData: [],
     getTableDataIsFetching: false,
     companyOccupational: [],
+    individualOccupational: [],
     getCompanyOccupationalData: false,
+    getIndividualOccupationalData: false,
+
     params: {},
   },
   reducers: {
@@ -80,6 +102,17 @@ export const SpecialPermitAdminSlice = createSlice({
     },
     [getCompanyOccupatinalData.rejected]: (state, action) => {
       state.getCompanyOccupationalData = false;
+      state.errors = action.payload;
+    },
+    [getIndividualOccupationalApplications.pending]: (state) => {
+      state.getIndividualOccupationalData = true;
+    },
+    [getIndividualOccupationalApplications.fulfilled]: (state, action) => {
+      state.getIndividualOccupationalData = false;
+      state.individualOccupational = action.payload;
+    },
+    [getIndividualOccupationalApplications.rejected]: (state, action) => {
+      state.getIndividualOccupationalData = false;
       state.errors = action.payload;
     },
   },
