@@ -9,7 +9,7 @@ export default function useGetImage() {
     setIsFetching(true);
     try {
       const response = await axios({
-        url,
+        url: url,
         method: "GET",
         params: { filepath: path },
         responseType: "blob",

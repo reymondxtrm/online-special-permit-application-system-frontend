@@ -31,7 +31,7 @@ export default function CompanyOccupationalPermitModal({
   const formikRef = useRef();
   const [cameraIsOpen, setCameraIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState();
-  const [addtionlaDetailsModal, setAdditionalDetailsModal] = useState(false);
+  const [additionalDetails, setAdditionalDetailsModal] = useState(false);
   const handleSubmit = useSubmit();
   const genderOptions = [
     { value: "MALE", label: "Male" },
@@ -92,7 +92,7 @@ export default function CompanyOccupationalPermitModal({
         image={formikRef?.current?.values?.employees[activeIndex]?.id_picture}
       />
       <CedulaAddtionalDetailsModal
-        isOpen={addtionlaDetailsModal}
+        isOpen={additionalDetails}
         toggle={toggleAdditionalDetailsModal}
         setAdditionalDetails={setAdditionalDetails}
       />
@@ -384,7 +384,7 @@ export default function CompanyOccupationalPermitModal({
                                     setActiveIndex(index);
                                   }}
                                 >
-                                  Dont have cadula?
+                                  {"Don't have Cedula?"}
                                 </p>
                               </td>
                               <td style={{ width: "10%" }}>

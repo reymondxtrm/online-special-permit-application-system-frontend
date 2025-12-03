@@ -300,7 +300,10 @@ const Returned = () => {
                         </>
                       }
                     >
-                      <OccupationalTables status={"returned"} />
+                      <OccupationalTables
+                        status={"returned"}
+                        motherTab={activeTab}
+                      />
                     </Tab>
                   </Tabs>
                 </CardBody>

@@ -110,9 +110,17 @@ function Services() {
         toggleModal={() => toggleModal("USE OF GOVERNMENT PROPERTY")}
       />
 
+      {/* <OccupationalPermitModal
+        openModal={occupationalPermitModal}
+        toggleModal={() => toggleModal("OCCUPATIONAL PERMIT")}
+      /> */}
       <OccupationalPermitModal
         openModal={occupationalPermitModal}
         toggleModal={() => toggleModal("OCCUPATIONAL PERMIT")}
+        mode="create"
+        title="Create Occupational Permit"
+        submitUrl="api/client/single-occupational-permit-application"
+        fetchUrl="api/client/get-user-occupation-details"
       />
       <CompanyOccupationalPermitModal
         isOpen={companyOccupationApplicationModal}

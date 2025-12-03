@@ -5,23 +5,31 @@ import { Col, Row } from "reactstrap";
 import OccupationalTableAdmin from "./OccupationalTableCompanyAdmin";
 import { useState } from "react";
 import OccupationalTableIndividualAdmin from "./OccupationalTableIndividualAdmin";
-import AdminTable from "./AdminTable";
 
-const OccupationalTables = ({ status }) => {
+const OccupationalTables = ({ status, motherTab }) => {
   const [activeTab, setActiveTab] = useState("individual");
   const handleSelectTab = (key) => {
     setActiveTab(key);
   };
+
   return (
     <Row>
       <Col>
         <Tabs activeKey={activeTab} onSelect={handleSelectTab} unmountOnExit>
           <Tab eventKey={"individual"} title="INDIVIDUAL">
-            <OccupationalTableIndividualAdmin status={status} />
+            <OccupationalTableIndividualAdmin
+              status={status}
+              activeTab={activeTab}
+              motherTab={motherTab}
+            />
             {/* <AdminTable status={status} /> */}
           </Tab>
           <Tab eventKey={"company"} title="COMPANY">
-            <OccupationalTableAdmin status={status} />
+            <OccupationalTableAdmin
+              status={status}
+              activeTab={activeTab}
+              motherTab={motherTab}
+            />
           </Tab>
         </Tabs>
       </Col>

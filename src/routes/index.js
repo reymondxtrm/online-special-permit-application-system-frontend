@@ -77,6 +77,8 @@ import ConfirmMail from "pages/AuthenticationInner/page-confirm-mail";
 
 //QR code
 import SpecialPermitDetailsQr from "pages/CbpldLandingPage/SpecialPermit/SpecialPermitDetailsQr";
+import { components } from "react-select/dist/react-select.cjs.prod";
+import CedulaApplicationFormModal from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Modals/CedulaApplicationFormModal";
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: Analytics },

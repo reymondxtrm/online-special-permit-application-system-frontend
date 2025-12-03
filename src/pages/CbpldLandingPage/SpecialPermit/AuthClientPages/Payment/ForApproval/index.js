@@ -74,28 +74,12 @@ const ForApproval = () => {
             title="Special Permit"
             breadcrumbItem="For Payment Applications"
           />
-          {/* 
-          <Row>
-            <Col>
-              <Card>
-                <CardBody>
-                  <Col md="3">
-                    <Label className="form-label">Select Year:</Label>
-                    <Select
-                      style={{ zIndex: "1" }}
-                      options={options}
-                      placeholder="Select Year"
-                    />
-                  </Col>
-                </CardBody>
-              </Card>
-            </Col>
-          </Row> */}
+
           <Row>
             <Col xs="12">
               <Card>
                 <CardBody>
-                  {user.accountType === "individu al" ? (
+                  {user.accountType === "individual" ? (
                     <Tabs
                       className="mb-3"
                       activeKey={activeTab}

@@ -39,6 +39,25 @@ export const getCompanyClientTable = createAsyncThunk(
     }
   }
 );
+export const getUserDetailsForCedulaApplication = createAsyncThunk(
+  "specialPermitClient/getUserDetailsForCedulaApplication",
+  async (params, thunkAPI) => {
+    try {
+      const response = await axios({
+        url: "api/client/get-user-details-for-cedula-application",
+        method: "GET",
+        params: { cedula_application_ids: params },
+      });
+      if (response.data) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(response.data);
+      }
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
 
 export const SpecialPermitClientSlice = createSlice({
   name: "specialPermitClient",
@@ -46,9 +65,10 @@ export const SpecialPermitClientSlice = createSlice({
     clientTableData: [],
     getTableDataIsFetching: false,
     clientCompanyTable: [],
-
+    selectedApplicationId: [],
     getClientCompanyTableIsFetching: false,
-
+    cedulaDetails: [],
+    getUserDetailsForCedulaApplicationIsFetching: false,
     errors: "",
     params: {},
   },
@@ -61,6 +81,9 @@ export const SpecialPermitClientSlice = createSlice({
     },
     setProps: (state, action) => {
       state.params = { ...action.payload };
+    },
+    setApplicationIdsForPayment: (state, action) => {
+      state.selectedApplicationId = action.payload;
     },
   },
   extraReducers: {
@@ -84,6 +107,17 @@ export const SpecialPermitClientSlice = createSlice({
     },
     [getCompanyClientTable.rejected]: (state, action) => {
       state.getClientCompanyTableIsFetching = false;
+      state.errors = action.payload;
+    },
+    [getUserDetailsForCedulaApplication.pending]: (state) => {
+      state.getUserDetailsForCedulaApplicationIsFetching = true;
+    },
+    [getUserDetailsForCedulaApplication.fulfilled]: (state, action) => {
+      state.getUserDetailsForCedulaApplicationIsFetching = false;
+      state.cedulaDetails = action.payload;
+    },
+    [getUserDetailsForCedulaApplication.rejected]: (state, action) => {
+      state.getUserDetailsForCedulaApplicationIsFetching = false;
       state.errors = action.payload;
     },
   },

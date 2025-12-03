@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { requestedServiceSlice } from "features/filters/requestedServiceSlice";
 import {
   getUnreadUserNotifications,
@@ -29,9 +29,11 @@ import { useDispatch, useSelector } from "react-redux";
 import "react-toastify/dist/ReactToastify.css";
 import { useHistory } from "react-router-dom/";
 import Notifications from "components/Notifications";
+import echo from "../src/pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Common/echo";
 
 const App = (props) => {
   const dispatch = useDispatch();
+  const [isConnected, setIsConnected] = useState(false);
   const history = useHistory();
   // const httpsAgent = new https.Agent({
   //   rejectUnauthorized: false, // Disables SSL certificate validation
@@ -79,6 +81,30 @@ const App = (props) => {
     return layoutCls;
   }
   const Layout = getLayout();
+  useEffect(() => {
+    if (!echo?.connector?.pusher?.connection) return;
+
+    const connection = echo.connector.pusher.connection;
+
+    const handleConnected = () => {
+      console.log("Pusher Connected!");
+      setIsConnected(true);
+    };
+
+    const handleDisconnected = () => {
+      console.log("Pusher Disconnected!");
+      setIsConnected(false);
+    };
+
+    connection.bind("connected", handleConnected);
+    connection.bind("disconnected", handleDisconnected);
+
+    return () => {
+      connection.unbind("connected", handleConnected);
+      connection.unbind("disconnected", handleDisconnected);
+    };
+  }, []);
+  console.log(isConnected);
   return (
     <React.Fragment>
       <Router basename="/">

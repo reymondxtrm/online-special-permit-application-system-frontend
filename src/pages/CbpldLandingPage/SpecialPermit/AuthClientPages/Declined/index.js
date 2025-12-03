@@ -35,6 +35,7 @@ import classnames from "classnames";
 
 import Pagination from "components/Pagination";
 import ClientTable from "../Common/ClientTable";
+import OccupationalPermitModal from "pages/CbpldLandingPage/Modals/OccupationalPermitModal";
 const Declined = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -63,6 +64,7 @@ const Declined = () => {
   };
   return (
     <React.Fragment>
+    
       <div className="page-content">
         <Container fluid>
           <Breadcrumbs

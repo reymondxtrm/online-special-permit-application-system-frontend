@@ -218,7 +218,7 @@ export default function CedulaAddtionalDetailsModal({
             </Col>
             <Col>
               <InputGroup className="d-flex flex-column">
-                <Label>Monthly Salary</Label>
+                <Label>Date Hired</Label>
                 <Input
                   type="date"
                   placeholder="Date Hired"

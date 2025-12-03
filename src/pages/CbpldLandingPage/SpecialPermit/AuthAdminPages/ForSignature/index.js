@@ -316,7 +316,10 @@ const ForSignature = () => {
                         </>
                       }
                     >
-                      <OccupationalTables status={"for_signature"} />
+                      <OccupationalTables
+                        status={"for_signature"}
+                        motherTab={activeTab}
+                      />
                     </Tab>
                   </Tabs>
                 </CardBody>

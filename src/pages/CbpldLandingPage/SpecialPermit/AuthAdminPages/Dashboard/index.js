@@ -155,7 +155,10 @@ const Dashboard = () => {
                       eventKey="occupational"
                       title={<>OCCUPATIONAL PERMIT </>}
                     >
-                      <OccupationalTables status={"completed"} />
+                      <OccupationalTables
+                        status={"completed"}
+                        motherTab={activeTab}
+                      />
                     </Tab>
                   </Tabs>
                 </CardBody>

@@ -299,7 +299,10 @@ const ForApproval = () => {
                         </>
                       }
                     >
-                      <OccupationalTables status={"for_payment_approval"} />
+                      <OccupationalTables
+                        status={"for_payment_approval"}
+                        motherTab={activeTab}
+                      />
                     </Tab>
                   </Tabs>
                 </CardBody>

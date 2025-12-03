@@ -3,6 +3,7 @@ import { getCompanyOccupatinalData } from "features/SpecialPermitAdmin";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  Badge,
   Button,
   DropdownItem,
   DropdownMenu,
@@ -20,6 +21,7 @@ import UploadPermitModal from "../Modals/UploadPermitModal";
 import GenerateOccupationalPermitModal from "../Modals/GenerateOccupationalPermitModal";
 import Viewer from "react-viewer";
 import useGetImage from "hooks/Common/useGetImage";
+import RemarksModal from "../Modals/RemarksModal";
 
 export default function OccupationalTableCompanyAdmin({ status }) {
   const dispatch = useDispatch();
@@ -33,10 +35,13 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [generateModal, setOpenGenerateModal] = useState(false);
   const [uploadPermitModal, setOpenUploadPermitModal] = useState(false);
+  const [returnRemarksModal, setOpenReturnRemarksModal] = useState(false);
   const [remarksModal, setOpenRemarksModal] = useState(false);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const handleSubmit = useSubmit();
   const [showAttachmentModal, setShowAttachmentModal] = useState(false);
+  const [orderOfPaymentId, setOrderOfPaymentId] = useState();
+  const [orPath, setOrPath] = useState("");
   useEffect(() => {
     dispatch(getCompanyOccupatinalData({ type: "company", status: status }));
   }, [refreshPage]);
@@ -66,11 +71,13 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   const toggleUploadPermitModal = () => {
     setOpenUploadPermitModal((prev) => !prev);
   };
-  const toggleImageViewer = (path) => {
-    getImageHandle({ path, url: "/api/admin/attachment" });
+  const toggleImageViewer = () => {
+    getImageHandle({ path: orPath, url: "/api/admin/attachment" });
     setIsViewerOpen((prev) => !prev);
   };
-
+  const toggleReturnRemarksModal = () => {
+    setOpenReturnRemarksModal((prev) => !prev);
+  };
   return (
     <React.Fragment>
       {isViewerOpen && currentImage && (
@@ -94,6 +101,12 @@ export default function OccupationalTableCompanyAdmin({ status }) {
         toggleRefresh={toggleRefresh}
         applicationId={applicationId}
       />
+      <RemarksModal
+        openModal={remarksModal}
+        toggleModal={toggleRemarksModal}
+        applicationId={applicationId}
+        toggleRefresh={toggleRefresh}
+      />
       <AttachmentModal
         openModal={showAttachmentModal}
         uploadedFiles={uploadedFiles}
@@ -107,8 +120,8 @@ export default function OccupationalTableCompanyAdmin({ status }) {
         <>
           <ReturnRemarksModal
             toggleModal={toggleRemarksModal}
-            openModal={remarksModal}
-            // orderOfPaymentId={orderOfPaymentId}
+            openModal={returnRemarksModal}
+            orderOfPaymentId={orderOfPaymentId}
             toggleRefresh={toggleRefresh}
           />
         </>
@@ -129,7 +142,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
             toggleModal={toggleUploadPermitModal}
             openModal={uploadPermitModal}
             special_permit_application_id={applicationId}
-            activeTab={"occupationa_permit"}
+            activeTab={"occupational_permit"}
             toggleRefresh={toggleRefresh}
           />
         </>
@@ -142,6 +155,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
             <th>Gender</th>
             <th>Address</th>
             <th>Contact</th>
+            {status === "for_payment_approval" && <th> Mode of Payment</th>}
             <th>Attachment</th>
             {status === "for_payment_approval" ||
             status === "pending" ||
@@ -196,7 +210,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                       {company.fname}
                     </td>
                     <td>{company?.user_addresses[0]?.company_fulladdress}</td>
-                    <td colSpan={3}></td>
+                    <td colSpan={4}></td>
                   </tr>
 
                   {selectedRow?.includes(companyIndex)
@@ -219,13 +233,39 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                     ?.user_phone_numbers_morph?.phone_number
                                 }
                               </td>
+                              {status === "for_payment_approval" && (
+                                <td>
+                                  <Badge
+                                    color={
+                                      item?.order_of_payment?.payment_detail
+                                        ?.payment_type === "online"
+                                        ? "info"
+                                        : "warning"
+                                    }
+                                  >
+                                    {
+                                      item?.order_of_payment?.payment_detail
+                                        ?.payment_type
+                                    }
+                                  </Badge>
+                                </td>
+                              )}
                               <td>
                                 {status === "for_payment_approval" ||
                                 status === "returned" ? (
                                   <Button
                                     color="success"
-                                    onClick={() => {
-                                      toggleImageViewer(
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      item?.order_of_payment?.payment_detail
+                                        ?.payment_type === "online"
+                                        ? window.open(
+                                            item?.order_of_payment
+                                              ?.payment_detail?.attachment,
+                                            "_blank"
+                                          )
+                                        : toggleImageViewer();
+                                      setOrPath(
                                         item?.uploaded_file?.official_receipt
                                       );
                                     }}
@@ -259,7 +299,14 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                       >
                                         Procced to payment
                                       </DropdownItem>
-                                      <DropdownItem>Return</DropdownItem>
+                                      <DropdownItem
+                                        onClick={() => {
+                                          toggleRemarksModal();
+                                          setApplicationId(item?.id);
+                                        }}
+                                      >
+                                        Return
+                                      </DropdownItem>
                                     </DropdownMenu>
                                   </UncontrolledDropdown>
                                 </td>
@@ -309,8 +356,9 @@ export default function OccupationalTableCompanyAdmin({ status }) {
 
                                       <DropdownItem
                                         onClick={() => {
-                                          // toggleReturnRemarksModal();
-                                          setorderOfPaymentId(
+                                          toggleReturnRemarksModal();
+
+                                          setOrderOfPaymentId(
                                             item?.order_of_payment?.id
                                           );
                                         }}
@@ -347,7 +395,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                         color="primary"
                                         style={{ width: "90px" }}
                                         onClick={() => {
-                                          toggleUploadModal();
+                                          toggleUploadPermitModal();
                                           setApplicationId(item?.id);
                                         }}
                                       >

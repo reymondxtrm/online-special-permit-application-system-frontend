@@ -68,13 +68,12 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const [purposeData, setpurposeData] = useState({});
   const [exemptionData, setexemptionData] = useState({});
   const [purposeOptions, setpurposeOptions] = useState();
-  const [applicationId, setapplicationId] = useState(null);
+  const [applicationId, setApplicationId] = useState(null);
   const [orderOfPaymentId, setorderOfPaymentId] = useState(null);
   const [name, setname] = useState(null);
   const [purpose, setpurpose] = useState(null);
   const [referenceNo, setreferenceNo] = useState(null);
   const [imageViewerScale, setimageViewScale] = useState(1);
-
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
   const [selectedRow, setSelectedRow] = useState([]);
@@ -554,21 +553,34 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                     <td>
                       {status === "for_payment_approval" ||
                       status === "returned" ? (
-                        <img
-                          src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`}
-                          alt={`Thumbnail`}
-                          style={{
-                            width: "100px",
-                            height: "50px",
-                            margin: "5px",
-                            cursor: "pointer",
-                          }}
-                          onClick={() =>
-                            openImageViewer(
-                              `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`
-                            )
-                          }
-                        />
+                        application?.order_of_payment?.payment_detail
+                          ?.payment_type === "online" ? (
+                          <Button
+                            color="success"
+                            onClick={() => {
+                              setUploadedFiles(item?.uploaded_file);
+                              toggleAttachmentModal();
+                            }}
+                          >
+                            Attachment
+                          </Button>
+                        ) : (
+                          <img
+                            src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`}
+                            alt={`Thumbnail`}
+                            style={{
+                              width: "100px",
+                              height: "50px",
+                              margin: "5px",
+                              cursor: "pointer",
+                            }}
+                            onClick={() =>
+                              openImageViewer(
+                                `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`
+                              )
+                            }
+                          />
+                        )
                       ) : (
                         <Button
                           color="success"
@@ -640,7 +652,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                                     return;
                                   }
 
-                                  setapplicationId(application?.id);
+                                  setApplicationId(application?.id);
                                   toggleAmountModal();
                                 }}
                               >
@@ -687,7 +699,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               <DropdownItem
                                 onClick={() => {
                                   toggleRemarksModal();
-                                  setapplicationId(application?.id);
+                                  setApplicationId(application?.id);
                                 }}
                               >
                                 Decline
@@ -700,10 +712,10 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                                     applicationType === "mayors_permit"
                                   ) {
                                     toggleMayorsAndGoodMoralRequestModal();
-                                    setapplicationId(application.id);
+                                    setApplicationId(application.id);
                                   } else {
                                     toggleRequestFormModal();
-                                    setapplicationId(application.id);
+                                    setApplicationId(application.id);
                                   }
                                 }}
                               >

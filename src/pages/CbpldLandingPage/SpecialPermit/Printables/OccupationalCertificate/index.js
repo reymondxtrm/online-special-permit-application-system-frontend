@@ -86,7 +86,7 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
         <div className="body-reference-number">
           <span className="fw-bold ">Permit No.:</span>
           <span className="text-decoration-underline fw-bold text-danger">
-            2025-OP-1231
+            {applicationDetails?.reference_no}
           </span>
         </div>
         <div className="top">

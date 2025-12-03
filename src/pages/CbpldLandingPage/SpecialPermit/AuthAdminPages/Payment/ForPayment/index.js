@@ -315,7 +315,10 @@ const Dashboard = () => {
                         </>
                       }
                     >
-                      <OccupationalTables status={"for_payment"} />
+                      <OccupationalTables
+                        status={"for_payment"}
+                        motherTab={activeTab}
+                      />
                     </Tab>
                   </Tabs>
                 </CardBody>

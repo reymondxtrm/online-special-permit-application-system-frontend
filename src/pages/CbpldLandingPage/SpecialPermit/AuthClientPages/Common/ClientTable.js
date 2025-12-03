@@ -22,6 +22,8 @@ import {
 } from "features/SpecialPermitClient";
 import Pagination from "components/Pagination";
 import CedulaApplicationFormModal from "../../AuthAdminPages/Modals/CedulaApplicationFormModal";
+import OccupationalPermitModal from "pages/CbpldLandingPage/Modals/OccupationalPermitModal";
+
 const ClientTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
   const [currentImage, setCurrentImage] = useState(null);
@@ -32,10 +34,11 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
   const [overTheCounterModal, setoverTheCounterModal] = useState(false); // State for selected application's uploaded files
   const [selectedRow, setSelectedRow] = useState([]);
   const [amount, setamount] = useState();
-  const [orderOfPaymentData, setorderOfPaymentData] = useState();
   const [reuploadModal, setreuploadModal] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState([]);
   const [cedulaApplicationModal, setCedulaApplicationModal] = useState(false);
+  const [updateOccupationalPermitModal, setOpenOccupationalPermitModal] =
+    useState(false);
 
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
@@ -79,6 +82,9 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
+  };
+  const toggleUpdateOccupationalPermitModal = () => {
+    setOpenOccupationalPermitModal((prev) => !prev);
   };
   const dateOfEvent = (date, time) => {
     if (date || time) {
@@ -161,6 +167,15 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
         applicationType={applicationType}
         paymentDetails={paymentDetails}
       />
+      <OccupationalPermitModal
+        openModal={updateOccupationalPermitModal}
+        toggleModal={toggleUpdateOccupationalPermitModal}
+        mode="update"
+        title="Update Occupational Permit"
+        // submitUrl={`api/client/update-occupational-permit/${id}`}
+        fetchUrl={`api/client/get-single-occupational/permit-application`}
+        applicationId={selectedRow[0]}
+      />
       <div className="d-flex gap-2">
         <div>
           {status === "for_payment" && user?.accountType === "company" ? (
@@ -168,6 +183,11 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
               color="primary"
               onClick={() => {
                 toggleOverTheCounterModal();
+                dispatch(
+                  SpecialPermitClientSlice.actions.setApplicationIdsForPayment(
+                    selectedRow
+                  )
+                );
               }}
               disabled={selectedRow.length <= 0}
             >
@@ -179,7 +199,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
         <div>
           <Button color="success">
             <i className="mdi mdi-printer "></i>{" "}
-            <span> Print Cedula Application Form</span>{" "}
+            <span> Reprint Cedula Application Form</span>{" "}
           </Button>
         </div>
       </div>
@@ -214,7 +234,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                 ) : null}
               </th>
               <th>#</th>
-              {status === "for_signature" && <th>Reference No</th>}
 
               {(applicationType === "mayors_permit" ||
                 applicationType === "good_moral") && (
@@ -298,8 +317,34 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                     </>
                   )}
                   {(status === "for_payment" ||
-                    status === "for_payment_approval" ||
-                    status === "declined") && <th> Amount</th>}
+                    status === "for_payment_approval") && (
+                    <>
+                      <th> Amount</th>
+                    </>
+                  )}
+                  {status === "pending" && (
+                    <>
+                      <th>Name</th>
+                      <th>Attachment</th>
+                    </>
+                  )}
+                  {(status === "declined" || status === "returned") && (
+                    <>
+                      <th>Remarks</th>
+                    </>
+                  )}
+
+                  {/* {status === "returned" && (
+                    <>
+                      <th>O.R</th>
+                    </>
+                  )} */}
+
+                  {(status === "returned" || status === "declined") && (
+                    <>
+                      <th>Actions</th>
+                    </>
+                  )}
                 </>
               )}
               {status === "for_payment" &&
@@ -578,8 +623,61 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                             </td>
                           </>
                         )}
-
-                        <td>{application?.order_of_payment?.total_amount}</td>
+                        {status === "pending" && (
+                          <>
+                            <td>{application?.requestor_name}</td>
+                            <td>
+                              <Button color="success">Attachment</Button>{" "}
+                            </td>
+                          </>
+                        )}
+                        {status === "for_payment_approval" ||
+                          (status === "for_signature" && (
+                            <td>{application?.reference_no || ""}</td>
+                          ))}
+                        {(status === "for_payment" ||
+                          status === "for_payment_approval") && (
+                          <td>{`₱ ${application?.order_of_payment?.total_amount}`}</td>
+                        )}
+                        {status === "returned" && (
+                          <>
+                            <td>
+                              {application?.status_histories?.[0]?.remarks}
+                            </td>
+                            {status === "returned" && (
+                              <td>
+                                <Button
+                                  color="primary"
+                                  onClick={() => {
+                                    setSelectedRow([application?.id]);
+                                    toggleReUploadModal();
+                                  }}
+                                >
+                                  Reupload O.R
+                                </Button>
+                              </td>
+                            )}
+                          </>
+                        )}
+                        {status === "declined" && (
+                          <>
+                            <td>
+                              {application?.status_histories?.[0]?.remarks}
+                              hello
+                            </td>
+                            <td>
+                              <Button
+                                onClick={() => {
+                                  setSelectedRow([application?.id]);
+                                  toggleUpdateOccupationalPermitModal();
+                                }}
+                                color="primary"
+                              >
+                                Revise & Resubmit
+                              </Button>
+                            </td>
+                          </>
+                        )}
                       </>
                     ) : null}
 
@@ -617,6 +715,11 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                           onClick={() => {
                             toggleOverTheCounterModal();
                             setSelectedRow([application?.id]);
+                            dispatch(
+                              SpecialPermitClientSlice.actions.setApplicationIdsForPayment(
+                                [application?.id]
+                              )
+                            );
                           }}
                         >
                           Pay

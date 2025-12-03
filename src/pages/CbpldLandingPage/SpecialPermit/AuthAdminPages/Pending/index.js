@@ -285,7 +285,10 @@ const Pending = () => {
                         </>
                       }
                     >
-                      <OccupationalTables status={"pending"} />
+                      <OccupationalTables
+                        status={"pending"}
+                        motherTab={activeTab}
+                      />
                     </Tab>
                   </Tabs>
                 </CardBody>
