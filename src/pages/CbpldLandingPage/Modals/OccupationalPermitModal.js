@@ -22,7 +22,7 @@ import PassportCamera from "../SpecialPermit/AuthClientPages/Common/PassportCame
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 import * as Yup from "yup";
-import PrivateImageViewer from "../SpecialPermit/AuthAdminPages/Common/PrivateImageViewer";
+import PrivateImageViewer from "../SpecialPermit/Common/PrivateImageViewer";
 import BasicInputField from "components/Forms/BasicInputField";
 function OccupationalPermitModal({
   openModal,

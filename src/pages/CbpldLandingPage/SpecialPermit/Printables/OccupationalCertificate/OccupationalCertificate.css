@@ -10,8 +10,8 @@
 }
 /*header*/
 .permit-logo {
-  width: 60px;
-  height: 60px;
+  width: 53px;
+  height: 53px;
   position: absolute;
 }
 .permit-header-text {
@@ -19,8 +19,8 @@
   flex-direction: column;
   font-size: 8px;
   gap: 0px;
-  width: 245px;
-  margin-left: 61px;
+  width: 225px;
+  margin-left: 45px;
   font-family: "Cambria, serif";
 }
 .permit-header-text > p {
@@ -32,6 +32,11 @@
 .permit-header-upper-section {
   display: flex;
   position: relative;
+}
+.permit-header-upper-section > p {
+  padding: 0px;
+  margin: 0px;
+  width: 300px;
 }
 .permit-header {
   display: flex;

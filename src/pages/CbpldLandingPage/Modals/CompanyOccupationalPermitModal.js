@@ -15,14 +15,13 @@ import {
   Row,
   Table,
 } from "reactstrap";
-import { initAsyncCompiler } from "sass";
+
 import Select from "react-select";
 import PassportCamera from "../SpecialPermit/AuthClientPages/Common/PassportCamera";
-
 import CedulaAddtionalDetailsModal from "./CedulaAddtionalDetailsModal";
-import { createSerializableStateInvariantMiddleware } from "@reduxjs/toolkit";
 import useSubmit from "hooks/Common/useSubmit";
-import { CITIZENSHIP_OPTIONS } from "assets/data/data";
+import * as Yup from "yup";
+import { useSelector } from "react-redux";
 
 export default function CompanyOccupationalPermitModal({
   isOpen,
@@ -44,6 +43,7 @@ export default function CompanyOccupationalPermitModal({
       capturedPicture
     );
   };
+  const user = useSelector((state) => state.user);
   const togglePasssportCamera = () => {
     setCameraIsOpen((prev) => !prev);
   };
@@ -82,6 +82,111 @@ export default function CompanyOccupationalPermitModal({
     }
     return form;
   };
+  console.log(user?.companyType);
+  const employeeSchema = Yup.object().shape({
+    fname: Yup.string().required("First name is required"),
+    lname: Yup.string().required("Last name is required"),
+    birth_date: Yup.string().required("Birth date is required"),
+    gender: Yup.string().required("Gender is required"),
+    address_line: Yup.string().required("Home address is required"),
+    contact_no: Yup.string().required("Contact number is required"),
+
+    no_cedula: Yup.boolean(),
+
+    // CEDULA is required only when no_cedula is false
+    cedula: Yup.mixed().when("no_cedula", {
+      is: false,
+      then: Yup.mixed()
+        .required("Cedula is required")
+        .test(
+          "fileRequired",
+          "Cedula file is required",
+          (value) => value instanceof File
+        ),
+      otherwise: Yup.mixed().nullable(),
+    }),
+    certificate_of_employment: Yup.mixed().required(
+      "Certificate of Employment is required"
+    ),
+
+    training_certificate: Yup.mixed()
+      .test(
+        "requiredWhenCompanyType",
+        "Training certificate is required.",
+        function (value) {
+          if (user?.companyType === "NON-FOOD-MASSEUR") {
+            return value instanceof File;
+          }
+          return true;
+        }
+      )
+      .test("fileType", "Only image files are allowed.", function (value) {
+        if (!value) return true;
+        return [
+          "image/jpeg",
+          "image/png",
+          "image/jpg",
+          "application/pdf",
+        ].includes(value.type);
+      }),
+
+    // These fields required only when no_cedula === true
+    citizenship: Yup.string().when("no_cedula", {
+      is: true,
+      then: Yup.string().required("Nationality is required"),
+      otherwise: Yup.string().nullable(),
+    }),
+    civil_status: Yup.string().when("no_cedula", {
+      is: true,
+      then: Yup.string().required("Civil status is required"),
+      otherwise: Yup.string().nullable(),
+    }),
+    place_of_birth: Yup.string().when("no_cedula", {
+      is: true,
+      then: Yup.string().required("Place of birth is required"),
+      otherwise: Yup.string().nullable(),
+    }),
+    blood_type: Yup.string().when("no_cedula", {
+      is: true,
+      then: Yup.string().required("Blood type is required"),
+      otherwise: Yup.string().nullable(),
+    }),
+    height: Yup.string().when("no_cedula", {
+      is: true,
+      then: Yup.string().required("Height is required"),
+      otherwise: Yup.string().nullable(),
+    }),
+    weight: Yup.string().when("no_cedula", {
+      is: true,
+      then: Yup.string().required("Weight is required"),
+      otherwise: Yup.string().nullable(),
+    }),
+    tin: Yup.string().when("no_cedula", {
+      is: true,
+      then: Yup.string().required("TIN is required"),
+      otherwise: Yup.string().nullable(),
+    }),
+    occupation: Yup.string().when("no_cedula", {
+      is: true,
+      then: Yup.string().required("Occupation is required"),
+      otherwise: Yup.string().nullable(),
+    }),
+    date_hired: Yup.string().when("no_cedula", {
+      is: true,
+      then: Yup.string().required("Date hired is required"),
+      otherwise: Yup.string().nullable(),
+    }),
+    monthly_salary: Yup.number().when("no_cedula", {
+      is: true,
+      then: Yup.number()
+        .typeError("Monthly salary must be a number")
+        .required("Monthly salary is required"),
+      otherwise: Yup.number().nullable(),
+    }),
+  });
+  const validationSchema = Yup.object().shape({
+    employees: Yup.array().of(employeeSchema),
+  });
 
   return (
     <React.Fragment>
@@ -114,6 +219,7 @@ export default function CompanyOccupationalPermitModal({
         <ModalBody>
           <Formik
             innerRef={formikRef}
+            validationSchema={validationSchema}
             initialValues={{
               employees: [
                 {
@@ -180,7 +286,9 @@ export default function CompanyOccupationalPermitModal({
                             <th>ID PICTURE</th>
                             <th>CEDULA</th>
                             <th>CERTIFICATE OF EMPLOYMENT</th>
-                            <th>TRAINING CERTIFICATE</th>
+                            {user?.companyType === "NON-FOOD-MASSEUR" && (
+                              <th>TRAINING CERTIFICATE</th>
+                            )}
                             <th>ACTIONS</th>
                           </tr>
                         </thead>
@@ -261,6 +369,15 @@ export default function CompanyOccupationalPermitModal({
                                     );
                                   }}
                                 />
+                                {props.touched.employees?.[index]?.gender &&
+                                props.errors.employees?.[index]?.gender ? (
+                                  <div
+                                    className="text-danger"
+                                    style={{ fontSize: "11px" }}
+                                  >
+                                    {props.errors.employees[index].gender}
+                                  </div>
+                                ) : null}
                               </td>
 
                               <td>
@@ -369,13 +486,35 @@ export default function CompanyOccupationalPermitModal({
                                 <Input
                                   type="file"
                                   accept="image/*"
+                                  name={`employees[${index}].cedula`}
                                   onChange={(e) => {
                                     props.setFieldValue(
                                       `employees[${index}].cedula`,
                                       e.target.files[0]
                                     );
                                   }}
+                                  onBlur={props.handleBlur}
+                                  invalid={
+                                    !props.values.employees?.[index]
+                                      ?.no_cedula &&
+                                    props.touched.employees?.[index]?.cedula &&
+                                    props.errors.employees?.[index]?.cedula
+                                      ? true
+                                      : false
+                                  }
                                 />
+
+                                {!props.values.employees?.[index]?.no_cedula && // 👈 hide error text if no_cedula = true
+                                props.touched.employees?.[index]?.cedula &&
+                                props.errors.employees?.[index]?.cedula ? (
+                                  <div
+                                    className="text-danger"
+                                    style={{ fontSize: "11px" }}
+                                  >
+                                    {props.errors.employees[index].cedula}
+                                  </div>
+                                ) : null}
+
                                 <p
                                   className=" fw-bold text-danger"
                                   style={{ cursor: "pointer" }}
@@ -397,20 +536,88 @@ export default function CompanyOccupationalPermitModal({
                                       e.target.files[0]
                                     );
                                   }}
+                                  onBlur={() =>
+                                    props.setFieldTouched(
+                                      `employees[${index}].certificate_of_employment`,
+                                      true
+                                    )
+                                  }
+                                  invalid={
+                                    props.touched?.employees?.[index]
+                                      ?.certificate_of_employment &&
+                                    props.errors?.employees?.[index]
+                                      ?.certificate_of_employment
+                                      ? true
+                                      : false
+                                  }
                                 />
+
+                                {props.touched?.employees?.[index]
+                                  ?.certificate_of_employment &&
+                                props.errors?.employees?.[index]
+                                  ?.certificate_of_employment ? (
+                                  <div
+                                    className="text-danger"
+                                    style={{
+                                      fontSize: "11px",
+                                      display: "block",
+                                    }}
+                                  >
+                                    {
+                                      props.errors.employees[index]
+                                        .certificate_of_employment
+                                    }
+                                  </div>
+                                ) : null}
                               </td>
-                              <td style={{ width: "10%" }}>
-                                <Input
-                                  type="file"
-                                  accept="image/*"
-                                  onChange={(e) => {
-                                    props.setFieldValue(
-                                      `employees[${index}].training_certificate`,
-                                      e.target.files[0]
-                                    );
-                                  }}
-                                />
-                              </td>
+
+                              {user?.companyType === "NON-FOOD-MASSEUR" && (
+                                <td style={{ width: "10%" }}>
+                                  <Input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                      props.setFieldValue(
+                                        `employees[${index}].training_certificate`,
+                                        e.target.files[0]
+                                      );
+                                    }}
+                                    onBlur={() =>
+                                      props.setFieldTouched(
+                                        `employees[${index}].training_certificate`,
+                                        true
+                                      )
+                                    }
+                                    invalid={
+                                      props.touched?.employees?.[index]
+                                        ?.training_certificate &&
+                                      props.errors?.employees?.[index]
+                                        ?.training_certificate
+                                        ? true
+                                        : false
+                                    }
+                                  />
+
+                                  {props.touched?.employees?.[index]
+                                    ?.training_certificate &&
+                                  props.errors?.employees?.[index]
+                                    ?.training_certificate ? (
+                                    <div
+                                      className="text-danger"
+                                      style={{
+                                        fontSize: "11px",
+                                        display: "block",
+                                      }}
+                                    >
+                                      {
+                                        props.errors.employees[index]
+                                          .training_certificate
+                                      }
+                                    </div>
+                                  ) : null}
+                                </td>
+                              )}
+
                               <td>
                                 <Button
                                   color="danger"

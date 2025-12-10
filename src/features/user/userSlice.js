@@ -138,6 +138,7 @@ export const userSlice = createSlice({
     roles: [],
     user_type: "",
     username: "",
+    companyType: "",
     accountType: "",
     withCompanyDetails: "",
     isFetching: false,
@@ -200,6 +201,7 @@ export const userSlice = createSlice({
       state.isSignUpError = false;
       state.isSignUpSuccess = false;
       state.isVerified = payload.user.email_verified_at;
+      state.companyType = payload?.user?.user_details?.company_type || null;
       return state;
     },
     [loginUser.rejected]: (state, { payload }) => {

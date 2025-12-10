@@ -21,7 +21,8 @@ import useSubmit from "hooks/Common/useSubmit";
 import axios from "axios";
 import { USER_PRIVACY } from "assets/data/data";
 import useGetImage from "hooks/Common/useGetImage";
-import ImageViewer from "react-simple-image-viewer";
+import ImageViewer from "react-image-viewer-zoom";
+
 function MayorsCertificateModal({
   openModal,
   toggleModal,
@@ -59,6 +60,7 @@ function MayorsCertificateModal({
               value: options.id,
               label: options.name,
             }));
+
             const updatedOptions = [{ value: 0, label: "Others" }, ...options];
 
             setpurposeOptions(updatedOptions);
@@ -80,7 +82,10 @@ function MayorsCertificateModal({
             const data = res.data;
             console.log(res.data);
             setExistingData({
-              purpose_id: data.application.purpose,
+              purpose_id: {
+                value: data.purpose?.id,
+                label: data.purpose?.name,
+              },
               other_purpose: data?.other_purpose || "",
             });
 
@@ -109,7 +114,7 @@ function MayorsCertificateModal({
 
   return (
     <React.Fragment>
-      {isViewingOpen && !isFetching && currentImage && (
+      {/* {isViewingOpen && !isFetching && currentImage && (
         <ImageViewer
           src={[currentImage]}
           currentIndex={0}
@@ -119,9 +124,9 @@ function MayorsCertificateModal({
             zIndex: 9999,
           }}
           closeOnClickOutside={true}
-          disableZoom={false}
+          disableZoom={false} // ✔ enables zoom
         />
-      )}
+      )} */}
       <Modal
         isOpen={openModal}
         toggle={() => {
@@ -191,7 +196,7 @@ function MayorsCertificateModal({
                               } else {
                                 setotherPurpose(false);
                               }
-
+                              // store the option object (or "" if cleared)
                               props.setFieldValue(
                                 "purpose_id",
                                 selectedOption ?? ""
@@ -275,18 +280,7 @@ function MayorsCertificateModal({
                             />
                             {isUpdate &&
                               uploadedFiles?.community_tax_certificate && (
-                                <Button
-                                  color="primary"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    getImageHandle({
-                                      path: uploadedFiles?.community_tax_certificate,
-                                      url: "api/client/attachment",
-                                      showLoader: true,
-                                    });
-                                    toggleIsViewerOpen();
-                                  }}
-                                >
+                                <Button color="primary">
                                   <i
                                     className="mdi mdi-eye"
                                     color="warning"
@@ -319,19 +313,7 @@ function MayorsCertificateModal({
                             />
                             {isUpdate && uploadedFiles?.barangay_clearance && (
                               <Button color="primary">
-                                <i
-                                  className="mdi mdi-eye"
-                                  color="warning"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    getImageHandle({
-                                      path: uploadedFiles?.barangay_clearance,
-                                      url: "api/client/attachment",
-                                      showLoader: true,
-                                    });
-                                    toggleIsViewerOpen();
-                                  }}
-                                ></i>
+                                <i className="mdi mdi-eye" color="warning"></i>
                               </Button>
                             )}
                           </div>
@@ -357,18 +339,7 @@ function MayorsCertificateModal({
                               accept="image/*"
                             />
                             {isUpdate && uploadedFiles?.fiscal_clearance && (
-                              <Button
-                                color="primary"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  getImageHandle({
-                                    path: uploadedFiles?.fiscal_clearance,
-                                    url: "api/client/attachment",
-                                    showLoader: true,
-                                  });
-                                  toggleIsViewerOpen();
-                                }}
-                              >
+                              <Button color="primary">
                                 <i className="mdi mdi-eye" color="warning"></i>
                               </Button>
                             )}
@@ -395,18 +366,7 @@ function MayorsCertificateModal({
                               accept="image/*"
                             />
                             {isUpdate && uploadedFiles?.court_clearance && (
-                              <Button
-                                color="primary"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  getImageHandle({
-                                    path: uploadedFiles?.court_clearance,
-                                    url: "api/client/attachment",
-                                    showLoader: true,
-                                  });
-                                  toggleIsViewerOpen();
-                                }}
-                              >
+                              <Button color="primary">
                                 <i className="mdi mdi-eye" color="warning"></i>
                               </Button>
                             )}
@@ -435,6 +395,31 @@ function MayorsCertificateModal({
                 "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
               color: "white",
             }}
+            // onClick={() => {
+            //   const formik = formikRef.current.values;
+
+            //   const formData = getFormData(formik);
+            //   if (proceed) {
+            //     handleSubmit(
+            //       {
+            //         url: "api/client/special-permit/mayors-permit",
+            //         headers: {
+            //           "Content-Type": "multipart/form-data",
+            //         },
+            //         message: {
+            //           title: "Are you sure you want to Proceed?",
+            //           failedTitle: "FAILED",
+            //           success: "Success!",
+            //           error: "unknown error occured",
+            //         },
+            //         params: formData,
+            //       },
+            //       [],
+            //       [toggleModal]
+            //     );
+            //     setIsProceed(false);
+            //   }
+            // }}
             onClick={() => {
               const formik = formikRef.current?.values ?? {};
               const formData = getFormData(formik);

@@ -24,9 +24,11 @@ function AttachmentModal({
   toggleModal,
   uploadedFiles,
   applicationType,
-  mainActiveTab,
+  mainActiveTab = "individual_permit",
   occupational = false,
+  isClient = false,
 }) {
+  console.log(uploadedFiles);
   const getActiveTabInitialState = (applicationType) => {
     if (applicationType == "mayors_permit" || applicationType == "good_moral") {
       return "Police Clearance";
@@ -98,7 +100,7 @@ function AttachmentModal({
       setIsFetching(true);
       try {
         const response = await axios({
-          url: "/api/admin/attachment",
+          url: isClient ? "/api/client/attachment" : "/api/admin/attachment",
           method: "GET",
           params: { filepath: filePath },
           responseType: "blob",
@@ -120,7 +122,7 @@ function AttachmentModal({
     return () => {
       if (blobUrl) URL.revokeObjectURL(blobUrl); // cleanup blob URL
     };
-  }, [activeTab, applicationType]);
+  }, [activeTab, applicationType, openModal]);
 
   const images = Object.values(fileMapping[applicationType]).filter(Boolean);
 

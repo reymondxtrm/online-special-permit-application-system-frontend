@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AttachmentModal from "../Modals/AttachmentModal";
 import {
+  Badge,
   Button,
   Col,
   DropdownItem,
@@ -21,6 +22,8 @@ import FileViewerModal from "../AdminControls/Modals/FileViewerModal";
 import RemarksModal from "../Modals/RemarksModal";
 import useSubmit from "hooks/Common/useSubmit";
 import ReturnRemarksModal from "../Modals/ReturnRemarksModal";
+import GenerateOccupationalPermitModal from "../Modals/GenerateOccupationalPermitModal";
+import UploadPermitModal from "../Modals/UploadPermitModal";
 
 export default function OccupationalTableIndividualAdmin({
   status,
@@ -38,6 +41,9 @@ export default function OccupationalTableIndividualAdmin({
   const [orderOfPaymentId, setOrderOfPaymentId] = useState();
   const [returnRemarksModal, setOpenReturnRemarksModal] = useState(false);
   const [remarksModal, setRemarksModal] = useState(false);
+  const [uploadPermitModal, setOpenUploadPermitModal] = useState(false);
+  const [activeIndex, setActiveIndex] = useState();
+  const [generateModal, setOpenGenerateModal] = useState(false);
 
   const [fileViewerOpen, setFileViewerOpen] = useState(false);
   const handleSubmit = useSubmit();
@@ -69,6 +75,12 @@ export default function OccupationalTableIndividualAdmin({
   };
   const toggleRemarksModal = () => {
     setRemarksModal((prev) => !prev);
+  };
+  const toggleUploadPermitModal = () => {
+    setOpenUploadPermitModal((prev) => !prev);
+  };
+  const toggleGenerateModal = () => {
+    setOpenGenerateModal((prev) => !prev);
   };
   return (
     <React.Fragment>
@@ -106,6 +118,25 @@ export default function OccupationalTableIndividualAdmin({
         applicationId={applicationId}
         toggleRefresh={toggleRefresh}
       />
+
+      {status === "for_signature" ? (
+        <>
+          <GenerateOccupationalPermitModal
+            toggle={toggleGenerateModal}
+            openModal={generateModal}
+            applicationDetails={
+              specialPermitAdmin?.individualOccupational?.[activeIndex]
+            }
+          />
+          <UploadPermitModal
+            toggleModal={toggleUploadPermitModal}
+            openModal={uploadPermitModal}
+            special_permit_application_id={applicationId}
+            activeTab={"occupational_permit"}
+            toggleRefresh={toggleRefresh}
+          />
+        </>
+      ) : null}
       <Table hover>
         <thead>
           <tr>
@@ -115,9 +146,12 @@ export default function OccupationalTableIndividualAdmin({
             <th>Gender</th>
             <th>Address</th>
             <th>Contact</th>
-            {status === "for_payment_approval" && <th> Mode of Payment</th>}
+            {status === "for_payment_approval" ||
+              (status === "for_signature" && <th> Mode of Payment</th>)}
             <th>Attachment</th>
-            {status === "pending" || status === "for_payment_approval" ? (
+            {status === "pending" ||
+            status === "for_payment_approval" ||
+            status === "for_signature" ? (
               <th>Actions</th>
             ) : null}
           </tr>
@@ -139,10 +173,29 @@ export default function OccupationalTableIndividualAdmin({
                   </td>
                   <td>
                     {
-                      application?.user?.user_phone_numbers_morph[0]
-                        ?.phone_number
+                      application?.order_of_payment?.payment_detail
+                        ?.payment_type
                     }
                   </td>
+                  {status === "for_payment_approval" ||
+                    (status === "for_signature" && (
+                      <td>
+                        <Badge
+                          color={
+                            application?.order_of_payment?.payment_detail
+                              ?.payment_type === "online"
+                              ? "info"
+                              : "warning"
+                          }
+                        >
+                          {
+                            application?.order_of_payment?.payment_detail
+                              ?.payment_type
+                          }
+                        </Badge>
+                      </td>
+                    ))}
+
                   <td>
                     {status === "for_payment_approval" ||
                     status === "returned" ? (
@@ -221,8 +274,8 @@ export default function OccupationalTableIndividualAdmin({
                                     error: "unknown error occured",
                                   },
                                   params: {
-                                    special_permit_application_id:
-                                      application?.id,
+                                    order_of_payment_id:
+                                      application?.order_of_payment?.id,
                                   },
                                 },
                                 [],
@@ -244,6 +297,42 @@ export default function OccupationalTableIndividualAdmin({
                           </DropdownItem>
                         </DropdownMenu>
                       </UncontrolledDropdown>
+                    </td>
+                  ) : null}
+                  {status === "for_signature" ? (
+                    <td>
+                      <div
+                        style={{
+                          display: "flex",
+                          // justifyContent: "space-between",
+                        }}
+                      >
+                        <div style={{ paddingRight: "10px" }}>
+                          <Button
+                            color="warning"
+                            style={{ width: "90px" }}
+                            onClick={() => {
+                              toggleGenerateModal();
+                              setActiveIndex(index);
+                              setApplicationId(item?.id);
+                            }}
+                          >
+                            Generate
+                          </Button>
+                        </div>
+                        <div>
+                          <Button
+                            color="primary"
+                            style={{ width: "90px" }}
+                            onClick={() => {
+                              toggleUploadPermitModal();
+                              setApplicationId(item?.id);
+                            }}
+                          >
+                            Upload
+                          </Button>
+                        </div>
+                      </div>
                     </td>
                   ) : null}
                 </tr>

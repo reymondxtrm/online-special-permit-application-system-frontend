@@ -5,6 +5,7 @@ import permitHeaderLine from "../../../../../assets/images/permitHeaderLine.png"
 import permitFooterLine from "../../../../../assets/images/permitFooterLine.png";
 import butuanOnLogo from "../../../../../assets/images/butuanOnLogo.png";
 import axios from "axios";
+import QrCodeGenerator from "../Certification/CertificateSections/QrCodeGenerator";
 
 const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
   const now = new Date();
@@ -64,7 +65,7 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
     <div className="permit-container" ref={ref}>
       <div className="permit-header">
         <div className="permit-header-upper-section">
-          <div>
+          <div style={{ width: "10px" }}>
             <img src={logo} className="permit-logo" />
           </div>
           <div className="permit-header-text">
@@ -76,6 +77,12 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
             </p>
             <p> City Hall Bldg., J.P. Rosales Ave., Doongan, Butuan City</p>
             <img src={permitHeaderLine} className="permit-headerline" />
+          </div>
+          <div style={{ width: "10px" }}>
+            <QrCodeGenerator
+              specialPermitId={applicationDetails?.id}
+              size={40}
+            />
           </div>
         </div>
         <div className="permit-header-title">

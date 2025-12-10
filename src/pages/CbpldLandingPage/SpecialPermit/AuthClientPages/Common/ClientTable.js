@@ -7,6 +7,8 @@ import {
   ModalHeader,
   ModalBody,
   Input,
+  Badge,
+  UncontrolledDropdown,
 } from "reactstrap";
 import moment from "moment";
 import axios from "axios";
@@ -21,25 +23,49 @@ import {
   SpecialPermitClientSlice,
 } from "features/SpecialPermitClient";
 import Pagination from "components/Pagination";
+
 import CedulaApplicationFormModal from "../../AuthAdminPages/Modals/CedulaApplicationFormModal";
 import OccupationalPermitModal from "pages/CbpldLandingPage/Modals/OccupationalPermitModal";
-
+import useGetImage from "hooks/Common/useGetImage";
+import FileIconFormat from "./FileIconFormat";
+import Swal from "sweetalert2";
+import AttachmentModal from "../../AuthAdminPages/Modals/AttachmentModal";
+import MayorsCertificateModal from "pages/CbpldLandingPage/Modals/MayorsCertificateModal";
+import GoodMoralModal from "pages/CbpldLandingPage/Modals/GoodMoralModal";
+import EventModal from "pages/CbpldLandingPage/Modals/EventModal";
+import MotorcadeModal from "pages/CbpldLandingPage/Modals/MotorcadeModal";
+import ParadeModal from "pages/CbpldLandingPage/Modals/ParadeModal";
+import RecorridaModal from "pages/CbpldLandingPage/Modals/RecorridaModal";
+import UseOfGovernmentPropertyModal from "pages/CbpldLandingPage/Modals/UseOfGovernmentPropertyModal";
 const ClientTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
-  const [currentImage, setCurrentImage] = useState(null);
+
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
-  const [selectedImage, setSelectedImage] = useState("");
+  const { getImageHandle, currentImage, isFetching } = useGetImage();
   const [refreshPage, setrefreshPage] = useState(false);
   const [overTheCounterModal, setoverTheCounterModal] = useState(false); // State for selected application's uploaded files
   const [selectedRow, setSelectedRow] = useState([]);
-  const [amount, setamount] = useState();
+
   const [reuploadModal, setreuploadModal] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState([]);
   const [cedulaApplicationModal, setCedulaApplicationModal] = useState(false);
+  const [attachmentModal, setShowAttachmentModal] = useState(false);
+  const [selectedUploadedFiles, setSelectedUploadedFiles] = useState([]);
   const [updateOccupationalPermitModal, setOpenOccupationalPermitModal] =
     useState(false);
-
+  const [mayorsPermitApplicationModal, setMayorsPermitApplicationModal] =
+    useState(false);
+  const [goodMoralApplicationModal, setGoodMoralApplicationModal] =
+    useState(false);
+  const [eventApplicationModal, setEventApplicationModal] = useState(false);
+  const [motorcadeApplicationModal, setMotorcadeApplicationModal] =
+    useState(false);
+  const [paradeApplicationModal, setParadeApplicationModal] = useState(false);
+  const [recorridaApplicationModal, setRecorridaApplicationModal] =
+    useState(false);
+  const [useOfGovernmentApplicationModal, setUseOfGovernmentApplicationModal] =
+    useState(false);
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const toggleRefresh = () => {
@@ -51,21 +77,38 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
     setreuploadModal(!reuploadModal);
   };
 
-  const openImageViewer = useCallback((imageUrl) => {
-    setCurrentImage(imageUrl);
-    setIsViewerOpen(true);
-  }, []);
-
-  const closeImageViewer = () => {
-    setIsViewerOpen(false);
-    setCurrentImage(null);
-  };
-
   const toggleOverTheCounterModal = () => {
     setoverTheCounterModal(!overTheCounterModal);
   };
+  const toggleAttachmentModal = () => {
+    setShowAttachmentModal((prev) => !prev);
+  };
+  const toggleIsViewerOpen = () => {
+    setIsViewerOpen((prev) => !prev);
+  };
   const toggleCedulaApplicationForm = () => {
     setCedulaApplicationModal((prev) => !prev);
+  };
+  const toggleMayorsPermitApplicationModal = () => {
+    setMayorsPermitApplicationModal((prev) => !prev);
+  };
+  const toggleGoodMoralApplicationModal = () => {
+    setGoodMoralApplicationModal((prev) => !prev);
+  };
+  const toggleEventApplicationModal = () => {
+    setEventApplicationModal((prev) => !prev);
+  };
+  const toggleMotorcadeApplicationModal = () => {
+    setMotorcadeApplicationModal((prev) => !prev);
+  };
+  const toggleParadeApplicationModal = () => {
+    setParadeApplicationModal((prev) => !prev);
+  };
+  const toggleRecorridaApplicationModal = () => {
+    setRecorridaApplicationModal((prev) => !prev);
+  };
+  const toggleUseOfGovernmentPropertyApplicationModal = () => {
+    setUseOfGovernmentApplicationModal((prev) => !prev);
   };
   useEffect(() => {
     const params = { status: status, permit_type: applicationType };
@@ -75,14 +118,27 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
     }
   }, [activeTab, refreshPage]);
 
-  const handleViewImage = (imageUrl) => {
-    setSelectedImage(imageUrl);
-    setIsModalOpen(true);
-  };
+  // const toggleModal = () => {
+  //   setIsModalOpen(!isModalOpen);
+  // };
+  const togglerFunction = useCallback(() => {
+    if (applicationType === "mayors_permit") {
+      toggleMayorsPermitApplicationModal();
+    } else if (applicationType === "good_moral") {
+      toggleGoodMoralApplicationModal();
+    } else if (applicationType === "event") {
+      toggleEventApplicationModal();
+    } else if (applicationType === "motorcade") {
+      toggleMotorcadeApplicationModal();
+    } else if (applicationType === "parade") {
+      toggleParadeApplicationModal();
+    } else if (applicationType === "recorrida") {
+      toggleRecorridaApplicationModal();
+    } else if (applicationType === "use_of_government_property") {
+      toggleUseOfGovernmentPropertyApplicationModal();
+    }
+  }, [applicationType]);
 
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
-  };
   const toggleUpdateOccupationalPermitModal = () => {
     setOpenOccupationalPermitModal((prev) => !prev);
   };
@@ -138,13 +194,17 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
 
   return (
     <>
-      {isViewerOpen && currentImage && (
+      {isViewerOpen && currentImage && isFetching === false && (
         <ImageViewer
-          src={[currentImage]} // Pass the current image as an array
+          src={[currentImage]}
           currentIndex={0}
-          onClose={closeImageViewer}
-          backgroundStyle={{ backgroundColor: "rgba(0,0,0,0.8)" }}
+          onClose={toggleIsViewerOpen}
+          backgroundStyle={{
+            backgroundColor: "rgba(0,0,0,0.8)",
+            zIndex: 9999,
+          }}
           closeOnClickOutside={true}
+          disableZoom={false} // ✔ enables zoom
         />
       )}
       {status === "returned" ? (
@@ -159,6 +219,17 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
         openModal={cedulaApplicationModal}
         toggleModal={toggleCedulaApplicationForm}
       />
+
+      <AttachmentModal
+        openModal={attachmentModal}
+        toggleModal={toggleAttachmentModal}
+        uploadedFiles={selectedUploadedFiles}
+        mainActiveTab={activeTab}
+        occupational
+        applicationType={"occupational_permit"}
+        isClient
+      />
+
       <OverTheCounterModal
         toggleModal={toggleOverTheCounterModal}
         openModal={overTheCounterModal}
@@ -172,10 +243,65 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
         toggleModal={toggleUpdateOccupationalPermitModal}
         mode="update"
         title="Update Occupational Permit"
-        // submitUrl={`api/client/update-occupational-permit/${id}`}
         fetchUrl={`api/client/get-single-occupational/permit-application`}
         applicationId={selectedRow[0]}
       />
+      {mayorsPermitApplicationModal && (
+        <MayorsCertificateModal
+          openModal={mayorsPermitApplicationModal}
+          toggleModal={toggleMayorsPermitApplicationModal}
+          isUpdate
+          specialPermitApplicationId={selectedRow[0]}
+        />
+      )}
+      {goodMoralApplicationModal && (
+        <GoodMoralModal
+          openModal={goodMoralApplicationModal}
+          toggleModal={toggleGoodMoralApplicationModal}
+          isUpdate
+          specialPermitApplicationId={selectedRow[0]}
+        />
+      )}
+      {eventApplicationModal && (
+        <EventModal
+          openModal={eventApplicationModal}
+          toggleModal={toggleEventApplicationModal}
+          isUpdate
+          specialPermitApplicationId={selectedRow[0]}
+        />
+      )}
+      {motorcadeApplicationModal && (
+        <MotorcadeModal
+          oepnModal={motorcadeApplicationModal}
+          toggleModal={toggleMotorcadeApplicationModal}
+          isUpdate
+          specialPermitApplicationId={selectedRow[0]}
+        />
+      )}
+      {paradeApplicationModal && (
+        <ParadeModal
+          openModal={paradeApplicationModal}
+          toggleModal={toggleParadeApplicationModal}
+          isUpdate
+          specialPermitApplicationId={selectedRow[0]}
+        />
+      )}
+      {recorridaApplicationModal && (
+        <RecorridaModal
+          openModal={recorridaApplicationModal}
+          toggleModal={toggleRecorridaApplicationModal}
+          isUpdate
+          specialPermitApplicationId={selectedRow[0]}
+        />
+      )}
+      {useOfGovernmentApplicationModal && (
+        <UseOfGovernmentPropertyModal
+          openModal={useOfGovernmentApplicationModal}
+          toggleModal={toggleUseOfGovernmentPropertyApplicationModal}
+          isUpdate
+          specialPermitApplicationId={selectedRow[0]}
+        />
+      )}
       <div className="d-flex gap-2">
         <div>
           {status === "for_payment" && user?.accountType === "company" ? (
@@ -196,16 +322,16 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
             </Button>
           ) : null}
         </div>
-        <div>
+        {/* <div>
           <Button color="success">
             <i className="mdi mdi-printer "></i>{" "}
             <span> Reprint Cedula Application Form</span>{" "}
           </Button>
-        </div>
+        </div> */}
       </div>
 
       <div className="tableFixHead">
-        <Table hover>
+        <Table>
           <thead
             style={{
               backgroundColor: "white",
@@ -221,7 +347,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                     type="checkbox"
                     checked={
                       selectedRow?.length ===
-                        specialPermitClient?.clientTableData.data?.length &&
+                        specialPermitClient?.clientTableData?.data?.length &&
                       specialPermitClient?.clientTableData?.data?.length !== 0
                     }
                     onClick={() => {
@@ -334,15 +460,9 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                     </>
                   )}
 
-                  {/* {status === "returned" && (
+                  {status === "returned" && (
                     <>
                       <th>O.R</th>
-                    </>
-                  )} */}
-
-                  {(status === "returned" || status === "declined") && (
-                    <>
-                      <th>Actions</th>
                     </>
                   )}
                 </>
@@ -352,6 +472,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                 <th>Actions</th>
               ) : null}
               {status === "completed" ? <th>Special Permit</th> : null}
+              {status === "declined" ? <th>Actions</th> : null}
             </tr>
           </thead>
           <tbody>
@@ -364,7 +485,16 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
             ) : specialPermitClient?.clientTableData?.data?.length > 0 ? (
               specialPermitClient?.clientTableData?.data.map(
                 (application, index) => (
-                  <tr key={application.id}>
+                  <tr
+                    key={application.id}
+                    style={{
+                      backgroundColor:
+                        application?.uploaded_file?.community_tax_certificate ==
+                        null
+                          ? "#f9cf03"
+                          : null,
+                    }}
+                  >
                     <td>
                       {user?.accountType === "company" &&
                         status === "for_payment" && (
@@ -411,20 +541,13 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                             )}
                             <td>
                               {application.uploaded_file?.police_clearance ? (
-                                <img
-                                  src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.police_clearance}`}
-                                  alt={`Thumbnail`}
-                                  style={{
-                                    width: "100px",
-                                    height: "50px",
-                                    margin: "5px",
-                                    cursor: "pointer",
-                                  }}
-                                  onClick={() =>
-                                    handleViewImage(
-                                      `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.police_clearance}`
-                                    )
+                                <FileIconFormat
+                                  fileType="police_clearance"
+                                  path={
+                                    application.uploaded_file?.police_clearance
                                   }
+                                  toggleIsViewerOpen={toggleIsViewerOpen}
+                                  getImageHandle={getImageHandle}
                                 />
                               ) : (
                                 "N/A"
@@ -433,20 +556,14 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                             <td>
                               {application.uploaded_file?.barangay_clearance &&
                               status !== "for_payment" ? (
-                                <img
-                                  src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.barangay_clearance}`}
-                                  alt={`Thumbnail`}
-                                  style={{
-                                    width: "100px",
-                                    height: "50px",
-                                    margin: "5px",
-                                    cursor: "pointer",
-                                  }}
-                                  onClick={() =>
-                                    handleViewImage(
-                                      `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.barangay_clearance}`
-                                    )
+                                <FileIconFormat
+                                  fileType="barangay_clearance"
+                                  path={
+                                    application.uploaded_file
+                                      ?.barangay_clearance
                                   }
+                                  toggleIsViewerOpen={toggleIsViewerOpen}
+                                  getImageHandle={getImageHandle}
                                 />
                               ) : (
                                 "N/A"
@@ -457,20 +574,14 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                               {application.uploaded_file
                                 ?.community_tax_certificate &&
                               status !== "for_payment" ? (
-                                <img
-                                  src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.community_tax_certificate}`}
-                                  alt={`Thumbnail`}
-                                  style={{
-                                    width: "100px",
-                                    height: "50px",
-                                    margin: "5px",
-                                    cursor: "pointer",
-                                  }}
-                                  onClick={() =>
-                                    handleViewImage(
-                                      `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.community_tax_certificate}`
-                                    )
+                                <FileIconFormat
+                                  fileType="community_tax_certificate"
+                                  path={
+                                    application.uploaded_file
+                                      ?.community_tax_certificate
                                   }
+                                  toggleIsViewerOpen={toggleIsViewerOpen}
+                                  getImageHandle={getImageHandle}
                                 />
                               ) : (
                                 "N/A"
@@ -480,20 +591,13 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                             <td>
                               {application.uploaded_file?.fiscal_clearance &&
                               status !== "for_payment" ? (
-                                <img
-                                  src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.fiscal_clearance}`}
-                                  alt={`Thumbnail`}
-                                  style={{
-                                    width: "100px",
-                                    height: "50px",
-                                    margin: "5px",
-                                    cursor: "pointer",
-                                  }}
-                                  onClick={() =>
-                                    handleViewImage(
-                                      `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.fiscal_clearance}`
-                                    )
+                                <FileIconFormat
+                                  fileType="fiscal_clearance"
+                                  path={
+                                    application.uploaded_file?.fiscal_clearance
                                   }
+                                  toggleIsViewerOpen={toggleIsViewerOpen}
+                                  getImageHandle={getImageHandle}
                                 />
                               ) : (
                                 "N/A"
@@ -502,20 +606,13 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                             <td>
                               {application.uploaded_file?.court_clearance &&
                               status !== "for_payment" ? (
-                                <img
-                                  src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.court_clearance}`}
-                                  alt={`Thumbnail`}
-                                  style={{
-                                    width: "100px",
-                                    height: "50px",
-                                    margin: "5px",
-                                    cursor: "pointer",
-                                  }}
-                                  onClick={() =>
-                                    handleViewImage(
-                                      `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application.uploaded_file.court_clearance}`
-                                    )
+                                <FileIconFormat
+                                  fileType="court_clearance"
+                                  path={
+                                    application.uploaded_file?.court_clearance
                                   }
+                                  toggleIsViewerOpen={toggleIsViewerOpen}
+                                  getImageHandle={getImageHandle}
                                 />
                               ) : (
                                 "N/A"
@@ -537,23 +634,15 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         {status === "returned" &&
                           application?.order_of_payment?.payment_detail
                             ?.attachment && (
-                            <td>
-                              <img
-                                src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`}
-                                alt={`Thumbnail`}
-                                style={{
-                                  width: "100px",
-                                  height: "50px",
-                                  margin: "5px",
-                                  cursor: "pointer",
-                                }}
-                                onClick={() =>
-                                  openImageViewer(
-                                    `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`
-                                  )
-                                }
-                              />
-                            </td>
+                            <FileIconFormat
+                              fileType="official_receipt"
+                              path={
+                                application?.order_of_payment?.payment_detail
+                                  ?.attachment
+                              }
+                              toggleIsViewerOpen={toggleIsViewerOpen}
+                              getImageHandle={getImageHandle}
+                            />
                           )}
 
                         {status === "returned" && (
@@ -627,7 +716,18 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                           <>
                             <td>{application?.requestor_name}</td>
                             <td>
-                              <Button color="success">Attachment</Button>{" "}
+                              <Button
+                                color="success"
+                                onClick={() => {
+                                  toggleAttachmentModal();
+
+                                  setSelectedUploadedFiles(
+                                    application?.uploaded_file
+                                  );
+                                }}
+                              >
+                                Attachment
+                              </Button>{" "}
                             </td>
                           </>
                         )}
@@ -644,26 +744,34 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                             <td>
                               {application?.status_histories?.[0]?.remarks}
                             </td>
-                            {status === "returned" && (
-                              <td>
-                                <Button
-                                  color="primary"
-                                  onClick={() => {
-                                    setSelectedRow([application?.id]);
-                                    toggleReUploadModal();
-                                  }}
-                                >
-                                  Reupload O.R
-                                </Button>
-                              </td>
-                            )}
+                            <td>
+                              <FileIconFormat
+                                fileType="official_receipt"
+                                path={
+                                  application?.order_of_payment?.payment_detail
+                                    ?.attachment
+                                }
+                                toggleIsViewerOpen={toggleIsViewerOpen}
+                                getImageHandle={getImageHandle}
+                              />
+                            </td>
+                            <td>
+                              <Button
+                                color="primary"
+                                onClick={() => {
+                                  setSelectedRow([application?.id]);
+                                  toggleReUploadModal();
+                                }}
+                              >
+                                Reupload O.R
+                              </Button>
+                            </td>
                           </>
                         )}
                         {status === "declined" && (
                           <>
                             <td>
                               {application?.status_histories?.[0]?.remarks}
-                              hello
                             </td>
                             <td>
                               <Button
@@ -709,22 +817,30 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                     ) : null}
                     {status === "for_payment" &&
                     user?.accountType === "individual" ? (
-                      <td>
-                        <Button
-                          color="primary"
-                          onClick={() => {
-                            toggleOverTheCounterModal();
-                            setSelectedRow([application?.id]);
-                            dispatch(
-                              SpecialPermitClientSlice.actions.setApplicationIdsForPayment(
-                                [application?.id]
-                              )
-                            );
-                          }}
-                        >
-                          Pay
-                        </Button>
-                      </td>
+                      <>
+                        <td>
+                          <Button
+                            color="primary"
+                            onClick={() => {
+                              toggleOverTheCounterModal();
+                              setSelectedRow([application?.id]);
+                              dispatch(
+                                SpecialPermitClientSlice.actions.setApplicationIdsForPayment(
+                                  [application?.id]
+                                )
+                              );
+                            }}
+                          >
+                            Pay
+                          </Button>
+                        </td>
+                        {application?.uploaded_file
+                          ?.community_tax_certificate == null ? (
+                          <td>
+                            <Badge color="danger">No Cedula</Badge>
+                          </td>
+                        ) : null}
+                      </>
                     ) : null}
                     {status === "completed" ? (
                       <td>
@@ -787,6 +903,33 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         </div>
                       </td>
                     ) : null}
+                    {/* {applicationType === "mayors_permit" &&
+                      status === "declined" && (
+                        <td>
+                          <Button
+                            onClick={() => {
+                              setSelectedRow([application?.id]);
+                              toggleMayorsPermitApplicationModal();
+                            }}
+                            color="primary"
+                          >
+                            Revise & Resubmit
+                          </Button>
+                        </td>
+                      )} */}
+                    {status === "declined" && (
+                      <td>
+                        <Button
+                          onClick={() => {
+                            setSelectedRow([application?.id]);
+                            togglerFunction();
+                          }}
+                          color="primary"
+                        >
+                          Revise & Resubmit
+                        </Button>
+                      </td>
+                    )}
                   </tr>
                 )
               )
@@ -807,21 +950,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
           params={specialPermitClient.params}
         />
       </div>
-
-      <Modal isOpen={isModalOpen} toggle={toggleModal} size="lg">
-        <ModalHeader toggle={toggleModal}>Image Viewer</ModalHeader>
-        <ModalBody className="text-center">
-          {selectedImage ? (
-            <img
-              src={selectedImage}
-              alt="Selected Document"
-              style={{ maxWidth: "100%", maxHeight: "70vh" }}
-            />
-          ) : (
-            <p>No image selected</p>
-          )}
-        </ModalBody>
-      </Modal>
     </>
   );
 };

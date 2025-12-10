@@ -146,42 +146,29 @@ function PaymentModal({
   }, [applicationType]);
 
   const eor_collection = useMemo(() => {
-    // If modal is not open, return empty immediately
-    if (!openModal) return [];
-
-    const quantity = paymentDetails?.quantity ?? 0;
-    const totalAmount = paymentDetails?.total_amount ?? 0;
-    const typeLabel = type?.label ?? "";
-
-    let collection = [
-      {
-        name: `${typeLabel} X${quantity}`,
-        amount: totalAmount,
-        quantity: quantity,
-        account_code: "",
-      },
-    ];
-
-    if (applicationType === "good_moral" && Array.isArray(clearance)) {
-      const clearanceItems = clearance.map((item) => ({
-        name: item?.name ?? "",
-        amount: (item?.amount ?? 0) * quantity,
-        quantity: quantity,
-        account_code: "",
-      }));
-      collection = [...collection, ...clearanceItems];
+    let collection = [];
+    if (openModal) {
+      collection = [
+        {
+          name: `${type?.label}  X${paymentDetails?.quantity}`,
+          amount: paymentDetails?.total_amount,
+          quantity: paymentDetails?.quantity,
+          account_code: "",
+        },
+      ];
+      if (applicationType === "good_moral") {
+        clearance.map((item) => {
+          collection.push({
+            name: item.name,
+            amount: item.amount * paymentDetails?.quantity,
+            quantity: paymentDetails?.quantity,
+            account_code: "",
+          });
+        });
+      }
     }
-
     return collection;
-  }, [
-    openModal,
-    applicationType,
-    type?.label,
-    paymentDetails?.quantity,
-    paymentDetails?.total_amount,
-    clearance,
-  ]);
-
+  }, [applicationId, type, paymentDetails]);
   return (
     <React.Fragment>
       <OrderOfPaymentModal
