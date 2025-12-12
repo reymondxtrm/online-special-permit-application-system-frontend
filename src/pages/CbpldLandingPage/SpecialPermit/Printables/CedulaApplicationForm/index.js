@@ -47,8 +47,8 @@ const CedulaApplicationForm = React.forwardRef((props, ref) => {
                 : emp.user_addresses_morph?.[0]?.full_address || "",
             birth_date:
               user?.accountType === "individual"
-                ? emp.user_details?.birth_date || ""
-                : emp.user_details_morph?.birth_date || "",
+                ? emp.user_details?.birthdate || ""
+                : emp.user_details_morph?.birthdate || "",
             gender: emp.sex || "",
             citizenship: emp.citizenship || "",
             civil_status:

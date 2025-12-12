@@ -24,6 +24,7 @@ import "sweetalert2/dist/sweetalert2.min.css";
 import * as Yup from "yup";
 import PrivateImageViewer from "../SpecialPermit/Common/PrivateImageViewer";
 import BasicInputField from "components/Forms/BasicInputField";
+import { useSelector } from "react-redux";
 function OccupationalPermitModal({
   openModal,
   toggleModal,
@@ -41,6 +42,8 @@ function OccupationalPermitModal({
   const [uploadedFile, setUploadedFiles] = useState({});
   const [imageViewer, setOpenImageViewer] = useState(false);
   const [viewImage, setViewImage] = useState();
+  const user = useSelector((state) => state.user);
+  console.log(user);
   const validationSchema = Yup.object().shape({
     type: Yup.string().required(),
 
@@ -581,7 +584,7 @@ function OccupationalPermitModal({
                   url: submitUrl,
                   headers: { "Content-Type": "multipart/form-data" },
                   message: {
-                    title: "Proceed?",
+                    title: "Are you sure you want to submit?",
                     failedTitle: "FAILED",
                     success: "Success!",
                     error: "Unknown error occurred",

@@ -22,9 +22,16 @@ import useSubmit from "hooks/Common/useSubmit";
 import axios from "axios";
 import { USER_PRIVACY } from "assets/data/data";
 import * as Yup from "yup";
+import useGetImage from "hooks/Common/useGetImage";
+import ImageViewer from "react-simple-image-viewer";
 // import UserConfirmationModal from "./userConfirmationModal";
 
-function GoodMoralModal({ openModal, toggleModal }) {
+function GoodMoralModal({
+  openModal,
+  toggleModal,
+  isUpdate,
+  specialPermitApplicationId,
+}) {
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
   const [purposeOptions, setpurposeOptions] = useState();
@@ -33,7 +40,11 @@ function GoodMoralModal({ openModal, toggleModal }) {
   const [firstTimeJobSeeker, setfirstTimeJobSeeker] = useState(false);
   const [discountOptions, setdiscountOptions] = useState();
   const [proceed, setIsProceed] = useState(false);
-  console.log(proceed);
+  const [uploadedFiles, setUploadedFiles] = useState({});
+  const [existingData, setExistingData] = useState({});
+  const [isViewingOpen, setIsViewingOpen] = useState(false);
+  const { currentImage, getImageHandle, isFetching } = useGetImage();
+
   useEffect(() => {
     if (openModal) {
       axios
@@ -47,7 +58,6 @@ function GoodMoralModal({ openModal, toggleModal }) {
               label: options.name,
             }));
             const updatedOptions = [{ value: 0, label: "Others" }, ...options];
-            // options.push({ value: "others", label: "Others" });
             setpurposeOptions(updatedOptions);
           },
           (error) => {
@@ -58,20 +68,69 @@ function GoodMoralModal({ openModal, toggleModal }) {
   }, [openModal]);
 
   useEffect(() => {
+    if (!openModal || !isUpdate) return;
+    axios
+      .get("api/client/get-single-occupational/permit-application", {
+        params: { special_permit_application_id: specialPermitApplicationId },
+      })
+      .then((res) => {
+        let data = res.data;
+        let purposeValue = null;
+        let otherPurposeValue = "";
+
+        if (data?.application_purpose?.type === "temporary") {
+          purposeValue = { value: 0, label: "Others" };
+          otherPurposeValue = data?.application_purpose?.name || "";
+        } else {
+          purposeValue =
+            purposeOptions?.find(
+              (item) => item.value === data?.application_purpose?.id
+            ) || null;
+        }
+        console.log(
+          purposeOptions?.find(
+            (item) => item.value === data?.application_purpose?.id
+          )
+        );
+        const exemptionCaseValue =
+          discountOptions?.find(
+            (opt) => opt.value === data?.permitApplicationExemption?.id
+          ) || null;
+
+        setExistingData({
+          purpose: purposeValue,
+          other_purpose: otherPurposeValue,
+          hasExemptionCase: !!data?.permitApplicationExemption,
+          exemptionCase: exemptionCaseValue,
+        });
+
+        setUploadedFiles(data?.uploaded_files || []);
+      })
+      .catch((error) => console.log(error));
+  }, [
+    openModal,
+    isUpdate,
+    specialPermitApplicationId,
+    purposeOptions,
+    discountOptions,
+  ]);
+  console.log(existingData);
+  useEffect(() => {
     if (!openModal) {
-      // Reset all the states when the modal is closed
       setpurposeOptions(undefined);
       setotherPurpose(false);
       setemploymentPurpose(false);
       setdiscountOptions(undefined);
 
-      // Optionally, reset the Formik form if necessary
       if (formikRef.current) {
         formikRef.current.resetForm();
       }
     }
   }, [openModal]);
 
+  const toggleIsViewerOpen = () => {
+    setIsViewingOpen((prev) => !prev);
+  };
   useEffect(() => {
     if (openModal && employmentPurpose) {
       axios
@@ -84,7 +143,7 @@ function GoodMoralModal({ openModal, toggleModal }) {
               value: options.id,
               label: options.name,
             }));
-            // options.push({ value: "others", label: "Others" });
+
             setdiscountOptions(options);
           },
           (error) => {
@@ -93,6 +152,10 @@ function GoodMoralModal({ openModal, toggleModal }) {
         );
     }
   }, [openModal, employmentPurpose]);
+  useEffect(() => {
+    setotherPurpose(Boolean(existingData?.other_purpose));
+    setemploymentPurpose(Boolean(existingData?.hasExemptionCase));
+  }, [existingData]);
   const getFormData = (object) => {
     const formData = new FormData();
     Object.keys(object).forEach((key) => {
@@ -131,12 +194,25 @@ function GoodMoralModal({ openModal, toggleModal }) {
     exemption_proof: fileValidation,
     court_clearance: fileValidation,
   });
-  console.log(formikRef?.current?.values?.exemption_id);
+
   const setProceedHandle = () => {
     setIsProceed((prev) => !prev);
   };
   return (
     <React.Fragment>
+      {isViewingOpen && !isFetching && currentImage && (
+        <ImageViewer
+          src={[currentImage]}
+          currentIndex={0}
+          onClose={toggleIsViewerOpen}
+          backgroundStyle={{
+            backgroundColor: "rgba(0,0,0,0.8)",
+            zIndex: 9999,
+          }}
+          closeOnClickOutside={true}
+          disableZoom={false}
+        />
+      )}
       <Modal
         isOpen={openModal}
         toggle={() => {
@@ -176,11 +252,12 @@ function GoodMoralModal({ openModal, toggleModal }) {
         <ModalBody style={{ overflowX: "auto" }}>
           <Formik
             innerRef={formikRef}
+            enableReinitialize
             initialValues={{
               type: "good_moral",
-              purpose_id: "",
-              exemption_id: "",
-              other_purpose: "",
+              purpose: existingData?.purpose || "",
+              exemption: existingData?.exemptionCase || "",
+              other_purpose: existingData?.other_purpose || "",
               police_clearance: "",
               community_tax_certificate: "",
               barangay_clearance: "",
@@ -202,7 +279,6 @@ function GoodMoralModal({ openModal, toggleModal }) {
                             isClearable={true}
                             name={"purpose"}
                             onChange={(selectedOption) => {
-                              console.log(selectedOption);
                               if (
                                 selectedOption.label === "Others" ||
                                 selectedOption.label === "Local Employment"
@@ -223,11 +299,12 @@ function GoodMoralModal({ openModal, toggleModal }) {
                               }
 
                               props.setFieldValue(
-                                "purpose_id",
+                                "purpose",
                                 selectedOption ? selectedOption : {}
                               );
                             }}
                             placeholder="Select Purpose"
+                            value={props.values.purpose}
                             options={purposeOptions}
                           />
                         </FormGroup>
@@ -242,6 +319,7 @@ function GoodMoralModal({ openModal, toggleModal }) {
                             name={`other_purpose`}
                             onChange={props.handleChange}
                             placeholder="Enter your purpose"
+                            value={props?.values?.other_purpose}
                           />
                         </FormGroup>
                       </Col>
@@ -254,14 +332,15 @@ function GoodMoralModal({ openModal, toggleModal }) {
                             <Label>Exempted Cases</Label>
                             <Select
                               isClearable={true}
-                              name={"exemption_id"}
+                              name={"exemption"}
                               onChange={(selectedOption) => {
                                 props.setFieldValue(
-                                  "exemption_id",
-                                  selectedOption ? selectedOption?.value : ""
+                                  "exemption",
+                                  selectedOption ? selectedOption : {}
                                 );
                               }}
                               placeholder="Select Purpose"
+                              value={props?.values?.exemption}
                               options={discountOptions}
                             />
                           </FormGroup>
@@ -291,19 +370,38 @@ function GoodMoralModal({ openModal, toggleModal }) {
                       <Col>
                         <FormGroup>
                           <Label for="policeClearance">Police Clearance</Label>
-                          <Input
-                            id="policeClearance"
-                            name="police_clearance"
-                            type="file"
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "police_clearance",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            accept="image/*"
-                          />
+                          <div className="d-flex gap-1">
+                            <Input
+                              id="policeClearance"
+                              name="police_clearance"
+                              type="file"
+                              onChange={(event) => {
+                                console.log(event);
+                                props.setFieldValue(
+                                  "police_clearance",
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              accept="image/*"
+                            />
+                            {isUpdate && uploadedFiles?.police_clearance && (
+                              <Button color="primary">
+                                <i
+                                  className="mdi mdi-eye"
+                                  color="warning"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    getImageHandle({
+                                      path: uploadedFiles?.police_clearance,
+                                      url: "api/client/attachment",
+                                      showLoader: true,
+                                    });
+                                    toggleIsViewerOpen();
+                                  }}
+                                ></i>
+                              </Button>
+                            )}
+                          </div>
                         </FormGroup>
                       </Col>
                     </Row>
@@ -311,19 +409,39 @@ function GoodMoralModal({ openModal, toggleModal }) {
                       <Col>
                         <FormGroup>
                           <Label for="taxCert">Community Tax Certificate</Label>
-                          <Input
-                            id="taxCert"
-                            name={`community_tax_certificate`}
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "community_tax_certificate",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            type="file"
-                            accept="image/*"
-                          />
+                          <div className="d-flex gap-1">
+                            <Input
+                              id="taxCert"
+                              name={`community_tax_certificate`}
+                              onChange={(event) => {
+                                console.log(event);
+                                props.setFieldValue(
+                                  "community_tax_certificate",
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              type="file"
+                              accept="image/*"
+                            />
+                            {isUpdate &&
+                              uploadedFiles?.community_tax_certificate && (
+                                <Button color="primary">
+                                  <i
+                                    className="mdi mdi-eye"
+                                    color="warning"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      getImageHandle({
+                                        path: uploadedFiles?.community_tax_certificate,
+                                        url: "api/client/attachment",
+                                        showLoader: true,
+                                      });
+                                      toggleIsViewerOpen();
+                                    }}
+                                  ></i>
+                                </Button>
+                              )}
+                          </div>
                         </FormGroup>
                       </Col>
                     </Row>
@@ -333,19 +451,38 @@ function GoodMoralModal({ openModal, toggleModal }) {
                           <Label for="exampleFile">
                             Barangay Clearance (As proof of Residency)
                           </Label>
-                          <Input
-                            id="exampleFile"
-                            name={`barangay_clearance`}
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "barangay_clearance",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            type="file"
-                            accept="image/*"
-                          />
+                          <div className="d-flex gap-1">
+                            <Input
+                              id="exampleFile"
+                              name={`barangay_clearance`}
+                              onChange={(event) => {
+                                console.log(event);
+                                props.setFieldValue(
+                                  "barangay_clearance",
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              type="file"
+                              accept="image/*"
+                            />
+                            {isUpdate && uploadedFiles?.barangay_clearance && (
+                              <Button color="primary">
+                                <i
+                                  className="mdi mdi-eye"
+                                  color="warning"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    getImageHandle({
+                                      path: uploadedFiles?.barangay_clearance,
+                                      url: "api/client/attachment",
+                                      showLoader: true,
+                                    });
+                                    toggleIsViewerOpen();
+                                  }}
+                                ></i>
+                              </Button>
+                            )}
+                          </div>
                         </FormGroup>
                       </Col>
                     </Row>
@@ -353,19 +490,38 @@ function GoodMoralModal({ openModal, toggleModal }) {
                       <Col>
                         <FormGroup>
                           <Label for="fiscalClearance">Fiscal Clearance</Label>
-                          <Input
-                            id="fiscalClearance"
-                            name={`fiscal_clearance`}
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "fiscal_clearance",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            type="file"
-                            accept="image/*"
-                          />
+                          <div className="d-flex gap-1">
+                            <Input
+                              id="fiscalClearance"
+                              name={`fiscal_clearance`}
+                              onChange={(event) => {
+                                console.log(event);
+                                props.setFieldValue(
+                                  "fiscal_clearance",
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              type="file"
+                              accept="image/*"
+                            />
+                            {isUpdate && uploadedFiles?.fiscal_clearance && (
+                              <Button color="primary">
+                                <i
+                                  className="mdi mdi-eye"
+                                  color="warning"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    getImageHandle({
+                                      path: uploadedFiles?.fiscal_clearance,
+                                      url: "api/client/attachment",
+                                      showLoader: true,
+                                    });
+                                    toggleIsViewerOpen();
+                                  }}
+                                ></i>
+                              </Button>
+                            )}
+                          </div>
                         </FormGroup>
                       </Col>
                     </Row>
@@ -373,19 +529,38 @@ function GoodMoralModal({ openModal, toggleModal }) {
                       <Col>
                         <FormGroup>
                           <Label for="courtClearance">Court Clearance</Label>
-                          <Input
-                            id="courtClearance"
-                            name={`court_clearance`}
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "court_clearance",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            type="file"
-                            accept="image/*"
-                          />
+                          <div className="d-flex gap-1">
+                            <Input
+                              id="courtClearance"
+                              name={`court_clearance`}
+                              onChange={(event) => {
+                                console.log(event);
+                                props.setFieldValue(
+                                  "court_clearance",
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              type="file"
+                              accept="image/*"
+                            />
+                            {isUpdate && uploadedFiles?.court_clearance && (
+                              <Button color="primary">
+                                <i
+                                  className="mdi mdi-eye"
+                                  color="warning"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    getImageHandle({
+                                      path: uploadedFiles?.court_clearance,
+                                      url: "api/client/attachment",
+                                      showLoader: true,
+                                    });
+                                    toggleIsViewerOpen();
+                                  }}
+                                ></i>
+                              </Button>
+                            )}
+                          </div>
                         </FormGroup>
                       </Col>
                     </Row>
@@ -411,7 +586,23 @@ function GoodMoralModal({ openModal, toggleModal }) {
               color: "white",
             }}
             onClick={() => {
-              const formik = formikRef.current.values;
+              const formik = {
+                // ...formikRef.current.values,
+                purpose_id: formikRef?.current?.values?.purpose,
+                exemption_id:
+                  formikRef?.current?.values?.exemption?.value || null,
+                barangay_clearance:
+                  formikRef?.current?.values?.barangay_clearance,
+                community_tax_certificate:
+                  formikRef?.current?.values?.community_tax_certificate,
+                court_clearance: formikRef?.current?.values?.court_clearance,
+                exemption_proof: formikRef?.current?.values?.exemption_proof,
+                fiscal_clearance: formikRef?.current?.values?.fiscal_clearance,
+                other_purpose: formikRef?.current?.values?.other_purpose,
+                police_clearance: formikRef?.current?.values?.police_clearance,
+                type: formikRef?.current?.values?.type,
+              };
+
               const formData = getFormData(formik);
               if (proceed) {
                 handleSubmit(

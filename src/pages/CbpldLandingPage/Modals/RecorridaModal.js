@@ -5,8 +5,6 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Table,
-  Badge,
   Form,
   Row,
   Col,
@@ -14,316 +12,376 @@ import {
   Label,
   FormGroup,
 } from "reactstrap";
-import { faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Select, { StylesConfig } from "react-select";
-import { FieldArray, Formik } from "formik";
+import { Formik } from "formik";
 import useSubmit from "hooks/Common/useSubmit";
+import axios from "axios";
 import { USER_PRIVACY } from "assets/data/data";
 
-function RecorridaModal({ openModal, toggleModal }) {
+function RecorridaModal({
+  openModal,
+  toggleModal,
+  isUpdate = false,
+  specialPermitApplicationId = null,
+}) {
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
   const [proceed, setIsProceed] = useState(false);
+  const [existingData, setExistingData] = useState(null);
+  const [loadingExisting, setLoadingExisting] = useState(false);
 
-  const purposeOptions = [
-    { value: 1, label: "Local Employment" },
-    { value: 2, label: "International Employment" },
-  ];
+  const setProceedHandle = () => setIsProceed((prev) => !prev);
 
   const getFormData = (object) => {
     const formData = new FormData();
     Object.keys(object).forEach((key) => {
-      if (object[key] instanceof File || object[key] instanceof Blob) {
-        formData.append(key, object[key]); // Directly append files
-      } else if (Array.isArray(object[key])) {
-        object[key].forEach((item) => formData.append(`${key}[]`, item));
-      } else if (typeof object[key] === "object" && object[key] !== null) {
-        formData.append(key, JSON.stringify(object[key]));
+      const val = object[key];
+
+      if (val instanceof File || val instanceof Blob) {
+        formData.append(key, val);
+      } else if (Array.isArray(val)) {
+        val.forEach((item) => formData.append(`${key}[]`, item));
+      } else if (typeof val === "object" && val !== null) {
+        formData.append(key, JSON.stringify(val));
       } else {
-        formData.append(key, object[key]);
+        formData.append(key, val);
       }
     });
     return formData;
   };
-  const setProceedHandle = () => {
-    setIsProceed((prev) => !prev);
+
+  // FETCH EXISTING FOR UPDATE
+  useEffect(() => {
+    if (isUpdate && openModal && specialPermitApplicationId) {
+      fetchExistingRecorrida();
+    }
+  }, [isUpdate, openModal, specialPermitApplicationId]);
+
+  const fetchExistingRecorrida = async () => {
+    try {
+      setLoadingExisting(true);
+
+      const res = await axios.get(
+        "api/client/get-single-occupational/permit-application",
+        { params: { id: specialPermitApplicationId } }
+      );
+
+      const d = res.data.data;
+
+      setExistingData({
+        requestor_name: d.requestor_name || "",
+        event_name: d.event_name || "",
+        event_date_from: d.event_date_from || "",
+        event_date_to: d.event_date_to || "",
+        event_time_from: d.event_time_from || "",
+        event_time_to: d.event_time_to || "",
+        number_of_participants: d.number_of_participants || 0,
+        surname: d.surname || "",
+        first_name: d.first_name || "",
+        middle_initial: d.middle_initial || "",
+        suffix: d.suffix || "",
+        sex: d.sex || "",
+        email: d.email || "",
+        contact_no: d.contact_no || "",
+        province: d.province || "",
+        city: d.city || "",
+        barangay: d.barangay || "",
+        additional_address: d.additional_address || "",
+
+        request_letter: d.request_letter || null,
+        route_plan: d.route_plan || null,
+        official_receipt: d.official_receipt || null,
+        or_no: d.or_no || "",
+        paid_amount: d.paid_amount || "",
+      });
+
+      setLoadingExisting(false);
+    } catch (err) {
+      console.error(err);
+      setLoadingExisting(false);
+    }
   };
 
+  const initialValues = {
+    type: "event",
+    requestor_name: existingData?.requestor_name || "",
+    event_name: existingData?.event_name || "",
+    event_date_from: existingData?.event_date_from || "",
+    event_date_to: existingData?.event_date_to || "",
+    event_time_from: existingData?.event_time_from || "",
+    event_time_to: existingData?.event_time_to || "",
+    number_of_participants: existingData?.number_of_participants || 0,
+
+    surname: existingData?.surname || "",
+    first_name: existingData?.first_name || "",
+    middle_initial: existingData?.middle_initial || "",
+    suffix: existingData?.suffix || "",
+    sex: existingData?.sex || "",
+    email: existingData?.email || "",
+    contact_no: existingData?.contact_no || "",
+    province: existingData?.province || "",
+    city: existingData?.city || "",
+    barangay: existingData?.barangay || "",
+    additional_address: existingData?.additional_address || "",
+
+    request_letter: null,
+    route_plan: null,
+    official_receipt: null,
+
+    or_no: existingData?.or_no || "",
+    paid_amount: existingData?.paid_amount || "",
+  };
+
+  if (!openModal) return null;
+
   return (
-    <React.Fragment>
-      <Modal
-        isOpen={openModal}
+    <Modal
+      isOpen={openModal}
+      toggle={() => {
+        toggleModal();
+        setIsProceed(false);
+      }}
+      backdrop="static"
+      size="m"
+      className="modal-dialog-centered"
+      style={{ overflowY: "auto" }}
+      unmountOnClose
+    >
+      <ModalHeader
         toggle={() => {
           toggleModal();
           setIsProceed(false);
         }}
-        fade={true}
-        backdrop="static"
-        size="m"
-        className="modal-dialog-centered"
-        style={{
-          //  maxHeight: "90vh",
-          overflowY: "auto",
-          // maxWidth: "1400px",
-        }}
-        unmountOnClose
       >
-        <ModalHeader
-          toggle={() => {
-            toggleModal();
-            setIsProceed(false);
+        <p
+          style={{
+            fontWeight: "bold",
+            letterSpacing: ".2rem",
+            fontSize: "18pt",
+            margin: 0,
+            color: "#368be0",
           }}
         >
-          <p
-            style={{
-              fontWeight: "bold",
-              letterSpacing: ".2rem",
-              fontSize: "18pt",
-              margin: "0",
-              padding: "0",
-              color: "#368be0",
-            }}
-          >
-            {"RECORRIDA"}
-          </p>
-        </ModalHeader>
-        <ModalBody style={{ overflowX: "auto" }}>
+          RECORRIDA {isUpdate ? "(UPDATE)" : ""}
+        </p>
+      </ModalHeader>
+
+      <ModalBody style={{ overflowX: "auto" }}>
+        {loadingExisting ? (
+          <p>Loading...</p>
+        ) : (
           <Formik
             innerRef={formikRef}
-            initialValues={{
-              type: "event",
-              requestor_name: "sample",
-              event_name: "sample",
-              event_date_from: "2024-10-19",
-              event_date_to: "2024-10-19",
-              event_time_from: "sample",
-              event_time_to: "sample",
-              number_of_participants: 0,
-              surname: "asa",
-              first_name: "as",
-              middle_initial: "asa",
-              suffix: "as",
-              sex: "male",
-              email: "ctian1019@gmail.com",
-              contact_no: "09461424574",
-              province: "121",
-              city: "12121",
-              barangay: "12121",
-              additional_address: "asdasdsadas",
-              request_letter: "",
-              route_plan: "",
-              official_receipt: "",
-              or_no: "asasasasa12121",
-              paid_amount: "12121",
-            }}
+            initialValues={initialValues}
+            enableReinitialize={true}
             onSubmit={handleSubmit}
           >
             {(props) => (
               <Form>
                 <Row>
                   <Col>
+                    {/* Requestor Name */}
+                    <FormGroup>
+                      <Label>Name of Requestor / Organization</Label>
+                      <Input
+                        name="requestor_name"
+                        onChange={props.handleChange}
+                        value={props.values.requestor_name}
+                      />
+                    </FormGroup>
+
+                    {/* Event Name */}
+                    <FormGroup>
+                      <Label>Name of Event</Label>
+                      <Input
+                        name="event_name"
+                        onChange={props.handleChange}
+                        value={props.values.event_name}
+                      />
+                    </FormGroup>
+
+                    {/* Vehicles */}
+                    <FormGroup>
+                      <Label>Maximum Number of Vehicles</Label>
+                      <Input
+                        type="number"
+                        name="number_of_participants"
+                        value={props.values.number_of_participants}
+                        onChange={props.handleChange}
+                      />
+                    </FormGroup>
+
+                    {/* Dates */}
                     <Row>
-                      <Col md={12}>
+                      <Col md={6}>
                         <FormGroup>
-                          <Label for="nameOfRequestor">
-                            Name of Requestor / Organization
-                          </Label>
+                          <Label>Start Date</Label>
                           <Input
-                            id="nameOfRequestor"
-                            name={`requestor_name`}
-                            placeholder="Enter Name of Requestor / Organization"
+                            type="date"
+                            name="event_date_from"
+                            value={props.values.event_date_from}
+                            onChange={props.handleChange}
+                          />
+                        </FormGroup>
+                      </Col>
+
+                      <Col md={6}>
+                        <FormGroup>
+                          <Label>End Date</Label>
+                          <Input
+                            type="date"
+                            name="event_date_to"
+                            value={props.values.event_date_to}
                             onChange={props.handleChange}
                           />
                         </FormGroup>
                       </Col>
                     </Row>
 
-                    <Row>
-                      <Col md={12}>
-                        <FormGroup>
-                          <Label for="nameOfEvent">Name of Event</Label>
-                          <Input
-                            id="nameOfEvent"
-                            name={`event_name`}
-                            placeholder="Enter Name of Event"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col md={12}>
-                        <FormGroup>
-                          <Label for="nameOfEvent">
-                            Maximum Number of Vehicles
-                          </Label>
-                          <Input
-                            id="numberOfParticipants"
-                            name={`number_of_participants`}
-                            placeholder="0"
-                            onChange={props.handleChange}
-                            type="number"
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
+                    {/* Times */}
                     <Row>
                       <Col md={6}>
                         <FormGroup>
-                          <Label for="date">Date of Event</Label>
+                          <Label>Start Time</Label>
                           <Input
-                            id="date"
-                            name={`event_date_from`}
-                            type="date"
-                            onChange={props.handleChange}
-                            placeholder="Enter Date"
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col md={6}>
-                        <FormGroup>
-                          <Label for="date">Date of Event</Label>
-                          <Input
-                            id="date"
-                            name={`event_date_to`}
-                            type="date"
-                            onChange={props.handleChange}
-                            placeholder="Enter Date"
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col md={6}>
-                        <FormGroup>
-                          <Label for="timeOfEvent">Time of Event</Label>
-                          <Input
-                            id="timeOfEvent"
-                            name={`event_time_from`}
                             type="time"
+                            name="event_time_from"
+                            value={props.values.event_time_from}
                             onChange={props.handleChange}
                           />
                         </FormGroup>
                       </Col>
+
                       <Col md={6}>
                         <FormGroup>
-                          <Label for="timeOfEvent">Time of Event</Label>
+                          <Label>End Time</Label>
                           <Input
-                            id="timeOfEvent"
-                            name={`event_time_to`}
                             type="time"
+                            name="event_time_to"
+                            value={props.values.event_time_to}
                             onChange={props.handleChange}
                           />
                         </FormGroup>
                       </Col>
                     </Row>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <Label for="requestLetter">
-                            Request Letter Stamped (Received by Office of the
-                            City Mayor)
-                          </Label>
-                          <Input
-                            id="requestLetter"
-                            name={"request_letter"}
-                            type="file"
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "request_letter",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            accept="image/*"
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <Label for="exampleFile">
-                            Route Plan approved by CTTMD
-                          </Label>
-                          <Input
-                            id="exampleFile"
-                            type="file"
-                            name={"route_plan"}
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "route_plan",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            accept="image/*"
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
+
+                    {/* Request Letter */}
+                    <FormGroup>
+                      <Label>Request Letter</Label>
+
+                      {/* {isUpdate && existingData?.request_letter && (
+                        <a
+                          href={existingData.request_letter}
+                          target="_blank"
+                          className="text-primary d-block mb-2"
+                        >
+                          View Existing
+                        </a>
+                      )} */}
+
+                      <Input
+                        type="file"
+                        onChange={(e) =>
+                          props.setFieldValue(
+                            "request_letter",
+                            e.currentTarget.files[0]
+                          )
+                        }
+                      />
+                    </FormGroup>
+
+                    {/* Route Plan */}
+                    <FormGroup>
+                      <Label>Route Plan (CTTMD Approved)</Label>
+
+                      {/* {isUpdate && existingData?.route_plan && (
+                        <a
+                          href={existingData.route_plan}
+                          target="_blank"
+                          className="text-primary d-block mb-2"
+                        >
+                          View Existing
+                        </a>
+                      )} */}
+
+                      <Input
+                        type="file"
+                        onChange={(e) =>
+                          props.setFieldValue(
+                            "route_plan",
+                            e.currentTarget.files[0]
+                          )
+                        }
+                      />
+                    </FormGroup>
                   </Col>
                 </Row>
               </Form>
             )}
           </Formik>
-          <div className="d-flex gap-2">
-            <div style={{ width: "30px" }}>
-              <Input type="checkbox" onClick={setProceedHandle} />
-            </div>
-            <p>{USER_PRIVACY}</p>
-          </div>
-        </ModalBody>
-        <ModalFooter>
-          <Button
-            style={{
-              backgroundColor: "#1a56db",
-              fontWeight: "600",
-              fontFamily:
-                "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
-              color: "white",
-            }}
-            onClick={() => {
-              const formik = formikRef.current.values;
-              const formData = getFormData(formik);
-              if (proceed) {
-                handleSubmit(
-                  {
-                    url: "api/client/special-permit/recorrida",
-                    headers: {
-                      "Content-Type": "multipart/form-data",
-                    },
-                    message: {
-                      title: "Are you sure you want to Proceed?",
-                      failedTitle: "FAILED",
-                      success: "Success!",
-                      error: "unknown error occured",
-                    },
-                    params: formData,
-                  },
-                  [],
-                  [toggleModal]
-                );
-                setIsProceed(false);
-              }
-            }}
-            disabled={!proceed}
-          >
-            Submit
-          </Button>
-          <Button
-            color="secondary"
-            onClick={() => {
-              toggleModal();
-              setIsProceed(false);
-            }}
-          >
-            Close
-          </Button>
-        </ModalFooter>
-      </Modal>
-    </React.Fragment>
+        )}
+
+        {/* Privacy */}
+        <div className="d-flex gap-2 mt-3">
+          <Input type="checkbox" onClick={setProceedHandle} />
+          <p>{USER_PRIVACY}</p>
+        </div>
+      </ModalBody>
+
+      <ModalFooter>
+        <Button
+          style={{
+            backgroundColor: "#1a56db",
+            fontWeight: 600,
+            color: "white",
+          }}
+          disabled={!proceed}
+          onClick={() => {
+            const formik = formikRef.current.values;
+            const formData = getFormData(formik);
+
+            const url = isUpdate
+              ? "api/client/special-permit/recorrida/update"
+              : "api/client/special-permit/recorrida";
+
+            if (isUpdate) {
+              formData.append("id", specialPermitApplicationId);
+            }
+
+            handleSubmit(
+              {
+                url,
+                headers: { "Content-Type": "multipart/form-data" },
+                message: {
+                  title: isUpdate
+                    ? "Update Recorrida?"
+                    : "Are you sure you want to submit?",
+                  failedTitle: "FAILED",
+                  success: isUpdate ? "Updated successfully!" : "Success!",
+                  error: "Unknown error occurred",
+                },
+                params: formData,
+              },
+              [],
+              [toggleModal]
+            );
+
+            setIsProceed(false);
+          }}
+        >
+          {isUpdate ? "Update" : "Submit"}
+        </Button>
+
+        <Button
+          color="secondary"
+          onClick={() => {
+            toggleModal();
+            setIsProceed(false);
+          }}
+        >
+          Close
+        </Button>
+      </ModalFooter>
+    </Modal>
   );
 }
 

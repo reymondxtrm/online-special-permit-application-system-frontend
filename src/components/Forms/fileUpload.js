@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import Dropzone from "react-dropzone";
 import { Row, Col, Card, UncontrolledAlert } from "reactstrap";
 import { Link } from "react-router-dom";
@@ -10,62 +10,53 @@ const FileUpload = ({
   setUploadError,
   submitError,
   setSubmitError,
-  label
+  label,
 }) => {
   function handleAcceptedFiles(files) {
-
-    files.map(file =>
+    files.map((file) =>
       Object.assign(file, {
         preview: URL.createObjectURL(file),
         formattedSize: formatBytes(file.size),
       })
-    )
-    setselectedFiles(files)
-    setUploadError()
-    submitError?setSubmitError(null):''
-    
+    );
+    setselectedFiles(files);
+    setUploadError();
+    submitError ? setSubmitError(null) : "";
   }
 
   function handleErrorFiles(files) {
-    setUploadError(files[0].errors[0])
+    setUploadError(files[0].errors[0]);
   }
 
   /**
    * Formats the size
    */
   function formatBytes(bytes, decimals = 2) {
-    if (bytes === 0) return "0 Bytes"
-    const k = 1024
-    const dm = decimals < 0 ? 0 : decimals
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i]
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
   }
   //***END */
   return (
     <>
       <Dropzone
-        onDrop={
-          acceptedFiles => {
-            handleAcceptedFiles(acceptedFiles)
-          }
-        }
-        onDropRejected={
-          fileRejections => {
-            handleErrorFiles(fileRejections)
-          }
-        }
-        accept='image/*'
+        onDrop={(acceptedFiles) => {
+          handleAcceptedFiles(acceptedFiles);
+        }}
+        onDropRejected={(fileRejections) => {
+          handleErrorFiles(fileRejections);
+        }}
+        accept="image/*"
         maxSize={5242880}
         maxFiles={1}
       >
         {({ getRootProps, getInputProps }) => (
           <div className="dropzone">
-            <div
-              className="dz-message needsclick mt-1"
-              {...getRootProps()}
-            >
+            <div className="dz-message needsclick mt-1" {...getRootProps()}>
               <input {...getInputProps()} />
               <div className="mb-2">
                 <i className="display-4 text-muted bx bxs-cloud-upload" />
@@ -96,10 +87,7 @@ const FileUpload = ({
                     />
                   </Col>
                   <Col>
-                    <Link
-                      to="#"
-                      className="text-muted font-weight-bold"
-                    >
+                    <Link to="#" className="text-muted font-weight-bold">
                       {f.name}
                     </Link>
                     <p className="mb-0">
@@ -109,43 +97,31 @@ const FileUpload = ({
                 </Row>
               </div>
             </Card>
-          )
+          );
         })}
       </div>
-      {
-        uploadError && (
-          <div>
-            <UncontrolledAlert
-              color="danger"
-              className="fade show"
-              role="alert"
-            >
-
-              {
-                uploadError.code === 'file-invalid-type' ? 'Upload Error, please upload an Image.' : uploadError.code === 'file-too-large' ? 'Upload Error, maximum file size is 5mb.' : uploadError.code === 'too-many-files' ? 'Upload Error, please upload only 1 file.' : 'Upload Error, please try again.'
-              }
-            </UncontrolledAlert>
-          </div>
-        )
-      }
-      {
-        submitError && (
-          <div>
-            <UncontrolledAlert
-              color="danger"
-              className="fade show"
-              role="alert"
-            >
-
-              {
-                submitError
-              }
-            </UncontrolledAlert>
-          </div>
-        )
-      }
+      {uploadError && (
+        <div>
+          <UncontrolledAlert color="danger" className="fade show" role="alert">
+            {uploadError.code === "file-invalid-type"
+              ? "Upload Error, please upload an Image."
+              : uploadError.code === "file-too-large"
+              ? "Upload Error, maximum file size is 5mb."
+              : uploadError.code === "too-many-files"
+              ? "Upload Error, please upload only 1 file."
+              : "Upload Error, please try again."}
+          </UncontrolledAlert>
+        </div>
+      )}
+      {submitError && (
+        <div>
+          <UncontrolledAlert color="danger" className="fade show" role="alert">
+            {submitError}
+          </UncontrolledAlert>
+        </div>
+      )}
     </>
-  )
-}
+  );
+};
 
-export default FileUpload
+export default FileUpload;

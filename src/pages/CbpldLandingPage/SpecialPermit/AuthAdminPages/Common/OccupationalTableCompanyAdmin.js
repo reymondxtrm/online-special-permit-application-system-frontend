@@ -41,7 +41,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   const handleSubmit = useSubmit();
   const [showAttachmentModal, setShowAttachmentModal] = useState(false);
   const [orderOfPaymentId, setOrderOfPaymentId] = useState();
-  const [orPath, setOrPath] = useState("");
+
   useEffect(() => {
     dispatch(getCompanyOccupatinalData({ type: "company", status: status }));
   }, [refreshPage]);
@@ -72,7 +72,6 @@ export default function OccupationalTableCompanyAdmin({ status }) {
     setOpenUploadPermitModal((prev) => !prev);
   };
   const toggleImageViewer = () => {
-    getImageHandle({ path: orPath, url: "/api/admin/attachment" });
     setIsViewerOpen((prev) => !prev);
   };
   const toggleReturnRemarksModal = () => {
@@ -80,7 +79,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   };
   return (
     <React.Fragment>
-      {isViewerOpen && currentImage && (
+      {isViewerOpen && currentImage && !isFetching && (
         <>
           <Viewer
             visible={isViewerOpen}
@@ -107,15 +106,17 @@ export default function OccupationalTableCompanyAdmin({ status }) {
         applicationId={applicationId}
         toggleRefresh={toggleRefresh}
       />
-      <AttachmentModal
-        openModal={showAttachmentModal}
-        uploadedFiles={uploadedFiles}
-        applicationId={applicationId}
-        applicationType={"occupational_permit"}
-        toggleModal={toggleAttachmentModal}
-        occupational
-        mainActiveTab={"occupational_permit"}
-      />
+      {AttachmentModal && (
+        <AttachmentModal
+          openModal={showAttachmentModal}
+          uploadedFiles={uploadedFiles}
+          applicationId={applicationId}
+          applicationType={"occupational_permit"}
+          toggleModal={toggleAttachmentModal}
+          occupational
+          mainActiveTab={"occupational_permit"}
+        />
+      )}
       {status === "for_payment_approval" ? (
         <>
           <ReturnRemarksModal
@@ -257,17 +258,23 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                     color="success"
                                     onClick={(e) => {
                                       e.preventDefault();
-                                      item?.order_of_payment?.payment_detail
-                                        ?.payment_type === "online"
-                                        ? window.open(
-                                            item?.order_of_payment
-                                              ?.payment_detail?.attachment,
-                                            "_blank"
-                                          )
-                                        : toggleImageViewer();
-                                      setOrPath(
-                                        item?.uploaded_file?.official_receipt
-                                      );
+                                      const paymentType =
+                                        item?.order_of_payment?.payment_detail
+                                          ?.payment_type;
+                                      const attachment =
+                                        item?.order_of_payment?.payment_detail
+                                          ?.attachment;
+                                      if (paymentType === "online") {
+                                        // Open new tab
+                                        window.open(attachment, "_blank");
+                                      } else {
+                                        toggleImageViewer();
+                                        getImageHandle({
+                                          path: attachment,
+                                          url: "api/admin/attachment",
+                                          showLoader: true,
+                                        });
+                                      }
                                     }}
                                   >
                                     Official Receipt

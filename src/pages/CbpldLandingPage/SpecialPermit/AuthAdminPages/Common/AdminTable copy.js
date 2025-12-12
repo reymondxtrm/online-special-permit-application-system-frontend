@@ -48,7 +48,6 @@ import {
   SpecialPermitAdminSlice,
 } from "features/SpecialPermitAdmin";
 import { useDispatch, useSelector } from "react-redux";
-import useGetImage from "hooks/Common/useGetImage";
 
 const AdminTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
@@ -76,7 +75,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const [referenceNo, setreferenceNo] = useState(null);
   const [imageViewerScale, setimageViewScale] = useState(1);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
-
+  const [currentImage, setCurrentImage] = useState(null);
   const [selectedRow, setSelectedRow] = useState([]);
   const [openRequestFormModal, setOpenRequestFormModal] = useState(false);
   const [
@@ -95,7 +94,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
         }
       : { status: status, permit_type: applicationType };
   }, [applicationType]);
-  const { isFetching, getImageHandle, currentImage } = useGetImage();
+
   const formatName = (name) => {
     const nameParts = name.split(" ");
     const firstName = nameParts[0]?.toUpperCase();
@@ -111,10 +110,15 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const toggleRemarksModal = useCallback(() => {
     setremarksModal((prev) => !prev);
   }, []);
-  const toggleImageViewer = useCallback(() => {
-    setIsViewerOpen((prev) => !prev);
+  const openImageViewer = useCallback((imageUrl) => {
+    setCurrentImage(imageUrl);
+    setIsViewerOpen(true);
   }, []);
 
+  const closeImageViewer = () => {
+    setIsViewerOpen(false);
+    setCurrentImage(null);
+  };
   const toggleRefresh = useCallback(() => {
     setrefreshPage((prev) => !prev);
   }, []);
@@ -320,18 +324,18 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
 
       <div className="tableFixHead">
         <div>
-          {isViewerOpen && currentImage && isFetching === false && (
+          {isViewerOpen && currentImage && (
             <>
               <Viewer
                 visible={isViewerOpen}
-                onClose={toggleImageViewer}
+                onClose={closeImageViewer}
                 images={[{ src: currentImage, alt: "Attachment" }]}
                 activeIndex={0}
                 rotatable
                 zoomable
                 scalable
                 attribute={false}
-                zIndex={99999}
+                zIndex={2000}
               />
             </>
           )}
@@ -382,6 +386,8 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                   <th>Sex</th>
                   <th>Email</th>
                   <th>Contact</th>
+
+                  {/* <th>Address</th> */}
                 </>
               ) : null}
               {status === "for_payment" ||
@@ -405,19 +411,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                   <th>Date To</th>
                 </>
               ) : null}
-
-              {status === "for_payment_approval" || status === "returned" ? (
-                <>
-                  <th>Official Receipt</th>
-                  {(applicationType === "good_moral" ||
-                    applicationType === "mayors_permit" ||
-                    applicationType === "occupational_permit") && (
-                    <th>Cedula</th>
-                  )}
-                </>
-              ) : (
-                <th>Attachment</th>
-              )}
+              <th>Attachments</th>
               {status === "returned" ? <th>Remarks</th> : null}
 
               {status === "pending" ? <th>Actions</th> : null}
@@ -556,64 +550,36 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                         <td>{application.user?.email}</td>
                       </>
                     ) : null}
-
                     <td>
                       {status === "for_payment_approval" ||
                       status === "returned" ? (
                         application?.order_of_payment?.payment_detail
                           ?.payment_type === "online" ? (
-                          <>
-                            <Button
-                              color="success"
-                              className="me-2"
-                              onClick={() => {
-                                console.log(
-                                  application?.order_of_payment?.payment_detail
-                                    ?.attachment
-                                );
-                                window.open(
-                                  application?.order_of_payment?.payment_detail
-                                    ?.attachment,
-                                  "_blank"
-                                );
-                              }}
-                            >
-                              Official Receipt
-                            </Button>
-                          </>
+                          <Button
+                            color="success"
+                            onClick={() => {
+                              setUploadedFiles(item?.uploaded_file);
+                              toggleAttachmentModal();
+                            }}
+                          >
+                            Attachment
+                          </Button>
                         ) : (
-                          <>
-                            <Button
-                              color="success"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                getImageHandle({
-                                  url: "api/admin/attachment",
-                                  path: application?.order_of_payment
-                                    ?.payment_detail?.attachment,
-                                  showLoader: true,
-                                });
-                                toggleImageViewer();
-                              }}
-                            >
-                              Attachment
-                            </Button>
-                            {/* <img
-                              src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`}
-                              alt={`Thumbnail`}
-                              style={{
-                                width: "100px",
-                                height: "50px",
-                                margin: "5px",
-                                cursor: "pointer",
-                              }}
-                              onClick={() =>
-                                openImageViewer(
-                                  `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`
-                                )
-                              }
-                            /> */}
-                          </>
+                          <img
+                            src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`}
+                            alt={`Thumbnail`}
+                            style={{
+                              width: "100px",
+                              height: "50px",
+                              margin: "5px",
+                              cursor: "pointer",
+                            }}
+                            onClick={() =>
+                              openImageViewer(
+                                `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`
+                              )
+                            }
+                          />
                         )
                       ) : (
                         <Button
@@ -626,31 +592,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                         </Button>
                       )}
                     </td>
-
-                    {(status === "for_payment_approval" ||
-                      status === "returned") &&
-                      (applicationType === "good_moral" ||
-                        applicationType === "mayors_permit" ||
-                        applicationType === "occupational_permit") && (
-                        <td>
-                          <Button
-                            color="primary"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              getImageHandle({
-                                url: "api/admin/attachment",
-                                path: application?.uploaded_file
-                                  ?.community_tax_certificate,
-                                showLoader: true,
-                              });
-                              toggleImageViewer();
-                            }}
-                          >
-                            Cedula
-                          </Button>
-                        </td>
-                      )}
-
                     {status === "returned" ? (
                       <td>
                         {application.status_histories
@@ -899,6 +840,22 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
           params={params}
         />
       </div>
+
+      {/* Image Viewer Modal */}
+      <Modal isOpen={isModalOpen} toggle={toggleModal} size="lg">
+        <ModalHeader toggle={toggleModal}>Image Viewer</ModalHeader>
+        <ModalBody className="text-center">
+          {selectedImage ? (
+            <img
+              src={selectedImage}
+              alt="Selected Document"
+              style={{ maxWidth: "100%", maxHeight: "70vh" }}
+            />
+          ) : (
+            <p>No image selected</p>
+          )}
+        </ModalBody>
+      </Modal>
     </>
   );
 };

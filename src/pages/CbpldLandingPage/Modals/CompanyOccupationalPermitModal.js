@@ -1,7 +1,7 @@
 import BasicInputField from "components/Forms/BasicInputField";
 import { helper } from "echarts/lib/export";
 import { FieldArray, Form, Formik, useFormik } from "formik";
-import React, { useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   Button,
   Col,
@@ -22,6 +22,8 @@ import CedulaAddtionalDetailsModal from "./CedulaAddtionalDetailsModal";
 import useSubmit from "hooks/Common/useSubmit";
 import * as Yup from "yup";
 import { useSelector } from "react-redux";
+import useGetImage from "hooks/Common/useGetImage";
+import Viewer from "react-viewer";
 
 export default function CompanyOccupationalPermitModal({
   isOpen,
@@ -31,6 +33,8 @@ export default function CompanyOccupationalPermitModal({
   const [cameraIsOpen, setCameraIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState();
   const [additionalDetails, setAdditionalDetailsModal] = useState(false);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const { getImageHandle, isFetching, currentImage } = useGetImage();
   const handleSubmit = useSubmit();
   const genderOptions = [
     { value: "MALE", label: "Male" },
@@ -47,6 +51,9 @@ export default function CompanyOccupationalPermitModal({
   const togglePasssportCamera = () => {
     setCameraIsOpen((prev) => !prev);
   };
+  const toggleImageViewer = useCallback(() => {
+    setIsViewerOpen((prev) => !prev);
+  }, []);
   const toggleAdditionalDetailsModal = () => {
     setAdditionalDetailsModal((prev) => !prev);
   };
@@ -130,7 +137,6 @@ export default function CompanyOccupationalPermitModal({
         ].includes(value.type);
       }),
 
-    // These fields required only when no_cedula === true
     citizenship: Yup.string().when("no_cedula", {
       is: true,
       then: Yup.string().required("Nationality is required"),
@@ -190,17 +196,38 @@ export default function CompanyOccupationalPermitModal({
 
   return (
     <React.Fragment>
-      <PassportCamera
-        onCapture={setIdPicture}
-        isOpen={cameraIsOpen}
-        toggle={togglePasssportCamera}
-        image={formikRef?.current?.values?.employees[activeIndex]?.id_picture}
-      />
-      <CedulaAddtionalDetailsModal
-        isOpen={additionalDetails}
-        toggle={toggleAdditionalDetailsModal}
-        setAdditionalDetails={setAdditionalDetails}
-      />
+      {isViewerOpen && currentImage && isFetching === false && (
+        <>
+          <Viewer
+            visible={isViewerOpen}
+            onClose={toggleImageViewer}
+            images={[{ src: currentImage, alt: "Attachment" }]}
+            activeIndex={0}
+            rotatable
+            zoomable
+            scalable
+            attribute={false}
+            zIndex={99999}
+          />
+        </>
+      )}
+      {cameraIsOpen && (
+        <PassportCamera
+          onCapture={setIdPicture}
+          isOpen={cameraIsOpen}
+          toggle={togglePasssportCamera}
+          image={formikRef?.current?.values?.employees[activeIndex]?.id_picture}
+        />
+      )}
+
+      {additionalDetails && (
+        <CedulaAddtionalDetailsModal
+          isOpen={additionalDetails}
+          toggle={toggleAdditionalDetailsModal}
+          setAdditionalDetails={setAdditionalDetails}
+          values={formikRef.current.values.employees?.[activeIndex]}
+        />
+      )}
       <Modal toggle={toggleModal} isOpen={isOpen} fullscreen>
         <ModalHeader toggle={toggleModal}>
           <p
@@ -274,7 +301,7 @@ export default function CompanyOccupationalPermitModal({
                 <FieldArray name="employees">
                   {(fieldArrayHelper) => (
                     <>
-                      <Table striped bordered>
+                      <Table striped>
                         <thead>
                           <tr>
                             <th>#</th>
@@ -295,7 +322,8 @@ export default function CompanyOccupationalPermitModal({
                         <tbody>
                           {props?.values?.employees?.map((employee, index) => (
                             <tr key={index}>
-                              <td className="fw-bold">{index + 1}</td>
+                              {/* <td className="fw-bold">{index + 1}</td> */}
+                              <th scope="row">{index + 1}</th>
                               <td style={{ width: "10%" }}>
                                 <div className="d-flex flex-column gap-0">
                                   <BasicInputField
@@ -469,18 +497,34 @@ export default function CompanyOccupationalPermitModal({
                                 />
                               </td>
                               <td>
-                                <Button
-                                  color="primary"
-                                  style={{ Width: "100%" }}
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    togglePasssportCamera();
-                                    setActiveIndex(index);
-                                  }}
-                                >
-                                  <i className="mdi  mdi-camera fs-5"></i>
-                                </Button>
+                                <div className="d-flex flex-column">
+                                  {props.values.employees?.[index]
+                                    ?.id_picture && (
+                                    <img
+                                      src={
+                                        props.values.employees[index].id_picture
+                                      }
+                                      alt="Captured ID"
+                                      className="img-fluid rounded border"
+                                      style={{
+                                        transition: "0.3s",
+                                        opacity: 1,
+                                      }}
+                                    />
+                                  )}
+                                  <Button
+                                    color="primary"
+                                    style={{ Width: "100%" }}
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      togglePasssportCamera();
+                                      setActiveIndex(index);
+                                    }}
+                                  >
+                                    <i className="mdi  mdi-camera fs-5"></i>
+                                  </Button>
+                                </div>
                               </td>
                               <td style={{ width: "10%" }}>
                                 <Input

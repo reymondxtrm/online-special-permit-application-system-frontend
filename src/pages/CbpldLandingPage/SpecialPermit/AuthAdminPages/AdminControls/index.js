@@ -496,6 +496,7 @@ const AdminControls = () => {
                             <td>#</td>
                             <th>Permit Type</th>
                             <th>Purpose</th>
+                            <th>Status</th>
                             <th>Actions</th>
                           </tr>
                         </thead>
@@ -529,6 +530,9 @@ const AdminControls = () => {
                                     </td>
                                     <td>
                                       {isLoading ? "loding ..." : items.name}
+                                    </td>
+                                    <td>
+                                      {isLoading ? "loding ..." : items.type}
                                     </td>
 
                                     <div className="d-flex gap-2">

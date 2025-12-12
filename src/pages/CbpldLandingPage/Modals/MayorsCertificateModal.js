@@ -69,6 +69,7 @@ function MayorsCertificateModal({
         );
     }
   }, [openModal]);
+
   useEffect(() => {
     if (openModal && isUpdate) {
       axios
@@ -77,11 +78,27 @@ function MayorsCertificateModal({
         })
         .then(
           (res) => {
-            const data = res.data;
-            console.log(res.data);
-            setExistingData({
-              purpose_id: data.application.purpose,
-              other_purpose: data?.other_purpose || "",
+            let data = res.data;
+
+            setExistingData(() => {
+              if (data?.application_purpose?.type === "temporary") {
+                data = {
+                  ...data,
+                  other_purpose: data?.application_purpose?.name,
+                  purpose: { value: 0, label: "Others" },
+                };
+              } else {
+                data = {
+                  ...data,
+                  purpose: purposeOptions?.find(
+                    (item) => item.value === data?.application?.purpose
+                  ),
+                };
+              }
+              return {
+                purpose: data?.purpose,
+                other_purpose: data?.other_purpose || "",
+              };
             });
 
             setUploadedFiles(data?.uploaded_files || []);
@@ -89,8 +106,8 @@ function MayorsCertificateModal({
           (error) => console.log(error)
         );
     }
-  }, [openModal, isUpdate, specialPermitApplicationId]);
-
+  }, [openModal, isUpdate, specialPermitApplicationId, purposeOptions]);
+  console.log(existingData);
   const getFormData = (object) => {
     const formData = new FormData();
     Object.keys(object).forEach((key) => {
@@ -162,7 +179,7 @@ function MayorsCertificateModal({
             enableReinitialize
             initialValues={{
               type: "mayors_permit",
-              purpose_id: existingData?.purpose_id || "",
+              purpose: existingData?.purpose || "",
               other_purpose: existingData?.other_purpose || "",
               police_clearance: "",
               community_tax_certificate: "",
@@ -179,11 +196,12 @@ function MayorsCertificateModal({
                     <Row>
                       <Col md={12}>
                         <FormGroup>
+                          {console.log(props.values.purpose)}
                           <Label>Purpose</Label>
                           <Select
                             isClearable={true}
                             name="purpose"
-                            value={props.values.purpose_id || null}
+                            value={props.values.purpose || null}
                             onChange={(selectedOption) => {
                               const label = selectedOption?.label;
                               if (label === "Others") {
@@ -191,9 +209,8 @@ function MayorsCertificateModal({
                               } else {
                                 setotherPurpose(false);
                               }
-
                               props.setFieldValue(
-                                "purpose_id",
+                                "purpose",
                                 selectedOption ?? ""
                               );
                             }}
@@ -436,12 +453,17 @@ function MayorsCertificateModal({
               color: "white",
             }}
             onClick={() => {
-              const formik = formikRef.current?.values ?? {};
+              const formik = {
+                ...formikRef.current?.values,
+                special_permit_application_id: specialPermitApplicationId,
+              };
               const formData = getFormData(formik);
               if (proceed) {
                 handleSubmit(
                   {
-                    url: "api/client/special-permit/mayors-permit",
+                    url: isUpdate
+                      ? "api/client/special-permit/mayors-permit/update"
+                      : "api/client/special-permit/mayors-permit",
                     headers: {
                       "Content-Type": "multipart/form-data",
                     },

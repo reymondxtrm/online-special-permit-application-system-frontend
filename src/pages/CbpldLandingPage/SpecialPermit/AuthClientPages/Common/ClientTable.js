@@ -9,6 +9,9 @@ import {
   Input,
   Badge,
   UncontrolledDropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
 } from "reactstrap";
 import moment from "moment";
 import axios from "axios";
@@ -37,6 +40,7 @@ import MotorcadeModal from "pages/CbpldLandingPage/Modals/MotorcadeModal";
 import ParadeModal from "pages/CbpldLandingPage/Modals/ParadeModal";
 import RecorridaModal from "pages/CbpldLandingPage/Modals/RecorridaModal";
 import UseOfGovernmentPropertyModal from "pages/CbpldLandingPage/Modals/UseOfGovernmentPropertyModal";
+import ReuploadCedulaModal from "../Modals/ReuploadCedulaModal";
 const ClientTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
 
@@ -66,6 +70,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
     useState(false);
   const [useOfGovernmentApplicationModal, setUseOfGovernmentApplicationModal] =
     useState(false);
+  const [reUploadCedulaModal, setReUploadCedulaModal] = useState(false);
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const toggleRefresh = () => {
@@ -110,6 +115,9 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
   const toggleUseOfGovernmentPropertyApplicationModal = () => {
     setUseOfGovernmentApplicationModal((prev) => !prev);
   };
+  const toggleReUploadCedulaModal = () => {
+    setReUploadCedulaModal((prev) => !prev);
+  };
   useEffect(() => {
     const params = { status: status, permit_type: applicationType };
     if (applicationType === activeTab) {
@@ -118,9 +126,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
     }
   }, [activeTab, refreshPage]);
 
-  // const toggleModal = () => {
-  //   setIsModalOpen(!isModalOpen);
-  // };
   const togglerFunction = useCallback(() => {
     if (applicationType === "mayors_permit") {
       toggleMayorsPermitApplicationModal();
@@ -215,6 +220,13 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
           toggleRefresh={toggleRefresh}
         />
       ) : null}
+      {reUploadCedulaModal && (
+        <ReuploadCedulaModal
+          specialPermitApplicationId={selectedRow[0]}
+          toggleModal={toggleReUploadCedulaModal}
+          openModal={ReuploadCedulaModal}
+        />
+      )}
       <CedulaApplicationFormModal
         openModal={cedulaApplicationModal}
         toggleModal={toggleCedulaApplicationForm}
@@ -490,7 +502,11 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                     style={{
                       backgroundColor:
                         application?.uploaded_file?.community_tax_certificate ==
-                        null
+                          null &&
+                        status === "for_payment" &&
+                        (applicationType === "occupational_permit" ||
+                          applicationType === "mayors_permit" ||
+                          applicationType === "good_moral")
                           ? "#f9cf03"
                           : null,
                     }}
@@ -651,7 +667,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                               color="primary"
                               onClick={() => {
                                 setSelectedRow([application?.id]);
-
                                 toggleReUploadModal();
                               }}
                             >
@@ -819,29 +834,60 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                     user?.accountType === "individual" ? (
                       <>
                         <td>
-                          <Button
-                            color="primary"
-                            onClick={() => {
-                              toggleOverTheCounterModal();
-                              setSelectedRow([application?.id]);
-                              dispatch(
-                                SpecialPermitClientSlice.actions.setApplicationIdsForPayment(
-                                  [application?.id]
-                                )
-                              );
-                            }}
-                          >
-                            Pay
-                          </Button>
+                          <>
+                            <UncontrolledDropdown
+                              className="me-2"
+                              direction="end"
+                            >
+                              <DropdownToggle caret color="primary">
+                                Actions
+                              </DropdownToggle>
+                              <DropdownMenu
+                                style={{
+                                  maxHeight: "200px",
+                                  overflowY: "auto",
+                                  zIndex: 1050, // High z-index to appear above
+                                  position: "absolute", // Ensure it's detached from parent
+                                }}
+                              >
+                                <DropdownItem
+                                  onClick={() => {
+                                    toggleOverTheCounterModal();
+                                    setSelectedRow([application?.id]);
+                                    dispatch(
+                                      SpecialPermitClientSlice.actions.setApplicationIdsForPayment(
+                                        [application?.id]
+                                      )
+                                    );
+                                  }}
+                                >
+                                  Pay
+                                </DropdownItem>
+
+                                <DropdownItem
+                                  onClick={() => {
+                                    toggleReUploadCedulaModal();
+                                    setSelectedRow([application?.id]);
+                                  }}
+                                >
+                                  Reupload Cedula
+                                </DropdownItem>
+                              </DropdownMenu>
+                            </UncontrolledDropdown>
+                          </>
                         </td>
                         {application?.uploaded_file
-                          ?.community_tax_certificate == null ? (
+                          ?.community_tax_certificate == null &&
+                        (applicationType === "occupational_permit" ||
+                          applicationType === "mayors_permit" ||
+                          applicationType === "good_moral") ? (
                           <td>
                             <Badge color="danger">No Cedula</Badge>
                           </td>
                         ) : null}
                       </>
                     ) : null}
+
                     {status === "completed" ? (
                       <td>
                         <div

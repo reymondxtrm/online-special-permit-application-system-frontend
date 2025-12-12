@@ -219,10 +219,10 @@ const adminUserControl = () => {
                     >
                       Unvalidated Company Account
                     </p>
-
+                    {console.log(userList?.unvalidatedUser)}
                     <UserControlsTable
                       isFetching={userList?.isFetching}
-                      tableData={userList?.unvalidatedUser?.data}
+                      tableData={userList?.unvalidatedUser}
                       tableName="company"
                     />
                     <Pagination
@@ -253,12 +253,13 @@ const adminUserControl = () => {
                     >
                       Users
                     </p>
-                    <DashboardFilters action={getUserList} forAction={0} />
+                    {/* <DashboardFilters action={getUserList} forAction={0} /> */}
 
                     <UserControlsTable
                       isFetching={userList?.isFetching}
-                      tableData={userList?.users?.data}
+                      tableData={userList?.users}
                       tableName="users"
+                      is_validated
                     />
                     <Pagination
                       dataProps={userList.users}

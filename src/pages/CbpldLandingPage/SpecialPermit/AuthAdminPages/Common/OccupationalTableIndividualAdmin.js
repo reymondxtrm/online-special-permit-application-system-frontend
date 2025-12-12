@@ -44,9 +44,11 @@ export default function OccupationalTableIndividualAdmin({
   const [uploadPermitModal, setOpenUploadPermitModal] = useState(false);
   const [activeIndex, setActiveIndex] = useState();
   const [generateModal, setOpenGenerateModal] = useState(false);
-
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [fileViewerOpen, setFileViewerOpen] = useState(false);
+  const { isFetching, getImageHandle, currentImage } = useGetImage();
   const handleSubmit = useSubmit();
+
   useEffect(() => {
     if (activeTab === "individual" && motherTab === "occupational") {
       dispatch(
@@ -82,23 +84,41 @@ export default function OccupationalTableIndividualAdmin({
   const toggleGenerateModal = () => {
     setOpenGenerateModal((prev) => !prev);
   };
+  const toggleImageViewer = () => {
+    setIsViewerOpen((prev) => !prev);
+  };
+
   return (
     <React.Fragment>
+      {isViewerOpen && !isFetching && currentImage && (
+        <Viewer
+          visible={isViewerOpen}
+          onClose={toggleImageViewer}
+          images={[{ src: currentImage, alt: "Attachment" }]}
+          activeIndex={0}
+          rotatable
+          zoomable
+          scalable
+          attribute={false}
+          zIndex={2000}
+        />
+      )}
       <FileViewerModal
         toggle={toggleFileViewerModal}
         isOpen={fileViewerOpen}
         fileUrl={orPath}
       />
-      <AttachmentModal
-        openModal={showAttachmentModal}
-        uploadedFiles={uploadedFiles}
-        applicationId={applicationId}
-        applicationType={"occupational_permit"}
-        toggleModal={toggleAttachmentModal}
-        occupational
-        mainActiveTab={"occupational_permit"}
-      />
-
+      {AttachmentModal && (
+        <AttachmentModal
+          openModal={showAttachmentModal}
+          uploadedFiles={uploadedFiles}
+          applicationId={applicationId}
+          applicationType={"occupational_permit"}
+          toggleModal={toggleAttachmentModal}
+          occupational
+          mainActiveTab={"occupational_permit"}
+        />
+      )}
       <AmountModal
         openModal={amountModal}
         toggleModal={toggleAmountModal}
@@ -137,6 +157,7 @@ export default function OccupationalTableIndividualAdmin({
           />
         </>
       ) : null}
+      {console.log(status)}
       <Table hover>
         <thead>
           <tr>
@@ -145,10 +166,18 @@ export default function OccupationalTableIndividualAdmin({
 
             <th>Gender</th>
             <th>Address</th>
-            <th>Contact</th>
-            {status === "for_payment_approval" ||
-              (status === "for_signature" && <th> Mode of Payment</th>)}
-            <th>Attachment</th>
+            {(status === "for_payment_approval" ||
+              status === "for_signature" ||
+              status === "returned") && <th> Mode of Payment</th>}
+            {status === "for_payment_approval" || status === "returned" ? (
+              <>
+                <th>Official Receipt</th>
+                <th>Cedula</th>
+              </>
+            ) : (
+              <th>Attachment</th>
+            )}
+
             {status === "pending" ||
             status === "for_payment_approval" ||
             status === "for_signature" ? (
@@ -171,42 +200,49 @@ export default function OccupationalTableIndividualAdmin({
                   <td>
                     {application?.user?.user_address_morph[0]?.full_address}
                   </td>
-                  <td>
-                    {
-                      application?.order_of_payment?.payment_detail
-                        ?.payment_type
-                    }
-                  </td>
-                  {status === "for_payment_approval" ||
-                    (status === "for_signature" && (
-                      <td>
-                        <Badge
-                          color={
-                            application?.order_of_payment?.payment_detail
-                              ?.payment_type === "online"
-                              ? "info"
-                              : "warning"
-                          }
-                        >
-                          {
-                            application?.order_of_payment?.payment_detail
-                              ?.payment_type
-                          }
-                        </Badge>
-                      </td>
-                    ))}
 
+                  {(status === "for_payment_approval" ||
+                    status === "for_signature" ||
+                    status === "returned") && (
+                    <td>
+                      <Badge
+                        color={
+                          application?.order_of_payment?.payment_detail
+                            ?.payment_type === "online"
+                            ? "info"
+                            : "warning"
+                        }
+                      >
+                        {
+                          application?.order_of_payment?.payment_detail
+                            ?.payment_type
+                        }
+                      </Badge>
+                    </td>
+                  )}
                   <td>
                     {status === "for_payment_approval" ||
                     status === "returned" ? (
                       <Button
                         color="success"
-                        onClick={() => {
-                          toggleFileViewerModal();
-                          setOrPath(
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const paymentType =
                             application?.order_of_payment?.payment_detail
-                              ?.attachment
-                          );
+                              ?.payment_type;
+                          const attachment =
+                            application?.order_of_payment?.payment_detail
+                              ?.attachment;
+                          if (paymentType === "online") {
+                            window.open(attachment, "_blank");
+                          } else {
+                            toggleImageViewer();
+                            getImageHandle({
+                              path: attachment,
+                              url: "api/admin/attachment",
+                              showLoader: true,
+                            });
+                          }
                         }}
                       >
                         Official Receipt
@@ -215,7 +251,7 @@ export default function OccupationalTableIndividualAdmin({
                       <Button
                         color="success"
                         onClick={() => {
-                          setUploadedFiles(item?.uploaded_file);
+                          setUploadedFiles(application?.uploaded_file);
                           toggleAttachmentModal();
                         }}
                       >
@@ -223,6 +259,29 @@ export default function OccupationalTableIndividualAdmin({
                       </Button>
                     )}
                   </td>
+
+                  {status === "for_payment_approval" ||
+                  status === "returned" ||
+                  status === "for_signature" ? (
+                    <td>
+                      <Button
+                        color="primary"
+                        onClick={(e) => {
+                          e.preventDefault();
+
+                          getImageHandle({
+                            url: "api/admin/attachment",
+                            path: application?.uploaded_file
+                              ?.community_tax_certificate,
+                            showLoader: true,
+                          });
+                          toggleImageViewer();
+                        }}
+                      >
+                        Cedula
+                      </Button>
+                    </td>
+                  ) : null}
                   {status === "pending" && (
                     <td>
                       <UncontrolledDropdown>
