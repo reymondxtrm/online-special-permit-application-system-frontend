@@ -13,7 +13,6 @@ import {
   Input,
   Label,
   FormGroup,
-  FormFeedback,
 } from "reactstrap";
 
 import Select from "react-select";
@@ -266,41 +265,27 @@ function MayorsCertificateModal({
                       <Col md={12}>
                         <FormGroup>
                           <Label>
-                            Purpose <span className="text-danger">*</span>
+                            Purpose<span style={{ color: "red" }}>&nbsp;*</span>
                           </Label>
-
-                          <div
-                            className={
-                              props.touched.purpose && props.errors.purpose
-                                ? "is-invalid"
-                                : ""
-                            }
-                          >
-                            <Select
-                              isClearable
-                              name="purpose"
-                              value={props.values.purpose || null}
-                              onChange={(selectedOption) => {
-                                const label = selectedOption?.label;
-                                setotherPurpose(label === "Others");
-                                props.setFieldValue(
-                                  "purpose",
-                                  selectedOption ?? ""
-                                );
-                              }}
-                              onBlur={() =>
-                                props.setFieldTouched("purpose", true)
+                          <Select
+                            isClearable={true}
+                            name="purpose"
+                            value={props.values.purpose || null}
+                            onChange={(selectedOption) => {
+                              const label = selectedOption?.label;
+                              if (label === "Others") {
+                                setotherPurpose(true);
+                              } else {
+                                setotherPurpose(false);
                               }
-                              options={purposeOptions}
-                              placeholder="Select Purpose"
-                            />
-                          </div>
-
-                          {props.touched.purpose && props.errors.purpose && (
-                            <FormFeedback className="d-block">
-                              {props.errors.purpose}
-                            </FormFeedback>
-                          )}
+                              props.setFieldValue(
+                                "purpose",
+                                selectedOption ?? ""
+                              );
+                            }}
+                            placeholder="Select Purpose"
+                            options={purposeOptions}
+                          />
                         </FormGroup>
                       </Col>
                     </Row>
@@ -308,189 +293,226 @@ function MayorsCertificateModal({
                       <Col md={12}>
                         <FormGroup>
                           <Label>
-                            Specify Other Purpose{" "}
-                            <span className="text-danger">*</span>
+                            Specify Other Purpose
+                            <span style={{ color: "red" }}>&nbsp;*</span>
                           </Label>
                           <Input
                             type="text"
                             name="other_purpose"
                             value={props.values.other_purpose}
                             onChange={props.handleChange}
-                            onBlur={props.handleBlur}
-                            invalid={
-                              props.touched.other_purpose &&
-                              Boolean(props.errors.other_purpose)
-                            }
+                            placeholder="Enter your purpose"
                           />
-                          <FormFeedback>
-                            {props.errors.other_purpose}
-                          </FormFeedback>
                         </FormGroup>
                       </Col>
                     )}
                     <Row>
                       <Col>
                         <FormGroup>
-                          <Label>
-                            Police Clearance{" "}
-                            <span className="text-danger">*</span>
+                          <Label for="policeClearance">
+                            Police Clearance
+                            <span style={{ color: "red" }}>&nbsp;*</span>
                           </Label>
-
-                          <Input
-                            type="file"
-                            name="police_clearance"
-                            accept="image/*"
-                            onChange={(e) =>
-                              props.setFieldValue(
-                                "police_clearance",
-                                e.currentTarget.files[0]
-                              )
-                            }
-                            onBlur={() =>
-                              props.setFieldTouched("police_clearance", true)
-                            }
-                            invalid={
-                              props.touched.police_clearance &&
-                              Boolean(props.errors.police_clearance)
-                            }
-                          />
-
-                          <FormFeedback>
-                            {props.errors.police_clearance}
-                          </FormFeedback>
+                          <div className="d-flex gap-1">
+                            <Input
+                              id="policeClearance"
+                              name="police_clearance"
+                              type="file"
+                              onChange={(event) => {
+                                console.log(event);
+                                props.setFieldValue(
+                                  "police_clearance",
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              accept="image/*"
+                            />
+                            {isUpdate && uploadedFiles?.police_clearance && (
+                              <Button
+                                color="primary"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  getImageHandle({
+                                    path: uploadedFiles?.police_clearance,
+                                    url: "api/client/attachment",
+                                    showLoader: true,
+                                  });
+                                  toggleIsViewerOpen();
+                                }}
+                              >
+                                <i className="mdi mdi-eye" color="warning"></i>
+                              </Button>
+                            )}
+                          </div>
                         </FormGroup>
                       </Col>
                     </Row>
                     <Row>
                       <Col>
                         <FormGroup>
-                          <Label>
-                            Community Tax Certificate{" "}
-                            <span className="text-danger">*</span>
+                          <Label for="taxCert">
+                            Community Tax Certificate
+                            <span style={{ color: "red" }}>&nbsp;*</span>
                           </Label>
-
-                          <Input
-                            type="file"
-                            name="community_tax_certificate"
-                            accept="image/*"
-                            onChange={(e) =>
-                              props.setFieldValue(
-                                "community_tax_certificate",
-                                e.currentTarget.files[0]
-                              )
-                            }
-                            onBlur={() =>
-                              props.setFieldTouched(
-                                "community_tax_certificate",
-                                true
-                              )
-                            }
-                            invalid={
-                              props.touched.community_tax_certificate &&
-                              Boolean(props.errors.community_tax_certificate)
-                            }
-                          />
-
-                          <FormFeedback>
-                            {props.errors.community_tax_certificate}
-                          </FormFeedback>
+                          <div className="d-flex gap-1">
+                            <Input
+                              id="taxCert"
+                              name={`community_tax_certificate`}
+                              onChange={(event) => {
+                                console.log(event);
+                                props.setFieldValue(
+                                  "community_tax_certificate",
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              type="file"
+                              accept="image/*"
+                            />
+                            {isUpdate &&
+                              uploadedFiles?.community_tax_certificate && (
+                                <Button
+                                  color="primary"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    getImageHandle({
+                                      path: uploadedFiles?.community_tax_certificate,
+                                      url: "api/client/attachment",
+                                      showLoader: true,
+                                    });
+                                    toggleIsViewerOpen();
+                                  }}
+                                >
+                                  <i
+                                    className="mdi mdi-eye"
+                                    color="warning"
+                                  ></i>
+                                </Button>
+                              )}
+                          </div>
                         </FormGroup>
                       </Col>
                     </Row>
                     <Row>
                       <Col>
                         <FormGroup>
-                          <Label>
-                            Barangay Clearance{" "}
-                            <span className="text-danger">*</span>
+                          <Label for="exampleFile">
+                            Barangay Clearance (As proof of Residency)
+                            <span style={{ color: "red" }}>&nbsp;*</span>
                           </Label>
-
-                          <Input
-                            type="file"
-                            name="barangay_clearance"
-                            accept="image/*"
-                            onChange={(e) =>
-                              props.setFieldValue(
-                                "barangay_clearance",
-                                e.currentTarget.files[0]
-                              )
-                            }
-                            onBlur={() =>
-                              props.setFieldTouched("barangay_clearance", true)
-                            }
-                            invalid={
-                              props.touched.barangay_clearance &&
-                              Boolean(props.errors.barangay_clearance)
-                            }
-                          />
-                          <FormFeedback>
-                            {props.errors.barangay_clearance}
-                          </FormFeedback>
+                          <div className="d-flex gap-1">
+                            <Input
+                              id="exampleFile"
+                              name={`barangay_clearance`}
+                              onChange={(event) => {
+                                console.log(event);
+                                props.setFieldValue(
+                                  "barangay_clearance",
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              type="file"
+                              accept="image/*"
+                            />
+                            {isUpdate && uploadedFiles?.barangay_clearance && (
+                              <Button color="primary">
+                                <i
+                                  className="mdi mdi-eye"
+                                  color="warning"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    getImageHandle({
+                                      path: uploadedFiles?.barangay_clearance,
+                                      url: "api/client/attachment",
+                                      showLoader: true,
+                                    });
+                                    toggleIsViewerOpen();
+                                  }}
+                                ></i>
+                              </Button>
+                            )}
+                          </div>
                         </FormGroup>
                       </Col>
                     </Row>
                     <Row>
                       <Col>
                         <FormGroup>
-                          <Label>
-                            Fiscal Clearance{" "}
-                            <span className="text-danger">*</span>
+                          <Label for="fiscalClearance">
+                            Fiscal Clearance
+                            <span style={{ color: "red" }}>&nbsp;*</span>
                           </Label>
-
-                          <Input
-                            type="file"
-                            name="fiscal_clearance"
-                            accept="image/*"
-                            onChange={(e) =>
-                              props.setFieldValue(
-                                "fiscal_clearance",
-                                e.currentTarget.files[0]
-                              )
-                            }
-                            onBlur={() =>
-                              props.setFieldTouched("fiscal_clearance", true)
-                            }
-                            invalid={
-                              props.touched.fiscal_clearance &&
-                              Boolean(props.errors.fiscal_clearance)
-                            }
-                          />
-                          <FormFeedback>
-                            {props.errors.fiscal_clearance}
-                          </FormFeedback>
+                          <div className="d-flex gap-1">
+                            <Input
+                              id="fiscalClearance"
+                              name={`fiscal_clearance`}
+                              onChange={(event) => {
+                                console.log(event);
+                                props.setFieldValue(
+                                  "fiscal_clearance",
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              type="file"
+                              accept="image/*"
+                            />
+                            {isUpdate && uploadedFiles?.fiscal_clearance && (
+                              <Button
+                                color="primary"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  getImageHandle({
+                                    path: uploadedFiles?.fiscal_clearance,
+                                    url: "api/client/attachment",
+                                    showLoader: true,
+                                  });
+                                  toggleIsViewerOpen();
+                                }}
+                              >
+                                <i className="mdi mdi-eye" color="warning"></i>
+                              </Button>
+                            )}
+                          </div>
                         </FormGroup>
                       </Col>
                     </Row>
                     <Row>
                       <Col>
                         <FormGroup>
-                          <Label>
-                            Court Clearance{" "}
-                            <span className="text-danger">*</span>
+                          <Label for="courtClearance">
+                            Court Clearance
+                            <span style={{ color: "red" }}>&nbsp;*</span>
                           </Label>
-
-                          <Input
-                            type="file"
-                            name="court_clearance"
-                            accept="image/*"
-                            onChange={(e) =>
-                              props.setFieldValue(
-                                "court_clearance",
-                                e.currentTarget.files[0]
-                              )
-                            }
-                            onBlur={() =>
-                              props.setFieldTouched("court_clearance", true)
-                            }
-                            invalid={
-                              props.touched.court_clearance &&
-                              Boolean(props.errors.court_clearance)
-                            }
-                          />
-
-                          <FormFeedback>
-                            {props.errors.court_clearance}
-                          </FormFeedback>
+                          <div className="d-flex gap-1">
+                            <Input
+                              id="courtClearance"
+                              name={`court_clearance`}
+                              onChange={(event) => {
+                                console.log(event);
+                                props.setFieldValue(
+                                  "court_clearance",
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              type="file"
+                              accept="image/*"
+                            />
+                            {isUpdate && uploadedFiles?.court_clearance && (
+                              <Button
+                                color="primary"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  getImageHandle({
+                                    path: uploadedFiles?.court_clearance,
+                                    url: "api/client/attachment",
+                                    showLoader: true,
+                                  });
+                                  toggleIsViewerOpen();
+                                }}
+                              >
+                                <i className="mdi mdi-eye" color="warning"></i>
+                              </Button>
+                            )}
+                          </div>
                         </FormGroup>
                       </Col>
                     </Row>

@@ -39,6 +39,7 @@ export default function FileIconFormat({
         showLoader: true,
       });
     } catch (err) {
+      toggleIsViewerOpen();
       console.error("Failed to load image", err);
     }
   };

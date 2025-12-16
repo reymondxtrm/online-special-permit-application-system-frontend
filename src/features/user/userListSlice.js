@@ -140,7 +140,7 @@ export const userListSlice = createSlice({
     [getUserList.fulfilled]: (state, { payload }) => {
       state.users = payload;
       state.isFetching = false;
-      state.errors = "";
+      state.errors = null;
     },
     [getUserList.rejected]: (state, { payload }) => {
       state.errors = payload;

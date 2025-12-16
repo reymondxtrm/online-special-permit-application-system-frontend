@@ -16,7 +16,7 @@ import {
   Spinner,
 } from "reactstrap";
 import classnames from "classnames";
-import Viewer from "react-viewer";
+import ReactSimpleImageViewer from "react-simple-image-viewer";
 import axios from "axios";
 
 function AttachmentModal({
@@ -28,7 +28,6 @@ function AttachmentModal({
   occupational = false,
   isClient = false,
 }) {
-  console.log(uploadedFiles);
   const getActiveTabInitialState = (applicationType) => {
     if (applicationType == "mayors_permit" || applicationType == "good_moral") {
       return "Police Clearance";
@@ -45,7 +44,7 @@ function AttachmentModal({
   }, [mainActiveTab]);
 
   const [isViewerOpen, setIsViewerOpen] = useState(false);
-  const [currentImage, setCurrentImage] = useState(0);
+  const [currentImage, setCurrentImage] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
   const fileMapping = {
     mayors_permit: {
@@ -124,9 +123,7 @@ function AttachmentModal({
     };
   }, [activeTab, applicationType, openModal]);
 
-  const images = Object.values(fileMapping[applicationType]).filter(Boolean);
-
-  const openImageViewer = () => {
+  const toggleIsViewerOpen = () => {
     setIsViewerOpen((prev) => !prev);
   };
 
@@ -231,51 +228,46 @@ function AttachmentModal({
                               </div>
 
                               {filePath ? (
-                                occupational ? (
-                                  isFetching ? (
-                                    <div className="text-center">
-                                      <Spinner color="primary" type="grow">
-                                        Loading...
-                                      </Spinner>
-                                      <Spinner color="primary" type="grow">
-                                        Loading...
-                                      </Spinner>
-                                      <Spinner color="primary" type="grow">
-                                        Loading...
-                                      </Spinner>
-                                      <Spinner color="primary" type="grow">
-                                        Loading...
-                                      </Spinner>
-                                      <Spinner color="primary" type="grow">
-                                        Loading...
-                                      </Spinner>
-                                      <Spinner color="primary" type="grow">
-                                        Loading...
-                                      </Spinner>
-                                      <Spinner color="primary" type="grow">
-                                        Loading...
-                                      </Spinner>
-                                      <Spinner color="primary" type="grow">
-                                        Loading...
-                                      </Spinner>
-                                    </div>
-                                  ) : (
-                                    <img src={currentImage} alt={activeTab} />
-                                  )
+                                isFetching ? (
+                                  <div className="text-center">
+                                    <Spinner color="primary" type="grow">
+                                      Loading...
+                                    </Spinner>
+                                    <Spinner color="primary" type="grow">
+                                      Loading...
+                                    </Spinner>
+                                    <Spinner color="primary" type="grow">
+                                      Loading...
+                                    </Spinner>
+                                    <Spinner color="primary" type="grow">
+                                      Loading...
+                                    </Spinner>
+                                    <Spinner color="primary" type="grow">
+                                      Loading...
+                                    </Spinner>
+                                    <Spinner color="primary" type="grow">
+                                      Loading...
+                                    </Spinner>
+                                    <Spinner color="primary" type="grow">
+                                      Loading...
+                                    </Spinner>
+                                    <Spinner color="primary" type="grow">
+                                      Loading...
+                                    </Spinner>
+                                  </div>
                                 ) : (
                                   <img
-                                    src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${filePath}`}
-                                    alt={`Document ${index + 1}`}
+                                    src={currentImage}
+                                    alt={activeTab}
                                     style={{
-                                      maxWidth: "100%",
-                                      maxHeight: "80vh",
-
                                       cursor: "pointer",
+                                      maxWidth: "100%",
                                     }}
-                                    onClick={() => {
-                                      openImageViewer();
-                                      setCurrentImage(index);
-                                    }}
+                                    onClick={
+                                      !isFetching && currentImage
+                                        ? toggleIsViewerOpen
+                                        : undefined
+                                    }
                                   />
                                 )
                               ) : (
@@ -298,21 +290,18 @@ function AttachmentModal({
           Close
         </Button>
       </ModalFooter>
-      {/* Image Viewer */}
-      {isViewerOpen && openModal && (
-        <Viewer
-          visible={isViewerOpen}
-          onClose={openImageViewer}
-          images={images.map((filePath) => ({
-            src: `${window.location.protocol}//${process.env.REACT_APP_API}storage/${filePath}`,
-            alt: "Attachment",
-          }))}
-          activeIndex={currentImage}
-          rotatable
-          zoomable
-          scalable
-          attribute={false}
-          zIndex={2000}
+
+      {isViewerOpen && !isFetching && currentImage && (
+        <ReactSimpleImageViewer
+          src={[currentImage]}
+          currentIndex={0}
+          onClose={toggleIsViewerOpen}
+          backgroundStyle={{
+            backgroundColor: "rgba(0,0,0,0.8)",
+            zIndex: 9999,
+          }}
+          closeOnClickOutside={true}
+          disableZoom={false}
         />
       )}
     </Modal>

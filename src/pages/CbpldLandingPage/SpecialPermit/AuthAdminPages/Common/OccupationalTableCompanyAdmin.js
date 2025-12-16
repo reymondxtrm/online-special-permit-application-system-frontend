@@ -22,6 +22,7 @@ import GenerateOccupationalPermitModal from "../Modals/GenerateOccupationalPermi
 import Viewer from "react-viewer";
 import useGetImage from "hooks/Common/useGetImage";
 import RemarksModal from "../Modals/RemarksModal";
+import OccupationalRequestForm from "../Printables/OccupationalRequestForm";
 
 export default function OccupationalTableCompanyAdmin({ status }) {
   const dispatch = useDispatch();
@@ -41,6 +42,8 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   const handleSubmit = useSubmit();
   const [showAttachmentModal, setShowAttachmentModal] = useState(false);
   const [orderOfPaymentId, setOrderOfPaymentId] = useState();
+  const [occupationalRequestModal, setOccupationalRequestModal] =
+    useState(false);
 
   useEffect(() => {
     dispatch(getCompanyOccupatinalData({ type: "company", status: status }));
@@ -55,6 +58,9 @@ export default function OccupationalTableCompanyAdmin({ status }) {
 
   const toggleAttachmentModal = () => {
     setShowAttachmentModal((prev) => !prev);
+  };
+  const toggleOccupationalRequestModal = () => {
+    setOccupationalRequestModal((prev) => !prev);
   };
   const toggleAmountModal = () => {
     setOpenAmountModal((prev) => !prev);
@@ -127,6 +133,13 @@ export default function OccupationalTableCompanyAdmin({ status }) {
           />
         </>
       ) : null}
+      {occupationalRequestModal && (
+        <OccupationalRequestForm
+          isOpen={occupationalRequestModal}
+          toggleModal={toggleOccupationalRequestModal}
+          applicationId={applicationId}
+        />
+      )}
 
       {status === "for_signature" ? (
         <>
@@ -313,6 +326,14 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                         }}
                                       >
                                         Return
+                                      </DropdownItem>
+                                      <DropdownItem
+                                        onClick={() => {
+                                          toggleOccupationalRequestModal();
+                                          setApplicationId(item?.id);
+                                        }}
+                                      >
+                                        View Request Form
                                       </DropdownItem>
                                     </DropdownMenu>
                                   </UncontrolledDropdown>

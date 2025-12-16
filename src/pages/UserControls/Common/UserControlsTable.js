@@ -15,7 +15,6 @@ import {
 } from "features/user/userListSlice";
 
 const UserControlsTable = ({ isFetching, tableData, tableName }) => {
-  const dispatch = useDispatch();
   const [sortedData, setSortedData] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
   const handleSubmit = useSubmit();
@@ -40,7 +39,6 @@ const UserControlsTable = ({ isFetching, tableData, tableName }) => {
   };
   const sortData = (key) => {
     let direction = "asc";
-
     if (
       sortConfig &&
       sortConfig.key === key &&
@@ -182,7 +180,7 @@ const UserControlsTable = ({ isFetching, tableData, tableName }) => {
               <TableLoader row={10} col={10} />
             ) : (
               sortedData &&
-              (sortedData.length === 0 ? (
+              (sortedData?.length === 0 ? (
                 <tr>
                   <td
                     colSpan={9}
@@ -194,25 +192,25 @@ const UserControlsTable = ({ isFetching, tableData, tableName }) => {
                   </td>
                 </tr>
               ) : (
-                sortedData.map((items, index) => {
+                sortedData?.map((items, index) => {
                   return (
-                    <tr key={items.id}>
+                    <tr key={items?.id}>
                       <td className="fw-bold">{index + 1}</td>
-                      <td>{items.id}</td>
-                      <td>{items.first_name}</td>
+                      <td>{items?.id}</td>
+                      <td>{items?.first_name}</td>
                       {tableName === "users" && (
                         <>
-                          <td>{`${items.middle_name || ""}`}</td>
-                          <td>{items.last_name}</td>
+                          <td>{`${items?.middle_name || ""}`}</td>
+                          <td>{items?.last_name || ""}</td>
                         </>
                       )}
                       {tableName === "company" && (
-                        <td>{items?.user_address_morph[0]?.full_address}</td>
+                        <td>{items?.user_address_morph?.[0]?.full_address}</td>
                       )}
                       <td>
                         <Badge
                           color={
-                            items.account_type === "individual"
+                            items?.account_type === "individual"
                               ? "success"
                               : "primary"
                           }
@@ -221,13 +219,13 @@ const UserControlsTable = ({ isFetching, tableData, tableName }) => {
                         </Badge>
                       </td>
                       <td>
-                        {items.user_roles.length === 0 ? (
+                        {items?.user_roles?.length === 0 ? (
                           <h5>
                             {" "}
                             <Badge color="success">Special Permit User</Badge>
                           </h5>
                         ) : (
-                          items.user_roles.map((role, index) => (
+                          items?.user_roles?.map((role, index) => (
                             <span key={index}>
                               <h5>
                                 <Badge color="success">
@@ -248,10 +246,10 @@ const UserControlsTable = ({ isFetching, tableData, tableName }) => {
                           <i
                             className="mdi mdi-trash-can text-danger fs-2"
                             style={{ cursor: "pointer" }}
-                            onClick={() => handleDelete(items.id)}
+                            onClick={() => handleDelete(items?.id)}
                           />
-                          {items.is_validated === 0 &&
-                          items.account_type === "company" ? (
+                          {items?.is_validated === 0 &&
+                          items?.account_type === "company" ? (
                             <i
                               className="mdi mdi-account-multiple-check fs-2 text-success"
                               style={{ cursor: "pointer" }}

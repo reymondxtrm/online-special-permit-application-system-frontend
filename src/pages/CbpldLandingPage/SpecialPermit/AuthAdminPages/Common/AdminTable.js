@@ -761,7 +761,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                                   setApplicationId(application?.id);
                                 }}
                               >
-                                Decline
+                                Return
                               </DropdownItem>
                               <DropdownItem
                                 onClick={() => {

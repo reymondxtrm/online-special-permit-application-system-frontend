@@ -1,0 +1,74 @@
+.form-table {
+  border-collapse: collapse;
+  font-family: "Times New Roman", serif;
+  font-size: 12pt; /* ≈ 16px */
+  width: 100%;
+  table-layout: fixed;
+  margin: 0;
+}
+
+/* Remove gaps between stacked tables */
+.form-table + .form-table {
+  margin-top: -1px;
+}
+
+.form-table td {
+  border: 1px solid #000;
+  vertical-align: top;
+  height: 36px;
+}
+
+.label {
+  font-weight: bold;
+  vertical-align: top;
+  padding-top: 0px;
+}
+
+.input {
+  height: 28px;
+}
+
+.sub-labels td {
+  border-top: none;
+  font-size: 10pt; /* ≈ 13px */
+  text-align: center;
+  padding-top: 2px;
+  padding-bottom: 4px;
+}
+
+.checkbox {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1px solid #000;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* Header text */
+.header-text p {
+  margin: 0;
+  font-size: 11pt;
+}
+
+.header-title {
+  font-weight: bold;
+  font-size: 12pt;
+}
+
+/* Title */
+.title {
+  font-size: 16pt; /* ≈ 21px */
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Declaration text */
+.cambraText {
+  font-size: 12pt;
+  line-height: 1.5;
+}
+
+.bolder-text {
+  font-weight: bold;
+}

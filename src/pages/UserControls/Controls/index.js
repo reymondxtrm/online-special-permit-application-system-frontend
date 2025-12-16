@@ -29,7 +29,7 @@ import {
 } from "features/user/userListSlice";
 import BasicInputField from "components/Forms/BasicInputField";
 import { useFormik } from "formik";
-import { head } from "lodash";
+
 const adminUserControl = () => {
   const dispatch = useDispatch();
   const filter = useSelector((state) => state.dateFilter.params);
@@ -219,10 +219,9 @@ const adminUserControl = () => {
                     >
                       Unvalidated Company Account
                     </p>
-                    {console.log(userList?.unvalidatedUser)}
                     <UserControlsTable
                       isFetching={userList?.isFetching}
-                      tableData={userList?.unvalidatedUser}
+                      tableData={userList?.unvalidatedUser?.data}
                       tableName="company"
                     />
                     <Pagination
@@ -253,11 +252,9 @@ const adminUserControl = () => {
                     >
                       Users
                     </p>
-                    {/* <DashboardFilters action={getUserList} forAction={0} /> */}
-
                     <UserControlsTable
                       isFetching={userList?.isFetching}
-                      tableData={userList?.users}
+                      tableData={userList?.users?.data}
                       tableName="users"
                       is_validated
                     />

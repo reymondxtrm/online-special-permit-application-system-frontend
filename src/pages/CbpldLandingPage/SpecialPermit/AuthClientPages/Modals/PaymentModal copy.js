@@ -22,6 +22,7 @@ import {
   Card,
   CardBody,
   CardHeader,
+  Spinner,
 } from "reactstrap";
 import Select, { StylesConfig } from "react-select";
 import { FieldArray, Formik, useFormik } from "formik";
@@ -67,10 +68,10 @@ function PaymentModal({
   const toggleGenerateModal = () => {
     setgenerateModal(!generateModal);
   };
+  const [isPaying, setIsPaying] = useState(false);
   const toggleTermsAndConditionsModal = () => {
     setTermsAndConditionsModal((prev) => !prev);
   };
-
   const user = useSelector((state) => state.user);
   const formatDate = (dateString) => {
     if (!dateString) return "No Date Provided"; // Handle missing date
@@ -146,29 +147,42 @@ function PaymentModal({
   }, [applicationType]);
 
   const eor_collection = useMemo(() => {
-    let collection = [];
-    if (openModal) {
-      collection = [
-        {
-          name: `${type?.label}  X${paymentDetails?.quantity}`,
-          amount: paymentDetails?.total_amount,
-          quantity: paymentDetails?.quantity,
-          account_code: "",
-        },
-      ];
-      if (applicationType === "good_moral") {
-        clearance.map((item) => {
-          collection.push({
-            name: item.name,
-            amount: item.amount * paymentDetails?.quantity,
-            quantity: paymentDetails?.quantity,
-            account_code: "",
-          });
-        });
-      }
+    // If modal is not open, return empty immediately
+    if (!openModal) return [];
+
+    const quantity = paymentDetails?.quantity ?? 0;
+    const totalAmount = paymentDetails?.total_amount ?? 0;
+    const typeLabel = type?.label ?? "";
+
+    let collection = [
+      {
+        name: `${typeLabel} X${quantity}`,
+        amount: totalAmount,
+        quantity: quantity,
+        account_code: "",
+      },
+    ];
+
+    if (applicationType === "good_moral" && Array.isArray(clearance)) {
+      const clearanceItems = clearance.map((item) => ({
+        name: item?.name ?? "",
+        amount: (item?.amount ?? 0) * quantity,
+        quantity: quantity,
+        account_code: "",
+      }));
+      collection = [...collection, ...clearanceItems];
     }
+
     return collection;
-  }, [applicationId, type, paymentDetails]);
+  }, [
+    openModal,
+    applicationType,
+    type?.label,
+    paymentDetails?.quantity,
+    paymentDetails?.total_amount,
+    clearance,
+  ]);
+
   return (
     <React.Fragment>
       <OrderOfPaymentModal
@@ -204,7 +218,7 @@ function PaymentModal({
           <Formik
             innerRef={formikRef}
             initialValues={{
-              // paid_amount: amount,
+              paid_amount: paymentDetails?.total_amount,
               or_no: "",
               date_of_payment: "",
               attachment: "",
@@ -702,131 +716,142 @@ function PaymentModal({
                           )}
 
                           <Row>
-                            <div className="text-end">
-                              <Button
-                                className="me-2"
-                                style={{
-                                  backgroundColor: "#1a56db",
-                                  fontWeight: "600",
-                                  fontFamily:
-                                    "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
-                                  color: "white",
-                                }}
-                                onClick={() => {
-                                  const formik = formikRef.current.values;
-                                  if (paymentMethod === "online") {
-                                    // const secretKey = process.env.REACT_SECRET_KEY;
-                                    const secretKey =
-                                      "dbb0cf7063d880f7d416cc137a24f3625be78529196e8d91d360fef1994e76ef";
-                                    const obj = {
-                                      // amount: paymentDetails.total_amount,
-                                      amount: 100,
-                                      transaction_type: "Tax/Fees",
-                                      // merchant_reference_number: `B-434`,
-                                      merchant_reference_number: `B-${uuidv4()}`,
-                                      full_name: user.name,
-                                      user_id: user.id,
-                                      ref_no: "1",
-                                      ref_no2: "0",
-                                      or_no: "12-312-312",
-                                      eor: true,
-                                      cedula: false,
-                                      cedula_type: "individual",
-                                      ref_no3: "0",
-                                      special_permit_application_id:
-                                        applicationId,
-                                      invoice_no: "12345",
-                                      department: "BPLD",
-                                      downloadable: false,
-                                      type_application: "miscellaneous",
-                                      // email: user.email,
-                                      email: "reymondxtrm@gmail.com",
-                                      remarks: "Remarks",
-                                      callback_url:
-                                        "https://saas.butuan.gov.ph/paymentreturn.php",
-                                      backUrl:
-                                        "http://localhost:3000/client/for-payment/dashboard",
-                                      new_collection: eor_collection,
-                                      onSuccessCallbackUrl: {
-                                        params: [
-                                          "special_permit_application_id",
-                                          "or_no",
-                                          "user_id",
-                                          "newCollection",
-                                        ],
-                                        defaults: {
-                                          Checksum: "", // sum reference
-                                          ErrorCode: "", // error code
-                                          LBPConfDate: "date_of_payment", // date
-                                          LBPConfNum: "LBPConfNum", // confirmation number
-                                          LBPRefNum: "", // some series numbers
-                                          MerchantRefNum: "", // merchant number
-                                          TrxnAmount: "paid_amount", // return ammount
-                                        },
-                                        link: `http://localhost:8000/api/update-payment-status`,
-                                      },
-                                    };
-
-                                    const jsonString = JSON.stringify(obj);
-                                    const encrypted = CryptoJS.AES.encrypt(
-                                      jsonString,
-                                      secretKey
-                                    ).toString();
-                                    const encoded =
-                                      encodeURIComponent(encrypted);
-                                    const url = `http://ctd01.a.testing.butuan.gov.ph/payment?data=${encoded}`;
-                                    const create = async () => {
-                                      try {
-                                        const response = await axios({
-                                          method: "POST",
-                                          url: "api/client/create-db-state",
-                                          params: {
-                                            application_type:
-                                              "occupational_permit",
-                                            special_permit_application_id: [
-                                              ...applicationId,
-                                            ],
+                            <div className="text-end me-2">
+                              {isPaying ? (
+                                <Button color="primary" disabled>
+                                  <Spinner size="sm">Paying....</Spinner>
+                                  <span>Paying....</span>
+                                </Button>
+                              ) : (
+                                <Button
+                                  className="me-2"
+                                  style={{
+                                    backgroundColor: "#1a56db",
+                                    fontWeight: "600",
+                                    fontFamily:
+                                      "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
+                                    color: "white",
+                                  }}
+                                  onClick={() => {
+                                    const formik = formikRef.current.values;
+                                    if (paymentMethod === "online") {
+                                      // const secretKey = process.env.REACT_SECRET_KEY;
+                                      const secretKey =
+                                        "dbb0cf7063d880f7d416cc137a24f3625be78529196e8d91d360fef1994e76ef";
+                                      const obj = {
+                                        // amount: paymentDetails.total_amount,
+                                        amount: 100,
+                                        transaction_type: "Tax/Fees",
+                                        // merchant_reference_number: `B-434`,
+                                        merchant_reference_number: `B-${uuidv4()}`,
+                                        full_name: user.name,
+                                        user_id: user.id,
+                                        ref_no: "1",
+                                        ref_no2: "0",
+                                        or_no: "12-312-312",
+                                        eor: true,
+                                        cedula: false,
+                                        cedula_type: "individual",
+                                        ref_no3: "0",
+                                        special_permit_application_id:
+                                          applicationId,
+                                        invoice_no: "12345",
+                                        department: "CBPLD",
+                                        downloadable: false,
+                                        type_application: "miscellaneous",
+                                        email: user.email,
+                                        // email: "reymondxtrm@gmail.com",
+                                        remarks: "Remarks",
+                                        callback_url:
+                                          "https://saas.butuan.gov.ph/paymentreturn.php",
+                                        backUrl:
+                                          "http://localhost:3000/client/for-payment/dashboard",
+                                        new_collection: eor_collection,
+                                        onSuccessCallbackUrl: {
+                                          params: [
+                                            "special_permit_application_id",
+                                            "or_no",
+                                            "user_id",
+                                            "newCollection",
+                                          ],
+                                          defaults: {
+                                            Checksum: "", // sum reference
+                                            ErrorCode: "", // error code
+                                            LBPConfDate: "date_of_payment", // date
+                                            LBPConfNum: "LBPConfNum", // confirmation number
+                                            LBPRefNum: "", // some series numbers
+                                            MerchantRefNum: "", // merchant number
+                                            TrxnAmount: "paid_amount", // return ammount
                                           },
-                                        });
-                                        if (response) {
-                                          setTimeout(() => {
-                                            window.location.href = url;
-                                          }, 1000);
-                                        }
-                                      } catch (error) {
-                                        console.log(error.response);
-                                      }
-                                    };
-                                    create();
-                                  } else {
-                                    const formData = getFormData(formik);
-                                    formData.append(
-                                      "special_permit_application_id",
-                                      applicationId
-                                    );
-                                    handleSubmit(
-                                      {
-                                        url: "api/client/pay-permit",
-                                        message: {
-                                          title:
-                                            "Are you sure you want to Proceed?",
-                                          failedTitle: "FAILED",
-                                          success: "Success!",
-                                          error: "unknown error occured",
+                                          link: `http://localhost:8000/api/update-payment-status`,
                                         },
-                                        params: formData,
-                                      },
-                                      [],
-                                      [toggleRefresh, toggleModal]
-                                    );
+                                      };
+
+                                      const jsonString = JSON.stringify(obj);
+                                      const encrypted = CryptoJS.AES.encrypt(
+                                        jsonString,
+                                        secretKey
+                                      ).toString();
+                                      const encoded =
+                                        encodeURIComponent(encrypted);
+                                      const url = `http://ctd01.a.testing.butuan.gov.ph/payment?data=${encoded}`;
+                                      const create = async () => {
+                                        setIsPaying((prev) => !prev);
+                                        try {
+                                          const response = await axios({
+                                            method: "POST",
+                                            url: "api/client/create-db-state",
+                                            params: {
+                                              application_type:
+                                                "occupational_permit",
+                                              special_permit_application_id: [
+                                                ...applicationId,
+                                              ],
+                                            },
+                                          });
+                                          if (response) {
+                                            setTimeout(() => {
+                                              window.location.href = url;
+                                            }, 1000);
+                                          }
+                                        } catch (error) {
+                                          console.log(error.response);
+                                        }
+                                      };
+                                      create();
+                                    } else {
+                                      const formData = getFormData(formik);
+                                      applicationId.forEach((id) => {
+                                        formData.append(
+                                          "special_permit_application_id[]",
+                                          id
+                                        );
+                                      });
+                                      handleSubmit(
+                                        {
+                                          url: "api/client/pay-permit",
+                                          message: {
+                                            title:
+                                              "Are you sure you want to Proceed?",
+                                            failedTitle: "FAILED",
+                                            success: "Success!",
+                                            error: "unknown error occured",
+                                          },
+                                          params: formData,
+                                        },
+                                        [],
+                                        [toggleRefresh, toggleModal]
+                                      );
+                                    }
+                                  }}
+                                  disabled={
+                                    !approveTerm && paymentMethod === "online"
                                   }
-                                }}
-                                disabled={
-                                  !approveTerm && paymentMethod === "online"
-                                }
-                              >
-                                {paymentMethod === "online" ? "Pay" : "Save"}
-                              </Button>
+                                >
+                                  {paymentMethod === "online" ? "Pay" : "Save"}
+                                </Button>
+                              )}
+
                               <Button color="secondary" onClick={toggleModal}>
                                 Close
                               </Button>

@@ -3139,13 +3139,6 @@
   "resolved" "https://registry.npmjs.org/@types/range-parser/-/range-parser-1.2.4.tgz"
   "version" "1.2.4"
 
-"@types/react-dom@^0.14.23":
-  "integrity" "sha512-EMCa3IEBSOE5weypSBxATxKZTAGil/hU48k/fW0jeW+Fj5ZeNGPNtbshVUygKTmvcq6IARZOi9lHJpLgjpkk9A=="
-  "resolved" "https://registry.npmjs.org/@types/react-dom/-/react-dom-0.14.23.tgz"
-  "version" "0.14.23"
-  dependencies:
-    "@types/react" "*"
-
 "@types/react-dom@^18.0.0":
   "integrity" "sha512-OWPWTUrY/NIrjsAPkAk1wW9LZeIjSvkXRhclsFO8CZcZGCOg2G0YZy4ft+rOyYxy8B7ui5iZzi9OkDebZ7/QSA=="
   "resolved" "https://registry.npmjs.org/@types/react-dom/-/react-dom-18.0.5.tgz"
@@ -3178,11 +3171,6 @@
     "@types/prop-types" "*"
     "@types/scheduler" "*"
     "csstype" "^3.0.2"
-
-"@types/react@^15.0.14":
-  "integrity" "sha512-zf8FeCS3RMYNk4yaXer0LHvpnOvzwN1JyHETjzI1gMqKNWLjPF1hlLFb12rOAAVh1koqTn7lVUTqM+TZKkiExg=="
-  "resolved" "https://registry.npmjs.org/@types/react/-/react-15.7.34.tgz"
-  "version" "15.7.34"
 
 "@types/react@^16.0.40":
   "integrity" "sha512-83zBE6+XUVXsdL3iFzOyUewdauaU+KviKCHEGOgSW52coAuqW7tEKQM0E9+ZC0Zk6TELQ2/JgogPvp7FavzFwg=="
@@ -10178,15 +10166,6 @@
     "prop-types" "^15.7.2"
     "react-modal" "^3.11.1"
 
-"react-image-viewer-zoom@^1.0.36":
-  "integrity" "sha512-jPx4GjNzi2iXaVqN+XdZOh0V7Y6ONqhe6m+zK47IizGkfzOwDl0LIAptLSU8hwpCa8T+gDtHojKJEOziLNdkqQ=="
-  "resolved" "https://registry.npmjs.org/react-image-viewer-zoom/-/react-image-viewer-zoom-1.0.36.tgz"
-  "version" "1.0.36"
-  dependencies:
-    "@types/react" "^15.0.14"
-    "@types/react-dom" "^0.14.23"
-    "typescript" "^2.2.1"
-
 "react-input-autosize@^3.0.0":
   "integrity" "sha512-nL9uS7jEs/zu8sqwFE5MAPx6pPkNAriACQ2rGLlqmKr2sPGtN7TXTyDdQt4lbNXVx7Uzadb40x8qotIuru6Rhg=="
   "resolved" "https://registry.npmjs.org/react-input-autosize/-/react-input-autosize-3.0.0.tgz"
@@ -12172,11 +12151,6 @@
   "version" "2.2.1"
   dependencies:
     "typescript-compare" "^0.0.2"
-
-"typescript@^2.2.1":
-  "integrity" "sha512-Gr4p6nFNaoufRIY4NMdpQRNmgxVIGMs4Fcu/ujdYk3nAZqk7supzBE9idmvfZIlH/Cuj//dvi+019qEue9lV0w=="
-  "resolved" "https://registry.npmjs.org/typescript/-/typescript-2.9.2.tgz"
-  "version" "2.9.2"
 
 "ua-parser-js@^0.7.18":
   "integrity" "sha512-qLK/Xe9E2uzmYI3qLeOmI0tEOt+TBBQyUIAh4aAgU05FVYzeZrKUdkAZfBNVGRaHVgV0TDkdEngJSw/SyQchkQ=="

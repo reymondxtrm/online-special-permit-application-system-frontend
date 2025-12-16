@@ -32,7 +32,7 @@ export default function CompanyOccupationalPermitModal({
   const formikRef = useRef();
   const [cameraIsOpen, setCameraIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState();
-  const [additionalDetails, setAdditionalDetailsModal] = useState(false);
+  // const [additionalDetails, setAdditionalDetailsModal] = useState(false);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const { getImageHandle, isFetching, currentImage } = useGetImage();
   const handleSubmit = useSubmit();
@@ -54,9 +54,9 @@ export default function CompanyOccupationalPermitModal({
   const toggleImageViewer = useCallback(() => {
     setIsViewerOpen((prev) => !prev);
   }, []);
-  const toggleAdditionalDetailsModal = () => {
-    setAdditionalDetailsModal((prev) => !prev);
-  };
+  // const toggleAdditionalDetailsModal = () => {
+  //   setAdditionalDetailsModal((prev) => !prev);
+  // };
   const setAdditionalDetails = (detail) => {
     Object.entries(detail).forEach(([key, value]) => {
       formikRef.current.setFieldValue(
@@ -97,9 +97,7 @@ export default function CompanyOccupationalPermitModal({
     gender: Yup.string().required("Gender is required"),
     address_line: Yup.string().required("Home address is required"),
     contact_no: Yup.string().required("Contact number is required"),
-
     no_cedula: Yup.boolean(),
-
     // CEDULA is required only when no_cedula is false
     cedula: Yup.mixed().when("no_cedula", {
       is: false,
@@ -137,58 +135,58 @@ export default function CompanyOccupationalPermitModal({
         ].includes(value.type);
       }),
 
-    citizenship: Yup.string().when("no_cedula", {
-      is: true,
-      then: Yup.string().required("Nationality is required"),
-      otherwise: Yup.string().nullable(),
-    }),
-    civil_status: Yup.string().when("no_cedula", {
-      is: true,
-      then: Yup.string().required("Civil status is required"),
-      otherwise: Yup.string().nullable(),
-    }),
-    place_of_birth: Yup.string().when("no_cedula", {
-      is: true,
-      then: Yup.string().required("Place of birth is required"),
-      otherwise: Yup.string().nullable(),
-    }),
-    blood_type: Yup.string().when("no_cedula", {
-      is: true,
-      then: Yup.string().required("Blood type is required"),
-      otherwise: Yup.string().nullable(),
-    }),
-    height: Yup.string().when("no_cedula", {
-      is: true,
-      then: Yup.string().required("Height is required"),
-      otherwise: Yup.string().nullable(),
-    }),
-    weight: Yup.string().when("no_cedula", {
-      is: true,
-      then: Yup.string().required("Weight is required"),
-      otherwise: Yup.string().nullable(),
-    }),
-    tin: Yup.string().when("no_cedula", {
-      is: true,
-      then: Yup.string().required("TIN is required"),
-      otherwise: Yup.string().nullable(),
-    }),
-    occupation: Yup.string().when("no_cedula", {
-      is: true,
-      then: Yup.string().required("Occupation is required"),
-      otherwise: Yup.string().nullable(),
-    }),
-    date_hired: Yup.string().when("no_cedula", {
-      is: true,
-      then: Yup.string().required("Date hired is required"),
-      otherwise: Yup.string().nullable(),
-    }),
-    monthly_salary: Yup.number().when("no_cedula", {
-      is: true,
-      then: Yup.number()
-        .typeError("Monthly salary must be a number")
-        .required("Monthly salary is required"),
-      otherwise: Yup.number().nullable(),
-    }),
+    // citizenship: Yup.string().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.string().required("Nationality is required"),
+    //   otherwise: Yup.string().nullable(),
+    // }),
+    // civil_status: Yup.string().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.string().required("Civil status is required"),
+    //   otherwise: Yup.string().nullable(),
+    // }),
+    // place_of_birth: Yup.string().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.string().required("Place of birth is required"),
+    //   otherwise: Yup.string().nullable(),
+    // }),
+    // blood_type: Yup.string().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.string().required("Blood type is required"),
+    //   otherwise: Yup.string().nullable(),
+    // }),
+    // height: Yup.string().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.string().required("Height is required"),
+    //   otherwise: Yup.string().nullable(),
+    // }),
+    // weight: Yup.string().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.string().required("Weight is required"),
+    //   otherwise: Yup.string().nullable(),
+    // }),
+    // tin: Yup.string().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.string().required("TIN is required"),
+    //   otherwise: Yup.string().nullable(),
+    // }),
+    // occupation: Yup.string().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.string().required("Occupation is required"),
+    //   otherwise: Yup.string().nullable(),
+    // }),
+    // date_hired: Yup.string().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.string().required("Date hired is required"),
+    //   otherwise: Yup.string().nullable(),
+    // }),
+    // monthly_salary: Yup.number().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.number()
+    //     .typeError("Monthly salary must be a number")
+    //     .required("Monthly salary is required"),
+    //   otherwise: Yup.number().nullable(),
+    // }),
   });
   const validationSchema = Yup.object().shape({
     employees: Yup.array().of(employeeSchema),
@@ -220,14 +218,14 @@ export default function CompanyOccupationalPermitModal({
         />
       )}
 
-      {additionalDetails && (
+      {/* {additionalDetails && (
         <CedulaAddtionalDetailsModal
           isOpen={additionalDetails}
           toggle={toggleAdditionalDetailsModal}
           setAdditionalDetails={setAdditionalDetails}
           values={formikRef.current.values.employees?.[activeIndex]}
         />
-      )}
+      )} */}
       <Modal toggle={toggleModal} isOpen={isOpen} fullscreen>
         <ModalHeader toggle={toggleModal}>
           <p
@@ -559,7 +557,7 @@ export default function CompanyOccupationalPermitModal({
                                   </div>
                                 ) : null}
 
-                                <p
+                                {/* <p
                                   className=" fw-bold text-danger"
                                   style={{ cursor: "pointer" }}
                                   onClick={() => {
@@ -568,7 +566,7 @@ export default function CompanyOccupationalPermitModal({
                                   }}
                                 >
                                   {"Don't have Cedula?"}
-                                </p>
+                                </p> */}
                               </td>
                               <td style={{ width: "10%" }}>
                                 <Input

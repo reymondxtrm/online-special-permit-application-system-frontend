@@ -68,8 +68,8 @@ export default function useGetImage() {
           confirmButtonText: "OK", // optional, customize the text
         });
       }
-
       setIsFetching(false);
+      throw new Error(message);
     }
 
     // finally {

@@ -25,14 +25,18 @@ import * as Yup from "yup";
 import PrivateImageViewer from "../SpecialPermit/Common/PrivateImageViewer";
 import BasicInputField from "components/Forms/BasicInputField";
 import { useSelector } from "react-redux";
+import ReactSimpleImageViewer from "react-simple-image-viewer";
+import useGetImage from "hooks/Common/useGetImage";
 function OccupationalPermitModal({
   openModal,
   toggleModal,
   mode = "create", // "create" or "update"
   title = "Occupational Permit",
-  fetchUrl = null, // fetch existing data if editing
+  fetchUrl,
   submitUrl,
   applicationId,
+  isUpdate = false,
+  toggleRefresh = () => {},
 }) {
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
@@ -42,17 +46,42 @@ function OccupationalPermitModal({
   const [uploadedFile, setUploadedFiles] = useState({});
   const [imageViewer, setOpenImageViewer] = useState(false);
   const [viewImage, setViewImage] = useState();
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const {
+    isFetching: getImageIsFetching,
+    currentImage,
+    getImageHandle,
+  } = useGetImage();
   const user = useSelector((state) => state.user);
-  console.log(user);
+
+  // useEffect(() => {
+  //   if (openModal && isUpdate && applicationId) {
+  //     axios
+  //       .get("api/client/get-single-permmit-application", {
+  //         params: {
+  //           special_permit_application_id: applicationId,
+  //         },
+  //       })
+  //       .then((res) => {
+  //         const data = res.data.data;
+  //         setExistingData({
+  //           requestor_name: data.requestor_name,
+  //           event_name: data.event_name,
+  //           event_date_from: data.event_date_from,
+  //           event_date_to: data.event_date_to,
+  //           event_time_from: data.event_time_from,
+  //           event_time_to: data.event_time_to,
+  //         });
+
+  //         setUploadedFiles(data.uploaded_file || {});
+  //       });
+  //   }
+  // }, [openModal, isUpdate, applicationId]);
+
   const validationSchema = Yup.object().shape({
     type: Yup.string().required(),
 
     id: Yup.mixed().nullable(),
-
-    monthly_income: Yup.number()
-      .typeError("Monthly income must be a valid number")
-      .positive("Monthly income must be greater than zero")
-      .required("Monthly income is required"),
 
     company_name: Yup.string().nullable(),
     company_address: Yup.string().nullable(),
@@ -112,8 +141,6 @@ function OccupationalPermitModal({
         ),
       otherwise: Yup.mixed().nullable(),
     }),
-
-    no_cedula: Yup.boolean(),
   });
   useEffect(() => {
     if (openModal && fetchUrl) {
@@ -123,7 +150,9 @@ function OccupationalPermitModal({
           const response = await axios({
             method: "GET",
             url: fetchUrl,
-            params: { special_permit_application_id: applicationId || null },
+            params: {
+              special_permit_application_id: applicationId || null,
+            },
           });
           if (mode === "update") {
             const res = response.data;
@@ -158,6 +187,9 @@ function OccupationalPermitModal({
   const togglePictureModal = () => {
     setCameraIsOpen((prev) => !prev);
   };
+  const toggleIsViewerOpen = () => {
+    setIsViewerOpen((prev) => !prev);
+  };
 
   const getFormData = (object) => {
     const formData = new FormData();
@@ -179,13 +211,21 @@ function OccupationalPermitModal({
     setOpenImageViewer((prev) => !prev);
   };
 
-  const getUploaded = (field) => {
-    if (!uploadedFile) return null;
-    return uploadedFile?.[field] || null;
-  };
-
   return (
     <>
+      {isViewerOpen && !getImageIsFetching && currentImage && (
+        <ReactSimpleImageViewer
+          src={[currentImage]}
+          currentIndex={0}
+          onClose={toggleIsViewerOpen}
+          backgroundStyle={{
+            backgroundColor: "rgba(0,0,0,0.8)",
+            zIndex: 9999,
+          }}
+          closeOnClickOutside={true}
+          disableZoom={false}
+        />
+      )}
       <PassportCamera
         onCapture={setIdPicture}
         isOpen={cameraIsOpen}
@@ -214,7 +254,9 @@ function OccupationalPermitModal({
           <Formik
             innerRef={formikRef}
             enableReinitialize
-            validationSchema={validationSchema}
+            validationSchema={isUpdate ? null : validationSchema}
+            validateOnChange={!isUpdate}
+            validateOnBlur={!isUpdate}
             initialValues={{
               type: "occupational_permit",
               id: tableData?.id || null,
@@ -222,7 +264,7 @@ function OccupationalPermitModal({
               community_tax_certificate: "",
               id_picture: "",
               training_certificate: "",
-              monthly_income: tableData?.monthly_income || "",
+              // monthly_income: tableData?.monthly_income || "",
               company_name: tableData?.company_name || "",
               company_address: tableData?.full_address || "",
               position: tableData?.position || "",
@@ -305,7 +347,7 @@ function OccupationalPermitModal({
                             </td>
                           </tr>
 
-                          <tr>
+                          {/* <tr>
                             <td className="text-end">
                               <Label>
                                 Monthly Income:
@@ -326,7 +368,7 @@ function OccupationalPermitModal({
                                 required={true}
                               />
                             </td>
-                          </tr>
+                          </tr> */}
 
                           <tr>
                             <td className="text-end">
@@ -336,51 +378,59 @@ function OccupationalPermitModal({
                               </Label>
                             </td>
                             <td colSpan={2}>
-                              <div
-                                className="d-flex flex-column"
-                                style={{ maxWidth: "400px" }}
-                              >
-                                <Input
-                                  accept="image/*"
-                                  id="certificateOfEmployment"
-                                  name="certificate_of_employment"
-                                  type="file"
-                                  onChange={(event) => {
-                                    props.setFieldValue(
-                                      "certificate_of_employment",
-                                      event.currentTarget.files[0]
-                                    );
-                                  }}
-                                  onBlur={props.handleBlur}
-                                  invalid={
-                                    props.touched.certificate_of_employment &&
-                                    props.errors.certificate_of_employment
-                                      ? true
-                                      : false
-                                  }
-                                />
-
-                                {props.touched.certificate_of_employment &&
-                                props.errors.certificate_of_employment ? (
-                                  <FormFeedback type="invalid">
-                                    {props.errors.certificate_of_employment}
-                                  </FormFeedback>
-                                ) : null}
-
-                                {getUploaded("certificate_of_employment") && (
-                                  <Button
-                                    className="mt-2"
-                                    color="primary"
-                                    onClick={() => {
-                                      setOpenImageViewer(true);
-                                      setViewImage(
-                                        getUploaded("certificate_of_employment")
+                              <div className="d-flex gap-2">
+                                <div
+                                  className="d-flex flex-column"
+                                  style={{ maxWidth: "400px" }}
+                                >
+                                  <Input
+                                    accept="image/*"
+                                    id="certificateOfEmployment"
+                                    name="certificate_of_employment"
+                                    type="file"
+                                    onChange={(event) => {
+                                      props.setFieldValue(
+                                        "certificate_of_employment",
+                                        event.currentTarget.files[0]
                                       );
                                     }}
-                                  >
-                                    View File
-                                  </Button>
-                                )}
+                                    onBlur={props.handleBlur}
+                                    invalid={
+                                      props.touched.certificate_of_employment &&
+                                      props.errors.certificate_of_employment
+                                        ? true
+                                        : false
+                                    }
+                                  />
+
+                                  {props.touched.certificate_of_employment &&
+                                  props.errors.certificate_of_employment ? (
+                                    <FormFeedback type="invalid">
+                                      {props.errors.certificate_of_employment}
+                                    </FormFeedback>
+                                  ) : null}
+                                </div>
+
+                                {isUpdate &&
+                                  uploadedFile?.certificate_of_employment && (
+                                    <Button
+                                      color="primary"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        getImageHandle({
+                                          path: uploadedFile?.certificate_of_employment,
+                                          url: "api/client/attachment",
+                                          showLoader: true,
+                                        });
+                                        toggleIsViewerOpen();
+                                      }}
+                                    >
+                                      <i
+                                        className="mdi mdi-eye"
+                                        color="warning"
+                                      ></i>
+                                    </Button>
+                                  )}
                               </div>
                             </td>
                           </tr>
@@ -394,57 +444,64 @@ function OccupationalPermitModal({
                             </td>
 
                             <td>
-                              <div
-                                className="d-flex flex-column"
-                                style={{ maxWidth: "300px" }}
-                              >
-                                <Input
-                                  accept="image/*"
-                                  id="communityTaxCertificate"
-                                  name="community_tax_certificate"
-                                  type="file"
-                                  disabled={props.values.no_cedula}
-                                  onChange={(event) => {
-                                    props.setFieldValue(
-                                      "community_tax_certificate",
-                                      event.currentTarget.files[0]
-                                    );
-                                  }}
-                                  onBlur={props.handleBlur}
-                                  invalid={
-                                    props.touched.community_tax_certificate &&
-                                    props.errors.community_tax_certificate
-                                      ? true
-                                      : false
-                                  }
-                                />
-
-                                {props.touched.community_tax_certificate &&
-                                props.errors.community_tax_certificate &&
-                                !props.values.no_cedula ? (
-                                  <FormFeedback type="invalid">
-                                    {props.errors.community_tax_certificate}
-                                  </FormFeedback>
-                                ) : null}
-
-                                {getUploaded("community_tax_certificate") && (
-                                  <Button
-                                    className="mt-2"
-                                    color="primary"
-                                    onClick={() => {
-                                      setOpenImageViewer(true);
-                                      setViewImage(
-                                        getUploaded("community_tax_certificate")
+                              <div className="d-flex gap-2">
+                                <div
+                                  className="d-flex flex-column"
+                                  style={{ maxWidth: "300px" }}
+                                >
+                                  <Input
+                                    accept="image/*"
+                                    id="communityTaxCertificate"
+                                    name="community_tax_certificate"
+                                    type="file"
+                                    disabled={props.values.no_cedula}
+                                    onChange={(event) => {
+                                      props.setFieldValue(
+                                        "community_tax_certificate",
+                                        event.currentTarget.files[0]
                                       );
                                     }}
-                                  >
-                                    View File
-                                  </Button>
-                                )}
+                                    onBlur={props.handleBlur}
+                                    invalid={
+                                      props.touched.community_tax_certificate &&
+                                      props.errors.community_tax_certificate
+                                        ? true
+                                        : false
+                                    }
+                                  />
+
+                                  {props.touched.community_tax_certificate &&
+                                  props.errors.community_tax_certificate &&
+                                  !props.values.no_cedula ? (
+                                    <FormFeedback type="invalid">
+                                      {props.errors.community_tax_certificate}
+                                    </FormFeedback>
+                                  ) : null}
+                                </div>
+                                {isUpdate &&
+                                  uploadedFile?.community_tax_certificate && (
+                                    <Button
+                                      color="primary"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        getImageHandle({
+                                          path: uploadedFile?.community_tax_certificate,
+                                          url: "api/client/attachment",
+                                          showLoader: true,
+                                        });
+                                        toggleIsViewerOpen();
+                                      }}
+                                    >
+                                      <i
+                                        className="mdi mdi-eye"
+                                        color="warning"
+                                      ></i>
+                                    </Button>
+                                  )}
                               </div>
                             </td>
 
-                            <td>
+                            {/* <td>
                               <div className="d-flex gap-2 align-items-center">
                                 <Input
                                   type="checkbox"
@@ -462,7 +519,7 @@ function OccupationalPermitModal({
                                   {"Don't have Cedula?"}
                                 </span>
                               </div>
-                            </td>
+                            </td> */}
                           </tr>
 
                           <tr>
@@ -488,18 +545,24 @@ function OccupationalPermitModal({
                                   <i className="mdi mdi-camera fs-4"></i>
                                   Take Picture
                                 </Button>
-                                {getUploaded("id_picture") && (
-                                  <div>
-                                    <Button
-                                      color="primary"
-                                      onClick={() => {
-                                        setOpenImageViewer(true);
-                                        setViewImage(getUploaded("id_picture"));
-                                      }}
-                                    >
-                                      View File
-                                    </Button>
-                                  </div>
+                                {isUpdate && uploadedFile?.id_picture && (
+                                  <Button
+                                    color="primary"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      getImageHandle({
+                                        path: uploadedFile?.id_picture,
+                                        url: "api/client/attachment",
+                                        showLoader: true,
+                                      });
+                                      toggleIsViewerOpen();
+                                    }}
+                                  >
+                                    <i
+                                      className="mdi mdi-eye"
+                                      color="warning"
+                                    ></i>
+                                  </Button>
                                 )}
                               </div>
                             </td>
@@ -514,51 +577,58 @@ function OccupationalPermitModal({
                               </td>
 
                               <td colSpan={2}>
-                                <div
-                                  className="d-flex flex-column"
-                                  style={{ maxWidth: "400px" }}
-                                >
-                                  <Input
-                                    accept="image/*"
-                                    id="trainingCertificate"
-                                    name="training_certificate"
-                                    type="file"
-                                    onChange={(event) => {
-                                      props.setFieldValue(
-                                        "training_certificate",
-                                        event.currentTarget.files[0]
-                                      );
-                                    }}
-                                    onBlur={props.handleBlur}
-                                    invalid={
-                                      props.touched.training_certificate &&
-                                      props.errors.training_certificate
-                                        ? true
-                                        : false
-                                    }
-                                  />
-
-                                  {props.touched.training_certificate &&
-                                  props.errors.training_certificate ? (
-                                    <FormFeedback type="invalid">
-                                      {props.errors.training_certificate}
-                                    </FormFeedback>
-                                  ) : null}
-
-                                  {getUploaded("training_certificate") && (
-                                    <Button
-                                      className="mt-2"
-                                      color="primary"
-                                      onClick={() => {
-                                        setOpenImageViewer(true);
-                                        setViewImage(
-                                          getUploaded("training_certificate")
+                                <div className="d-flex gap-2">
+                                  <div
+                                    className="d-flex flex-column"
+                                    style={{ maxWidth: "400px" }}
+                                  >
+                                    <Input
+                                      accept="image/*"
+                                      id="trainingCertificate"
+                                      name="training_certificate"
+                                      type="file"
+                                      onChange={(event) => {
+                                        props.setFieldValue(
+                                          "training_certificate",
+                                          event.currentTarget.files[0]
                                         );
                                       }}
-                                    >
-                                      View File
-                                    </Button>
-                                  )}
+                                      onBlur={props.handleBlur}
+                                      invalid={
+                                        props.touched.training_certificate &&
+                                        props.errors.training_certificate
+                                          ? true
+                                          : false
+                                      }
+                                    />
+
+                                    {props.touched.training_certificate &&
+                                    props.errors.training_certificate ? (
+                                      <FormFeedback type="invalid">
+                                        {props.errors.training_certificate}
+                                      </FormFeedback>
+                                    ) : null}
+                                  </div>
+                                  {isUpdate &&
+                                    uploadedFile?.community_tax_certificate && (
+                                      <Button
+                                        color="primary"
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          getImageHandle({
+                                            path: uploadedFile?.community_tax_certificate,
+                                            url: "api/client/attachment",
+                                            showLoader: true,
+                                          });
+                                          toggleIsViewerOpen();
+                                        }}
+                                      >
+                                        <i
+                                          className="mdi mdi-eye"
+                                          color="warning"
+                                        ></i>
+                                      </Button>
+                                    )}
                                 </div>
                               </td>
                             </tr>
@@ -576,9 +646,12 @@ function OccupationalPermitModal({
         <ModalFooter>
           <Button
             style={{ backgroundColor: "#1a56db", color: "white" }}
-            onClick={() => {
-              const formData = getFormData(formikRef.current.values);
-
+            onClick={async () => {
+              const params = {
+                ...formikRef.current.values,
+                special_permit_application_id: applicationId,
+              };
+              const formData = getFormData(params);
               handleSubmit(
                 {
                   url: submitUrl,
@@ -592,7 +665,7 @@ function OccupationalPermitModal({
                   params: formData,
                 },
                 [],
-                [toggleModal]
+                [toggleModal, toggleRefresh]
               );
             }}
           >

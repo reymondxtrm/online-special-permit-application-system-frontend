@@ -80,7 +80,6 @@
     "react-google-login": "^5.2.2",
     "react-i18next": "^11.10.0",
     "react-image-lightbox": "^5.1.1",
-    "react-image-viewer-zoom": "^1.0.36",
     "react-input-mask": "^2.0.4",
     "react-jvectormap": "^0.0.16",
     "react-leaflet": "^2.7.0",

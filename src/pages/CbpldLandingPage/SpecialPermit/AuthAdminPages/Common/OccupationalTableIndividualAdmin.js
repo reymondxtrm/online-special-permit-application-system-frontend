@@ -24,6 +24,7 @@ import useSubmit from "hooks/Common/useSubmit";
 import ReturnRemarksModal from "../Modals/ReturnRemarksModal";
 import GenerateOccupationalPermitModal from "../Modals/GenerateOccupationalPermitModal";
 import UploadPermitModal from "../Modals/UploadPermitModal";
+import OccupationalRequestForm from "../Printables/OccupationalRequestForm";
 
 export default function OccupationalTableIndividualAdmin({
   status,
@@ -47,6 +48,8 @@ export default function OccupationalTableIndividualAdmin({
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [fileViewerOpen, setFileViewerOpen] = useState(false);
   const { isFetching, getImageHandle, currentImage } = useGetImage();
+  const [occupationalRequestModal, setOccupationalRequestModal] =
+    useState(false);
   const handleSubmit = useSubmit();
 
   useEffect(() => {
@@ -67,6 +70,9 @@ export default function OccupationalTableIndividualAdmin({
   };
   const toggleRefresh = () => {
     setrefreshPage((prev) => !prev);
+  };
+  const toggleOccupationalRequestModal = () => {
+    setOccupationalRequestModal((prev) => !prev);
   };
 
   const toggleFileViewerModal = () => {
@@ -108,7 +114,7 @@ export default function OccupationalTableIndividualAdmin({
         isOpen={fileViewerOpen}
         fileUrl={orPath}
       />
-      {AttachmentModal && (
+      {showAttachmentModal && (
         <AttachmentModal
           openModal={showAttachmentModal}
           uploadedFiles={uploadedFiles}
@@ -117,6 +123,13 @@ export default function OccupationalTableIndividualAdmin({
           toggleModal={toggleAttachmentModal}
           occupational
           mainActiveTab={"occupational_permit"}
+        />
+      )}
+      {occupationalRequestModal && (
+        <OccupationalRequestForm
+          isOpen={occupationalRequestModal}
+          toggleModal={toggleOccupationalRequestModal}
+          applicationId={applicationId}
         />
       )}
       <AmountModal
@@ -260,7 +273,7 @@ export default function OccupationalTableIndividualAdmin({
                     )}
                   </td>
 
-                  {status === "for_payment_approval" ||
+                  {/* {status === "for_payment_approval" ||
                   status === "returned" ||
                   status === "for_signature" ? (
                     <td>
@@ -281,7 +294,7 @@ export default function OccupationalTableIndividualAdmin({
                         Cedula
                       </Button>
                     </td>
-                  ) : null}
+                  ) : null} */}
                   {status === "pending" && (
                     <td>
                       <UncontrolledDropdown>
@@ -302,6 +315,14 @@ export default function OccupationalTableIndividualAdmin({
                             }}
                           >
                             Return
+                          </DropdownItem>
+                          <DropdownItem
+                            onClick={() => {
+                              toggleOccupationalRequestModal();
+                              setApplicationId(application?.id);
+                            }}
+                          >
+                            View Request Form
                           </DropdownItem>
                         </DropdownMenu>
                       </UncontrolledDropdown>

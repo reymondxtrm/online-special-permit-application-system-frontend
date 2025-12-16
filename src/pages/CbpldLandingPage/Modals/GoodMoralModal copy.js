@@ -167,21 +167,14 @@ function GoodMoralModal({
     });
     return formData;
   };
-  const IMAGE_SIZE = 2 * 1024 * 1024;
-  const SUPPORTED_IMAGE_FORMATS = ["image/jpeg", "image/png", "image/jpg"];
-
   const fileValidation = Yup.mixed()
     .required("This file is required")
-    .test(
-      "fileSize",
-      "File must be less than 2MB",
-      (value) => value && value.size <= IMAGE_SIZE
-    )
-    .test(
-      "fileFormat",
-      "Only JPG and PNG images are allowed",
-      (value) => value && SUPPORTED_IMAGE_FORMATS.includes(value.type)
-    );
+    .test("fileSize", "File must be less than 2MB", (value) => {
+      return value && value.size <= IMAGE_SIZE;
+    })
+    .test("fileFormat", "Only JPG and PNG are allowed", (value) => {
+      return value && SUPPORTED_IMAGE_FORMATS.includes(value.type);
+    });
   const validationSchema = Yup.object().shape({
     purpose: Yup.object().nullable().required("Purpose is required"),
 
@@ -335,26 +328,20 @@ function GoodMoralModal({
                     </Row>
                     {otherPurpose && (
                       <Col md={12}>
-                        <FormGroup>
-                          <Label>
-                            Specify Other Purpose{" "}
-                            <span className="text-danger">*</span>
-                          </Label>
-                          <Input
-                            type="text"
-                            name="other_purpose"
-                            value={props.values.other_purpose}
-                            onChange={props.handleChange}
-                            onBlur={props.handleBlur}
-                            invalid={
-                              props.touched.other_purpose &&
-                              Boolean(props.errors.other_purpose)
-                            }
-                          />
-                          <FormFeedback>
-                            {props.errors.other_purpose}
-                          </FormFeedback>
-                        </FormGroup>
+                        <Input
+                          type="text"
+                          name="other_purpose"
+                          value={props.values.other_purpose}
+                          onChange={props.handleChange}
+                          onBlur={props.handleBlur}
+                          invalid={
+                            props.touched.other_purpose &&
+                            Boolean(props.errors.other_purpose)
+                          }
+                        />
+                        <FormFeedback>
+                          {props.errors.other_purpose}
+                        </FormFeedback>
                       </Col>
                     )}
 
@@ -366,34 +353,19 @@ function GoodMoralModal({
                               Exempted Cases{" "}
                               <span className="text-danger">*</span>
                             </Label>
-                            <div
-                              className={
-                                props.touched.exemption &&
-                                props.errors.exemption
-                                  ? "is-invalid"
-                                  : ""
-                              }
-                            >
-                              <Select
-                                isClearable
-                                name="exemption"
-                                value={props.values.exemption}
-                                options={discountOptions}
-                                onChange={(opt) =>
-                                  props.setFieldValue("exemption", opt ?? null)
-                                }
-                                onBlur={() =>
-                                  props.setFieldTouched("exemption", true)
-                                }
-                              />
-                            </div>
-
-                            {props.touched.exemption &&
-                              props.errors.exemption && (
-                                <FormFeedback className="d-block">
-                                  {props.errors.exemption}
-                                </FormFeedback>
-                              )}
+                            <Select
+                              isClearable={true}
+                              name={"exemption"}
+                              onChange={(selectedOption) => {
+                                props.setFieldValue(
+                                  "exemption",
+                                  selectedOption ? selectedOption : {}
+                                );
+                              }}
+                              placeholder="Select Purpose"
+                              value={props?.values?.exemption}
+                              options={discountOptions}
+                            />
                           </FormGroup>
                         </Col>
                         <Col>
@@ -403,26 +375,16 @@ function GoodMoralModal({
                               <span className="text-danger">*</span>
                             </Label>
                             <Input
-                              type="file"
+                              id="exemptionProof"
                               name="exemption_proof"
-                              accept="image/*"
-                              onChange={(e) =>
+                              type="file"
+                              onChange={(event) => {
                                 props.setFieldValue(
                                   "exemption_proof",
-                                  e.currentTarget.files[0]
-                                )
-                              }
-                              onBlur={() =>
-                                props.setFieldTouched("exemption_proof", true)
-                              }
-                              invalid={
-                                props.touched.exemption_proof &&
-                                Boolean(props.errors.exemption_proof)
-                              }
+                                  event.currentTarget.files[0]
+                                );
+                              }}
                             />
-                            <FormFeedback>
-                              {props.errors.exemption_proof}
-                            </FormFeedback>
                           </FormGroup>
                         </Col>
                       </>
@@ -437,27 +399,18 @@ function GoodMoralModal({
                           </Label>
                           <div className="d-flex gap-1">
                             <Input
-                              type="file"
+                              id="policeClearance"
                               name="police_clearance"
-                              accept="image/*"
-                              onChange={(e) =>
+                              type="file"
+                              onChange={(event) => {
+                                console.log(event);
                                 props.setFieldValue(
                                   "police_clearance",
-                                  e.currentTarget.files[0]
-                                )
-                              }
-                              onBlur={() =>
-                                props.setFieldTouched("police_clearance", true)
-                              }
-                              invalid={
-                                props.touched.police_clearance &&
-                                Boolean(props.errors.police_clearance)
-                              }
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              accept="image/*"
                             />
-                            <FormFeedback>
-                              {props.errors.police_clearance}
-                            </FormFeedback>
-
                             {isUpdate && uploadedFiles?.police_clearance && (
                               <Button color="primary">
                                 <i
@@ -488,30 +441,18 @@ function GoodMoralModal({
                           </Label>
                           <div className="d-flex gap-1">
                             <Input
-                              type="file"
-                              name="community_tax_certificate"
-                              accept="image/*"
-                              onChange={(e) =>
+                              id="taxCert"
+                              name={`community_tax_certificate`}
+                              onChange={(event) => {
+                                console.log(event);
                                 props.setFieldValue(
                                   "community_tax_certificate",
-                                  e.currentTarget.files[0]
-                                )
-                              }
-                              onBlur={() =>
-                                props.setFieldTouched(
-                                  "community_tax_certificate",
-                                  true
-                                )
-                              }
-                              invalid={
-                                props.touched.community_tax_certificate &&
-                                Boolean(props.errors.community_tax_certificate)
-                              }
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              type="file"
+                              accept="image/*"
                             />
-                            <FormFeedback>
-                              {props.errors.community_tax_certificate}
-                            </FormFeedback>
-
                             {isUpdate &&
                               uploadedFiles?.community_tax_certificate && (
                                 <Button color="primary">
@@ -543,30 +484,18 @@ function GoodMoralModal({
                           </Label>
                           <div className="d-flex gap-1">
                             <Input
-                              type="file"
-                              name="barangay_clearance"
-                              accept="image/*"
-                              onChange={(e) =>
+                              id="exampleFile"
+                              name={`barangay_clearance`}
+                              onChange={(event) => {
+                                console.log(event);
                                 props.setFieldValue(
                                   "barangay_clearance",
-                                  e.currentTarget.files[0]
-                                )
-                              }
-                              onBlur={() =>
-                                props.setFieldTouched(
-                                  "barangay_clearance",
-                                  true
-                                )
-                              }
-                              invalid={
-                                props.touched.barangay_clearance &&
-                                Boolean(props.errors.barangay_clearance)
-                              }
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              type="file"
+                              accept="image/*"
                             />
-                            <FormFeedback>
-                              {props.errors.barangay_clearance}
-                            </FormFeedback>
-
                             {isUpdate && uploadedFiles?.barangay_clearance && (
                               <Button color="primary">
                                 <i
@@ -597,27 +526,18 @@ function GoodMoralModal({
                           </Label>
                           <div className="d-flex gap-1">
                             <Input
-                              type="file"
-                              name="fiscal_clearance"
-                              accept="image/*"
-                              onChange={(e) =>
+                              id="fiscalClearance"
+                              name={`fiscal_clearance`}
+                              onChange={(event) => {
+                                console.log(event);
                                 props.setFieldValue(
                                   "fiscal_clearance",
-                                  e.currentTarget.files[0]
-                                )
-                              }
-                              onBlur={() =>
-                                props.setFieldTouched("fiscal_clearance", true)
-                              }
-                              invalid={
-                                props.touched.fiscal_clearance &&
-                                Boolean(props.errors.fiscal_clearance)
-                              }
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              type="file"
+                              accept="image/*"
                             />
-                            <FormFeedback>
-                              {props.errors.fiscal_clearance}
-                            </FormFeedback>
-
                             {isUpdate && uploadedFiles?.fiscal_clearance && (
                               <Button color="primary">
                                 <i
@@ -648,27 +568,18 @@ function GoodMoralModal({
                           </Label>
                           <div className="d-flex gap-1">
                             <Input
-                              type="file"
-                              name="court_clearance"
-                              accept="image/*"
-                              onChange={(e) =>
+                              id="courtClearance"
+                              name={`court_clearance`}
+                              onChange={(event) => {
+                                console.log(event);
                                 props.setFieldValue(
                                   "court_clearance",
-                                  e.currentTarget.files[0]
-                                )
-                              }
-                              onBlur={() =>
-                                props.setFieldTouched("court_clearance", true)
-                              }
-                              invalid={
-                                props.touched.court_clearance &&
-                                Boolean(props.errors.court_clearance)
-                              }
+                                  event.currentTarget.files[0]
+                                );
+                              }}
+                              type="file"
+                              accept="image/*"
                             />
-                            <FormFeedback>
-                              {props.errors.court_clearance}
-                            </FormFeedback>
-
                             {isUpdate && uploadedFiles?.court_clearance && (
                               <Button color="primary">
                                 <i
@@ -714,7 +625,7 @@ function GoodMoralModal({
             onClick={() => {
               const formik = {
                 // ...formikRef.current.values,
-                purpose: formikRef?.current?.values?.purpose,
+                purpose_id: formikRef?.current?.values?.purpose,
                 exemption_id:
                   formikRef?.current?.values?.exemption?.value || null,
                 barangay_clearance:

@@ -72,8 +72,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
   const [useOfGovernmentApplicationModal, setUseOfGovernmentApplicationModal] =
     useState(false);
   const [reUploadCedulaModal, setReUploadCedulaModal] = useState(false);
-
-  useState(false);
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const toggleRefresh = () => {
@@ -121,9 +119,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
   const toggleReUploadCedulaModal = () => {
     setReUploadCedulaModal((prev) => !prev);
   };
-  const toggleOccupationalPermitApplication = () => {
-    setOpenOccupationalPermitModal((prev) => !prev);
-  };
   useEffect(() => {
     const params = { status: status, permit_type: applicationType };
     if (applicationType === activeTab) {
@@ -147,8 +142,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
       toggleRecorridaApplicationModal();
     } else if (applicationType === "use_of_government_property") {
       toggleUseOfGovernmentPropertyApplicationModal();
-    } else if (applicationType === "occupational_permit") {
-      toggleOccupationalPermitApplication();
     }
   }, [applicationType]);
 
@@ -427,12 +420,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
         mode="update"
         title="Update Occupational Permit"
         fetchUrl={`api/client/get-single-occupational/permit-application`}
-        submitUrl={
-          "api/client/special-permit/update-occupational-permit/update"
-        }
         applicationId={selectedRow[0]}
-        isUpdate
-        toggleRefresh={toggleRefresh}
       />
       {mayorsPermitApplicationModal && (
         <MayorsCertificateModal
@@ -440,7 +428,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
           toggleModal={toggleMayorsPermitApplicationModal}
           isUpdate
           specialPermitApplicationId={selectedRow[0]}
-          toggleRefresh={toggleRefresh}
         />
       )}
       {goodMoralApplicationModal && (
@@ -449,7 +436,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
           toggleModal={toggleGoodMoralApplicationModal}
           isUpdate
           specialPermitApplicationId={selectedRow[0]}
-          toggleRefresh={toggleRefresh}
         />
       )}
       {eventApplicationModal && (
@@ -460,14 +446,12 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
           specialPermitApplicationId={selectedRow[0]}
         />
       )}
-
       {motorcadeApplicationModal && (
         <MotorcadeModal
-          openModal={motorcadeApplicationModal}
+          oepnModal={motorcadeApplicationModal}
           toggleModal={toggleMotorcadeApplicationModal}
           isUpdate
           specialPermitApplicationId={selectedRow[0]}
-          toggleRefresh={toggleRefresh}
         />
       )}
       {paradeApplicationModal && (
@@ -476,7 +460,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
           toggleModal={toggleParadeApplicationModal}
           isUpdate
           specialPermitApplicationId={selectedRow[0]}
-          toggleRefresh={toggleRefresh}
         />
       )}
       {recorridaApplicationModal && (
@@ -485,7 +468,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
           toggleModal={toggleRecorridaApplicationModal}
           isUpdate
           specialPermitApplicationId={selectedRow[0]}
-          toggleRefresh={toggleRefresh}
         />
       )}
       {useOfGovernmentApplicationModal && (
@@ -494,7 +476,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
           toggleModal={toggleUseOfGovernmentPropertyApplicationModal}
           isUpdate
           specialPermitApplicationId={selectedRow[0]}
-          toggleRefresh={toggleRefresh}
         />
       )}
       <div className="d-flex gap-2">
@@ -675,7 +656,20 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
             ) : specialPermitClient?.clientTableData?.data?.length > 0 ? (
               specialPermitClient?.clientTableData?.data.map(
                 (application, index) => (
-                  <tr key={application.id}>
+                  <tr
+                    key={application.id}
+                    style={{
+                      backgroundColor:
+                        application?.uploaded_file?.community_tax_certificate ==
+                          null &&
+                        status === "for_payment" &&
+                        (applicationType === "occupational_permit" ||
+                          applicationType === "mayors_permit" ||
+                          applicationType === "good_moral")
+                          ? "#f9cf03"
+                          : null,
+                    }}
+                  >
                     <td>
                       {user?.accountType === "company" &&
                         status === "for_payment" && (
@@ -955,7 +949,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                             <td>
                               {application?.status_histories?.[0]?.remarks}
                             </td>
-                            {/* <td>
+                            <td>
                               <Button
                                 onClick={() => {
                                   setSelectedRow([application?.id]);
@@ -965,7 +959,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                               >
                                 Revise & Resubmit
                               </Button>
-                            </td> */}
+                            </td>
                           </>
                         )}
                       </>
@@ -1001,22 +995,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                     user?.accountType === "individual" ? (
                       <>
                         <td>
-                          <Button
-                            color="primary"
-                            onClick={() => {
-                              toggleOverTheCounterModal();
-                              setSelectedRow([application?.id]);
-                              dispatch(
-                                SpecialPermitClientSlice.actions.setApplicationIdsForPayment(
-                                  [application?.id]
-                                )
-                              );
-                            }}
-                          >
-                            Pay
-                          </Button>
-                        </td>
-                        {/* <td>
                           <>
                             <UncontrolledDropdown
                               className="me-2"
@@ -1058,8 +1036,8 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                               </DropdownMenu>
                             </UncontrolledDropdown>
                           </>
-                        </td> */}
-                        {/* {application?.uploaded_file
+                        </td>
+                        {application?.uploaded_file
                           ?.community_tax_certificate == null &&
                         (applicationType === "occupational_permit" ||
                           applicationType === "mayors_permit" ||
@@ -1067,7 +1045,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                           <td>
                             <Badge color="danger">No Cedula</Badge>
                           </td>
-                        ) : null} */}
+                        ) : null}
                       </>
                     ) : null}
 
@@ -1132,6 +1110,20 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         </div>
                       </td>
                     ) : null}
+                    {/* {applicationType === "mayors_permit" &&
+                      status === "declined" && (
+                        <td>
+                          <Button
+                            onClick={() => {
+                              setSelectedRow([application?.id]);
+                              toggleMayorsPermitApplicationModal();
+                            }}
+                            color="primary"
+                          >
+                            Revise & Resubmit
+                          </Button>
+                        </td>
+                      )} */}
                     {status === "declined" && (
                       <td>
                         <Button
