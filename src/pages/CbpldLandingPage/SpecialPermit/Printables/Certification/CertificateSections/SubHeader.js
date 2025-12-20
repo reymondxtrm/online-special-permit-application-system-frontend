@@ -6,6 +6,8 @@ export default function SubHeader({ permitType, purpose, subHeader, scale }) {
 
   const fontSize1 = base1 * scale;
   const fontSize2 = base2 * scale;
+  const currentYear = new Date().getFullYear();
+
   return (
     <>
       {permitType !== "event" && (
@@ -20,10 +22,11 @@ export default function SubHeader({ permitType, purpose, subHeader, scale }) {
             style={{
               fontSize: `${fontSize1}pt`,
               color: "#154172",
-              fontFamily: "Bookman Old Style, serif",
+              // fontWeight: "500",
+              fontFamily: "Golos Text, sans-serif",
               padding: 0,
               margin: 0,
-              fontWeight: permitType === "good_moral" ? null : "bold",
+              fontWeight: permitType === "good_moral" ? null : "500",
             }}
           >
             {`(${permitType === "mayors_permit" ? purpose : subHeader})`}
@@ -41,14 +44,14 @@ export default function SubHeader({ permitType, purpose, subHeader, scale }) {
         <p
           style={{
             fontSize: `${fontSize2}pt`,
-            color: "#4C9F70",
+            color: "#11a7ee",
             fontFamily: "Book Antiqua",
             padding: 0,
             margin: 0,
             fontStyle: "italic",
           }}
         >
-          {"Series of 2025"}
+          {`Series of ${currentYear}`}
         </p>
       </div>
     </>

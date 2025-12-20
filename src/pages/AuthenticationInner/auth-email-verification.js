@@ -1,15 +1,15 @@
-import React from "react"
-import { Link } from "react-router-dom"
-import { Card, CardBody, Col, Container, Row } from "reactstrap"
+import React from "react";
+import { Link } from "react-router-dom";
+import { Card, CardBody, Col, Container, Row } from "reactstrap";
 
 // import images
-import logodark from "../../assets/images/logo-dark.png"
-import logolight from "../../assets/images/logo-light.png"
+import logodark from "../../assets/images/logo-dark.png";
+import logolight from "../../assets/images/logo-light.png";
 
 const EmailVerification = () => {
-
   //meta title
-  document.title="Email Verification | Skote - React Admin & Dashboard Template";
+  document.title =
+    "Email Verification | Skote - React Admin & Dashboard Template";
 
   return (
     <React.Fragment>
@@ -57,11 +57,8 @@ const EmailVerification = () => {
                           , Please check it
                         </p>
                         <div className="mt-4">
-                          <a
-                            href="/"
-                            className="btn btn-success w-md"
-                          >
-                            Verify email
+                          <a href="/" className="btn btn-success w-md">
+                            Verify OTP
                           </a>
                         </div>
                       </div>
@@ -87,6 +84,6 @@ const EmailVerification = () => {
         </Container>
       </div>
     </React.Fragment>
-  )
-}
-export default EmailVerification
+  );
+};
+export default EmailVerification;

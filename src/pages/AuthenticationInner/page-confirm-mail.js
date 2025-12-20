@@ -18,23 +18,28 @@ import cgbLogo from "../../assets/images/cgbLogo.png";
 
 const ConfirmMail = () => {
   //meta title
-  document.title = "Confirm Mail | Skote - React Admin & Dashboard Template";
+  document.title = "Confirm Email";
   const history = useHistory();
   const [message, setMessage] = useState("Verifying your email...");
   const [isFetching, setIsFetching] = useState(false);
   const query = new URLSearchParams(location.search);
   const verificationUrl = decodeURIComponent(query.get("url"));
-  const parts = verificationUrl?.split("/");
-  const id = parts[parts?.length - 2];
-  const hash = parts[parts?.length - 1].split("?")[0];
-
+  // const parts = verificationUrl?.split("/");
+  // const id = parts[parts?.length - 2];
+  // const hash = parts[parts?.length - 1].split("?")[0];
+  // const email = localStorage.getItem("email");
   useEffect(() => {
     setIsFetching(true);
     const verifyEmail = async () => {
       try {
-        const response = await axios.post(`api/email/verify/${id}/${hash}`, {
-          withCredentials: true,
-        });
+        const response = await axios.get(
+          verificationUrl,
+          // { email: email },
+          {
+            withCredentials: true,
+          }
+        );
+
         setMessage("✅ Email verified successfully!");
         setTimeout(() => history.push("/home"), 2000);
         setIsFetching(false);

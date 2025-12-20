@@ -23,9 +23,11 @@ export default function FirstParagraph({ firstParagraph, scale }) {
         >
           <p
             style={{
-              fontFamily: "Cambria, serif",
+              // fontFamily: "Cambria, serif",
               fontSize: `${fontSize}pt`,
-              fontWeight: "bold",
+              fontWeight: "300",
+              fontFamily: "Golos Text, sans-serif",
+              // fontWeight: "bold",
               textIndent: `${textIndent}px`,
               marginBottom: "1em", // em scales with font size automatically
               textAlign: "justify",

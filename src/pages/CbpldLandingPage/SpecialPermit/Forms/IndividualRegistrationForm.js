@@ -86,7 +86,6 @@ const IndividualRegistrationForm = ({
     "employed",
     "mixed_income_earner",
   ];
-
   useEffect(() => {
     if (openModal) {
       axios
@@ -179,6 +178,7 @@ const IndividualRegistrationForm = ({
       otherwise: (schema) => schema.notRequired(),
     }),
   });
+
   return (
     <div>
       <Formik
@@ -230,18 +230,19 @@ const IndividualRegistrationForm = ({
             username: `${values.first_name.toLowerCase()}.${values.surname.toLowerCase()}`,
           };
 
-          const res = await dispatch(
-            specialPermitClientRegister({ params, history })
-          );
-          if (res?.error) {
+          try {
+            await dispatch(
+              specialPermitClientRegister({ params, history })
+            ).unwrap();
+
+            Swal.close();
+          } catch (err) {
             Swal.fire({
               icon: "error",
               title: "Error",
-              text: res?.payload?.message || "Something went wrong",
+              text: err?.message || "Something went wrong",
               confirmButtonText: "OK",
             });
-          } else {
-            Swal.close();
           }
         }}
       >

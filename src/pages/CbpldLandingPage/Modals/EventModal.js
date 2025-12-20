@@ -68,7 +68,6 @@ function EventModal({
     if (!openModal) {
       setExistingData({});
       setUploadedFiles({});
-      setIsProceed(false);
     }
   }, [openModal]);
 
@@ -93,8 +92,6 @@ function EventModal({
     event_time_to: Yup.string().required("Required"),
   });
 
-  const setProceedHandle = () => setIsProceed((prev) => !prev);
-
   return (
     <React.Fragment>
       {isViewerOpen && !isFetching && currentImage && (
@@ -114,7 +111,6 @@ function EventModal({
         isOpen={openModal}
         toggle={() => {
           toggleModal();
-          setIsProceed(false);
         }}
         backdrop="static"
         className="modal-dialog-centered"
@@ -123,7 +119,6 @@ function EventModal({
         <ModalHeader
           toggle={() => {
             toggleModal();
-            setIsProceed(false);
           }}
         >
           <p
@@ -355,7 +350,10 @@ function EventModal({
 
           <div className="d-flex gap-2">
             <div style={{ width: "30px" }}>
-              <Input type="checkbox" onClick={setProceedHandle} />
+              <Input
+                type="checkbox"
+                onChange={(e) => setIsProceed(e.target.checked)}
+              />
             </div>
             <p>{USER_PRIVACY}</p>
           </div>
@@ -390,8 +388,6 @@ function EventModal({
                 [],
                 [toggleModal, toggleRefresh]
               );
-
-              setIsProceed(false);
             }}
           >
             {isUpdate ? "Update" : "Submit"}
@@ -401,7 +397,6 @@ function EventModal({
             color="secondary"
             onClick={() => {
               toggleModal();
-              setIsProceed(false);
             }}
           >
             Close

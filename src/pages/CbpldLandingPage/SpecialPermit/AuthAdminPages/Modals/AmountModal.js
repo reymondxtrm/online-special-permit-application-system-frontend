@@ -137,83 +137,80 @@ function AmountModal({
                           </FormGroup>
                         </Col>
                       </Row>
-                      <Row
-                        style={{
-                          backgroundColor: "#cddfebff",
-                          alignItems: "center", // centers vertically
-                          display: "flex", // enable flex layout
-                          minHeight: "30px", // optional: gives some height
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            marginTop: "5px",
-                          }}
-                        >
-                          <FormGroup
-                            check
-                            inline
-                            className="d-flex justify-content-center"
-                          >
-                            <Input
-                              type="checkbox"
-                              className="me-2"
-                              style={{ width: "17px", height: "17px" }}
-                              value={exempted}
-                              onChange={(e) => setExempted(e.target.checked)}
-                            />
-                            <Label
-                              style={{
-                                color: "#2162a3ff",
-                                fontSize: "15px",
-                                fontWeight: "bold",
-                              }}
-                            >
-                              Exempted
-                            </Label>
-                          </FormGroup>
-                        </div>
-                      </Row>{" "}
-                      <Row style={{ backgroundColor: "#cddfebff" }}>
-                        <Col md={12}>
-                          <FormGroup>
-                            <Label for="amount">Amount</Label>
-                            <Input
-                              id="amount"
-                              name={`amount`}
-                              type="number"
-                              placeholder="Enter amount"
-                              disabled={exempted}
-                              value={props.values.amount}
-                              onChange={props.handleChange}
-                            />
-                          </FormGroup>
-                        </Col>
-                      </Row>
-                      <Row
-                        style={{
-                          backgroundColor: "#cddfebff",
-                          paddingBottom: "15px",
-                        }}
-                      >
-                        <Col>
-                          <Label>Exemption</Label>
-                          <Select
-                            options={discountOption}
-                            onChange={(selected) => {
-                              props.setFieldValue(
-                                "exemption_id",
-                                selected.value
-                              );
-                            }}
-                            isDisabled={!exempted}
-                          />
-                        </Col>
-                      </Row>
                     </>
                   )}
+                  <Row
+                    style={{
+                      backgroundColor: "#cddfebff",
+                      alignItems: "center", // centers vertically
+                      display: "flex", // enable flex layout
+                      minHeight: "30px", // optional: gives some height
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        marginTop: "5px",
+                      }}
+                    >
+                      <FormGroup
+                        check
+                        inline
+                        className="d-flex justify-content-center"
+                      >
+                        <Input
+                          type="checkbox"
+                          className="me-2"
+                          style={{ width: "17px", height: "17px" }}
+                          value={exempted}
+                          onChange={(e) => setExempted(e.target.checked)}
+                        />
+                        <Label
+                          style={{
+                            color: "#2162a3ff",
+                            fontSize: "15px",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          Exempted
+                        </Label>
+                      </FormGroup>
+                    </div>
+                  </Row>{" "}
+                  <Row style={{ backgroundColor: "#cddfebff" }}>
+                    <Col md={12}>
+                      <FormGroup>
+                        <Label for="amount">Amount</Label>
+                        <Input
+                          id="amount"
+                          name={`amount`}
+                          type="number"
+                          placeholder="Enter amount"
+                          disabled={exempted}
+                          value={props.values.amount}
+                          onChange={props.handleChange}
+                        />
+                      </FormGroup>
+                    </Col>
+                  </Row>
+                  <Row
+                    style={{
+                      backgroundColor: "#cddfebff",
+                      paddingBottom: "15px",
+                    }}
+                  >
+                    <Col>
+                      <Label>Exemption</Label>
+                      <Select
+                        options={discountOption}
+                        onChange={(selected) => {
+                          props.setFieldValue("exemption_id", selected.value);
+                        }}
+                        isDisabled={!exempted}
+                      />
+                    </Col>
+                  </Row>
                 </Col>
               </Form>
             )}

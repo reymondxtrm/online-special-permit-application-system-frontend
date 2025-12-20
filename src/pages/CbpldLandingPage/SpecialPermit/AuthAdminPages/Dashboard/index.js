@@ -39,6 +39,7 @@ import OccupationalTables from "../Common/OccupationalTables";
 const Dashboard = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  document.title = "OSPAS";
   const [activeTab, setActiveTab] = useState("good_moral");
   const specialPermitAdmin = useSelector((state) => state.specialPermitAdmin);
   const handleTabSelect = (key) => {

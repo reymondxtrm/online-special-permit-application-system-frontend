@@ -75,6 +75,7 @@
     "react-drag-listview": "^0.1.8",
     "react-dropzone": "^11.3.2",
     "react-dual-listbox": "^2.1.2",
+    "react-easy-crop": "^5.5.6",
     "react-facebook-login": "^4.1.1",
     "react-flatpickr": "^3.10.7",
     "react-google-login": "^5.2.2",

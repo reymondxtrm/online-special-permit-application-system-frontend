@@ -233,17 +233,13 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                     <img src={cgbLogo} alt="CGB Logo" className="header-logo" />
                   </div>
 
-                  <div>
+                  <div style={{ paddingTop: "15px" }}>
                     <div className="d-flex gap-5">
-                      <div className="header-text">
+                      <div className="header-text" style={{ color: "black" }}>
                         {" "}
                         <p>Republic of the Philippines</p>
-                        <p className="header-title">
-                          CITY GOVERNMENT OF BUTUAN
-                        </p>
-                        <p className="header-title">
-                          City Business Permits and Licensing Department
-                        </p>
+                        <p>CITY GOVERNMENT OF BUTUAN</p>
+                        <p>City Business Permits and Licensing Department</p>
                         <p>
                           City Hall Bldg., J.P. Rosales Ave., Doongan, Butuan
                           City
@@ -256,11 +252,11 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                         />
                       </div>
                     </div>
-                    <img
+                    {/* <img
                       className="header-line"
                       src={headerLine}
                       alt="CGB Logo"
-                    />
+                    /> */}
                   </div>
                 </div>
               </td>
@@ -271,7 +267,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                   style={{
                     fontSize: `${scale * 14}pt`,
                     fontWeight: "bold",
-                    color: "#4C9F70",
+                    color: "#11a7ee",
                     marginRight: "1.5cm",
                   }}
                 >
@@ -312,7 +308,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                 <ThirdParagraph thirdParagraph={thirdParagraph} scale={scale} />
                 {(permitType === "good_moral" ||
                   permitType === "mayors_permit") && (
-                  <MayorSignatory permitType={permitType} />
+                  <MayorSignatory permitType={permitType} scale={scale} />
                 )}
                 <DepartmentHeadSingnatory scale={scale} />
               </td>
@@ -355,11 +351,11 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                     </p>
                   )}
                   <p className="footer-code">{REVISION_CODE[permitType]}</p>
-                  <img
+                  {/* <img
                     style={{ width: "100%" }}
                     src={footerLine}
                     alt="CGB Logo"
-                  />
+                  /> */}
                 </div>
               </td>
             </tr>

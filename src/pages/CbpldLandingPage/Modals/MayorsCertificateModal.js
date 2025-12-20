@@ -24,6 +24,7 @@ import { USER_PRIVACY } from "assets/data/data";
 import useGetImage from "hooks/Common/useGetImage";
 import ImageViewer from "react-simple-image-viewer";
 import * as Yup from "yup";
+import E from "react-script";
 export const createMayorsCertificateSchema = (isUpdate) =>
   Yup.object().shape({
     // Only validate when NOT updating
@@ -106,9 +107,6 @@ function MayorsCertificateModal({
   const [isViewingOpen, setIsViewingOpen] = useState(false);
   const { currentImage, getImageHandle, isFetching } = useGetImage();
 
-  const setProceedHandle = () => {
-    setIsProceed((prev) => !prev);
-  };
   const toggleIsViewerOpen = () => {
     setIsViewingOpen((prev) => !prev);
   };
@@ -211,7 +209,6 @@ function MayorsCertificateModal({
         isOpen={openModal}
         toggle={() => {
           toggleModal();
-          setIsProceed(false);
         }}
         fade={true}
         backdrop="static"
@@ -225,7 +222,6 @@ function MayorsCertificateModal({
         <ModalHeader
           toggle={() => {
             toggleModal();
-            setIsProceed(false);
           }}
         >
           <p
@@ -501,7 +497,10 @@ function MayorsCertificateModal({
           </Formik>
           <div className="d-flex gap-2">
             <div style={{ width: "30px" }}>
-              <Input type="checkbox" onClick={setProceedHandle} />
+              <Input
+                type="checkbox"
+                onChange={(e) => setIsProceed(e.target.checked)}
+              />
             </div>
             <p>{USER_PRIVACY}</p>
           </div>
@@ -541,7 +540,6 @@ function MayorsCertificateModal({
                   [],
                   [toggleModal, toggleRefresh]
                 );
-                setIsProceed(false);
               }
             }}
             disabled={!proceed}
@@ -552,7 +550,6 @@ function MayorsCertificateModal({
             color="secondary"
             onClick={() => {
               toggleModal();
-              setIsProceed(false);
             }}
           >
             Close

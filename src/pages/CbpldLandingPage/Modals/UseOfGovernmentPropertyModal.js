@@ -41,7 +41,7 @@ function UseOfGovernmentPropertyModal({
     setIsViewerOpen((prev) => !prev);
   };
   const [loadingExisting, setLoadingExisting] = useState(false);
-  const setProceedHandle = () => setIsProceed((prev) => !prev);
+
   const getFormData = (object) => {
     const formData = new FormData();
     Object.keys(object).forEach((key) => {
@@ -205,7 +205,6 @@ function UseOfGovernmentPropertyModal({
         isOpen={openModal}
         toggle={() => {
           toggleModal();
-          setIsProceed(false);
         }}
         backdrop="static"
         size="m"
@@ -216,7 +215,6 @@ function UseOfGovernmentPropertyModal({
         <ModalHeader
           toggle={() => {
             toggleModal();
-            setIsProceed(false);
           }}
         >
           <p
@@ -489,7 +487,10 @@ function UseOfGovernmentPropertyModal({
 
           <div className="d-flex gap-2">
             <div style={{ width: "30px" }}>
-              <Input type="checkbox" onClick={setProceedHandle} />
+              <Input
+                type="checkbox"
+                onChange={(e) => setIsProceed(e.target.checked)}
+              />
             </div>
             <p>{USER_PRIVACY}</p>
           </div>
@@ -531,8 +532,6 @@ function UseOfGovernmentPropertyModal({
                 [],
                 [toggleModal, toggleRefresh]
               );
-
-              setIsProceed(false);
             }}
           >
             {isUpdate ? "Update" : "Submit"}
@@ -542,7 +541,6 @@ function UseOfGovernmentPropertyModal({
             color="secondary"
             onClick={() => {
               toggleModal();
-              setIsProceed(false);
             }}
           >
             Close

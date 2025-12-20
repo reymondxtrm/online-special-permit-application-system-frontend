@@ -178,7 +178,11 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
             </div>
           </div>
         </div>
-
+        <div>
+          <p className="note">
+            NOTE: THIS PERMIT IS VALID UNTIL <span>{formatted}</span>
+          </p>
+        </div>
         <div className="picture-section">
           <div className="idpicture-box">
             {currentImage ? (
@@ -240,12 +244,7 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
             <span className="fw-bold">CBPLD.BPLD.P.013.REV02</span>
           </div>
         </div>
-        <div>
-          <p className="note">
-            NOTE: THIS PERMIT IS VALID UNTIL <span>{formatted}</span>
-          </p>
-        </div>
-        {/* <img src={permitFooterLine} className="footer-line" /> */}
+        <img src={permitFooterLine} className="footer-line" />
       </div>
     </div>
   );

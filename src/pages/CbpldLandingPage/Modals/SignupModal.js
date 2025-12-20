@@ -185,37 +185,21 @@ function SignupModal({ openModal, toggleModal, props }) {
             {selectedType === "individual" && (
               <IndividualRegistrationForm
                 toggleModal={toggleModal}
+                openModal={selectedType === "individual"}
                 brangaysOptions={brangaysOptions}
+                props={props}
               />
             )}
             {selectedType === "company" && (
               <CompanyRegistrationForm
                 brangaysOptions={brangaysOptions}
+                openModal={selectedType === "company"}
                 toggleModal={toggleModal}
+                props={props}
               />
             )}
           </div>
         </ModalBody>
-        {/* <ModalFooter>
-          <Button
-            style={{
-              backgroundColor: "#1a56db",
-              fontWeight: "600",
-              fontFamily:
-                "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
-              color: "white",
-            }}
-            onClick={() => {
-              console.log(formikRef.current.errors);
-              formikRef.current.handleSubmit();
-            }}
-          >
-            Submit
-          </Button>
-          <Button color="secondary" onClick={toggleModal}>
-            Close
-          </Button>
-        </ModalFooter> */}
       </Modal>
     </React.Fragment>
   );

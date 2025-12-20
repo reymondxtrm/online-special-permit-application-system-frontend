@@ -1,19 +1,19 @@
-import React from "react"
-import CarouselPage from "./CarouselPage"
+import React from "react";
+import CarouselPage from "./CarouselPage";
 
 //Verification code package
-import AuthCode from "react-auth-code-input"
+import AuthCode from "react-auth-code-input";
 
 // import images
-import logodark from "../../assets/images/logo-dark.png"
-import logolight from "../../assets/images/logo-light.png"
-import { Col, Form, FormGroup, Label, Row } from "reactstrap"
-import { Link } from "react-router-dom"
+import logodark from "../../assets/images/logo-dark.png";
+import logolight from "../../assets/images/logo-light.png";
+import { Col, Form, FormGroup, Label, Row } from "reactstrap";
+import { Link } from "react-router-dom";
 
 const TwostepVerification2 = () => {
-
   //meta title
-  document.title="Two Step Verification 2 | Skote - React Admin & Dashboard Template";
+  document.title =
+    "Two Step Verification 2 | Skote - React Admin & Dashboard Template";
 
   return (
     <React.Fragment>
@@ -55,7 +55,7 @@ const TwostepVerification2 = () => {
                             Please enter the 4 digit code sent to{" "}
                             <span className="font-weight-semibold">
                               example@abc.com
-                              </span>
+                            </span>
                           </p>
 
                           <Form>
@@ -67,7 +67,7 @@ const TwostepVerification2 = () => {
                                     className="visually-hidden"
                                   >
                                     Dight 1
-                                    </Label>
+                                  </Label>
                                   <AuthCode
                                     characters={4}
                                     className="form-control form-control-lg text-center"
@@ -81,7 +81,7 @@ const TwostepVerification2 = () => {
                                       marginRight: "15px",
                                       border: "1px solid #ced4da",
                                       textTransform: "uppercase",
-                                      borderRadius: ".4rem"
+                                      // borderRadius: ".4rem"
                                     }}
                                     onChange={() => null}
                                   />
@@ -96,7 +96,7 @@ const TwostepVerification2 = () => {
                               className="btn btn-success w-md"
                             >
                               Confirm
-                              </Link>
+                            </Link>
                           </div>
                         </div>
                       </div>
@@ -106,8 +106,8 @@ const TwostepVerification2 = () => {
                       <p className="mb-0">
                         © {new Date().getFullYear()} Skote. Crafted with{" "}
                         <i className="mdi mdi-heart text-danger"></i> by
-                          Themesbrand
-                        </p>
+                        Themesbrand
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -117,7 +117,7 @@ const TwostepVerification2 = () => {
         </div>
       </div>
     </React.Fragment>
-  )
-}
+  );
+};
 
-export default TwostepVerification2
+export default TwostepVerification2;

@@ -126,11 +126,11 @@
   text-decoration: underline;
 }
 .note {
+  margin-top: 10px;
   font-weight: bold;
   font-size: 10px;
   text-align: center;
-  color: #e04136;
-  margin: 0px;
+  color: #368be0;
 }
 /* .signatories-container {
   width: 100px;

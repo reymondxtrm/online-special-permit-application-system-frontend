@@ -14,11 +14,11 @@ export default function HeadersTitle({ headerTitle, scale }) {
       <p
         style={{
           fontSize: `${fontSize}pt`,
-          fontWeight: "bold",
-          color: "#154172",
           padding: 0,
           margin: 0,
-          fontFamily: "Bookman Old Style, serif",
+          fontWeight: "600",
+          fontFamily: "Golos Text, sans-serif",
+          color: "#154172",
         }}
       >
         {headerTitle}

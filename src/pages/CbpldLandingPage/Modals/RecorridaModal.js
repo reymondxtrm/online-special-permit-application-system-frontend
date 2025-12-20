@@ -36,7 +36,6 @@ function RecorridaModal({
   const { currentImage, isFetching, getImageHandle } = useGetImage();
   const [uploadedFiles, setUploadedFiles] = useState({});
   const [isViewerOpen, setIsViewerOpen] = useState(false);
-  const setProceedHandle = () => setIsProceed((prev) => !prev);
 
   const getFormData = (object) => {
     const formData = new FormData();
@@ -169,7 +168,6 @@ function RecorridaModal({
         isOpen={openModal}
         toggle={() => {
           toggleModal();
-          setIsProceed(false);
         }}
         backdrop="static"
         size="m"
@@ -180,7 +178,6 @@ function RecorridaModal({
         <ModalHeader
           toggle={() => {
             toggleModal();
-            setIsProceed(false);
           }}
         >
           <p
@@ -435,7 +432,10 @@ function RecorridaModal({
           )}
           <div className="d-flex gap-2">
             <div style={{ width: "30px" }}>
-              <Input type="checkbox" onClick={setProceedHandle} />
+              <Input
+                type="checkbox"
+                onChange={(e) => setIsProceed(e.target.checked)}
+              />
             </div>
             <p>{USER_PRIVACY}</p>
           </div>
@@ -477,8 +477,6 @@ function RecorridaModal({
                 [],
                 [toggleModal, toggleRefresh]
               );
-
-              setIsProceed(false);
             }}
           >
             {isUpdate ? "Update" : "Submit"}
@@ -488,7 +486,6 @@ function RecorridaModal({
             color="secondary"
             onClick={() => {
               toggleModal();
-              setIsProceed(false);
             }}
           >
             Close

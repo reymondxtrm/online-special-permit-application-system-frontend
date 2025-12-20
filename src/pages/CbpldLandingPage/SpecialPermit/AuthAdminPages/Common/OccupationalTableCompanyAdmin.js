@@ -42,6 +42,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   const handleSubmit = useSubmit();
   const [showAttachmentModal, setShowAttachmentModal] = useState(false);
   const [orderOfPaymentId, setOrderOfPaymentId] = useState();
+  const [uploadImageModal, setUpdloadImageModal] = useState(false);
   const [occupationalRequestModal, setOccupationalRequestModal] =
     useState(false);
 
@@ -83,6 +84,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   const toggleReturnRemarksModal = () => {
     setOpenReturnRemarksModal((prev) => !prev);
   };
+
   return (
     <React.Fragment>
       {isViewerOpen && currentImage && !isFetching && (
@@ -112,6 +114,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
         applicationId={applicationId}
         toggleRefresh={toggleRefresh}
       />
+
       {AttachmentModal && (
         <AttachmentModal
           openModal={showAttachmentModal}

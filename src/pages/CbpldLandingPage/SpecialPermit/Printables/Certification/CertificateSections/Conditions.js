@@ -27,9 +27,10 @@ export default function Conditions({ conditions, permitType, scale }) {
             >
               <p
                 style={{
-                  fontFamily: "Cambria, serif",
+                  fontWeight: "300",
+                  fontFamily: "Golos Text, sans-serif",
                   fontSize: `${fontSize}pt`,
-                  fontWeight: "bold",
+                  // fontWeight: "bold",
                   color: "#154172",
                   marginBottom: "1em",
                   textAlign: "justify",
@@ -51,9 +52,10 @@ export default function Conditions({ conditions, permitType, scale }) {
                     <li
                       key={index}
                       style={{
-                        fontFamily: "Cambria, serif",
+                        fontWeight: "300",
+                        fontFamily: "Golos Text, sans-serif",
                         fontSize: `${fontSize}pt`,
-                        fontWeight: "bold",
+
                         textAlign: "justify",
                         lineHeight: "1",
                         fontStyle: "italic",

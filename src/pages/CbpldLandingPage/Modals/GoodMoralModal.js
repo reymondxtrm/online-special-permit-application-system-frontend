@@ -210,10 +210,6 @@ function GoodMoralModal({
     court_clearance: fileValidation,
   });
 
-  const setProceedHandle = () => {
-    setIsProceed((prev) => !prev);
-  };
-
   return (
     <React.Fragment>
       {isViewingOpen && !isFetching && currentImage && (
@@ -233,7 +229,6 @@ function GoodMoralModal({
         isOpen={openModal}
         toggle={() => {
           toggleModal();
-          setIsProceed(false);
         }}
         fade={true}
         backdrop="static"
@@ -249,7 +244,6 @@ function GoodMoralModal({
         <ModalHeader
           toggle={() => {
             toggleModal();
-            setIsProceed(false);
           }}
         >
           <p
@@ -697,7 +691,10 @@ function GoodMoralModal({
           </Formik>
           <div className="d-flex gap-2">
             <div style={{ width: "30px" }}>
-              <Input type="checkbox" onClick={setProceedHandle} />
+              <Input
+                type="checkbox"
+                onChange={(e) => setIsProceed(e.target.checked)}
+              />
             </div>
             <p>{USER_PRIVACY}</p>
           </div>
@@ -748,7 +745,6 @@ function GoodMoralModal({
                   [],
                   [toggleModal, toggleRefresh]
                 );
-                setIsProceed(false);
               }
             }}
             disabled={!proceed}
@@ -759,7 +755,6 @@ function GoodMoralModal({
             color="secondary"
             onClick={() => {
               toggleModal();
-              setIsProceed(false);
             }}
           >
             Close

@@ -1,10 +1,8 @@
 import React from "react";
 
-export default function MayorSignatory({ permitType, scale }) {
-  const baseFontSize = 13; // pt
+export default function MayorSignatory({ scale }) {
+  const baseFontSize = 14; // pt
   const fontSize = baseFontSize * scale;
-
-  // Scale padding
   const topPadding = 40 * scale;
   const bottomPadding = 30 * scale;
 
@@ -20,10 +18,11 @@ export default function MayorSignatory({ permitType, scale }) {
         <p
           style={{
             fontSize: `${fontSize}pt`,
-            fontWeight: "bold",
+            // fontWeight: "bold",
             paddingTop: `${topPadding}px`,
             margin: 0,
-            fontFamily: "Cambria, serif",
+            fontWeight: "600",
+            fontFamily: "Golos Text, sans-serif",
           }}
         >
           {"ATTY. LAWRENCE LEMUEL H. FORTUN"}
@@ -41,7 +40,8 @@ export default function MayorSignatory({ permitType, scale }) {
             fontSize: `${fontSize}pt`,
             padding: 0,
             margin: 0,
-            fontFamily: "Cambria, serif",
+            fontFamily: "Golos Text, sans-serif",
+            fontWeight: "600",
           }}
         >
           {"City Mayor"}
@@ -62,7 +62,7 @@ export default function MayorSignatory({ permitType, scale }) {
             fontStyle: "italic",
             paddingTop: `${bottomPadding}px`,
             margin: 0,
-            fontFamily: "Cambria, serif",
+            fontFamily: "Golos Text, sans-serif",
             wordWrap: "break-word",
             whiteSpace: "normal",
           }}

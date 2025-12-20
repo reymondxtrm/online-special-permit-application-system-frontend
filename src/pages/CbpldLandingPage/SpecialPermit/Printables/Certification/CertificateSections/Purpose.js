@@ -15,12 +15,13 @@ export default function Purpose({ purpose, scale }) {
       <p
         style={{
           fontSize: `${fontSize}pt`,
-          fontWeight: "bold",
+          // fontWeight: "bold",
           // color: "#005a99",
           textDecoration: "underline",
           padding: 0,
           margin: 0,
-          fontFamily: "Bookman Old Style, serif",
+          fontWeight: "600",
+          fontFamily: "Golos Text, sans-serif",
         }}
       >
         {purpose}

@@ -184,7 +184,7 @@ function OrderOfPaymentModal({
                             }}
                           >
                             {applicationType === desc.type
-                              ? paymentDetails.billed_amount
+                              ? `₱ ${paymentDetails.billed_amount}`
                               : null}
                           </td>
                         </tr>
@@ -204,6 +204,7 @@ function OrderOfPaymentModal({
                         style={{
                           border: "1px solid black",
                           padding: "8px",
+                          textAlign: "end",
                         }}
                       >
                         {paymentDetails?.quantity}
@@ -233,7 +234,7 @@ function OrderOfPaymentModal({
                 </p>
                 <p
                   style={{
-                    textAlign: "center",
+                    textAlign: "end",
                     marginTop: "10px",
                     fontSize: "12px",
                   }}

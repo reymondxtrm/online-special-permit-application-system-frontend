@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import {
   Button,
   Modal,
@@ -17,7 +17,9 @@ import {
 } from "reactstrap";
 import classnames from "classnames";
 import ReactSimpleImageViewer from "react-simple-image-viewer";
+
 import axios from "axios";
+import Viewer from "react-viewer";
 
 function AttachmentModal({
   openModal,
@@ -46,6 +48,7 @@ function AttachmentModal({
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
+  const blobUrlRef = useRef(null);
   const fileMapping = {
     mayors_permit: {
       "Police Clearance": uploadedFiles?.police_clearance,
@@ -93,8 +96,6 @@ function AttachmentModal({
 
     if (!activeTab || !filePath) return;
 
-    let blobUrl = null;
-
     const fetchImage = async () => {
       setIsFetching(true);
       try {
@@ -106,8 +107,13 @@ function AttachmentModal({
         });
 
         if (response?.data) {
-          blobUrl = URL.createObjectURL(response.data);
-          setCurrentImage(blobUrl);
+          if (blobUrlRef.current) {
+            URL.revokeObjectURL(blobUrlRef.current);
+          }
+
+          const newBlobUrl = URL.createObjectURL(response.data);
+          blobUrlRef.current = newBlobUrl;
+          setCurrentImage(newBlobUrl);
         }
         setIsFetching(false);
       } catch (error) {
@@ -119,10 +125,17 @@ function AttachmentModal({
     fetchImage();
 
     return () => {
-      if (blobUrl) URL.revokeObjectURL(blobUrl); // cleanup blob URL
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
     };
-  }, [activeTab, applicationType, openModal]);
-
+  }, [activeTab, applicationType, openModal, isClient]);
+  useEffect(() => {
+    if (isViewerOpen) {
+      setIsViewerOpen(false);
+    }
+  }, [activeTab]);
   const toggleIsViewerOpen = () => {
     setIsViewerOpen((prev) => !prev);
   };
@@ -291,19 +304,20 @@ function AttachmentModal({
         </Button>
       </ModalFooter>
 
-      {isViewerOpen && !isFetching && currentImage && (
-        <ReactSimpleImageViewer
-          src={[currentImage]}
-          currentIndex={0}
-          onClose={toggleIsViewerOpen}
-          backgroundStyle={{
-            backgroundColor: "rgba(0,0,0,0.8)",
-            zIndex: 9999,
-          }}
-          closeOnClickOutside={true}
-          disableZoom={false}
-        />
-      )}
+      <Viewer
+        visible={isViewerOpen}
+        onClose={toggleIsViewerOpen}
+        images={[{ src: currentImage, alt: "Attachment" }]}
+        activeIndex={0}
+        rotatable={true}
+        zoomable={true}
+        scalable={true}
+        noNavbar={false}
+        noToolbar={false}
+        attribute={false}
+        zIndex={2000}
+        key={currentImage}
+      />
     </Modal>
   );
 }

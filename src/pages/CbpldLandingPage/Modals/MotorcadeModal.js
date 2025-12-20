@@ -36,7 +36,6 @@ function MotorcadeModal({
   const [proceed, setIsProceed] = useState(false);
   const { getImageHandle, isFetching, currentImage } = useGetImage();
   const [isViewerOpen, setIsViewerOpen] = useState(false);
-  const setProceedHandle = () => setIsProceed((prev) => !prev);
 
   useEffect(() => {
     if (openModal && isUpdate) {
@@ -66,7 +65,6 @@ function MotorcadeModal({
       formikRef.current.resetForm();
       setExistingData({});
       setUploadedFiles({});
-      setIsProceed(false);
     }
   }, [openModal]);
 
@@ -144,7 +142,6 @@ function MotorcadeModal({
         isOpen={openModal}
         toggle={() => {
           toggleModal();
-          setIsProceed(false);
         }}
         fade
         backdrop="static"
@@ -154,7 +151,6 @@ function MotorcadeModal({
         <ModalHeader
           toggle={() => {
             toggleModal();
-            setIsProceed(false);
           }}
         >
           <p
@@ -407,7 +403,10 @@ function MotorcadeModal({
 
           <div className="d-flex gap-2">
             <div style={{ width: "30px" }}>
-              <Input type="checkbox" onClick={setProceedHandle} />
+              <Input
+                type="checkbox"
+                onChange={(e) => setIsProceed(e.target.checked)}
+              />
             </div>
             <p>{USER_PRIVACY}</p>
           </div>
@@ -440,8 +439,6 @@ function MotorcadeModal({
                 [],
                 [toggleModal, toggleRefresh]
               );
-
-              setIsProceed(false);
             }}
           >
             {isUpdate ? "Update" : "Submit"}
@@ -451,7 +448,6 @@ function MotorcadeModal({
             color="secondary"
             onClick={() => {
               toggleModal();
-              setIsProceed(false);
             }}
           >
             Close

@@ -7,9 +7,7 @@ import "./i18n";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
-
 import { store } from "./app/store";
-
 const root = ReactDOM.createRoot(document.getElementById("root"));
 let persistor = persistStore(store);
 <script src="https://js.pusher.com/8.3.0/pusher.min.js"></script>;

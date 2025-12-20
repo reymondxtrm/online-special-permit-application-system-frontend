@@ -21,26 +21,6 @@ export const loginUser = createAsyncThunk(
   async ({ data, history }, thunkAPI) => {
     try {
       const res = await axios.post("/api/login", data);
-      localStorage.setItem("email", res.data.email);
-      if (res.data.status === 202) {
-        history.push("/email-verification");
-      }
-      if (res.data.status === 200) {
-        history.push("/verify-otp");
-        return { ...res.data };
-      } else {
-        return thunkAPI.rejectWithValue(res.data);
-      }
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data);
-    }
-  }
-);
-export const sendOtp = createAsyncThunk(
-  "users/sendOtp",
-  async ({ data, history }, thunkAPI) => {
-    try {
-      const res = await axios.post("/api/login/verify-otp", data);
       if (res.data.status === 200) {
         localStorage.setItem("authUser", JSON.stringify(res.data));
         localStorage.setItem("authToken", res.data.token);
@@ -87,29 +67,8 @@ export const specialPermitClientRegister = createAsyncThunk(
         method: "POST",
         data: params,
       });
-      // localStorage.setItem("authUser", JSON.stringify(response.data));
-      localStorage.setItem("email", response.data.email);
-      if (response.status === 200) {
-        history.push(`/email-verification`);
-        return response;
-      }
-      return thunkAPI.rejectWithValue(response.data);
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data);
-    }
-  }
-);
-export const specialPermitCompanyRegistration = createAsyncThunk(
-  "user/specialPermitCompanyRegistration",
-  async ({ params, history }, thunkAPI) => {
-    try {
-      const response = await axios({
-        url: "api/registration/company",
-        method: "POST",
-        data: params,
-      });
-      // localStorage.setItem("authUser", JSON.stringify(response.data));
-      localStorage.setItem("email", response.data.email);
+      localStorage.setItem("authUser", JSON.stringify(response.data));
+      localStorage.setItem("authToken", response.data.token);
       if (response.status === 200) {
         history.push(`/email-verification`);
         return response;
@@ -185,10 +144,8 @@ export const userSlice = createSlice({
     accountType: "",
     withCompanyDetails: "",
     isFetching: false,
-    loginIsFetching: false,
     isSuccess: false,
     isLoginError: false,
-    isOtpError: false,
     isSignUpError: false,
     isSignUpSuccess: false,
     isVerified: "",
@@ -231,7 +188,7 @@ export const userSlice = createSlice({
       state.isSignUpSuccess = false;
       state.errorMessage = payload.message;
     },
-    [sendOtp.fulfilled]: (state, { payload }) => {
+    [loginUser.fulfilled]: (state, { payload }) => {
       state.name = payload.user.fname;
       state.email = payload.user.email;
       state.id = payload.user.id;
@@ -249,14 +206,14 @@ export const userSlice = createSlice({
       state.companyType = payload?.user?.user_details?.company_type || null;
       return state;
     },
-    [sendOtp.rejected]: (state, { payload }) => {
+    [loginUser.rejected]: (state, { payload }) => {
       state.isFetching = false;
       state.isLoginError = true;
       state.errorMessage = payload.message;
       state.isSignUpError = false;
       state.isSignUpSuccess = false;
     },
-    [sendOtp.pending]: (state) => {
+    [loginUser.pending]: (state) => {
       state.isFetching = true;
     },
     [logoutUser.fulfilled]: (state) => {
@@ -307,21 +264,21 @@ export const userSlice = createSlice({
       state.isFetching = true;
     },
     [specialPermitClientRegister.fulfilled]: (state, { payload }) => {
-      // state.name = payload.user.fname;
-      // state.email = payload.user.email;
-      // state.id = payload.user.id;
-      // state.user_type = payload.user.user_type;
-      // state.accountType = payload.user.account_type;
-      // state.roles = payload.roles;
-      // state.username = payload.user.username;
+      state.name = payload.user.fname;
+      state.email = payload.user.email;
+      state.id = payload.user.id;
+      state.user_type = payload.user.user_type;
+      state.accountType = payload.user.account_type;
+      state.roles = payload.roles;
+      state.username = payload.user.username;
       state.isFetching = false;
       state.isSuccess = true;
       state.isLoginError = false;
       state.errorMessage = "";
       state.isSignUpError = false;
       state.isSignUpSuccess = false;
-      // state.isVerified = payload.user.email_verified_at;
-      // state.companyType = payload?.user?.user_details?.company_type || null;
+      state.isVerified = payload.user.email_verified_at;
+      state.companyType = payload?.user?.user_details?.company_type || null;
       state.isFetching = false;
       state.isSignUpSuccess = true;
     },
@@ -339,43 +296,6 @@ export const userSlice = createSlice({
     [postForgetPassword.rejected]: (state, { payload }) => {
       state.forgetIsFetching = false;
       state.forgetError = payload.message;
-    },
-    [loginUser.pending]: (state) => {
-      state.isFetching = true;
-    },
-    [loginUser.fulfilled]: (state, { payload }) => {
-      state.isFetching = false;
-      state.forgetSuccessMsg = payload.message;
-    },
-    [loginUser.rejected]: (state, { payload }) => {
-      state.isFetching = false;
-      state.forgetError = payload.message;
-    },
-    [specialPermitCompanyRegistration.pending]: (state) => {
-      state.isFetching = true;
-    },
-    [specialPermitCompanyRegistration.fulfilled]: (state, { payload }) => {
-      // state.name = payload.user.fname;
-      state.email = payload.user.email;
-      // state.id = payload.user.id;
-      // state.user_type = payload.user.user_type;
-      // state.accountType = payload.user.account_type;
-      // state.roles = payload.roles;
-      // state.username = payload.user.username;
-      state.isFetching = false;
-      state.isSuccess = true;
-      state.isLoginError = false;
-      state.errorMessage = "";
-      state.isSignUpError = false;
-      state.isSignUpSuccess = false;
-      // state.isVerified = payload.user.email_verified_at;
-      // state.companyType = payload?.user?.user_details?.company_type || null;
-      state.isFetching = false;
-      state.isSignUpSuccess = true;
-    },
-    [specialPermitCompanyRegistration.rejected]: (state) => {
-      state.isFetching = false;
-      state.isSignUpError = true;
     },
   },
 });

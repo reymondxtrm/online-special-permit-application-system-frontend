@@ -704,8 +704,8 @@ function PaymentModal({
                                         const secretKey =
                                           "dbb0cf7063d880f7d416cc137a24f3625be78529196e8d91d360fef1994e76ef";
                                         const obj = {
-                                          // amount: paymentDetails.total_amount,
-                                          amount: 100,
+                                          amount: paymentDetails.total_amount,
+                                          // amount: 100,
                                           transaction_type: "Tax/Fees",
                                           // merchant_reference_number: `B-434`,
                                           merchant_reference_number: `B-${uuidv4()}`,
@@ -724,13 +724,16 @@ function PaymentModal({
                                           department: "CBPLD",
                                           downloadable: false,
                                           type_application: "miscellaneous",
-                                          email: user.email,
-                                          // email: "reymondxtrm@gmail.com",
+                                          // email: user.email,
+                                          email: "reymondxtrm@gmail.com",
                                           remarks: "Remarks",
                                           callback_url:
                                             "https://saas.butuan.gov.ph/paymentreturn.php",
                                           backUrl:
-                                            "http://localhost:3000/client/for-payment/dashboard",
+                                            window.location.protocol +
+                                            "//" +
+                                            process.env.REACT_APP_URL +
+                                            "client/for-payment/dashboard",
                                           new_collection: eor_collection,
                                           onSuccessCallbackUrl: {
                                             params: [
@@ -748,7 +751,11 @@ function PaymentModal({
                                               MerchantRefNum: "", // merchant number
                                               TrxnAmount: "paid_amount", // return ammount
                                             },
-                                            link: `http://localhost:8000/api/update-payment-status`,
+                                            link:
+                                              window.location.protocol +
+                                              "//" +
+                                              process.env.REACT_APP_API +
+                                              `api/update-payment-status`,
                                           },
                                         };
 

@@ -16,11 +16,12 @@ export default function DepartmentHeadSingnatory({ scale }) {
         <p
           style={{
             fontSize: `${fontSize}pt`,
-            fontWeight: "bold",
+            // fontWeight: "bold",
             // color: "#005a99",
             paddingTop: `${padding}px`,
             margin: 0,
-            fontFamily: "Cambria, serif",
+            fontWeight: "600",
+            fontFamily: "Golos Text, sans-serif",
           }}
         >
           {"ATTY. MOSHI ARIEL S. CAHOY"}
@@ -39,7 +40,8 @@ export default function DepartmentHeadSingnatory({ scale }) {
 
             padding: 0,
             margin: 0,
-            fontFamily: "Cambria, serif",
+            // fontWeight: "500",
+            fontFamily: "Golos Text, sans-serif",
           }}
         >
           {"City Goverment Department Head II"}

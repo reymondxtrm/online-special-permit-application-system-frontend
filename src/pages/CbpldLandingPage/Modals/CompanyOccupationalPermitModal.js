@@ -24,6 +24,7 @@ import * as Yup from "yup";
 import { useSelector } from "react-redux";
 import useGetImage from "hooks/Common/useGetImage";
 import Viewer from "react-viewer";
+import UploadWithCropperModal from "./UploadWithCropperModal";
 
 export default function CompanyOccupationalPermitModal({
   isOpen,
@@ -34,7 +35,11 @@ export default function CompanyOccupationalPermitModal({
   const [activeIndex, setActiveIndex] = useState();
   // const [additionalDetails, setAdditionalDetailsModal] = useState(false);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [inputPicture, setInputPicture] = useState(null);
+  const [uploadImageModal, setUploadImageModal] = useState(false);
   const { getImageHandle, isFetching, currentImage } = useGetImage();
+
+  const fileInputRef = useRef(null);
   const handleSubmit = useSubmit();
   const genderOptions = [
     { value: "MALE", label: "Male" },
@@ -54,17 +59,39 @@ export default function CompanyOccupationalPermitModal({
   const toggleImageViewer = useCallback(() => {
     setIsViewerOpen((prev) => !prev);
   }, []);
+  const onCropDone = (image) => {
+    formikRef.current.setFieldValue(
+      `employees.[${activeIndex}].id_picture`,
+      image
+    );
+    toggleUploadImageModal();
+  };
+  console.log(formikRef?.current?.values);
   // const toggleAdditionalDetailsModal = () => {
   //   setAdditionalDetailsModal((prev) => !prev);
   // };
-  const setAdditionalDetails = (detail) => {
-    Object.entries(detail).forEach(([key, value]) => {
-      formikRef.current.setFieldValue(
-        `employees[${activeIndex}].${key}`,
-        value || ""
-      );
-    });
+  // const setAdditionalDetails = (detail) => {
+  //   Object.entries(detail).forEach(([key, value]) => {
+  //     formikRef.current.setFieldValue(
+  //       `employees[${activeIndex}].${key}`,
+  //       value || ""
+  //     );
+  //   });
+  // };
+  const toggleUploadImageModal = () => {
+    setUploadImageModal((prev) => !prev);
   };
+  const handleClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleChange = (e) => {
+    const file = e.target.files[0];
+    const url = URL.createObjectURL(file);
+    setInputPicture(url);
+    toggleUploadImageModal();
+  };
+
   const getFormData = (object, form = new FormData(), namespace = "") => {
     for (const key in object) {
       if (Object.prototype.hasOwnProperty.call(object, key)) {
@@ -89,7 +116,6 @@ export default function CompanyOccupationalPermitModal({
     }
     return form;
   };
-  console.log(user?.companyType);
   const employeeSchema = Yup.object().shape({
     fname: Yup.string().required("First name is required"),
     lname: Yup.string().required("Last name is required"),
@@ -215,6 +241,14 @@ export default function CompanyOccupationalPermitModal({
           isOpen={cameraIsOpen}
           toggle={togglePasssportCamera}
           image={formikRef?.current?.values?.employees[activeIndex]?.id_picture}
+        />
+      )}
+      {uploadImageModal && (
+        <UploadWithCropperModal
+          openModal={uploadImageModal}
+          toggleModal={toggleUploadImageModal}
+          image={inputPicture}
+          onCropDone={onCropDone}
         />
       )}
 
@@ -522,6 +556,24 @@ export default function CompanyOccupationalPermitModal({
                                   >
                                     <i className="mdi  mdi-camera fs-5"></i>
                                   </Button>
+                                  <Button
+                                    color="primary"
+                                    outline
+                                    style={{ marginTop: "5px" }}
+                                    onClick={() => {
+                                      handleClick();
+                                      setActiveIndex(index);
+                                    }}
+                                  >
+                                    Upload image
+                                  </Button>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    ref={fileInputRef}
+                                    style={{ display: "none" }}
+                                    onChange={handleChange}
+                                  />
                                 </div>
                               </td>
                               <td style={{ width: "10%" }}>

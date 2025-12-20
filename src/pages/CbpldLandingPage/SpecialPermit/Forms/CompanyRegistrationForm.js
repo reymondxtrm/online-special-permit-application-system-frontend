@@ -7,12 +7,18 @@ import useSubmit from "hooks/Common/useSubmit";
 
 import Swal from "sweetalert2";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { specialPermitCompanyRegistration } from "features/user/userSlice";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 // migrate this one into authentication pages
 export default function CompanyRegistrationForm({
   brangaysOptions,
   toggleModal,
+  props,
 }) {
   const [outsideButuan, setOutsideButuan] = useState(false);
+  const dispatch = useDispatch();
+  const history = useHistory();
   const validation = useFormik({
     enableReinitialize: true,
     initialValues: {
@@ -50,7 +56,7 @@ export default function CompanyRegistrationForm({
           };
         }
 
-        const response = await axios.post("/api/registration/company", params);
+        await dispatch(specialPermitCompanyRegistration({ params, history }));
 
         Swal.fire({
           icon: "success",

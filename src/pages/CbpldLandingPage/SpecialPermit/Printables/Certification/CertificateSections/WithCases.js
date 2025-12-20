@@ -28,9 +28,10 @@ export default function WithCases({ withCase, scale }) {
       <div style={{ marginLeft: `${innerMarginLeft}px` }}>
         <p
           style={{
-            fontFamily: "Cambria, serif",
+            fontWeight: "600",
+            fontFamily: "Golos Text, sans-serif",
             fontSize: `${fontSize}pt`,
-            fontWeight: "bold",
+            // fontWeight: "bold",
             marginBottom: "1em", // em scales with font size automatically
             textAlign: "justify",
             lineHeight: "1.5",

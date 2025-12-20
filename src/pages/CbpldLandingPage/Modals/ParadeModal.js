@@ -77,9 +77,7 @@ function ParadeModal({
     });
     return formData;
   };
-  const setProceedHandle = () => {
-    setIsProceed((prev) => !prev);
-  };
+
   const toggleIsViewerOpen = () => {
     setIsViewerOpen((prev) => !prev);
   };
@@ -132,7 +130,6 @@ function ParadeModal({
         isOpen={openModal}
         toggle={() => {
           toggleModal();
-          setIsProceed(false);
         }}
         fade={true}
         backdrop="static"
@@ -146,7 +143,6 @@ function ParadeModal({
         <ModalHeader
           toggle={() => {
             toggleModal();
-            setIsProceed(false);
           }}
         >
           <p
@@ -417,7 +413,10 @@ function ParadeModal({
           </Formik>
           <div className="d-flex gap-2">
             <div style={{ width: "30px" }}>
-              <Input type="checkbox" onClick={setProceedHandle} />
+              <Input
+                type="checkbox"
+                onChange={(e) => setIsProceed(e.target.checked)}
+              />
             </div>
             <p>{USER_PRIVACY}</p>
           </div>
@@ -457,7 +456,6 @@ function ParadeModal({
                   [],
                   [toggleModal, toggleRefresh]
                 );
-                setIsProceed(false);
               }
             }}
             disabled={!proceed}
@@ -468,7 +466,6 @@ function ParadeModal({
             color="secondary"
             onClick={() => {
               toggleModal();
-              setIsProceed(false);
             }}
           >
             Close

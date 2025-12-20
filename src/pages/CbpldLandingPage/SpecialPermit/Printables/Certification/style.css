@@ -1,12 +1,14 @@
 /* Wrapper */
+
+@import url("https://fonts.googleapis.com/css2?family=Golos+Text:wght@400..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 .certificate-wrapper {
   margin: auto;
   padding: 20px;
   display: flex;
   justify-content: center;
   color: #000000;
+  font-family: "Golos Text", sans-serif;
 }
-
 .a4 {
   width: 208mm;
   height: 290mm;
@@ -19,10 +21,13 @@
 
 .certificate-table {
   width: 100%;
+  background-image: url("../../../../../assets/images/Permit.png");
+  background-size: cover;
+  background-position: center;
   height: 100%;
   border-collapse: collapse;
-  box-shadow: 0 0 0 1px black, 0 0 0 2px white, 0 0 0 3px black, 0 0 0 4px white,
-    0 0 0 5px black;
+  border-style: dashed;
+  border-color: #3d69c2;
 }
 
 /* Header Section */
@@ -51,17 +56,15 @@
   padding-top: 20px;
   font-size: 11pt;
   line-height: 1.2;
-  color: #154172;
+  color: #000000 !important;
 }
 
 .header-text p {
   margin: 0;
   padding: 0;
   text-align: left;
-}
-
-.header-title {
-  font-weight: bold;
+  font-weight: 500;
+  color: #000000 !important;
 }
 
 /* Content Section */
@@ -78,6 +81,7 @@
   height: 135px;
   text-align: center;
   padding: 10px;
+  margin-left: 30px;
 }
 
 .footer-content {
@@ -115,7 +119,7 @@
 }
 
 .footer-warning {
-  font-family: "Cambria, serif";
+  /* font-family: "Cambria, serif"; */
   margin: 0;
   font-size: 15px;
   color: rgb(204, 79, 79);
@@ -199,26 +203,23 @@
     -webkit-print-color-adjust: exact;
   }
 
-  /* ✅ Keep header text size consistent in print */
   .header-text {
     font-size: 11pt !important;
     line-height: 1.2 !important;
-    color: #154172 !important;
+    color: #000000 !important;
     padding-top: 20px !important;
     margin-left: 5px !important;
     transform: scale(1) !important;
     transform-origin: top left !important;
   }
 
-  /* ✅ Keep header title bold and same size */
   .header-title {
     font-size: 12pt !important;
     font-weight: bold !important;
-    color: #154172 !important;
+    color: black !important;
     letter-spacing: 0.3px;
   }
 
-  /* ✅ Prevent unwanted image scaling globally */
   img {
     max-width: none !important;
     max-height: none !important;
