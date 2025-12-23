@@ -1,9 +1,13 @@
 import TableLoaders from "components/Loaders/TableLoaders";
-import { getIndividualOccupationalApplications } from "features/SpecialPermitAdmin";
+import {
+  getIndividualOccupationalApplications,
+  SpecialPermitAdminSlice,
+} from "features/SpecialPermitAdmin";
 import { iteratee } from "lodash";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AttachmentModal from "../Modals/AttachmentModal";
+import Pagination from "components/Pagination";
 import {
   Badge,
   Button,
@@ -25,6 +29,10 @@ import ReturnRemarksModal from "../Modals/ReturnRemarksModal";
 import GenerateOccupationalPermitModal from "../Modals/GenerateOccupationalPermitModal";
 import UploadPermitModal from "../Modals/UploadPermitModal";
 import OccupationalRequestForm from "../Printables/OccupationalRequestForm";
+import {
+  formateDateIntoString,
+  updateTabNotification,
+} from "common/utility/utilityFunction";
 
 export default function OccupationalTableIndividualAdmin({
   status,
@@ -93,6 +101,13 @@ export default function OccupationalTableIndividualAdmin({
   const toggleImageViewer = () => {
     setIsViewerOpen((prev) => !prev);
   };
+  const handleRowOnclick = (permit_id) => {
+    const response = updateTabNotification(
+      "occupational_permit",
+      permit_id,
+      status
+    );
+  };
 
   return (
     <React.Fragment>
@@ -158,7 +173,7 @@ export default function OccupationalTableIndividualAdmin({
             toggle={toggleGenerateModal}
             openModal={generateModal}
             applicationDetails={
-              specialPermitAdmin?.individualOccupational?.[activeIndex]
+              specialPermitAdmin?.individualOccupational?.data?.[activeIndex]
             }
           />
           <UploadPermitModal
@@ -185,7 +200,6 @@ export default function OccupationalTableIndividualAdmin({
             {status === "for_payment_approval" || status === "returned" ? (
               <>
                 <th>Official Receipt</th>
-                <th>Cedula</th>
               </>
             ) : (
               <th>Attachment</th>
@@ -201,14 +215,28 @@ export default function OccupationalTableIndividualAdmin({
         <tbody>
           {specialPermitAdmin.getIndividualOccupationalData ? (
             <TableLoaders row={7} col={10} />
-          ) : specialPermitAdmin?.individualOccupational?.length > 0 ? (
-            specialPermitAdmin?.individualOccupational?.map(
+          ) : specialPermitAdmin?.individualOccupational?.data?.length > 0 ? (
+            specialPermitAdmin?.individualOccupational?.data?.map(
               (application, index) => (
-                <tr key={index}>
+                <tr
+                  key={index}
+                  onClick={() => {
+                    application?.mark_as_read
+                      ? null
+                      : handleRowOnclick(application.id);
+                  }}
+                >
                   <td className="fw-bold">{index + 1}</td>
-                  <td className="fw-bold">{`${application?.user?.fname} ${
-                    application?.user?.mname || ""
-                  } ${application?.user?.lname}`}</td>
+                  <td className="fw-bold">
+                    {`${application?.user?.fname} ${
+                      application?.user?.mname || ""
+                    } ${application?.user?.lname}`}{" "}
+                    {application?.mark_as_read ? (
+                      ""
+                    ) : (
+                      <Badge color="primary"> Unread</Badge>
+                    )}
+                  </td>
                   <td>{application?.user?.sex}</td>
                   <td>
                     {application?.user?.user_address_morph[0]?.full_address}
@@ -394,7 +422,7 @@ export default function OccupationalTableIndividualAdmin({
                             onClick={() => {
                               toggleGenerateModal();
                               setActiveIndex(index);
-                              setApplicationId(item?.id);
+                              setApplicationId(application?.id);
                             }}
                           >
                             Generate
@@ -406,7 +434,7 @@ export default function OccupationalTableIndividualAdmin({
                             style={{ width: "90px" }}
                             onClick={() => {
                               toggleUploadPermitModal();
-                              setApplicationId(item?.id);
+                              setApplicationId(application?.id);
                             }}
                           >
                             Upload
@@ -427,6 +455,17 @@ export default function OccupationalTableIndividualAdmin({
           )}
         </tbody>
       </Table>
+      <Pagination
+        dataProps={specialPermitAdmin.individualOccupational}
+        setDataProps={
+          SpecialPermitAdminSlice.actions.setDataPropsIndividualOccupational
+        }
+        setShowLoading={
+          SpecialPermitAdminSlice.actions.setShowLoadingIndividualOccupational
+        }
+        isLoading={specialPermitAdmin.getIndividualOccupationalData}
+        params={{ type: "individual", status: status }}
+      />
     </React.Fragment>
   );
 }

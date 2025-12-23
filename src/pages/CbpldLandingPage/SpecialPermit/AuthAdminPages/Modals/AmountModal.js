@@ -40,7 +40,7 @@ function AmountModal({
   useEffect(() => {
     if (openModal) {
       axios
-        .get("api/admin/get/exempted-cases", {
+        .get("api/admin//get/exempted-cases/admin", {
           params: { permit_type: "event" },
         })
         .then(
@@ -63,7 +63,6 @@ function AmountModal({
       <Modal
         isOpen={openModal}
         toggle={() => {
-          // ensure parent toggles and reset local state and form
           toggleModal();
           setExempted(false);
           if (
@@ -75,7 +74,6 @@ function AmountModal({
         }}
         fade={true}
         backdrop="static"
-        // use reactstrap props: centered to vertically center, remove invalid props
         centered
         keyboard
         style={{ overflowY: "auto" }}
@@ -137,47 +135,48 @@ function AmountModal({
                           </FormGroup>
                         </Col>
                       </Row>
-                    </>
-                  )}
-                  <Row
-                    style={{
-                      backgroundColor: "#cddfebff",
-                      alignItems: "center", // centers vertically
-                      display: "flex", // enable flex layout
-                      minHeight: "30px", // optional: gives some height
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        marginTop: "5px",
-                      }}
-                    >
-                      <FormGroup
-                        check
-                        inline
-                        className="d-flex justify-content-center"
+                      <Row
+                        style={{
+                          backgroundColor: "#cddfebff",
+                          alignItems: "center",
+                          display: "flex",
+                          minHeight: "30px",
+                        }}
                       >
-                        <Input
-                          type="checkbox"
-                          className="me-2"
-                          style={{ width: "17px", height: "17px" }}
-                          value={exempted}
-                          onChange={(e) => setExempted(e.target.checked)}
-                        />
-                        <Label
+                        <div
                           style={{
-                            color: "#2162a3ff",
-                            fontSize: "15px",
-                            fontWeight: "bold",
+                            display: "flex",
+                            alignItems: "center",
+                            marginTop: "5px",
                           }}
                         >
-                          Exempted
-                        </Label>
-                      </FormGroup>
-                    </div>
-                  </Row>{" "}
+                          <FormGroup
+                            check
+                            inline
+                            className="d-flex justify-content-center"
+                          >
+                            <Input
+                              type="checkbox"
+                              className="me-2"
+                              style={{ width: "17px", height: "17px" }}
+                              value={exempted}
+                              onChange={(e) => setExempted(e.target.checked)}
+                            />
+                            <Label
+                              style={{
+                                color: "#2162a3ff",
+                                fontSize: "15px",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              Exempted
+                            </Label>
+                          </FormGroup>
+                        </div>
+                      </Row>{" "}
+                    </>
+                  )}
+
                   <Row style={{ backgroundColor: "#cddfebff" }}>
                     <Col md={12}>
                       <FormGroup>
@@ -194,23 +193,25 @@ function AmountModal({
                       </FormGroup>
                     </Col>
                   </Row>
-                  <Row
-                    style={{
-                      backgroundColor: "#cddfebff",
-                      paddingBottom: "15px",
-                    }}
-                  >
-                    <Col>
-                      <Label>Exemption</Label>
-                      <Select
-                        options={discountOption}
-                        onChange={(selected) => {
-                          props.setFieldValue("exemption_id", selected.value);
-                        }}
-                        isDisabled={!exempted}
-                      />
-                    </Col>
-                  </Row>
+                  {permitType === "event" && (
+                    <Row
+                      style={{
+                        backgroundColor: "#cddfebff",
+                        paddingBottom: "15px",
+                      }}
+                    >
+                      <Col>
+                        <Label>Exemption</Label>
+                        <Select
+                          options={discountOption}
+                          onChange={(selected) => {
+                            props.setFieldValue("exemption_id", selected.value);
+                          }}
+                          isDisabled={!exempted}
+                        />
+                      </Col>
+                    </Row>
+                  )}
                 </Col>
               </Form>
             )}

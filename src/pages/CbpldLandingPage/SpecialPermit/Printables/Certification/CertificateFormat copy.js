@@ -55,7 +55,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
   const maxHeight = useMemo(() => {
     return permitType === "good_moral" || permitType === "mayors_permit"
       ? 1090
-      : 1223;
+      : 1195;
   }, [permitType]);
 
   useEffect(() => {
@@ -64,7 +64,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
 
     let timeoutId;
     let isRunning = true;
-    const scaleRef = { current: scale };
+    const scaleRef = { current: scale }; // keep the latest scale in a ref-like object
 
     const adjustScale = () => {
       if (!isRunning) return;
@@ -72,7 +72,9 @@ const CertificateFormat = React.forwardRef((props, ref) => {
       const tolerance = 5;
       const lowerBound = maxHeight - 80;
       const upperBound = maxHeight + tolerance;
+
       let newScale = scaleRef.current;
+      console.log(maxHeight, currentHeight);
       if (currentHeight > upperBound && newScale > 0.5) {
         newScale = +Math.max(newScale - 0.01, 0.5).toFixed(2);
         setScale(newScale);
@@ -87,9 +89,10 @@ const CertificateFormat = React.forwardRef((props, ref) => {
         isRunning = false;
         clearTimeout(timeoutId);
       }
-      console.log(newScale);
     };
+
     adjustScale();
+
     return () => {
       isRunning = false;
       clearTimeout(timeoutId);

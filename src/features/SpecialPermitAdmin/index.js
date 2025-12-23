@@ -58,6 +58,26 @@ export const getIndividualOccupationalApplications = createAsyncThunk(
     }
   }
 );
+export const getOccupationalDetails = createAsyncThunk(
+  "specialPermitAdmin/getOccupationalDetails",
+  async (params, thunkAPI) => {
+    try {
+      const response = await axios({
+        url: "api/admin/get-individual-occupational-applications",
+        method: "GET",
+        params: { ...params },
+      });
+      if (response.data) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(response.data);
+      }
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
 export const SpecialPermitAdminSlice = createSlice({
   name: "specialPermitAdmin",
   initialState: {
@@ -67,7 +87,6 @@ export const SpecialPermitAdminSlice = createSlice({
     individualOccupational: [],
     getCompanyOccupationalData: false,
     getIndividualOccupationalData: false,
-
     params: {},
   },
   reducers: {
@@ -79,6 +98,18 @@ export const SpecialPermitAdminSlice = createSlice({
     },
     setParams: (state, action) => {
       state.params = action.payload;
+    },
+    setDataPropsCompanyOccupational: (state, action) => {
+      state.companyOccupational = action.payload;
+    },
+    setShowLoadingCompanyOccupational: (state, action) => {
+      state.getCompanyOccupationalData = action.payload;
+    },
+    setDataPropsIndividualOccupational: (state, action) => {
+      state.individualOccupational = action.payload;
+    },
+    setShowLoadingIndividualOccupational: (state, action) => {
+      state.getIndividualOccupationalData = action.payload;
     },
   },
   extraReducers: {

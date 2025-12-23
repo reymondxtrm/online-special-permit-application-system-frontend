@@ -238,8 +238,16 @@ function PaymentModal({
                       flexDirection: "column",
                     }}
                   >
-                    <Row>
-                      <Col style={{ paddingRight: "0px", paddingLeft: "0px" }}>
+                    <Row className="m-0 p-0" style={{ height: "100%" }}>
+                      <Col
+                        style={{
+                          paddingRight: "0px",
+                          paddingLeft: "0px",
+                          height: "100%",
+                          display: "flex",
+                          flexDirection: "column",
+                        }}
+                      >
                         <Card>
                           <CardBody>
                             <Row style={{ marginTop: "10px" }}>
@@ -363,7 +371,15 @@ function PaymentModal({
                           </CardBody>
                         </Card>
                       </Col>
-                      <Col style={{ paddingRight: "0px", paddingLeft: "2px" }}>
+                      <Col
+                        style={{
+                          paddingRight: "0px",
+                          paddingLeft: "2px",
+                          height: "100%",
+                          display: "flex",
+                          flexDirection: "column",
+                        }}
+                      >
                         <Card>
                           <CardBody
                             style={{
@@ -376,7 +392,6 @@ function PaymentModal({
                                 <Card>
                                   <CardBody style={{ color: "" }}>
                                     <Row>
-                                      <div></div>
                                       <h4
                                         style={{
                                           color: "#0b2c72ff",
@@ -386,10 +401,9 @@ function PaymentModal({
                                       >
                                         Payment Method
                                       </h4>
-                                      <Col className="d-flex align-items-center justify-content-center">
+                                      <Col className="d-flex ">
                                         <Card
                                           style={{
-                                            // border: "3px solid #5587F9",
                                             border: "3px solid ",
                                             borderColor:
                                               paymentMethod === "online"
@@ -427,7 +441,7 @@ function PaymentModal({
                                           </CardBody>
                                         </Card>
                                       </Col>
-                                      <Col className="d-flex align-items-center justify-content-center ">
+                                      <Col className="d-flex">
                                         <Card
                                           style={{
                                             border: "3px solid ",
@@ -489,18 +503,31 @@ function PaymentModal({
                                           <div>
                                             <p
                                               className="m-0 p-0 fw-bold"
-                                              style={{ fontSize: "10px" }}
+                                              style={{
+                                                fontSize: "20px",
+                                                color: "#0b2c72ff",
+                                              }}
                                             >
                                               Landbank (ePayment Portal)
                                             </p>
-                                            <p style={{ fontSize: "10px" }}>
+                                            <p style={{ fontSize: "14px" }}>
                                               {" "}
-                                              Rate: LBP ATM/Visa Debit Card - P
-                                              7 per transaction | BancNet-Member
-                                              Bank ATM/Debit Cards - P17 per
-                                              transaction | Cash Payment and
-                                              e-Wallet (GCash, ShopeePay and
-                                              GrabPay - P 30 per transaction)
+                                              Rate: LBP ATM/Visa Debit Card -{" "}
+                                              <strong>
+                                                P 7 per transaction{" "}
+                                              </strong>
+                                              | BancNet-Member Bank ATM/Debit
+                                              Cards -
+                                              <strong>
+                                                {" "}
+                                                P17 per transaction
+                                              </strong>{" "}
+                                              | Cash Payment and e-Wallet
+                                              (GCash, ShopeePay and GrabPay -
+                                              <strong>
+                                                P 30 per transaction
+                                              </strong>{" "}
+                                              )
                                             </p>
                                           </div>
                                           <div className="d-flex gap-2">
@@ -542,6 +569,7 @@ function PaymentModal({
                                     </Row>
                                   </CardBody>
                                 </Card>
+                                {console.log(approveTerm)}
                                 <Row>
                                   <div className="d-flex gap-2">
                                     <Input
@@ -549,6 +577,9 @@ function PaymentModal({
                                       defaultChecked={approveTerm}
                                       onChange={(e) => {
                                         setApproveTerm(e.target.checked);
+                                        if (e.target.checked) {
+                                          toggleTermsAndConditionsModal();
+                                        }
                                       }}
                                     />
                                     <p>
@@ -700,14 +731,14 @@ function PaymentModal({
                                     onClick={() => {
                                       const formik = formikRef.current.values;
                                       if (paymentMethod === "online") {
-                                        // const secretKey = process.env.REACT_SECRET_KEY;
                                         const secretKey =
-                                          "dbb0cf7063d880f7d416cc137a24f3625be78529196e8d91d360fef1994e76ef";
+                                          process.env.REACT_SECRET_KEY;
+                                        // const secretKey =
+                                        //   "dbb0cf7063d880f7d416cc137a24f3625be78529196e8d91d360fef1994e76ef";
                                         const obj = {
                                           amount: paymentDetails.total_amount,
                                           // amount: 100,
                                           transaction_type: "Tax/Fees",
-                                          // merchant_reference_number: `B-434`,
                                           merchant_reference_number: `B-${uuidv4()}`,
                                           full_name: user.name,
                                           user_id: user.id,
@@ -724,8 +755,8 @@ function PaymentModal({
                                           department: "CBPLD",
                                           downloadable: false,
                                           type_application: "miscellaneous",
-                                          // email: user.email,
-                                          email: "reymondxtrm@gmail.com",
+                                          email: user.email,
+                                          // email: "reymondxtrm@gmail.com",
                                           remarks: "Remarks",
                                           callback_url:
                                             "https://saas.butuan.gov.ph/paymentreturn.php",
@@ -743,13 +774,13 @@ function PaymentModal({
                                               "newCollection",
                                             ],
                                             defaults: {
-                                              Checksum: "", // sum reference
-                                              ErrorCode: "", // error code
-                                              LBPConfDate: "date_of_payment", // date
-                                              LBPConfNum: "LBPConfNum", // confirmation number
-                                              LBPRefNum: "", // some series numbers
-                                              MerchantRefNum: "", // merchant number
-                                              TrxnAmount: "paid_amount", // return ammount
+                                              Checksum: "",
+                                              ErrorCode: "",
+                                              LBPConfDate: "date_of_payment",
+                                              LBPConfNum: "LBPConfNum",
+                                              LBPRefNum: "",
+                                              MerchantRefNum: "",
+                                              TrxnAmount: "paid_amount",
                                             },
                                             link:
                                               window.location.protocol +

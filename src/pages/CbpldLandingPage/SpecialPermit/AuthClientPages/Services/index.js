@@ -7,6 +7,9 @@ import {
   Row,
   Col,
   Button,
+  UncontrolledPopover,
+  PopoverHeader,
+  PopoverBody,
 } from "reactstrap";
 import Breadcrumbs from "components/Common/Breadcrumb";
 import bg from "../../../../../assets/images/cgb-bg.jpg";
@@ -20,17 +23,99 @@ import UseOfGovernmentPropertyModal from "../../../Modals/UseOfGovernmentPropert
 import OccupationalPermitModal from "../../../Modals/OccupationalPermitModal";
 import { useSelector } from "react-redux";
 import CompanyOccupationalPermitModal from "pages/CbpldLandingPage/Modals/CompanyOccupationalPermitModal";
-const PermitCard = ({ title, content, onClick, isDisabled }) => (
-  <Col sm="3">
-    <Card style={styles.card}>
-      <CardHeader style={styles.cardHeader}>{title}</CardHeader>
-      <CardBody>{content}</CardBody>
-      <Button style={styles.button} onClick={onClick} disabled={isDisabled}>
-        Go to Form
-      </Button>
-    </Card>
-  </Col>
-);
+
+const PermitCard = ({ title, content, onClick, isDisabled }) => {
+  const popoverId = `permitHelp-${title.replace(/\s+/g, "-")}`;
+
+  let info = "";
+  switch (title) {
+    case "MAYORS CERTIFICATE":
+      info =
+        "Certificate issued by the City Mayor which confirms the residency of an individual and others.";
+      break;
+    case "CERTIFICATE OF GOOD MORAL CHARACTER":
+      info =
+        "Clearance issued by the City Mayor which shall serve as a proof of good moral character of an individual as required by a public / private entity for employment purposes.";
+      break;
+    case "MOTORCADE":
+      info =
+        "Procession or convoy of vehicles, typically consisting of motor vehicles.";
+      break;
+    case "PARADE":
+      info = "Public procession or organized march.";
+      break;
+    case "RECORRIDA":
+      info =
+        "Activity undertaken by a group of persons using mobile platforms.";
+      break;
+    case "EVENT":
+      info =
+        "Event Permit issued by the City Mayor granting authority to an individual, organization, or group to conduct an event within the city’s jurisdiction. This permit ensures that the planned activity complies with local laws, public safety regulations, and community standards, and is required for events such as celebrations, programs, gatherings, or similar activities.";
+      break;
+    case "USE OF GOVERNMENT PROPERTY":
+      info =
+        "Use of Government Property Permit issued by the City Mayor authorizing the temporary use of government-owned property or facilities for an approved purpose, subject to applicable regulations.";
+      break;
+    case "OCCUPATIONAL PERMIT":
+      info =
+        "Occupational Permit issued by the City Mayor authorizing an individual to engage in a specific occupation or profession within the city, in compliance with local laws and regulations.";
+      break;
+    default:
+      info = "";
+  }
+
+  return (
+    <Col sm="3">
+      <Card style={styles.card}>
+        <CardHeader
+          style={{
+            ...styles.cardHeader,
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <span
+            style={{
+              flex: 1,
+              textAlign: "left",
+              lineHeight: "1.2",
+            }}
+          >
+            {title}
+          </span>
+          <i
+            id={popoverId}
+            className="mdi mdi-head-question-outline fs-3"
+            style={{
+              cursor: "pointer",
+              textDecoration: "none",
+              marginLeft: "auto",
+              borderBottom: "none",
+              lineHeight: 1,
+            }}
+          />
+
+          <UncontrolledPopover
+            placement="bottom"
+            target={popoverId}
+            trigger="hover"
+          >
+            <PopoverHeader>
+              <span className="text-primary">What is this?</span>
+            </PopoverHeader>
+            <PopoverBody>{info}</PopoverBody>
+          </UncontrolledPopover>
+        </CardHeader>
+
+        <CardBody>{content}</CardBody>
+
+        <Button style={styles.button} onClick={onClick} disabled={isDisabled}>
+          Go to Form
+        </Button>
+      </Card>
+    </Col>
+  );
+};
 
 function Services() {
   const [formModal, setformModal] = useState(false);
@@ -110,10 +195,6 @@ function Services() {
         toggleModal={() => toggleModal("USE OF GOVERNMENT PROPERTY")}
       />
 
-      {/* <OccupationalPermitModal
-        openModal={occupationalPermitModal}
-        toggleModal={() => toggleModal("OCCUPATIONAL PERMIT")}
-      /> */}
       <OccupationalPermitModal
         openModal={occupationalPermitModal}
         toggleModal={() => toggleModal("OCCUPATIONAL PERMIT")}
@@ -135,12 +216,7 @@ function Services() {
                 <CardBody>
                   <Container>
                     <Row>
-                      <Col lg="12">
-                        {/* <div className="text-center mb-5">
-                            <div className="small-title">Special Permit</div>
-                            <h4>Special Permit Forms</h4>
-                          </div> */}
-                      </Col>
+                      <Col lg="12"></Col>
                     </Row>
 
                     <Row style={{ paddingTop: "90px" }}>
@@ -155,7 +231,7 @@ function Services() {
                             }}
                           />
                           <PermitCard
-                            title={"GOOD MORAL"}
+                            title={"CERTIFICATE OF GOOD MORAL CHARACTER"}
                             isDisabled={false}
                             content={"Click go to Form to Apply..."}
                             onClick={() => {
@@ -225,7 +301,6 @@ function Services() {
   );
 }
 
-// Styles object
 const styles = {
   section: {
     backgroundPosition: "100%",

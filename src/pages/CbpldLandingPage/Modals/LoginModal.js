@@ -25,7 +25,7 @@ import { Link } from "react-router-dom";
 function LoginModal({ openModal, toggleModal, toggleSignUp }) {
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
-
+  const user = useState((state) => state?.user);
   const purposeOptions = [
     { value: 1, label: "Local Employment" },
     { value: 2, label: "International Employment" },
@@ -87,6 +87,7 @@ function LoginModal({ openModal, toggleModal, toggleSignUp }) {
           >
             {(props) => (
               <Form>
+                
                 <Row>
                   <FormGroup>
                     <Label for="username">Username</Label>

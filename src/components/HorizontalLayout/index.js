@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import { withRouter } from "react-router-dom";
 import PropTypes from "prop-types";
 
@@ -7,7 +7,7 @@ import {
   changeLayout,
   changeTopbarTheme,
   changeLayoutWidth,
-  showRightSidebarAction
+  showRightSidebarAction,
 } from "../../store/actions";
 
 //redux
@@ -20,17 +20,15 @@ import Footer from "./Footer";
 import RightSidebar from "../CommonForBoth/RightSidebar";
 
 const Layout = (props) => {
-
   const dispatch = useDispatch();
 
-  const {
-    topbarTheme, layoutWidth, isPreloader, showRightSidebar
-  } = useSelector(state => ({
-    topbarTheme: state.Layout.topbarTheme,
-    layoutWidth: state.Layout.layoutWidth,
-    isPreloader: state.Layout.isPreloader,
-    showRightSidebar: state.Layout.showRightSidebar,
-  }));
+  const { topbarTheme, layoutWidth, isPreloader, showRightSidebar } =
+    useSelector((state) => ({
+      topbarTheme: state.Layout.topbarTheme,
+      layoutWidth: state.Layout.layoutWidth,
+      isPreloader: state.Layout.isPreloader,
+      showRightSidebar: state.Layout.showRightSidebar,
+    }));
 
   /*
   document title
@@ -39,14 +37,12 @@ const Layout = (props) => {
     const title = props.location.pathname;
     let currentage = title.charAt(1).toUpperCase() + title.slice(2);
 
-    document.title =
-      currentage + " | Skote - React Admin & Dashboard Template";
+    document.title = "BPLD | SPECIAL PERMIT";
   }, [props.location.pathname]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
 
   //hides right sidebar on body click
   const hideRightbar = (event) => {
@@ -134,7 +130,7 @@ const Layout = (props) => {
 };
 
 Layout.propTypes = {
-  changeLayout: PropTypes.func,/*  */
+  changeLayout: PropTypes.func /*  */,
   changeLayoutWidth: PropTypes.func,
   changeTopbarTheme: PropTypes.func,
   children: PropTypes.object,
@@ -142,7 +138,7 @@ Layout.propTypes = {
   layoutWidth: PropTypes.any,
   location: PropTypes.object,
   showRightSidebar: PropTypes.any,
-  topbarTheme: PropTypes.any
+  topbarTheme: PropTypes.any,
 };
 
 export default withRouter(Layout);

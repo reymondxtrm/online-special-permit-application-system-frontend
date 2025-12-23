@@ -1,5 +1,8 @@
 import TableLoaders from "components/Loaders/TableLoaders";
-import { getCompanyOccupatinalData } from "features/SpecialPermitAdmin";
+import {
+  getCompanyOccupatinalData,
+  SpecialPermitAdminSlice,
+} from "features/SpecialPermitAdmin";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -23,6 +26,11 @@ import Viewer from "react-viewer";
 import useGetImage from "hooks/Common/useGetImage";
 import RemarksModal from "../Modals/RemarksModal";
 import OccupationalRequestForm from "../Printables/OccupationalRequestForm";
+import Pagination from "components/Pagination";
+import {
+  formateDateIntoString,
+  updateTabNotification,
+} from "common/utility/utilityFunction";
 
 export default function OccupationalTableCompanyAdmin({ status }) {
   const dispatch = useDispatch();
@@ -56,7 +64,13 @@ export default function OccupationalTableCompanyAdmin({ status }) {
         : [...prev, index]
     );
   };
-
+  const handleRowOnclick = (permit_id) => {
+    const response = updateTabNotification(
+      "occupational_permit",
+      permit_id,
+      status
+    );
+  };
   const toggleAttachmentModal = () => {
     setShowAttachmentModal((prev) => !prev);
   };
@@ -184,12 +198,14 @@ export default function OccupationalTableCompanyAdmin({ status }) {
         <tbody>
           {specialPermitAdmin?.getCompanyOccupationalData ? (
             <TableLoaders row={7} col={10} />
-          ) : specialPermitAdmin?.companyOccupational?.length > 0 ? (
-            specialPermitAdmin?.companyOccupational.map(
+          ) : specialPermitAdmin?.companyOccupational?.data?.length > 0 ? (
+            specialPermitAdmin?.companyOccupational?.data?.map(
               (company, companyIndex) => (
                 <React.Fragment key={companyIndex}>
                   <tr
-                    onClick={() => handleSetRow(companyIndex)}
+                    onClick={() => {
+                      handleSetRow(companyIndex);
+                    }}
                     style={{
                       cursor: "pointer",
                       backgroundColor: selectedRow.includes(companyIndex)
@@ -234,9 +250,23 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                     ? company?.special_permit_applications?.length > 0
                       ? company?.special_permit_applications?.map(
                           (item, index) => (
-                            <tr key={index}>
+                            <tr
+                              key={index}
+                              onClick={() => {
+                                item?.mark_as_read
+                                  ? null
+                                  : handleRowOnclick(item.id);
+                              }}
+                            >
                               <td></td>
-                              <td>{`${item?.corporation_member?.fname}  ${item?.corporation_member?.mname} ${item?.corporation_member?.lname}`}</td>
+                              <td>
+                                {`${item?.corporation_member?.fname}  ${item?.corporation_member?.mname} ${item?.corporation_member?.lname}`}{" "}
+                                {item?.mark_as_read ? (
+                                  ""
+                                ) : (
+                                  <Badge color="primary"> Unread</Badge>
+                                )}
+                              </td>
                               <td>{item?.corporation_member?.sex}</td>
                               <td>
                                 {
@@ -453,6 +483,17 @@ export default function OccupationalTableCompanyAdmin({ status }) {
           )}
         </tbody>
       </Table>
+      <Pagination
+        dataProps={specialPermitAdmin.companyOccupational}
+        setDataProps={
+          SpecialPermitAdminSlice.actions.setDataPropsCompanyOccupational
+        }
+        setShowLoading={
+          SpecialPermitAdminSlice.actions.setShowLoadingCompanyOccupational
+        }
+        isLoading={specialPermitAdmin.getCompanyOccupationalData}
+        params={{ type: "company", status: status }}
+      />
     </React.Fragment>
   );
 }

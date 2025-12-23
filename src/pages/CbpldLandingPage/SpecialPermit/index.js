@@ -111,16 +111,17 @@ function SpecialPermit({ props }) {
                     {(props) => (
                       <Form>
                         <Row>
-                          {loginStatus.isLoginError && !loginStatus.isFetching && (
-                            <UncontrolledAlert
-                              color="danger"
-                              className="alert-dismissible fade show"
-                              role="alert"
-                            >
-                              <i className="mdi mdi-block-helper me-2"></i>
-                              {loginStatus.errorMessage}
-                            </UncontrolledAlert>
-                          )}
+                          {loginStatus?.isLoginError &&
+                            !loginStatus?.isFetching && (
+                              <UncontrolledAlert
+                                color="danger"
+                                className="alert-dismissible fade show"
+                                role="alert"
+                              >
+                                <i className="mdi mdi-block-helper me-2"></i>
+                                {loginStatus?.errorMessage}
+                              </UncontrolledAlert>
+                            )}
                           <FormGroup>
                             <Label for="username">Username</Label>
                             <Input

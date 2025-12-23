@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import cgbLogo from "../../../../../assets/images/cgbLogo.png";
 import headerLine from "../../../../../assets/images/permitHeaderLine.png";
@@ -46,6 +46,13 @@ export default function OccupationalRequestForm({
       document.title = originalTitle;
     }, 5000);
   };
+  const isCompany = application?.user?.account_type === "company";
+
+  const gender = application?.corporation_member?.sex ?? application?.user?.sex;
+
+  const civilStatus =
+    application?.corporation_member?.user_details_morph?.civil_status?.code ??
+    application?.user?.user_details?.civil_status?.code;
 
   return (
     <Modal isOpen={isOpen} toggle={toggleModal} size="xl">
@@ -131,7 +138,13 @@ export default function OccupationalRequestForm({
                       </colgroup>
                       <tbody>
                         <tr>
-                          <td className="label">Date:</td>
+                          <td className="label">
+                            Date:
+                            <span className="fw-normal">
+                              {" "}
+                              {application?.application_date}
+                            </span>
+                          </td>
                           <td className="label">Control No.:</td>
                         </tr>
                       </tbody>
@@ -141,13 +154,34 @@ export default function OccupationalRequestForm({
                     <table className="form-table">
                       <tbody>
                         <tr>
-                          <td className="label">Name:</td>
+                          <td className="label d-flex ">
+                            Name:
+                            <div className="w-100 d-flex justify-content-around  ">
+                              <span>
+                                {isCompany
+                                  ? application?.corporation_member?.lname
+                                  : application?.user?.lname || ""}
+                              </span>
+                              <span>
+                                {isCompany
+                                  ? application?.corporation_member?.fname
+                                  : application?.user?.fname || ""}
+                              </span>
+                              <span>
+                                {isCompany
+                                  ? application?.corporation_member?.mname
+                                  : application?.user?.mname || ""}
+                              </span>
+                            </div>
+                          </td>
                         </tr>
                         <tr className="sub-labels">
-                          <td className="d-flex justify-content-around">
-                            <span>Surname</span>
-                            <span>First Name</span>
-                            <span>Middle Initial / Suffix</span>
+                          <td>
+                            <div className="d-flex justify-content-around ms-5">
+                              <span>Surname</span>
+                              <span>First Name</span>
+                              <span>Middle Initial / Suffix</span>
+                            </div>
                           </td>
                         </tr>
                       </tbody>
@@ -162,27 +196,66 @@ export default function OccupationalRequestForm({
                       <tbody>
                         <tr>
                           <td className="label">
-                            Date of Birth: <span>(Month-Day-Year)</span>
+                            <div>
+                              Date of Birth: <span>(Year-Month-Day)</span>
+                            </div>
+                            <div className="text-center fw-normal">
+                              <span>
+                                {isCompany
+                                  ? application?.corporation_member
+                                      ?.user_details_morph?.birthdate
+                                  : application?.user?.user_details
+                                      ?.birthdate || ""}
+                              </span>
+                            </div>
                           </td>
                           <td className="label">
                             <div className="d-flex">
                               Gender:
                               <div className="d-flex flex-column">
                                 <div>
-                                  <span className="checkbox ms-2"></span> Male
+                                  <span
+                                    className="checkbox ms-2"
+                                    style={{
+                                      backgroundColor:
+                                        gender === "MALE" ? "black" : null,
+                                    }}
+                                  ></span>{" "}
+                                  Male
                                 </div>
                                 <div>
-                                  <span className="checkbox ms-2"></span> Female
+                                  <span
+                                    className="checkbox ms-2"
+                                    style={{
+                                      backgroundColor:
+                                        gender === "FEMALE" ? "black" : null,
+                                    }}
+                                  ></span>{" "}
+                                  FEMALE
                                 </div>
                               </div>
                               <div>
                                 <div>
-                                  <span className="checkbox ms-2"></span> Prefer
-                                  not to say
+                                  <span
+                                    className="checkbox ms-2"
+                                    style={{
+                                      backgroundColor:
+                                        gender === "PREFER NOT TO SAY"
+                                          ? "black"
+                                          : null,
+                                    }}
+                                  ></span>{" "}
+                                  Prefer not to say
                                 </div>
                                 <div>
-                                  <span className="checkbox ms-2"></span> Other
-                                  _______
+                                  <span
+                                    className="checkbox ms-2"
+                                    style={{
+                                      backgroundColor:
+                                        gender === "OTHERS" ? "black" : null,
+                                    }}
+                                  ></span>{" "}
+                                  Other _______
                                 </div>
                               </div>
                             </div>
@@ -195,7 +268,33 @@ export default function OccupationalRequestForm({
                     <table className="form-table">
                       <tbody>
                         <tr>
-                          <td className="label">Address:</td>
+                          <td className="label">
+                            Address:
+                            <div className="d-flex justify-content-around">
+                              <span>
+                                {isCompany
+                                  ? application?.corporation_member
+                                      ?.user_addresses_morph?.[0]?.address_line
+                                  : application?.user?.user_addresses?.[0]
+                                      ?.address_line}
+                              </span>
+                              <span>
+                                {isCompany
+                                  ? application?.corporation_member
+                                      ?.user_addresses_morph?.[0]?.barangay
+                                  : application?.user?.user_addresses?.[0]
+                                      ?.barangay}
+                              </span>
+                              <span>
+                                {isCompany
+                                  ? application?.corporation_member
+                                      ?.user_addresses_morph?.[0]?.city
+                                  : application?.user?.user_addresses?.[0]
+                                      ?.city}{" "}
+                                / 8600
+                              </span>
+                            </div>
+                          </td>
                         </tr>
                         <tr className="sub-labels">
                           <td className="d-flex justify-content-around">
@@ -220,41 +319,117 @@ export default function OccupationalRequestForm({
                               Civil Status:
                               <div className="d-flex flex-column">
                                 <div>
-                                  <span className="checkbox  ms-2"></span>{" "}
+                                  <span
+                                    className="checkbox  ms-2"
+                                    style={{
+                                      backgroundColor:
+                                        civilStatus === "single"
+                                          ? "black"
+                                          : null,
+                                    }}
+                                  ></span>{" "}
                                   Single
                                 </div>
                                 <div>
-                                  <span className="checkbox  ms-2"></span>{" "}
+                                  <span
+                                    className="checkbox  ms-2"
+                                    style={{
+                                      backgroundColor:
+                                        civilStatus === "divorced"
+                                          ? "black"
+                                          : null,
+                                    }}
+                                  ></span>{" "}
                                   Divorced
                                 </div>
                               </div>
                               <div className="d-flex flex-column">
                                 <div>
-                                  <span className="checkbox  ms-2"></span>{" "}
+                                  <span
+                                    className="checkbox  ms-2"
+                                    style={{
+                                      backgroundColor:
+                                        civilStatus === "married"
+                                          ? "black"
+                                          : null,
+                                    }}
+                                  ></span>{" "}
                                   Married
                                 </div>
                                 <div>
-                                  <span className="checkbox ms-2 "></span>{" "}
+                                  <span
+                                    className="checkbox ms-2 "
+                                    style={{
+                                      backgroundColor:
+                                        civilStatus === "annulled"
+                                          ? "black"
+                                          : null,
+                                    }}
+                                  ></span>{" "}
                                   Annulled
                                 </div>
                               </div>
                               <div className="d-flex flex-column">
                                 <div>
-                                  <span className="checkbox  ms-2"></span>{" "}
+                                  <span
+                                    className="checkbox  ms-2"
+                                    style={{
+                                      backgroundColor:
+                                        civilStatus === "separated"
+                                          ? "black"
+                                          : null,
+                                    }}
+                                  ></span>{" "}
                                   Separated
                                 </div>
                                 <div>
-                                  <span className="checkbox  ms-2"></span>{" "}
+                                  <span
+                                    className="checkbox  ms-2"
+                                    style={{
+                                      backgroundColor:
+                                        civilStatus === "widowed"
+                                          ? "black"
+                                          : null,
+                                    }}
+                                  ></span>{" "}
                                   Widowed/Widower
                                 </div>
                               </div>
                             </div>
                           </td>
-                          <td className="label">Contact Number:</td>
+                          <td className="label">
+                            <div>Contact Number:</div>
+                            <div className="text-center">
+                              <span className="fw-normal">
+                                {isCompany
+                                  ? application?.corporation_member
+                                      ?.user_phone_numbers_morph?.[0]
+                                      ?.phone_number
+                                  : application?.user?.user_phone_numbers?.[0]
+                                      ?.phone_number || ""}
+                              </span>
+                            </div>
+                          </td>
                         </tr>
                         <tr>
-                          <td className="label">Educational Attainment:</td>
-                          <td className="label">Occupation / Position:</td>
+                          <td className="label">
+                            Educational Attainment:{" "}
+                            <span className="fw-normal">
+                              {isCompany
+                                ? application?.corporation_member
+                                    ?.user_details_morph?.educational_attainment
+                                : application?.user?.user_details
+                                    ?.educational_attainment || ""}
+                            </span>
+                          </td>
+                          <td className="label">
+                            Occupation / Position:{" "}
+                            {isCompany
+                              ? application?.corporation_member
+                                  ?.user_occupation_details_morph?.position
+                              : application?.user?.user_occupation_details
+                                  ?.position || ""}
+                          </td>
                         </tr>
                       </tbody>
                     </table>
@@ -264,11 +439,29 @@ export default function OccupationalRequestForm({
                       <tbody>
                         <tr>
                           <td className="label">
-                            Name of Employer / Establishment:
+                            Name of Employer / Establishment:{" "}
+                            <span className="fw-normal">
+                              {isCompany
+                                ? application?.corporation_member
+                                    ?.user_occupation_details_morph
+                                    ?.company_name
+                                : application?.user?.user_occupation_details
+                                    ?.company_name || ""}
+                            </span>
                           </td>
                         </tr>
                         <tr>
-                          <td className="label">Business Address:</td>
+                          <td className="label">
+                            Business Address:{" "}
+                            <span className="fw-normal">
+                              {isCompany
+                                ? application?.corporation_member
+                                    ?.user_occupation_details_morph
+                                    ?.employeer_address
+                                : application?.user?.user_occupation_details
+                                    ?.employeer_address || ""}
+                            </span>
+                          </td>
                         </tr>
                       </tbody>
                     </table>
@@ -317,11 +510,23 @@ export default function OccupationalRequestForm({
                     style={{ width: "200px" }}
                     className="d-flex align-items-center flex-column"
                   >
+                    <span className="fw-bold" style={{ marginTop: "60px" }}>
+                      {" "}
+                      {isCompany
+                        ? `${application?.corporation_member?.fname} ${
+                            application?.corporation_member?.mname || ""
+                          } ${
+                            application?.corporation_member?.lname
+                          }`.toUpperCase()
+                        : `${application?.user?.fname} ${
+                            application?.user?.mname || ""
+                          } ${application?.user?.lname}`.toUpperCase() || ""}
+                    </span>
                     <hr
                       style={{
                         width: "200px",
                         border: "1px solid #000000",
-                        marginTop: "40px",
+                        marginTop: "0px",
                         marginBottom: "0px",
                       }}
                     />

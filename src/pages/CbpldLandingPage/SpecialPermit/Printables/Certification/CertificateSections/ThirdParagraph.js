@@ -45,10 +45,9 @@ export default function ThirdParagraph({ thirdParagraph, scale }) {
     >
       <p
         style={{
-          fontWeight: "600",
+          // fontWeight: "500",
           fontFamily: "Golos Text, sans-serif",
           fontSize: `${fontSize}pt`,
-          // fontWeight: "bold",
           textIndent: `${textIndent}px`,
           marginBottom: "1em",
           textAlign: "justify",

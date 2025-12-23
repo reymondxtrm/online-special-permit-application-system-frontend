@@ -7,13 +7,14 @@ import butuanOnLogo from "../../../../../assets/images/butuanOnLogo.png";
 import axios from "axios";
 import QrCodeGenerator from "../Certification/CertificateSections/QrCodeGenerator";
 
-const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
+const OccupationalCertificate = forwardRef(({ applicationID }, ref) => {
   const now = new Date();
   const endOfYear = new Date(now.getFullYear(), 11, 31);
   const options = { year: "numeric", month: "long", day: "numeric" };
   const formatted = endOfYear.toLocaleDateString("en-US", options);
   const [currentImage, setCurrentImage] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
+  const [applicationDetails, setApplicationDetails] = useState(null);
   console.log(currentImage);
 
   const concatString = (convert, { fname, mname, lname }) => {
@@ -33,17 +34,34 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
       "/" +
       today.getFullYear();
     return formatted;
-  }, [applicationDetails]);
+  }, [applicationID]);
 
   useEffect(() => {
-    if (applicationDetails) {
+    if (applicationID) {
+      const fetchData = async () => {
+        try {
+          const response = await axios({
+            method: "GET",
+            url: "",
+            params: { special_permit_appplication_id: applicationID },
+          });
+          setApplicationDetails(response.data);
+        } catch (error) {
+          console.log(error.response.data);
+        }
+      };
+      fetchData();
+    }
+  }, []);
+  useEffect(() => {
+    if (applicationID) {
       const fetchImage = async () => {
         setIsFetching(true);
         try {
           const response = await axios({
             url: "/api/admin/attachment",
             method: "GET",
-            params: { filepath: applicationDetails?.uploaded_file?.id_picture },
+            params: { filepath: applicationID?.uploaded_file?.id_picture },
             responseType: "blob",
           });
 
@@ -60,7 +78,7 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
 
       fetchImage();
     }
-  }, [applicationDetails]);
+  }, [applicationID]);
   return (
     <div className="permit-container" ref={ref}>
       <div className="permit-header">

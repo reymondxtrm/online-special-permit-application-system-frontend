@@ -172,7 +172,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
     }
   }, [activeTab, refreshPage]);
 
-  // Function to handle opening the image viewer modal
   const handleViewImage = (imageUrl) => {
     setSelectedImage(imageUrl);
     setIsModalOpen(true);
@@ -308,6 +307,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
             referenceNo={referenceNo}
             specialPermitID={specialPermitID}
           />
+
           <UploadPermitModal
             toggleModal={toggleUploadModal}
             openModal={uploadModal}
@@ -406,18 +406,10 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                 </>
               ) : null}
 
-              {status === "for_payment_approval" || status === "returned" ? (
-                <>
-                  <th>Official Receipt</th>
-                  {(applicationType === "good_moral" ||
-                    applicationType === "mayors_permit" ||
-                    applicationType === "occupational_permit") && (
-                    <th>Cedula</th>
-                  )}
-                </>
-              ) : (
+              {(status !== "for_payment_approval" || status !== "returned") && (
                 <th>Attachment</th>
               )}
+
               {status === "returned" ? <th>Remarks</th> : null}
 
               {status === "pending" ? <th>Actions</th> : null}
@@ -438,7 +430,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                 <React.Fragment key={application.id}>
                   <tr
                     onClick={() => {
-                      application.mark_as_read
+                      application?.mark_as_read
                         ? null
                         : handleRowOnclick(application.id);
                     }}
@@ -447,21 +439,21 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                     {status === "for_signature" && (
                       <td>{application.reference_no}</td>
                     )}
-                    <td>{application.user?.fullname}</td>
+                    <td>
+                      {application.user?.fullname}{" "}
+                      {application?.mark_as_read ? (
+                        ""
+                      ) : (
+                        <Badge color="primary"> Unread</Badge>
+                      )}
+                    </td>
                     {applicationType === "mayors_permit" ||
                     applicationType === "good_moral" ||
                     applicationType === "occupational_permit" ? (
                       <>
                         {applicationType === "mayors_permit" ||
                         applicationType === "good_moral" ? (
-                          <td>
-                            {application?.application_purpose?.name}{" "}
-                            {application?.mark_as_read ? (
-                              ""
-                            ) : (
-                              <Badge color="primary"> Unread</Badge>
-                            )}
-                          </td>
+                          <td>{application?.application_purpose?.name} </td>
                         ) : null}
 
                         {/* {applicationType === "good_moral" && (
@@ -627,7 +619,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                       )}
                     </td>
 
-                    {(status === "for_payment_approval" ||
+                    {/* {(status === "for_payment_approval" ||
                       status === "returned") &&
                       (applicationType === "good_moral" ||
                         applicationType === "mayors_permit" ||
@@ -649,7 +641,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                             Cedula
                           </Button>
                         </td>
-                      )}
+                      )} */}
 
                     {status === "returned" ? (
                       <td>
@@ -804,6 +796,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                                   application.application_purpose?.name?.toUpperCase()
                                 );
                                 setreferenceNo(application.reference_no);
+
                                 setspecialPermitID(application?.id);
                               }}
                             >

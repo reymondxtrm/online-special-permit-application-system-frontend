@@ -12,6 +12,7 @@ export default function GenerateOccupationalPermitModal({
 }) {
   const componentRef = useRef();
   const handleDefaultFileName = "sample";
+  console.log(applicationDetails);
 
   return (
     <Modal toggle={toggle} isOpen={openModal}>

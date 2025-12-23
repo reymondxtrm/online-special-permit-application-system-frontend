@@ -27,7 +27,7 @@ import CarouselPage from "./CarouselPage";
 
 const Login = (props) => {
   //meta title
-  document.title = "BPLD Document Tracker";
+  document.title = "BPLD | SPECIAL PERMIT";
   const dispatch = useDispatch();
   // console.log(props);
   useEffect(() => {

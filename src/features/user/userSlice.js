@@ -345,11 +345,12 @@ export const userSlice = createSlice({
     },
     [loginUser.fulfilled]: (state, { payload }) => {
       state.isFetching = false;
-      state.forgetSuccessMsg = payload.message;
+      state.errorMessage = "";
     },
     [loginUser.rejected]: (state, { payload }) => {
       state.isFetching = false;
-      state.forgetError = payload.message;
+      state.isLoginError = true;
+      state.errorMessage = payload.message;
     },
     [specialPermitCompanyRegistration.pending]: (state) => {
       state.isFetching = true;
