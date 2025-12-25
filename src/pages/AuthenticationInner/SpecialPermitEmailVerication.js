@@ -62,7 +62,7 @@ const SpecialPermitEmailVerication = (props) => {
                   />
                 </Link>
                 <p className="mt-3 fw-bold">
-                  SPECIAL PERMIT APPLICATION SYSTEMS
+                  ONLINE SPECIAL PERMIT APPLICATION SYSTEMS
                 </p>
               </div>
             </Col>

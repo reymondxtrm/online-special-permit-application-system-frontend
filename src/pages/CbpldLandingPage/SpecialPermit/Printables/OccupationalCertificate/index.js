@@ -7,16 +7,15 @@ import butuanOnLogo from "../../../../../assets/images/butuanOnLogo.png";
 import axios from "axios";
 import QrCodeGenerator from "../Certification/CertificateSections/QrCodeGenerator";
 
-const OccupationalCertificate = forwardRef(({ applicationID }, ref) => {
+const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
   const now = new Date();
   const endOfYear = new Date(now.getFullYear(), 11, 31);
   const options = { year: "numeric", month: "long", day: "numeric" };
   const formatted = endOfYear.toLocaleDateString("en-US", options);
   const [currentImage, setCurrentImage] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
-  const [applicationDetails, setApplicationDetails] = useState(null);
-  console.log(currentImage);
-
+  console.log(applicationDetails);
+  const isCompany = applicationDetails?.user?.account_type === "company";
   const concatString = (convert, { fname, mname, lname }) => {
     if (convert === "toUpper") {
       return `${fname} ${mname} ${lname}`.toUpperCase();
@@ -24,6 +23,25 @@ const OccupationalCertificate = forwardRef(({ applicationID }, ref) => {
       return `${fname} ${mname} ${lname}`;
     }
   };
+  const calculateAge = (birthDate) => {
+    const birth = new Date(birthDate);
+    const today = new Date();
+
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  };
+  const gender =
+    applicationDetails?.corporation_member?.sex ??
+    applicationDetails?.user?.sex;
   const currentDate = useMemo(() => {
     const today = new Date();
 
@@ -34,34 +52,17 @@ const OccupationalCertificate = forwardRef(({ applicationID }, ref) => {
       "/" +
       today.getFullYear();
     return formatted;
-  }, [applicationID]);
+  }, [applicationDetails]);
 
   useEffect(() => {
-    if (applicationID) {
-      const fetchData = async () => {
-        try {
-          const response = await axios({
-            method: "GET",
-            url: "",
-            params: { special_permit_appplication_id: applicationID },
-          });
-          setApplicationDetails(response.data);
-        } catch (error) {
-          console.log(error.response.data);
-        }
-      };
-      fetchData();
-    }
-  }, []);
-  useEffect(() => {
-    if (applicationID) {
+    if (applicationDetails) {
       const fetchImage = async () => {
         setIsFetching(true);
         try {
           const response = await axios({
             url: "/api/admin/attachment",
             method: "GET",
-            params: { filepath: applicationID?.uploaded_file?.id_picture },
+            params: { filepath: applicationDetails?.uploaded_file?.id_picture },
             responseType: "blob",
           });
 
@@ -78,7 +79,7 @@ const OccupationalCertificate = forwardRef(({ applicationID }, ref) => {
 
       fetchImage();
     }
-  }, [applicationID]);
+  }, [applicationDetails]);
   return (
     <div className="permit-container" ref={ref}>
       <div className="permit-header">
@@ -94,13 +95,7 @@ const OccupationalCertificate = forwardRef(({ applicationID }, ref) => {
               CITY BUSINESS PERMITS AND LICENSING DEPARTMENT
             </p>
             <p> City Hall Bldg., J.P. Rosales Ave., Doongan, Butuan City</p>
-            <img src={permitHeaderLine} className="permit-headerline" />
-          </div>
-          <div style={{ width: "10px" }}>
-            <QrCodeGenerator
-              specialPermitId={applicationDetails?.id}
-              size={40}
-            />
+            {/* <img src={permitHeaderLine} className="permit-headerline" /> */}
           </div>
         </div>
         <div className="permit-header-title">
@@ -108,99 +103,14 @@ const OccupationalCertificate = forwardRef(({ applicationID }, ref) => {
         </div>
       </div>
       <div className="permit-body">
-        <div className="body-reference-number">
-          <span className="fw-bold ">Permit No.:</span>
-          <span className="text-decoration-underline fw-bold text-danger">
-            {applicationDetails?.reference_no}
-          </span>
-        </div>
-        <div className="top">
-          <div className="user-name">
-            <span>Name:</span>
-            <span className="fw-bold text-decoration-underline ">
-              {concatString("toUpper", {
-                fname: applicationDetails?.corporation_member?.fname,
-                mname: applicationDetails?.corporation_member?.mname || "",
-                lname: applicationDetails?.corporation_member?.lname,
-              })}
-            </span>
-          </div>
-          <div className="user-details">
-            <div className="user-details-birth">
-              <div>
-                <span>Date if Birth:</span>
-                <span className="fw-bold text-decoration-underline ">
-                  {
-                    applicationDetails?.corporation_member?.user_details_morph
-                      ?.birthdate
-                  }
-                </span>
-              </div>
-              <div>
-                <span>Age:</span>
-                <span className="fw-bold text-decoration-underline ">
-                  {
-                    applicationDetails?.corporation_member?.user_details_morph
-                      ?.age
-                  }
-                </span>
-              </div>
-              <div>
-                <span>Sex:</span>
-                <span className="fw-bold text-decoration-underline">
-                  {applicationDetails?.corporation_member?.sex}
-                </span>
-              </div>
-            </div>
-            <div>
-              <span>Home Address:</span>
-              <span className="fw-bold text-decoration-underline">
-                {
-                  applicationDetails?.corporation_member
-                    ?.user_addresses_morph[0]?.full_address
-                }
-              </span>
-            </div>
-            <div>
-              <span>Occupation:</span>
-              <span className="fw-bold text-decoration-underline">
-                {
-                  applicationDetails?.corporation_member
-                    ?.user_occupation_details_morph?.position
-                }
-              </span>
-            </div>
-            <div>
-              <span>Company Name:</span>
-              <span className="fw-bold text-decoration-underline">
-                {
-                  applicationDetails?.corporation_member
-                    ?.user_occupation_details_morph?.company_name
-                }
-              </span>
-            </div>
-            <div>
-              <span>Company Address:</span>
-              <span className="fw-bold text-decoration-underline">
-                {
-                  applicationDetails?.corporation_member
-                    ?.user_occupation_details_morph?.company_name
-                }
-              </span>
-            </div>
-            <div>
-              <span>Date Issued:</span>
-              <span className="fw-bold text-decoration-underline">
-                {currentDate}
-              </span>
-            </div>
-          </div>
-        </div>
-
         <div className="picture-section">
           <div className="idpicture-box">
             {currentImage ? (
-              <img src={currentImage} alt="ID picture" />
+              <img
+                src={currentImage}
+                alt="ID picture"
+                className="custom-image"
+              />
             ) : (
               <>
                 <span>ID PICTURE</span>
@@ -208,33 +118,118 @@ const OccupationalCertificate = forwardRef(({ applicationID }, ref) => {
               </>
             )}
           </div>
-          <div className="signatories-container">
-            <div className="mayor">
-              <span className="mayor-name">
-                ATTY. LAWRENCE LEMUEL H. FORTUN
+
+          <div className="user-details">
+            <div className="text-justify">
+              <span>PERMIT NO:</span>
+              <span className="text-decoration-underline fw-bold">
+                {applicationDetails?.reference_no}
               </span>
-              <span>City Mayor</span>
             </div>
-            <div className="signatories-container">
-              <div>
-                <span className="authority">
-                  For and by the authority of the City Mayor
-                </span>
+            <div className="user-details-birth">
+              <div className="text-justify">
+                <span>DATE OF BIRTH: </span>
+                <span className="text-decoration-underline ">
+                  {isCompany
+                    ? applicationDetails?.corporation_member?.user_details_morph
+                        ?.birthdate
+                    : applicationDetails?.user?.user_details?.birthdate || ""}
+                </span>{" "}
+                <span>AGE: </span>
+                <span className="text-decoration-underline ">
+                  {calculateAge(
+                    isCompany
+                      ? applicationDetails?.corporation_member
+                          ?.user_details_morph?.birthdate
+                      : applicationDetails?.user?.user_details?.birthdate || 0
+                  )}
+                </span>{" "}
+                <span>SEX: </span>
+                <span className=" text-decoration-underline">{gender}</span>
               </div>
-              <div className="signatories">
-                <span className="signatories-name">
-                  ATTY. MOSHI ARIEL S. CAHOY
-                </span>
-                <span>City Government Department Head II</span>
-                <span></span>
-              </div>
+            </div>
+            <div className="text-justify">
+              <span>HOME ADDRESS: </span>
+              <span className=" text-decoration-underline">
+                {isCompany
+                  ? applicationDetails?.corporation_member?.user_addresses_morph?.[0]?.full_address?.toUpperCase()
+                  : applicationDetails?.user?.user_addresses?.[0]?.full_address?.toUpperCase()}
+              </span>
+            </div>
+
+            <div>
+              <span>COMPANY NAME: </span>
+              <span className=" text-decoration-underline fw-bold">
+                {isCompany
+                  ? applicationDetails?.corporation_member?.user_occupation_details_morph?.company_name?.toUpperCase()
+                  : applicationDetails?.user?.user_occupation_details?.company_name?.toUpperCase() ||
+                    ""}
+              </span>
+            </div>
+
+            <div>
+              <span>COMPANY ADDRESS: </span>
+              <span className=" text-decoration-underline">
+                {isCompany
+                  ? applicationDetails?.corporation_member?.user_occupation_details_morph?.employeer_address?.toUpperCase()
+                  : applicationDetails?.user?.user_occupation_details?.employeer_address?.toUpperCase() ||
+                    ""}
+              </span>
+            </div>
+            <div className="occupation-section">
+              <span>OCCUPATION: </span>
+              <span className=" text-decoration-underline fw-bold">
+                {isCompany
+                  ? applicationDetails?.corporation_member?.user_occupation_details_morph?.position?.toUpperCase()
+                  : applicationDetails?.user?.user_occupation_details?.position?.toUpperCase() ||
+                    ""}
+              </span>
             </div>
           </div>
         </div>
       </div>
+      <div className="top">
+        <div className="d-flex  justify-content-center">
+          <span className="d-flex align-items-end ">NAME:</span>
+          <span className="fw-bold name">
+            ATTY. LAWRENCE LEMUEL H. FORTUN LEMUELLEMUEL
+          </span>
+          {/* <span className="fw-bold name">
+            {isCompany
+              ? concatString("toUpper", {
+                  fname: applicationDetails?.corporation_member?.fname,
+                  mname: applicationDetails?.corporation_member?.mname || "",
+                  lname: applicationDetails?.corporation_member?.lname,
+                })
+              : concatString("toUpper", {
+                  fname: applicationDetails?.user?.fname,
+                  mname: applicationDetails?.user?.mname || "",
+                  lname: applicationDetails?.user?.lname,
+                }) || ""}
+          </span> */}
+        </div>
+        <div className="mayor">
+          <span className="mayor-name">ATTY. LAWRENCE LEMUEL H. FORTUN</span>
+          <span>City Mayor</span>
+        </div>
+        <div className="signatories-container text-center">
+          <span className="authority">
+            For and by the authority of the City Mayor
+          </span>
+        </div>
+
+        <div style={{ width: "40px", marginLeft: "7px" }}>
+          <QrCodeGenerator specialPermitId={applicationDetails?.id} size={70} />
+        </div>
+        <div className="signatories">
+          <span className="signatories-name">ATTY. MOSHI ARIEL S. CAHOY</span>
+          <span>City Government Department Head II</span>
+          <span></span>
+        </div>
+      </div>
       <div className="permit-footer">
         <div className="permit-footer-upper">
-          <div className="or-section">
+          {/* <div className="or-section">
             <div>
               <span>O.R. No:</span>
               <span>
@@ -252,10 +247,10 @@ const OccupationalCertificate = forwardRef(({ applicationID }, ref) => {
                 }
               </span>
             </div>
-          </div>
+          </div> */}
           <div className="logo-section">
             <img src={butuanOnLogo} className="butuan-on-logo" />
-            <span className="fw-bold">CBPLD.BPLD.P.013.REV02</span>
+            <span className="fw-bold rev-code">CBPLD.BPLD.P.013.REV03</span>
           </div>
         </div>
         <div>

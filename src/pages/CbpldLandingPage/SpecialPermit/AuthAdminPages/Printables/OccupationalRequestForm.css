@@ -7,7 +7,6 @@
   margin: 0;
 }
 
-/* Remove gaps between stacked tables */
 .form-table + .form-table {
   margin-top: -1px;
 }
@@ -49,6 +48,9 @@
 .header-text p {
   margin: 0;
   font-size: 11pt;
+}
+.header-logo-request-form {
+  width: 120px;
 }
 
 .header-title {

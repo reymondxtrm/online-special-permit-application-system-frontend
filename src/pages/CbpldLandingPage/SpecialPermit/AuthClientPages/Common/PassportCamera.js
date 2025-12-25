@@ -150,8 +150,8 @@ const PassportCamera = ({ onCapture, isOpen, toggle, image }) => {
                 className="position-absolute"
                 style={{
                   border: "3px solid rgba(255,255,255,0.85)",
-                  width: "36%",
-                  height: "36%",
+                  width: "31.43%",
+                  height: "32.69%",
                   top: "50%",
                   left: "50%",
                   transform: "translate(-50%, -50%)",

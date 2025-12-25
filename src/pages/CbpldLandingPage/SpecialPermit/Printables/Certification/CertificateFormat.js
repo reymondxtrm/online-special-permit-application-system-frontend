@@ -51,11 +51,18 @@ const CertificateFormat = React.forwardRef((props, ref) => {
   } = props;
   const [scale, setScale] = useState(1);
   const certificateRef = useRef();
-
+  const paperSize =
+    permitType === "good_moral" || permitType === "mayors_permit"
+      ? "a4"
+      : "folio";
   const maxHeight = useMemo(() => {
-    return permitType === "good_moral" || permitType === "mayors_permit"
-      ? 1090
-      : 1223;
+    const baseHeight =
+      permitType === "good_moral" || permitType === "mayors_permit"
+        ? 1090
+        : 1223;
+
+    const minus18mmInPx = (18 * 96) / 25.4; // ~68 px
+    return baseHeight - minus18mmInPx;
   }, [permitType]);
 
   useEffect(() => {
@@ -134,7 +141,11 @@ const CertificateFormat = React.forwardRef((props, ref) => {
   } else subHeader = "";
 
   return (
-    <div ref={ref} className={` certificate-wrapper `}>
+    <div
+      ref={ref}
+      className={` certificate-wrapper ${paperSize}`}
+      style={{ "--scale": scale }}
+    >
       <div ref={certificateRef}>
         <table className="certificate-table">
           <tbody>
@@ -143,15 +154,15 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                 <div className="header-content">
                   <div
                     style={{
-                      paddingTop: "15px",
-                      paddingLeft: "20px",
+                      paddingTop: "5px",
+                      paddingLeft: "5px",
                       zIndex: "1000",
                     }}
                   >
                     <img src={cgbLogo} alt="CGB Logo" className="header-logo" />
                   </div>
 
-                  <div style={{ paddingTop: "15px" }}>
+                  <div style={{ paddingTop: "5px" }}>
                     <div className="d-flex gap-5">
                       <div className="header-text" style={{ color: "black" }}>
                         {" "}
@@ -163,7 +174,6 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                           City
                         </p>
                       </div>
-
                       <div className="qr-wrapper d-flex align-items-center">
                         <QrCodeGenerator
                           specialPermitId={specialPermitApplicationId}
@@ -187,6 +197,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                     fontWeight: "bold",
                     color: "#11a7ee",
                     marginRight: "1.5cm",
+                    marginBottom: "0px",
                   }}
                 >
                   {referenceNo}
@@ -195,40 +206,26 @@ const CertificateFormat = React.forwardRef((props, ref) => {
             </tr>
             <tr>
               <td colSpan="2" style={{ paddingTop: `-${scale * 1}` }}>
-                <HeadersTitle headerTitle={headerTitle} scale={scale} />
+                <HeadersTitle headerTitle={headerTitle} />
                 <SubHeader
                   permitType={permitType}
                   purpose={purpose}
                   subHeader={subHeader}
-                  scale={scale}
                 />
-                <FirstParagraph firstParagraph={firstParagraph} scale={scale} />
-                <EventName
-                  permitType={permitType}
-                  eventName={eventName}
-                  scale={scale}
-                />
-                {!!withCase && <WithCases withCase={withCase} scale={scale} />}
+                <FirstParagraph firstParagraph={firstParagraph} />
+                <EventName permitType={permitType} eventName={eventName} />
+                {!!withCase && <WithCases withCase={withCase} />}
                 {!!secondParagraph && (
-                  <SecondParagraph
-                    secondParagraph={secondParagraph}
-                    scale={scale}
-                  />
+                  <SecondParagraph secondParagraph={secondParagraph} />
                 )}
-                <Conditions
-                  conditions={conditions}
-                  permitType={permitType}
-                  scale={scale}
-                />
-                {permitType === "good_moral" && (
-                  <Purpose purpose={purpose} scale={scale} />
-                )}
-                <ThirdParagraph thirdParagraph={thirdParagraph} scale={scale} />
+                <Conditions conditions={conditions} permitType={permitType} />
+                {permitType === "good_moral" && <Purpose purpose={purpose} />}
+                <ThirdParagraph thirdParagraph={thirdParagraph} />
                 {(permitType === "good_moral" ||
                   permitType === "mayors_permit") && (
-                  <MayorSignatory permitType={permitType} scale={scale} />
+                  <MayorSignatory permitType={permitType} />
                 )}
-                <DepartmentHeadSingnatory scale={scale} />
+                <DepartmentHeadSingnatory />
               </td>
             </tr>
 

@@ -92,7 +92,7 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                       <img
                         src={cgbLogo}
                         alt="CGB Logo"
-                        className="header-logo"
+                        className="header-logo-request-form"
                       />
                     </div>
                     <div style={{ marginTop: "10px" }}>

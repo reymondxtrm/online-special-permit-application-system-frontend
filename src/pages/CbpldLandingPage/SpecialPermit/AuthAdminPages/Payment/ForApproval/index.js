@@ -78,14 +78,11 @@ const ForApproval = () => {
     const channel = echo.channel("special-permit-for_payment_approval");
     const handler = (event) => {
       const { documentType, count } = event;
-      // Only update state if value actually changes to avoid extra renders
-      console.log(event);
       setNewCounts((prevCounts) => {
         return { ...prevCounts, [documentType]: count };
       });
     };
     channel.listen(".document.stage_moved", handler);
-
     return () => {
       try {
         channel.stopListening(".document.stage_moved", handler);

@@ -1,19 +1,38 @@
 import axios from "axios";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import logo from "../../../../../assets/images/cgbLogo.png";
 import OccupationalCertificate from "../../Printables/OccupationalCertificate";
 import ReactToPrint from "react-to-print";
 
 export default function GenerateOccupationalPermitModal({
-  applicationDetails,
+  applicationID,
   openModal,
   toggle,
 }) {
   const componentRef = useRef();
   const handleDefaultFileName = "sample";
-  console.log(applicationDetails);
+  const [applicationDetails, setApplicationDetails] = useState(null);
 
+  useEffect(() => {
+    if (applicationID) {
+      const fetchData = async () => {
+        try {
+          const response = await axios({
+            method: "GET",
+            url: "api/admin/get-request-form-data",
+            params: { id: applicationID },
+          });
+          setApplicationDetails(response.data);
+        } catch (error) {
+          console.log(error.response.data);
+        }
+      };
+      fetchData();
+    }
+  }, [applicationID]);
+  console.log("wew", applicationDetails);
+  const isCompany = applicationDetails?.user?.account_type === "company";
   return (
     <Modal toggle={toggle} isOpen={openModal}>
       <ModalHeader toggle={toggle}>

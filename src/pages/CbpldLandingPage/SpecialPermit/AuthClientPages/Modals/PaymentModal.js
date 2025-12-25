@@ -66,6 +66,14 @@ function PaymentModal({
   const toggleGenerateModal = () => {
     setgenerateModal(!generateModal);
   };
+  function getTransactionDate() {
+    const d = new Date();
+    return (
+      d.getFullYear().toString() +
+      String(d.getMonth() + 1).padStart(2, "0") +
+      String(d.getDate()).padStart(2, "0")
+    );
+  }
   const [isPaying, setIsPaying] = useState(false);
   const toggleTermsAndConditionsModal = () => {
     setTermsAndConditionsModal((prev) => !prev);
@@ -739,7 +747,7 @@ function PaymentModal({
                                           amount: paymentDetails.total_amount,
                                           // amount: 100,
                                           transaction_type: "Tax/Fees",
-                                          merchant_reference_number: `B-${uuidv4()}`,
+                                          merchant_reference_number: `OSPAS-${applicationId}-${getTransactionDate()}`,
                                           full_name: user.name,
                                           user_id: user.id,
                                           ref_no: "1",
@@ -797,7 +805,8 @@ function PaymentModal({
                                         ).toString();
                                         const encoded =
                                           encodeURIComponent(encrypted);
-                                        const url = `http://ctd01.a.testing.butuan.gov.ph/payment?data=${encoded}`;
+                                        // const url = `http://ctd01.a.testing.butuan.gov.ph/payment?data=${encoded}`;
+                                        const url = `http://epay01.a.staging.butuan.gov.ph/payment?data=${encoded}`;
                                         const create = async () => {
                                           setIsPaying((prev) => !prev);
                                           try {

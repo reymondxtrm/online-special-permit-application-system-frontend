@@ -1,13 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 
-export default function ThirdParagraph({ thirdParagraph, scale }) {
-  const baseFontSize = 13; // pt
-  const fontSize = baseFontSize * scale;
-
-  const marginTop = 4 * scale;
-  const marginLeftRight = 1.5 * scale; // cm
-  const marginBottom = 0.25 * scale; // cm
-  const textIndent = 50 * scale; // px
+export default function ThirdParagraph({ thirdParagraph }) {
+  // No need to pass scale prop anymore!
+  // Component will inherit --scale from parent .certificate-wrapper
 
   const escapeHtml = (s) =>
     s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -17,11 +12,13 @@ export default function ThirdParagraph({ thirdParagraph, scale }) {
 
     let t = escapeHtml(input);
 
+    // Transform ordinal numbers (1st, 2nd, 3rd, etc.) to underlined with superscript
     t = t.replace(
       /\b(\d+)(st|nd|rd|th)\b/gi,
       (_, num, suffix) => `<u>${num}<sup>${suffix}</sup></u>&nbsp;`
     );
 
+    // Underline month names
     const months =
       "January|February|March|April|May|June|July|August|September|October|November|December";
     const monthRegex = new RegExp(`\\b(${months})\\b`, "gi");
@@ -33,30 +30,18 @@ export default function ThirdParagraph({ thirdParagraph, scale }) {
     return t;
   };
 
+  // Memoize transformed text to avoid unnecessary recalculations
+  const transformedText = useMemo(
+    () => transformText(thirdParagraph),
+    [thirdParagraph]
+  );
+
   return (
-    <div
-      style={{
-        marginTop: `${marginTop}px`,
-        marginLeft: `${marginLeftRight}cm`,
-        marginBottom: `${marginBottom}cm`,
-        marginRight: `${marginLeftRight}cm`,
-        lineHeight: "1.2",
-      }}
-    >
+    <div className="third-paragraph-wrapper">
       <p
-        style={{
-          // fontWeight: "500",
-          fontFamily: "Golos Text, sans-serif",
-          fontSize: `${fontSize}pt`,
-          textIndent: `${textIndent}px`,
-          marginBottom: "1em",
-          textAlign: "justify",
-          lineHeight: "1.5",
-        }}
-        dangerouslySetInnerHTML={{
-          __html: transformText(thirdParagraph),
-        }}
-      ></p>
+        className="third-paragraph-text"
+        dangerouslySetInnerHTML={{ __html: transformedText }}
+      />
     </div>
   );
 }

@@ -1,59 +1,37 @@
 import React from "react";
 
-export default function SubHeader({ permitType, purpose, subHeader, scale }) {
-  const base1 = 17; // pt
-  const base2 = 11; // pt
+export default function SubHeader({ permitType, purpose, subHeader }) {
+  // No need to pass scale prop anymore!
+  // Component will inherit --scale from parent .certificate-wrapper
 
-  const fontSize1 = base1 * scale;
-  const fontSize2 = base2 * scale;
   const currentYear = new Date().getFullYear();
 
+  // Determine if we should show the permit type header
+  const showPermitTypeHeader = permitType !== "event";
+
+  // Determine what text to display in the header
+  const headerText = permitType === "mayors_permit" ? purpose : subHeader;
+
+  // Determine if font weight should be lighter (for good_moral)
+  const isGoodMoral = permitType === "good_moral";
+
   return (
-    <>
-      {permitType !== "event" && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
+    <div className="subheader-section">
+      {showPermitTypeHeader && (
+        <div className="subheader-wrapper">
           <p
-            style={{
-              fontSize: `${fontSize1}pt`,
-              color: "#154172",
-              // fontWeight: "500",
-              fontFamily: "Golos Text, sans-serif",
-              padding: 0,
-              margin: 0,
-              fontWeight: permitType === "good_moral" ? null : "500",
-            }}
+            className={`subheader-title ${
+              isGoodMoral ? "subheader-title--light" : ""
+            }`}
           >
-            {`(${permitType === "mayors_permit" ? purpose : subHeader})`}
+            ({headerText})
           </p>
         </div>
       )}
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <p
-          style={{
-            fontSize: `${fontSize2}pt`,
-            color: "#11a7ee",
-            fontFamily: "Book Antiqua",
-            padding: 0,
-            margin: 0,
-            fontStyle: "italic",
-          }}
-        >
-          {`Series of ${currentYear}`}
-        </p>
+      <div className="subheader-wrapper">
+        <p className="subheader-series">Series of {currentYear}</p>
       </div>
-    </>
+    </div>
   );
 }

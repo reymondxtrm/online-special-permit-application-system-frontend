@@ -163,11 +163,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
           <GenerateOccupationalPermitModal
             toggle={toggleGenerateModal}
             openModal={generateModal}
-            applicationDetails={specialPermitAdmin?.companyOccupational?.[
-              selectedCompanyIndex
-            ]?.special_permit_applications?.find(
-              (item) => item.id === applicationId
-            )}
+            applicationID={applicationId}
           />
           <UploadPermitModal
             toggleModal={toggleUploadPermitModal}
@@ -182,6 +178,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
         <thead>
           <tr>
             <th>#</th>
+            {status === "for_signature" && <th>Reference No</th>}
             <th>Name of Requestor / Corporation</th>
             <th>Gender</th>
             <th>Address</th>
@@ -239,6 +236,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                         value="✔"
                       />
                     </td>
+
                     <td colSpan={2} className="fw-bold">
                       {company.fname}
                     </td>
@@ -259,6 +257,9 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                               }}
                             >
                               <td></td>
+                              {status === "for_signature" && (
+                                <td>{item?.reference_no}</td>
+                              )}
                               <td>
                                 {`${item?.corporation_member?.fname}  ${item?.corporation_member?.mname} ${item?.corporation_member?.lname}`}{" "}
                                 {item?.mark_as_read ? (

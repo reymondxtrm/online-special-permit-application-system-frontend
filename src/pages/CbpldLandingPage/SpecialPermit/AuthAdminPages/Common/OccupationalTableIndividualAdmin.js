@@ -172,9 +172,7 @@ export default function OccupationalTableIndividualAdmin({
           <GenerateOccupationalPermitModal
             toggle={toggleGenerateModal}
             openModal={generateModal}
-            applicationDetails={
-              specialPermitAdmin?.individualOccupational?.data?.[activeIndex]
-            }
+            applicationID={applicationId}
           />
           <UploadPermitModal
             toggleModal={toggleUploadPermitModal}
@@ -190,8 +188,8 @@ export default function OccupationalTableIndividualAdmin({
         <thead>
           <tr>
             <th>#</th>
+            {status === "for_signature" && <th>Reference No</th>}
             <th>Name of Requestor / Corporation</th>
-
             <th>Gender</th>
             <th>Address</th>
             {(status === "for_payment_approval" ||
@@ -227,6 +225,9 @@ export default function OccupationalTableIndividualAdmin({
                   }}
                 >
                   <td className="fw-bold">{index + 1}</td>
+                  {status === "for_signature" && (
+                    <td>{application?.reference_no}</td>
+                  )}
                   <td className="fw-bold">
                     {`${application?.user?.fname} ${
                       application?.user?.mname || ""

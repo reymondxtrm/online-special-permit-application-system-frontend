@@ -576,7 +576,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                     </>
                   )}
 
-                  {(status === "declined" || status === "returned") && (
+                  {status === "returned" && (
                     <>
                       <th>Remarks</th>
                     </>
@@ -648,7 +648,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                       <th>Attachment</th>
                     </>
                   )}
-                  {(status === "declined" || status === "returned") && (
+                  {status === "returned" && (
                     <>
                       <th>Remarks</th>
                     </>
@@ -666,7 +666,11 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                 <th>Actions</th>
               ) : null}
               {status === "completed" ? <th>Special Permit</th> : null}
-              {status === "declined" ? <th>Actions</th> : null}
+              {status === "declined" ? (
+                <>
+                  <th>Remarks</th> <th>Actions</th>{" "}
+                </>
+              ) : null}
             </tr>
           </thead>
           <tbody>
@@ -950,24 +954,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                             </td>
                           </>
                         )}
-                        {status === "declined" && (
-                          <>
-                            <td>
-                              {application?.status_histories?.[0]?.remarks}
-                            </td>
-                            {/* <td>
-                              <Button
-                                onClick={() => {
-                                  setSelectedRow([application?.id]);
-                                  toggleUpdateOccupationalPermitModal();
-                                }}
-                                color="primary"
-                              >
-                                Revise & Resubmit
-                              </Button>
-                            </td> */}
-                          </>
-                        )}
                       </>
                     ) : null}
 
@@ -1133,17 +1119,20 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                       </td>
                     ) : null}
                     {status === "declined" && (
-                      <td>
-                        <Button
-                          onClick={() => {
-                            setSelectedRow([application?.id]);
-                            togglerFunction();
-                          }}
-                          color="primary"
-                        >
-                          Revise & Resubmit
-                        </Button>
-                      </td>
+                      <>
+                        <td>{application?.status_histories?.[0]?.remarks}</td>
+                        <td>
+                          <Button
+                            onClick={() => {
+                              setSelectedRow([application?.id]);
+                              togglerFunction();
+                            }}
+                            color="primary"
+                          >
+                            Revise & Resubmit
+                          </Button>
+                        </td>
+                      </>
                     )}
                   </tr>
                 )

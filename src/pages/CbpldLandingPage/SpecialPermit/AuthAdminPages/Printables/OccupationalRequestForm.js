@@ -84,7 +84,7 @@ export default function OccupationalRequestForm({
                         <img
                           src={cgbLogo}
                           alt="CGB Logo"
-                          className="header-logo"
+                          className="header-logo-request-form"
                         />
                       </div>
                       <div style={{ marginTop: "10px" }}>
@@ -110,7 +110,10 @@ export default function OccupationalRequestForm({
                         </div>
                       </div>
                     </div>
-                    <div className="text-center" style={{ marginTop: "50px" }}>
+                    <div
+                      className="text-center "
+                      style={{ marginTop: "50px", width: "100%" }}
+                    >
                       <h1 className="title">
                         REQUEST FORM FOR OCCUPATIONAL PERMIT
                       </h1>
@@ -119,18 +122,15 @@ export default function OccupationalRequestForm({
                 </td>
               </tr>
 
-              {/* FORM TABLE */}
               <tr>
                 <td
                   style={{
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    width: "765px",
                   }}
                 >
-                  <div style={{ width: "100%" }}>
-                    {/* Table 1: 50-50 split */}
+                  <div style={{ width: "765px" }}>
                     <table className="form-table split-70-30">
                       <colgroup>
                         <col style={{ width: "60%" }} />
