@@ -9,12 +9,12 @@ import cgbLogo from "../../assets/images/cgbLogo.png";
 import Swal from "sweetalert2";
 import { useHistory, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom/cjs/react-router-dom.min";
 
 const SpecialPermitEmailVerication = (props) => {
   document.title = "Email Verification";
   const history = useHistory();
   const user = useSelector((state) => state.user);
+  const email = localStorage.getItem("email");
 
   const resendVerificationEmail = async () => {
     try {
@@ -23,10 +23,7 @@ const SpecialPermitEmailVerication = (props) => {
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading(),
       });
-      const response = await axios.post("/api/email/resend", {
-        email: email,
-      });
-
+      const response = await axios.post("/api/email/resend", { email: email });
       Swal.close();
       Swal.fire({
         icon: "success",
@@ -65,7 +62,7 @@ const SpecialPermitEmailVerication = (props) => {
                   />
                 </Link>
                 <p className="mt-3 fw-bold">
-                  SPECIAL PERMIT APPLICATION SYSTEMS
+                  ONLINE SPECIAL PERMIT APPLICATION SYSTEMS
                 </p>
               </div>
             </Col>

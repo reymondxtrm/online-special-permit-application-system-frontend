@@ -20,11 +20,73 @@ export const getTableData = createAsyncThunk(
     }
   }
 );
+export const getCompanyOccupatinalData = createAsyncThunk(
+  "specialPermitAdmin/getCompanyOccupatinalData",
+  async (params, thunkAPI) => {
+    try {
+      const response = await axios({
+        url: "api/admin/get-companies-occupational-applications",
+        method: "GET",
+        params: { ...params },
+      });
+      if (response.data) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(response.data);
+      }
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+export const getIndividualOccupationalApplications = createAsyncThunk(
+  "specialPermitAdmin/getIndividualOccupationalApplications",
+  async (params, thunkAPI) => {
+    try {
+      const response = await axios({
+        url: "api/admin/get-individual-occupational-applications",
+        method: "GET",
+        params: { ...params },
+      });
+      if (response.data) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(response.data);
+      }
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+export const getOccupationalDetails = createAsyncThunk(
+  "specialPermitAdmin/getOccupationalDetails",
+  async (params, thunkAPI) => {
+    try {
+      const response = await axios({
+        url: "api/admin/get-individual-occupational-applications",
+        method: "GET",
+        params: { ...params },
+      });
+      if (response.data) {
+        return response.data;
+      } else {
+        return thunkAPI.rejectWithValue(response.data);
+      }
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
 export const SpecialPermitAdminSlice = createSlice({
   name: "specialPermitAdmin",
   initialState: {
     tableData: [],
     getTableDataIsFetching: false,
+    companyOccupational: [],
+    individualOccupational: [],
+    getCompanyOccupationalData: false,
+    getIndividualOccupationalData: false,
     params: {},
   },
   reducers: {
@@ -36,6 +98,18 @@ export const SpecialPermitAdminSlice = createSlice({
     },
     setParams: (state, action) => {
       state.params = action.payload;
+    },
+    setDataPropsCompanyOccupational: (state, action) => {
+      state.companyOccupational = action.payload;
+    },
+    setShowLoadingCompanyOccupational: (state, action) => {
+      state.getCompanyOccupationalData = action.payload;
+    },
+    setDataPropsIndividualOccupational: (state, action) => {
+      state.individualOccupational = action.payload;
+    },
+    setShowLoadingIndividualOccupational: (state, action) => {
+      state.getIndividualOccupationalData = action.payload;
     },
   },
   extraReducers: {
@@ -49,6 +123,28 @@ export const SpecialPermitAdminSlice = createSlice({
     [getTableData.rejected]: (state, { payload }) => {
       state.getTableDataIsFetching = false;
       state.errors = payload.data;
+    },
+    [getCompanyOccupatinalData.pending]: (state) => {
+      state.getCompanyOccupationalData = true;
+    },
+    [getCompanyOccupatinalData.fulfilled]: (state, action) => {
+      state.getCompanyOccupationalData = false;
+      state.companyOccupational = action.payload;
+    },
+    [getCompanyOccupatinalData.rejected]: (state, action) => {
+      state.getCompanyOccupationalData = false;
+      state.errors = action.payload;
+    },
+    [getIndividualOccupationalApplications.pending]: (state) => {
+      state.getIndividualOccupationalData = true;
+    },
+    [getIndividualOccupationalApplications.fulfilled]: (state, action) => {
+      state.getIndividualOccupationalData = false;
+      state.individualOccupational = action.payload;
+    },
+    [getIndividualOccupationalApplications.rejected]: (state, action) => {
+      state.getIndividualOccupationalData = false;
+      state.errors = action.payload;
     },
   },
 });

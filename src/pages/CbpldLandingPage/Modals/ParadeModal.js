@@ -13,23 +13,54 @@ import {
   Input,
   Label,
   FormGroup,
+  FormFeedback,
 } from "reactstrap";
-import { faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Select, { StylesConfig } from "react-select";
+
 import { FieldArray, Formik } from "formik";
 import useSubmit from "hooks/Common/useSubmit";
 import { USER_PRIVACY } from "assets/data/data";
+import axios from "axios";
+import ReactSimpleImageViewer from "react-simple-image-viewer";
+import useGetImage from "hooks/Common/useGetImage";
+import * as Yup from "yup";
 
-function ParadeModal({ openModal, toggleModal }) {
+function ParadeModal({
+  openModal,
+  toggleModal,
+  isUpdate = false,
+  specialPermitApplicationId,
+  toggleRefresh,
+}) {
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
   const [proceed, setIsProceed] = useState(false);
+  const [existingData, setExistingData] = useState({});
+  const [uploadedFiles, setUploadedFiles] = useState({});
+  const { currentImage, isFetching, getImageHandle } = useGetImage();
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
 
-  const purposeOptions = [
-    { value: 1, label: "Local Employment" },
-    { value: 2, label: "International Employment" },
-  ];
+  useEffect(() => {
+    if (openModal && isUpdate && specialPermitApplicationId) {
+      axios
+        .get("api/client/get-single-permmit-application", {
+          params: {
+            special_permit_application_id: specialPermitApplicationId,
+          },
+        })
+        .then((res) => {
+          const data = res.data.data;
+          setExistingData({
+            requestor_name: data.requestor_name,
+            event_name: data.event_name,
+            event_date_from: data.event_date_from,
+            event_date_to: data.event_to,
+            event_time_from: data.event_time_from,
+            event_time_to: data.event_time_to,
+          });
+          setUploadedFiles(data.uploaded_file || {});
+        });
+    }
+  }, [openModal, isUpdate, specialPermitApplicationId]);
 
   const getFormData = (object) => {
     const formData = new FormData();
@@ -46,33 +77,72 @@ function ParadeModal({ openModal, toggleModal }) {
     });
     return formData;
   };
-  const setProceedHandle = () => {
-    setIsProceed((prev) => !prev);
+
+  const toggleIsViewerOpen = () => {
+    setIsViewerOpen((prev) => !prev);
   };
+  const ParadeSchema = Yup.object().shape({
+    requestor_name: Yup.string().required(
+      "Requestor / Organization is required"
+    ),
+
+    event_name: Yup.string().required("Event name is required"),
+
+    event_date_from: Yup.date().required("Start date is required"),
+
+    event_date_to: Yup.date()
+      .min(Yup.ref("event_date_from"), "End date must be after start date")
+      .required("End date is required"),
+
+    event_time_from: Yup.string().required("Start time is required"),
+
+    event_time_to: Yup.string().required("End time is required"),
+
+    request_letter: Yup.mixed().when("$isUpdate", {
+      is: false,
+      then: (schema) => schema.required("Request letter is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+
+    route_plan: Yup.mixed().when("$isUpdate", {
+      is: false,
+      then: (schema) => schema.required("Route plan is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+  });
 
   return (
     <React.Fragment>
+      {isViewerOpen && !isFetching && currentImage && (
+        <ReactSimpleImageViewer
+          src={[currentImage]}
+          currentIndex={0}
+          onClose={toggleIsViewerOpen}
+          backgroundStyle={{
+            backgroundColor: "rgba(0,0,0,0.8)",
+            zIndex: 9999,
+          }}
+          closeOnClickOutside={true}
+          disableZoom={false}
+        />
+      )}
       <Modal
         isOpen={openModal}
         toggle={() => {
           toggleModal();
-          setIsProceed(false);
         }}
         fade={true}
         backdrop="static"
         size="m"
         className="modal-dialog-centered"
         style={{
-          //  maxHeight: "90vh",
           overflowY: "auto",
-          // maxWidth: "1400px",
         }}
         unmountOnClose
       >
         <ModalHeader
           toggle={() => {
             toggleModal();
-            setIsProceed(false);
           }}
         >
           <p
@@ -85,37 +155,25 @@ function ParadeModal({ openModal, toggleModal }) {
               color: "#368be0",
             }}
           >
-            {"PARADE"}
+            {isUpdate ? "UPDATE PARADE" : "PARADE"}
           </p>
         </ModalHeader>
         <ModalBody style={{ overflowX: "auto" }}>
           <Formik
             innerRef={formikRef}
+            validationSchema={ParadeSchema}
+            enableReinitialize
             initialValues={{
-              type: "event",
-              permit_type_id: "2",
-              requestor_name: "sample",
-              event_name: "sample",
-              event_date_from: "2024-10-19",
-              event_date_to: "2024-10-19",
-              event_time_from: "",
-              event_time_to: "sample",
-              surname: "asa",
-              first_name: "as",
-              middle_initial: "asa",
-              suffix: "as",
-              sex: "male",
-              email: "ctian1019@gmail.com",
-              contact_no: "09461424574",
-              province: "121",
-              city: "12121",
-              barangay: "12121",
-              additional_address: "asdasdsadas",
-              request_letter: "",
+              type: "parade",
+              permit_type_id: "parade",
+              requestor_name: existingData?.requestor_name || "",
+              event_name: existingData?.event_name || "",
+              event_date_from: existingData?.event_date_from || "",
+              event_date_to: existingData?.event_to || "",
+              event_time_from: existingData?.event_time_from || "",
+              event_time_to: existingData?.event_time_to || "",
               route_plan: "",
-              official_receipt: "",
-              or_no: "asasasasa12121",
-              paid_amount: "12121",
+              request_letter: "",
             }}
             onSubmit={handleSubmit}
           >
@@ -131,10 +189,19 @@ function ParadeModal({ openModal, toggleModal }) {
                           </Label>
                           <Input
                             id="nameOfRequestor"
-                            name={`requestor_name`}
+                            name="requestor_name"
                             placeholder="Enter Name of Requestor / Organization"
                             onChange={props.handleChange}
+                            onBlur={props.handleBlur}
+                            value={props.values.requestor_name}
+                            invalid={
+                              props.touched.requestor_name &&
+                              Boolean(props.errors.requestor_name)
+                            }
                           />
+                          <FormFeedback>
+                            {props.errors.requestor_name}
+                          </FormFeedback>
                         </FormGroup>
                       </Col>
                     </Row>
@@ -145,60 +212,98 @@ function ParadeModal({ openModal, toggleModal }) {
                           <Label for="nameOfEvent">Name of Event</Label>
                           <Input
                             id="nameOfEvent"
-                            name={`event_name`}
-                            placeholder="Enter Name of Event"
+                            name="event_name"
+                            value={props.values.event_name}
                             onChange={props.handleChange}
+                            onBlur={props.handleBlur}
+                            invalid={
+                              props.touched.event_name &&
+                              Boolean(props.errors.event_name)
+                            }
                           />
+                          <FormFeedback>{props.errors.event_name}</FormFeedback>
                         </FormGroup>
                       </Col>
                     </Row>
                     <Row>
                       <Col md={6}>
                         <FormGroup>
-                          <Label for="date">Start Date</Label>
+                          <Label for="dateOfEventFrom">Start Date</Label>
                           <Input
-                            id="date"
-                            name={`event_date_from`}
                             type="date"
+                            name="event_date_from"
+                            value={props.values.event_date_from}
                             onChange={props.handleChange}
-                            placeholder="Enter Date"
+                            onBlur={props.handleBlur}
+                            invalid={
+                              props.touched.event_date_from &&
+                              Boolean(props.errors.event_date_from)
+                            }
                           />
+                          <FormFeedback>
+                            {props.errors.event_date_from}
+                          </FormFeedback>
                         </FormGroup>
                       </Col>
                       <Col md={6}>
                         <FormGroup>
-                          <Label for="date">End Date</Label>
+                          <Label for="dateOfEventTo">End Date</Label>
+
                           <Input
-                            id="date"
-                            name={`event_date_to`}
+                            id="dateOfEventTo"
                             type="date"
+                            name="event_date_to"
+                            value={props.values.event_date_to}
                             onChange={props.handleChange}
-                            placeholder="Enter Date"
+                            onBlur={props.handleBlur}
+                            invalid={
+                              props.touched.event_date_to &&
+                              Boolean(props.errors.event_date_to)
+                            }
                           />
+                          <FormFeedback>
+                            {props.errors.event_date_to}
+                          </FormFeedback>
                         </FormGroup>
                       </Col>
                     </Row>
                     <Row>
                       <Col md={6}>
                         <FormGroup>
-                          <Label for="timeOfEvent">Start Time</Label>
+                          <Label for="timeOfEventFrom">Start Time</Label>
                           <Input
-                            id="timeOfEvent"
-                            name={`event_time_from`}
                             type="time"
+                            name="event_time_from"
+                            value={props.values.event_time_from}
                             onChange={props.handleChange}
+                            onBlur={props.handleBlur}
+                            invalid={
+                              props.touched.event_time_from &&
+                              Boolean(props.errors.event_time_from)
+                            }
                           />
+                          <FormFeedback>
+                            {props.errors.event_time_from}
+                          </FormFeedback>
                         </FormGroup>
                       </Col>
                       <Col md={6}>
                         <FormGroup>
-                          <Label for="timeOfEvent">End Time</Label>
+                          <Label for="timeOfEventTo">End Time</Label>
                           <Input
-                            id="timeOfEvent"
-                            name={`event_time_to`}
                             type="time"
+                            name="event_time_to"
+                            value={props.values.event_time_to}
                             onChange={props.handleChange}
+                            onBlur={props.handleBlur}
+                            invalid={
+                              props.touched.event_time_to &&
+                              Boolean(props.errors.event_time_to)
+                            }
                           />
+                          <FormFeedback>
+                            {props.errors.event_time_to}
+                          </FormFeedback>
                         </FormGroup>
                       </Col>
                     </Row>
@@ -209,41 +314,95 @@ function ParadeModal({ openModal, toggleModal }) {
                             Request Letter Stamped (Received by Office of the
                             City Mayor)
                           </Label>
-                          <Input
-                            id="requestLetter"
-                            name={"request_letter"}
-                            type="file"
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "request_letter",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            accept="image/*"
-                          />
+                          <div className="d-flex gap-2">
+                            <Input
+                              type="file"
+                              name="request_letter"
+                              accept="image/*"
+                              onChange={(e) =>
+                                props.setFieldValue(
+                                  "request_letter",
+                                  e.currentTarget.files[0]
+                                )
+                              }
+                              onBlur={() =>
+                                props.setFieldTouched("request_letter", true)
+                              }
+                              invalid={
+                                props.touched.request_letter &&
+                                Boolean(props.errors.request_letter)
+                              }
+                            />
+                            <FormFeedback>
+                              {props.errors.request_letter}
+                            </FormFeedback>
+
+                            {isUpdate && uploadedFiles?.request_letter && (
+                              <Button
+                                color="primary"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  getImageHandle({
+                                    path: uploadedFiles?.request_letter,
+                                    url: "api/client/attachment",
+                                    showLoader: true,
+                                  });
+                                  toggleIsViewerOpen();
+                                }}
+                              >
+                                <i className="mdi mdi-eye" color="warning"></i>
+                              </Button>
+                            )}
+                          </div>
                         </FormGroup>
                       </Col>
                     </Row>
                     <Row>
                       <Col>
                         <FormGroup>
-                          <Label for="exampleFile">
+                          <Label for="route_plan">
                             Route Plan approved by CTTMD
                           </Label>
-                          <Input
-                            id="exampleFile"
-                            type="file"
-                            name={"route_plan"}
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "route_plan",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            accept="image/*"
-                          />
+                          <div className="d-flex gap-2">
+                            <Input
+                              type="file"
+                              name="route_plan"
+                              accept="image/*"
+                              onChange={(e) =>
+                                props.setFieldValue(
+                                  "route_plan",
+                                  e.currentTarget.files[0]
+                                )
+                              }
+                              onBlur={() =>
+                                props.setFieldTouched("route_plan", true)
+                              }
+                              invalid={
+                                props.touched.route_plan &&
+                                Boolean(props.errors.route_plan)
+                              }
+                            />
+                            <FormFeedback>
+                              {props.errors.route_plan}
+                            </FormFeedback>
+
+                            {isUpdate && uploadedFiles?.route_plan && (
+                              <Button
+                                color="primary"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  getImageHandle({
+                                    path: uploadedFiles?.route_plan,
+                                    url: "api/client/attachment",
+                                    showLoader: true,
+                                  });
+                                  toggleIsViewerOpen();
+                                }}
+                              >
+                                <i className="mdi mdi-eye" color="warning"></i>
+                              </Button>
+                            )}
+                          </div>
                         </FormGroup>
                       </Col>
                     </Row>
@@ -254,7 +413,10 @@ function ParadeModal({ openModal, toggleModal }) {
           </Formik>
           <div className="d-flex gap-2">
             <div style={{ width: "30px" }}>
-              <Input type="checkbox" onClick={setProceedHandle} />
+              <Input
+                type="checkbox"
+                onChange={(e) => setIsProceed(e.target.checked)}
+              />
             </div>
             <p>{USER_PRIVACY}</p>
           </div>
@@ -269,13 +431,17 @@ function ParadeModal({ openModal, toggleModal }) {
               color: "white",
             }}
             onClick={() => {
-              const formik = formikRef.current.values;
-
-              const formData = getFormData(formik);
+              const params = {
+                ...formikRef.current.values,
+                special_permit_application_id: specialPermitApplicationId,
+              };
+              const formData = getFormData(params);
               if (proceed) {
                 handleSubmit(
                   {
-                    url: "api/client/special-permit/parade",
+                    url: isUpdate
+                      ? "api/client/special-permit/parade/update"
+                      : "api/client/special-permit/parade",
                     headers: {
                       "Content-Type": "multipart/form-data",
                     },
@@ -288,9 +454,8 @@ function ParadeModal({ openModal, toggleModal }) {
                     params: formData,
                   },
                   [],
-                  [toggleModal]
+                  [toggleModal, toggleRefresh]
                 );
-                setIsProceed(false);
               }
             }}
             disabled={!proceed}
@@ -301,7 +466,6 @@ function ParadeModal({ openModal, toggleModal }) {
             color="secondary"
             onClick={() => {
               toggleModal();
-              setIsProceed(false);
             }}
           >
             Close

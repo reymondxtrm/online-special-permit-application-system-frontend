@@ -48,6 +48,7 @@ import {
   SpecialPermitAdminSlice,
 } from "features/SpecialPermitAdmin";
 import { useDispatch, useSelector } from "react-redux";
+import useGetImage from "hooks/Common/useGetImage";
 
 const AdminTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
@@ -68,15 +69,14 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const [purposeData, setpurposeData] = useState({});
   const [exemptionData, setexemptionData] = useState({});
   const [purposeOptions, setpurposeOptions] = useState();
-  const [applicationId, setapplicationId] = useState(null);
+  const [applicationId, setApplicationId] = useState(null);
   const [orderOfPaymentId, setorderOfPaymentId] = useState(null);
   const [name, setname] = useState(null);
   const [purpose, setpurpose] = useState(null);
   const [referenceNo, setreferenceNo] = useState(null);
   const [imageViewerScale, setimageViewScale] = useState(1);
-
   const [isViewerOpen, setIsViewerOpen] = useState(false);
-  const [currentImage, setCurrentImage] = useState(null);
+
   const [selectedRow, setSelectedRow] = useState([]);
   const [openRequestFormModal, setOpenRequestFormModal] = useState(false);
   const [
@@ -95,7 +95,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
         }
       : { status: status, permit_type: applicationType };
   }, [applicationType]);
-
+  const { isFetching, getImageHandle, currentImage } = useGetImage();
   const formatName = (name) => {
     const nameParts = name.split(" ");
     const firstName = nameParts[0]?.toUpperCase();
@@ -104,7 +104,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
 
     return `${firstName} ${middleName} ${lastName}`;
   };
-
   const toggleGenerateModal = () => {
     setgenerateModal(!generateModal);
   };
@@ -112,15 +111,10 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const toggleRemarksModal = useCallback(() => {
     setremarksModal((prev) => !prev);
   }, []);
-  const openImageViewer = useCallback((imageUrl) => {
-    setCurrentImage(imageUrl);
-    setIsViewerOpen(true);
+  const toggleImageViewer = useCallback(() => {
+    setIsViewerOpen((prev) => !prev);
   }, []);
 
-  const closeImageViewer = () => {
-    setIsViewerOpen(false);
-    setCurrentImage(null);
-  };
   const toggleRefresh = useCallback(() => {
     setrefreshPage((prev) => !prev);
   }, []);
@@ -178,7 +172,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
     }
   }, [activeTab, refreshPage]);
 
-  // Function to handle opening the image viewer modal
   const handleViewImage = (imageUrl) => {
     setSelectedImage(imageUrl);
     setIsModalOpen(true);
@@ -314,6 +307,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
             referenceNo={referenceNo}
             specialPermitID={specialPermitID}
           />
+
           <UploadPermitModal
             toggleModal={toggleUploadModal}
             openModal={uploadModal}
@@ -326,18 +320,18 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
 
       <div className="tableFixHead">
         <div>
-          {isViewerOpen && currentImage && (
+          {isViewerOpen && currentImage && isFetching === false && (
             <>
               <Viewer
                 visible={isViewerOpen}
-                onClose={closeImageViewer}
+                onClose={toggleImageViewer}
                 images={[{ src: currentImage, alt: "Attachment" }]}
                 activeIndex={0}
                 rotatable
                 zoomable
                 scalable
                 attribute={false}
-                zIndex={2000}
+                zIndex={99999}
               />
             </>
           )}
@@ -388,8 +382,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                   <th>Sex</th>
                   <th>Email</th>
                   <th>Contact</th>
-
-                  {/* <th>Address</th> */}
                 </>
               ) : null}
               {status === "for_payment" ||
@@ -413,7 +405,11 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                   <th>Date To</th>
                 </>
               ) : null}
-              <th>Attachments</th>
+
+              {(status !== "for_payment_approval" || status !== "returned") && (
+                <th>Attachment</th>
+              )}
+
               {status === "returned" ? <th>Remarks</th> : null}
 
               {status === "pending" ? <th>Actions</th> : null}
@@ -434,7 +430,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                 <React.Fragment key={application.id}>
                   <tr
                     onClick={() => {
-                      application.mark_as_read
+                      application?.mark_as_read
                         ? null
                         : handleRowOnclick(application.id);
                     }}
@@ -443,21 +439,21 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                     {status === "for_signature" && (
                       <td>{application.reference_no}</td>
                     )}
-                    <td>{application.user?.fullname}</td>
+                    <td>
+                      {application.user?.fullname}{" "}
+                      {application?.mark_as_read ? (
+                        ""
+                      ) : (
+                        <Badge color="primary"> Unread</Badge>
+                      )}
+                    </td>
                     {applicationType === "mayors_permit" ||
                     applicationType === "good_moral" ||
                     applicationType === "occupational_permit" ? (
                       <>
                         {applicationType === "mayors_permit" ||
                         applicationType === "good_moral" ? (
-                          <td>
-                            {application?.application_purpose?.name}{" "}
-                            {application?.mark_as_read ? (
-                              ""
-                            ) : (
-                              <Badge color="primary"> Unread</Badge>
-                            )}
-                          </td>
+                          <td>{application?.application_purpose?.name} </td>
                         ) : null}
 
                         {/* {applicationType === "good_moral" && (
@@ -552,24 +548,65 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                         <td>{application.user?.email}</td>
                       </>
                     ) : null}
+
                     <td>
                       {status === "for_payment_approval" ||
                       status === "returned" ? (
-                        <img
-                          src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`}
-                          alt={`Thumbnail`}
-                          style={{
-                            width: "100px",
-                            height: "50px",
-                            margin: "5px",
-                            cursor: "pointer",
-                          }}
-                          onClick={() =>
-                            openImageViewer(
-                              `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`
-                            )
-                          }
-                        />
+                        application?.order_of_payment?.payment_detail
+                          ?.payment_type === "online" ? (
+                          <>
+                            <Button
+                              color="success"
+                              className="me-2"
+                              onClick={() => {
+                                console.log(
+                                  application?.order_of_payment?.payment_detail
+                                    ?.attachment
+                                );
+                                window.open(
+                                  application?.order_of_payment?.payment_detail
+                                    ?.attachment,
+                                  "_blank"
+                                );
+                              }}
+                            >
+                              Official Receipt
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button
+                              color="success"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                getImageHandle({
+                                  url: "api/admin/attachment",
+                                  path: application?.order_of_payment
+                                    ?.payment_detail?.attachment,
+                                  showLoader: true,
+                                });
+                                toggleImageViewer();
+                              }}
+                            >
+                              Attachment
+                            </Button>
+                            {/* <img
+                              src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`}
+                              alt={`Thumbnail`}
+                              style={{
+                                width: "100px",
+                                height: "50px",
+                                margin: "5px",
+                                cursor: "pointer",
+                              }}
+                              onClick={() =>
+                                openImageViewer(
+                                  `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`
+                                )
+                              }
+                            /> */}
+                          </>
+                        )
                       ) : (
                         <Button
                           color="success"
@@ -581,6 +618,31 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                         </Button>
                       )}
                     </td>
+
+                    {/* {(status === "for_payment_approval" ||
+                      status === "returned") &&
+                      (applicationType === "good_moral" ||
+                        applicationType === "mayors_permit" ||
+                        applicationType === "occupational_permit") && (
+                        <td>
+                          <Button
+                            color="primary"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              getImageHandle({
+                                url: "api/admin/attachment",
+                                path: application?.uploaded_file
+                                  ?.community_tax_certificate,
+                                showLoader: true,
+                              });
+                              toggleImageViewer();
+                            }}
+                          >
+                            Cedula
+                          </Button>
+                        </td>
+                      )} */}
+
                     {status === "returned" ? (
                       <td>
                         {application.status_histories
@@ -641,7 +703,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                                     return;
                                   }
 
-                                  setapplicationId(application?.id);
+                                  setApplicationId(application?.id);
                                   toggleAmountModal();
                                 }}
                               >
@@ -688,10 +750,10 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               <DropdownItem
                                 onClick={() => {
                                   toggleRemarksModal();
-                                  setapplicationId(application?.id);
+                                  setApplicationId(application?.id);
                                 }}
                               >
-                                Decline
+                                Return
                               </DropdownItem>
                               <DropdownItem
                                 onClick={() => {
@@ -701,10 +763,10 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                                     applicationType === "mayors_permit"
                                   ) {
                                     toggleMayorsAndGoodMoralRequestModal();
-                                    setapplicationId(application.id);
+                                    setApplicationId(application.id);
                                   } else {
                                     toggleRequestFormModal();
-                                    setapplicationId(application.id);
+                                    setApplicationId(application.id);
                                   }
                                 }}
                               >
@@ -734,6 +796,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                                   application.application_purpose?.name?.toUpperCase()
                                 );
                                 setreferenceNo(application.reference_no);
+
                                 setspecialPermitID(application?.id);
                               }}
                             >
@@ -771,18 +834,10 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                           >
                             <DropdownItem
                               onClick={() => {
-                                // const formik = formikRef.current.values;
-                                // const formData = getFormData(formik);
-                                // formData.append(
-                                //   "special_permit_application_id",
-                                //   applicationId
-                                // );
                                 handleSubmit(
                                   {
                                     url: "api/admin/approve-payment",
-                                    // headers: {
-                                    //   "Content-Type": "multipart/form-data",
-                                    // },
+
                                     message: {
                                       title:
                                         "Are you sure you want to Proceed?",
@@ -837,22 +892,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
           params={params}
         />
       </div>
-
-      {/* Image Viewer Modal */}
-      <Modal isOpen={isModalOpen} toggle={toggleModal} size="lg">
-        <ModalHeader toggle={toggleModal}>Image Viewer</ModalHeader>
-        <ModalBody className="text-center">
-          {selectedImage ? (
-            <img
-              src={selectedImage}
-              alt="Selected Document"
-              style={{ maxWidth: "100%", maxHeight: "70vh" }}
-            />
-          ) : (
-            <p>No image selected</p>
-          )}
-        </ModalBody>
-      </Modal>
     </>
   );
 };

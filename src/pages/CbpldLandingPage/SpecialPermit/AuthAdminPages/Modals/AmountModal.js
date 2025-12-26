@@ -33,9 +33,14 @@ function AmountModal({
   const [discountOption, setDiscountOptions] = useState([]);
   const [exempted, setExempted] = useState(false);
   useEffect(() => {
+    if (exempted) {
+      formikRef.current.setFieldValue("amount", 0);
+    }
+  }, [exempted]);
+  useEffect(() => {
     if (openModal) {
       axios
-        .get("api/admin/get/exempted-cases", {
+        .get("api/admin//get/exempted-cases/admin", {
           params: { permit_type: "event" },
         })
         .then(
@@ -58,7 +63,6 @@ function AmountModal({
       <Modal
         isOpen={openModal}
         toggle={() => {
-          // ensure parent toggles and reset local state and form
           toggleModal();
           setExempted(false);
           if (
@@ -70,7 +74,6 @@ function AmountModal({
         }}
         fade={true}
         backdrop="static"
-        // use reactstrap props: centered to vertically center, remove invalid props
         centered
         keyboard
         style={{ overflowY: "auto" }}
@@ -115,27 +118,12 @@ function AmountModal({
             {(props) => (
               <Form>
                 <Col>
-                  <Row>
-                    <Col md={12}>
-                      <FormGroup>
-                        <Label for="amount">Amount</Label>
-                        <Input
-                          id="amount"
-                          name={`amount`}
-                          type="number"
-                          placeholder="Enter amount"
-                          value={props.values.amount}
-                          onChange={props.handleChange}
-                        />
-                      </FormGroup>
-                    </Col>
-                  </Row>
                   {permitType === "event" && (
                     <>
                       <Row>
                         <Col md={12}>
                           <FormGroup>
-                            <Label for="amount">Event Type</Label>
+                            <Label for="event_type">Event Type</Label>
                             <Input
                               id="event_type"
                               name={`event_type`}
@@ -149,10 +137,10 @@ function AmountModal({
                       </Row>
                       <Row
                         style={{
-                          backgroundColor: "#0b95f4",
-                          alignItems: "center", // centers vertically
-                          display: "flex", // enable flex layout
-                          minHeight: "30px", // optional: gives some height
+                          backgroundColor: "#cddfebff",
+                          alignItems: "center",
+                          display: "flex",
+                          minHeight: "30px",
                         }}
                       >
                         <div
@@ -162,35 +150,67 @@ function AmountModal({
                             marginTop: "5px",
                           }}
                         >
-                          <FormGroup check inline>
+                          <FormGroup
+                            check
+                            inline
+                            className="d-flex justify-content-center"
+                          >
                             <Input
                               type="checkbox"
                               className="me-2"
-                              onChange={() => setExempted((prev) => !prev)}
+                              style={{ width: "17px", height: "17px" }}
+                              value={exempted}
+                              onChange={(e) => setExempted(e.target.checked)}
                             />
-
-                            <Label style={{ color: "white", fontSize: "15px" }}>
+                            <Label
+                              style={{
+                                color: "#2162a3ff",
+                                fontSize: "15px",
+                                fontWeight: "bold",
+                              }}
+                            >
                               Exempted
                             </Label>
                           </FormGroup>
                         </div>
-                      </Row>
-                      <Row>
-                        <Col>
-                          <Label>Exemption</Label>
-                          <Select
-                            options={discountOption}
-                            onChange={(selected) => {
-                              props.setFieldValue(
-                                "exemption_id",
-                                selected.value
-                              );
-                            }}
-                            isDisabled={!exempted}
-                          />
-                        </Col>
-                      </Row>
+                      </Row>{" "}
                     </>
+                  )}
+
+                  <Row style={{ backgroundColor: "#cddfebff" }}>
+                    <Col md={12}>
+                      <FormGroup>
+                        <Label for="amount">Amount</Label>
+                        <Input
+                          id="amount"
+                          name={`amount`}
+                          type="number"
+                          placeholder="Enter amount"
+                          disabled={exempted}
+                          value={props.values.amount}
+                          onChange={props.handleChange}
+                        />
+                      </FormGroup>
+                    </Col>
+                  </Row>
+                  {permitType === "event" && (
+                    <Row
+                      style={{
+                        backgroundColor: "#cddfebff",
+                        paddingBottom: "15px",
+                      }}
+                    >
+                      <Col>
+                        <Label>Exemption</Label>
+                        <Select
+                          options={discountOption}
+                          onChange={(selected) => {
+                            props.setFieldValue("exemption_id", selected.value);
+                          }}
+                          isDisabled={!exempted}
+                        />
+                      </Col>
+                    </Row>
                   )}
                 </Col>
               </Form>
@@ -208,7 +228,7 @@ function AmountModal({
             }}
             onClick={() => {
               const formik = formikRef.current?.values || {};
-              console.log(exempted);
+
               handleSubmit(
                 {
                   url: formik.exemption_id
@@ -231,7 +251,6 @@ function AmountModal({
                 [],
                 [
                   toggleRefresh,
-                  // ensure modal closes and form resets after action
                   () => {
                     toggleModal();
                     if (

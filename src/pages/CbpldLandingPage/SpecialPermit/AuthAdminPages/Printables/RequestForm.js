@@ -92,7 +92,7 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                       <img
                         src={cgbLogo}
                         alt="CGB Logo"
-                        className="header-logo"
+                        className="header-logo-request-form"
                       />
                     </div>
                     <div style={{ marginTop: "10px" }}>
@@ -121,8 +121,8 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                       className="text-center"
                       style={{
                         position: "absolute",
-                        bottom: "-30px",
-                        left: "180px",
+                        bottom: "-40px",
+                        left: "250px",
                       }}
                     >
                       <h1 className="title">REQUEST FORM FOR SPECIAL PERMIT</h1>
@@ -136,7 +136,6 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    width: "765px",
                   }}
                 >
                   <table
@@ -145,7 +144,8 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                       borderCollapse: "collapse",
                       marginTop: "30px",
                       tableLayout: "fixed",
-                      width: "92%",
+
+                      width: "740px",
                     }}
                   >
                     <thead>
@@ -163,13 +163,15 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                           <div className="d-flex gap-1 align-items-center">
                             <div
                               className="checkbox"
-                              style={{
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.request_letter && type === "event"
-                                    ? "black"
-                                    : "",
-                              }}
+                              style={
+                                {
+                                  // backgroundColor:
+                                  //   !!application?.uploaded_file
+                                  //     ?.request_letter && type === "event"
+                                  //     ? "black"
+                                  //     : "",
+                                }
+                              }
                             ></div>
                             <p style={{ flex: "1" }} className="m-0 p-0">
                               Request Letter &quot;Received&quot; by the Office
@@ -181,13 +183,15 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                           <div className="d-flex gap-1 align-items-center">
                             <div
                               className="checkbox"
-                              style={{
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.request_letter && type === "motorcade"
-                                    ? "black"
-                                    : "",
-                              }}
+                              style={
+                                {
+                                  // backgroundColor:
+                                  //   !!application?.uploaded_file
+                                  //     ?.request_letter && type === "motorcade"
+                                  //     ? "black"
+                                  //     : "",
+                                }
+                              }
                             ></div>
                             <p style={{ flex: "1" }} className="m-0 p-0">
                               Request Letter &quot;Received&quot; by the Office
@@ -199,13 +203,15 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                           <div className="d-flex gap-1 align-items-center">
                             <div
                               className="checkbox"
-                              style={{
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.request_letter && type === "parade"
-                                    ? "black"
-                                    : "",
-                              }}
+                              style={
+                                {
+                                  // backgroundColor:
+                                  //   !!application?.uploaded_file
+                                  //     ?.request_letter && type === "parade"
+                                  //     ? "black"
+                                  //     : "",
+                                }
+                              }
                             ></div>
                             <p style={{ flex: "1" }} className="m-0 p-0">
                               Request Letter &quot;Received&quot; by the Office
@@ -217,13 +223,15 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                           <div className="d-flex gap-1 align-items-center">
                             <div
                               className="checkbox"
-                              style={{
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.request_letter && type === "recorrida"
-                                    ? "black"
-                                    : "",
-                              }}
+                              style={
+                                {
+                                  // backgroundColor:
+                                  //   !!application?.uploaded_file
+                                  //     ?.request_letter && type === "recorrida"
+                                  //     ? "black"
+                                  //     : "",
+                                }
+                              }
                             ></div>
                             <p style={{ flex: "1" }} className="m-0 p-0">
                               Request Letter &quot;Received&quot; by the Office
@@ -235,14 +243,16 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                           <div className="d-flex gap-1 align-items-center">
                             <div
                               className="checkbox"
-                              style={{
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.request_letter &&
-                                  type === "use_of_government_property"
-                                    ? "black"
-                                    : "",
-                              }}
+                              style={
+                                {
+                                  // backgroundColor:
+                                  //   !!application?.uploaded_file
+                                  //     ?.request_letter &&
+                                  //   type === "use_of_government_property"
+                                  //     ? "black"
+                                  //     : "",
+                                }
+                              }
                             ></div>
                             <p style={{ flex: "1" }} className="m-0 p-0">
                               Request Letter &quot;Received&quot; by the Office
@@ -256,13 +266,15 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                           <div className="d-flex gap-1 align-items-center">
                             <div
                               className="checkbox"
-                              style={{
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.official_receipt && type === "event"
-                                    ? "black"
-                                    : "",
-                              }}
+                              style={
+                                {
+                                  // backgroundColor:
+                                  //   !!application?.uploaded_file
+                                  //     ?.official_receipt && type === "event"
+                                  //     ? "black"
+                                  //     : "",
+                                }
+                              }
                             >
                               {" "}
                             </div>
@@ -276,13 +288,15 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                           <div className="d-flex gap-1 align-items-center">
                             <div
                               className="checkbox"
-                              style={{
-                                backgroundColor:
-                                  !!application?.uploaded_file?.route_plan &&
-                                  type === "motorcade"
-                                    ? "black"
-                                    : "",
-                              }}
+                              style={
+                                {
+                                  // backgroundColor:
+                                  //   !!application?.uploaded_file?.route_plan &&
+                                  //   type === "motorcade"
+                                  //     ? "black"
+                                  //     : "",
+                                }
+                              }
                             ></div>
                             <p style={{ flex: "1" }} className="m-0 p-0">
                               Route Plan approved by the CTTMD
@@ -293,13 +307,15 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                           <div className="d-flex gap-1 align-items-center">
                             <div
                               className="checkbox"
-                              style={{
-                                backgroundColor:
-                                  !!application?.uploaded_file?.route_plan &&
-                                  type === "parade"
-                                    ? "black"
-                                    : "",
-                              }}
+                              style={
+                                {
+                                  // backgroundColor:
+                                  //   !!application?.uploaded_file?.route_plan &&
+                                  //   type === "parade"
+                                  //     ? "black"
+                                  //     : "",
+                                }
+                              }
                             ></div>
                             <p style={{ flex: "1" }} className="m-0 p-0">
                               Route Plan approved by the CTTMD
@@ -310,13 +326,15 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                           <div className="d-flex gap-1 align-items-center">
                             <div
                               className="checkbox"
-                              style={{
-                                backgroundColor:
-                                  !!application?.uploaded_file?.route_plan &&
-                                  type === "recorrida"
-                                    ? "black"
-                                    : "",
-                              }}
+                              style={
+                                {
+                                  // backgroundColor:
+                                  //   !!application?.uploaded_file?.route_plan &&
+                                  //   type === "recorrida"
+                                  //     ? "black"
+                                  //     : "",
+                                }
+                              }
                             ></div>
                             <p style={{ flex: "1" }} className="m-0 p-0">
                               Route Plan approved by the CTTMD
@@ -327,14 +345,16 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                           <div className="d-flex gap-1 align-items-center">
                             <div
                               className="checkbox"
-                              style={{
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.official_receipt &&
-                                  type === "use_of_government_property"
-                                    ? "black"
-                                    : "",
-                              }}
+                              style={
+                                {
+                                  // backgroundColor:
+                                  //   !!application?.uploaded_file
+                                  //     ?.official_receipt &&
+                                  //   type === "use_of_government_property"
+                                  //     ? "black"
+                                  //     : "",
+                                }
+                              }
                             >
                               {" "}
                             </div>
@@ -351,13 +371,15 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                           <div className="d-flex gap-1 align-items-center">
                             <div
                               className="checkbox"
-                              style={{
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.official_receipt && type === "motorcade"
-                                    ? "black"
-                                    : "",
-                              }}
+                              style={
+                                {
+                                  // backgroundColor:
+                                  //   !!application?.uploaded_file
+                                  //     ?.official_receipt && type === "motorcade"
+                                  //     ? "black"
+                                  //     : "",
+                                }
+                              }
                             ></div>
                             <p style={{ flex: "1" }} className="m-0 p-0">
                               Official Receipt &#8369;200.00 per day (less than
@@ -370,13 +392,15 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                           <div className="d-flex gap-1 align-items-center">
                             <div
                               className="checkbox"
-                              style={{
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.official_receipt && type === "parade"
-                                    ? "black"
-                                    : "",
-                              }}
+                              style={
+                                {
+                                  // backgroundColor:
+                                  //   !!application?.uploaded_file
+                                  //     ?.official_receipt && type === "parade"
+                                  //     ? "black"
+                                  //     : "",
+                                }
+                              }
                             ></div>
                             <p style={{ flex: "1" }} className="m-0 p-0">
                               Official Receipt &#8369;200.00 per day (less than
@@ -389,13 +413,15 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                           <div className="d-flex gap-1 align-items-center">
                             <div
                               className="checkbox"
-                              style={{
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.official_receipt && type === "recorrida"
-                                    ? "black"
-                                    : "",
-                              }}
+                              style={
+                                {
+                                  // backgroundColor:
+                                  //   !!application?.uploaded_file
+                                  //     ?.official_receipt && type === "recorrida"
+                                  //     ? "black"
+                                  //     : "",
+                                }
+                              }
                             >
                               {" "}
                             </div>
@@ -565,7 +591,7 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                 </td>
               </tr>
               <tr>
-                <td style={{ width: "900px" }}>
+                <td style={{ width: "900px", padding: "10px" }}>
                   <p style={{ textIndent: "40px" }} className="cambraText">
                     I hereby voluntarily declare that all the information
                     provided in this request form for the special permit is
@@ -579,7 +605,7 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
               <tr>
                 <td>
                   <div
-                    style={{ width: "200px" }}
+                    style={{ width: "200px", padding: "10px" }}
                     className="d-flex align-items-center flex-column"
                   >
                     <hr

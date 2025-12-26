@@ -32,7 +32,7 @@ import FileUpload from "components/Forms/fileUpload";
 
 const Register = (props) => {
   //meta title
-  document.title = "BPLD Document Tracker";
+  document.title = "BPLD | SPECIAL PERMIT";
 
   const dispatch = useDispatch();
 

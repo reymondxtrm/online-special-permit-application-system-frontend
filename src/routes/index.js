@@ -70,13 +70,18 @@ import AdminForPaymentApproval from "../pages/CbpldLandingPage/SpecialPermit/Aut
 import AdminForSignature from "../pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/ForSignature";
 import AdminControls from "../pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/AdminControls";
 import FormEditors from "pages/Forms/FormEditors";
-import EmailVerification from "pages/AuthenticationInner/auth-email-verification";
+import EmailVerification from "pages/AuthenticationInner/auth-email-verification-2";
 import SpecialPermitEmailVerication from "pages/AuthenticationInner/SpecialPermitEmailVerication";
 import ForgetPasswordPage from "pages/AuthenticationInner/ForgetPassword";
 import ConfirmMail from "pages/AuthenticationInner/page-confirm-mail";
 
 //QR code
 import SpecialPermitDetailsQr from "pages/CbpldLandingPage/SpecialPermit/SpecialPermitDetailsQr";
+import { components } from "react-select/dist/react-select.cjs.prod";
+import CedulaApplicationFormModal from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Modals/CedulaApplicationFormModal";
+import PassportCropper from "pages/TrialPages/PassportCropper";
+import TwostepVerification2 from "pages/AuthenticationInner/auth-two-step-verification-2";
+import TwostepVerification from "pages/AuthenticationInner/auth-two-step-verification";
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: Analytics },
@@ -180,6 +185,7 @@ const publicRoutes = [
   { path: "/forgot-password", component: ForgetPasswordPage },
   { path: "/verify-email", component: ConfirmMail },
   { path: "/special-permit-qr-details/:id", component: SpecialPermitDetailsQr },
+  { path: "/verify-otp", component: TwostepVerification },
 ];
 
 export { authProtectedRoutes, publicRoutes };

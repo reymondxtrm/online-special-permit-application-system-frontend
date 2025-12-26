@@ -1,5 +1,6 @@
 import React from "react";
 import moment from "moment";
+// import "../style.css";
 
 export default function PermitStamp({ orNo, ORDate, dateIssued, approvedBy }) {
   const formatDate = (dateString) => {

@@ -1,0 +1,6 @@
+.success {
+  box-shadow: 0 4px 10px rgba(28, 137, 126, 0.25);
+}
+.failed {
+  box-shadow: 0 4px 10px rgba(196, 22, 13, 0.25);
+}

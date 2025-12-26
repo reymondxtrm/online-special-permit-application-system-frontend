@@ -8,24 +8,37 @@ import moment from "moment";
 import { getForAssessmentReceiving } from "features/AssessmentReceiver/assessmentReceiverSlice";
 import { useDispatch } from "react-redux";
 import DetailsButton from "components/Common/Buttons/DetailsButton";
+import useSubmit from "hooks/Common/useSubmit";
+import {
+  getUserList,
+  getCompanyListUnvalidated,
+} from "features/user/userListSlice";
 
-const UserControlsTable = ({ data, tableData }) => {
-  const dispatch = useDispatch();
-  const params = {
-    for_action: 1,
-  };
-
+const UserControlsTable = ({ isFetching, tableData, tableName }) => {
   const [sortedData, setSortedData] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+  const handleSubmit = useSubmit();
   useEffect(() => {
     setSortedData(
       _.orderBy(tableData, [sortConfig.key], [sortConfig.direction])
     );
   }, [tableData, sortConfig]);
-
+  const validationHandle = (id) => {
+    handleSubmit(
+      {
+        url: "api/admin/user-validate",
+        params: { id: id },
+        message: { title: "Are you sure you want to verify this company?" },
+      },
+      [
+        getUserList({ unvalidated_user: 0 }),
+        getCompanyListUnvalidated({ unvalidated_user: 1 }),
+      ],
+      []
+    );
+  };
   const sortData = (key) => {
     let direction = "asc";
-
     if (
       sortConfig &&
       sortConfig.key === key &&
@@ -82,34 +95,64 @@ const UserControlsTable = ({ data, tableData }) => {
             }}
           >
             <tr>
+              <th>#</th>
               <th>User ID</th>
-              <th
-                style={{
-                  width: "10%",
-                  cursor: "pointer",
-                }}
-                onClick={() => sortData("first_name")}
-              >
-                First Name
-              </th>
-              <th
-                style={{
-                  width: "10%",
-                  cursor: "pointer",
-                }}
-                onClick={() => sortData("middle_name")}
-              >
-                Middle Initial
-              </th>
-              <th
-                style={{
-                  width: "10%",
-                  cursor: "pointer",
-                }}
-                onClick={() => sortData("last_name")}
-              >
-                Last Name
-              </th>
+              {tableName === "company" && (
+                <>
+                  <th
+                    style={{
+                      width: "20%",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => sortData("first_name")}
+                  >
+                    Company Name
+                  </th>
+                  <th
+                    style={{
+                      width: "20%",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => sortData("")}
+                  >
+                    Company Address
+                  </th>
+                </>
+              )}
+
+              {tableName === "users" ? (
+                <>
+                  <th
+                    style={{
+                      width: "10%",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => sortData("first_name")}
+                  >
+                    First Name/Company Name
+                  </th>
+                  <th
+                    style={{
+                      width: "10%",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => sortData("middle_name")}
+                  >
+                    Middle Initial
+                  </th>
+                  <th
+                    style={{
+                      width: "10%",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => sortData("last_name")}
+                  >
+                    Last Name
+                  </th>
+                </>
+              ) : (
+                ""
+              )}
 
               <th
                 style={{
@@ -120,15 +163,24 @@ const UserControlsTable = ({ data, tableData }) => {
               >
                 Role(s)
               </th>
+              <th
+                style={{
+                  width: "20%",
+                  cursor: "pointer",
+                }}
+                onClick={() => sortData("roles")}
+              >
+                Account Type
+              </th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {data.isFetching ? (
+            {isFetching ? (
               <TableLoader row={10} col={10} />
             ) : (
               sortedData &&
-              (sortedData.length === 0 ? (
+              (sortedData?.length === 0 ? (
                 <tr>
                   <td
                     colSpan={9}
@@ -140,21 +192,40 @@ const UserControlsTable = ({ data, tableData }) => {
                   </td>
                 </tr>
               ) : (
-                sortedData.map((items, index) => {
+                sortedData?.map((items, index) => {
                   return (
-                    <tr key={items.id}>
-                      <td>{items.id}</td>
-                      <td>{items.first_name}</td>
-                      <td>{`${items.middle_name || ""}`}</td>
-                      <td>{items.last_name}</td>
+                    <tr key={items?.id}>
+                      <td className="fw-bold">{index + 1}</td>
+                      <td>{items?.id}</td>
+                      <td>{items?.first_name}</td>
+                      {tableName === "users" && (
+                        <>
+                          <td>{`${items?.middle_name || ""}`}</td>
+                          <td>{items?.last_name || ""}</td>
+                        </>
+                      )}
+                      {tableName === "company" && (
+                        <td>{items?.user_address_morph?.[0]?.full_address}</td>
+                      )}
                       <td>
-                        {items.user_roles.length === 0 ? (
+                        <Badge
+                          color={
+                            items?.account_type === "individual"
+                              ? "success"
+                              : "primary"
+                          }
+                        >
+                          {items?.account_type}
+                        </Badge>
+                      </td>
+                      <td>
+                        {items?.user_roles?.length === 0 ? (
                           <h5>
                             {" "}
                             <Badge color="success">Special Permit User</Badge>
                           </h5>
                         ) : (
-                          items.user_roles.map((role, index) => (
+                          items?.user_roles?.map((role, index) => (
                             <span key={index}>
                               <h5>
                                 <Badge color="success">
@@ -171,16 +242,23 @@ const UserControlsTable = ({ data, tableData }) => {
                         )}
                       </td>
                       <td>
-                        {/* <i
-                          className="mdi mdi-pen text-warning fs-3"
-                          style={{ cursor: "pointer" }}
-                          onClick={() => handleEdit(items.id)}
-                        /> */}
-                        <i
-                          className="mdi mdi-trash-can text-danger fs-2"
-                          style={{ cursor: "pointer" }}
-                          onClick={() => handleDelete(items.id)}
-                        />
+                        <div className="d-flex  gap-2">
+                          <i
+                            className="mdi mdi-trash-can text-danger fs-2"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => handleDelete(items?.id)}
+                          />
+                          {items?.is_validated === 0 &&
+                          items?.account_type === "company" ? (
+                            <i
+                              className="mdi mdi-account-multiple-check fs-2 text-success"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => validationHandle(items.id)}
+                            ></i>
+                          ) : (
+                            ""
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );

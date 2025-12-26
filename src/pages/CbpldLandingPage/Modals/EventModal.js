@@ -5,103 +5,120 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Table,
-  Badge,
   Form,
   Row,
   Col,
   Input,
   Label,
   FormGroup,
+  FormFeedback,
 } from "reactstrap";
-import { faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Select, { StylesConfig } from "react-select";
-import { FieldArray, Formik } from "formik";
+
+import { Formik } from "formik";
 import useSubmit from "hooks/Common/useSubmit";
+import axios from "axios";
 import { EVENT_TYPES, USER_PRIVACY } from "assets/data/data";
 import * as Yup from "yup";
+import useGetImage from "hooks/Common/useGetImage";
+import ImageViewer from "react-simple-image-viewer";
 
-function EventModal({ openModal, toggleModal }) {
+function EventModal({
+  openModal,
+  toggleModal,
+  isUpdate = false,
+  specialPermitApplicationId,
+  specialPermitType,
+  toggleRefresh,
+}) {
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
   const [proceed, setIsProceed] = useState(false);
+  const [existingData, setExistingData] = useState({});
+  const [uploadedFiles, setUploadedFiles] = useState({});
+  const { getImageHandle, currentImage, isFetching } = useGetImage();
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const toggleIsViewerOpen = () => {
+    setIsViewerOpen((prev) => !prev);
+  };
+  useEffect(() => {
+    if (openModal && isUpdate && specialPermitApplicationId) {
+      axios
+        .get("api/client/get-single-permmit-application", {
+          params: {
+            special_permit_application_id: specialPermitApplicationId,
+          },
+        })
+        .then((res) => {
+          const data = res.data.data;
+          setExistingData({
+            requestor_name: data.requestor_name,
+            event_name: data.event_name,
+            event_date_from: data.event_date_from,
+            event_date_to: data.event_date_to,
+            event_time_from: data.event_time_from,
+            event_time_to: data.event_time_to,
+          });
+
+          setUploadedFiles(data.uploaded_file || {});
+        });
+    }
+  }, [openModal, isUpdate, specialPermitApplicationId]);
+  console.log(uploadedFiles);
+  useEffect(() => {
+    if (!openModal) {
+      setExistingData({});
+      setUploadedFiles({});
+    }
+  }, [openModal]);
 
   const getFormData = (object) => {
     const formData = new FormData();
     Object.keys(object).forEach((key) => {
-      if (object[key] instanceof File || object[key] instanceof Blob) {
-        formData.append(key, object[key]); // Directly append files
-      } else if (Array.isArray(object[key])) {
-        object[key].forEach((item) => formData.append(`${key}[]`, item));
-      } else if (typeof object[key] === "object" && object[key] !== null) {
-        formData.append(key, JSON.stringify(object[key]));
-      } else {
+      if (object[key] instanceof File) {
         formData.append(key, object[key]);
+      } else {
+        formData.append(key, object[key] ?? "");
       }
     });
     return formData;
   };
-  const setProceedHandle = () => {
-    setIsProceed((prev) => !prev);
-  };
+
   const validationSchema = Yup.object().shape({
-    requestor_name: Yup.string().required(),
-    event_name: Yup.string().required(),
-    event_date_from: Yup.date().required(),
-    event_date_to: Yup.date().required(),
-    event_time_from: Yup.string().required(),
-    event_time_to: Yup.string().required(),
-    // event_type: Yup.string().required(),
-    request_letter: Yup.mixed()
-      .required("An image is required")
-      .test("fileSize", "Image size must be less than 2MB", (value) => {
-        return value && value.size <= IMAGE_SIZE;
-      })
-      .test(
-        "fileFormat",
-        "Only jpg, jpeg, png, gif, webp are allowed",
-        (value) => {
-          return value && SUPPORTED_IMAGE_FORMATS.includes(value.type);
-        }
-      ),
-    route_plan: Yup.mixed()
-      .required("An image is required")
-      .test("fileSize", "Image size must be less than 2MB", (value) => {
-        return value && value.size <= IMAGE_SIZE;
-      })
-      .test(
-        "fileFormat",
-        "Only jpg, jpeg, png, gif, webp are allowed",
-        (value) => {
-          return value && SUPPORTED_IMAGE_FORMATS.includes(value.type);
-        }
-      ),
+    requestor_name: Yup.string().required("Required"),
+    event_name: Yup.string().required("Required"),
+    event_date_from: Yup.date().required("Required"),
+    event_date_to: Yup.date().required("Required"),
+    event_time_from: Yup.string().required("Required"),
+    event_time_to: Yup.string().required("Required"),
   });
 
   return (
     <React.Fragment>
+      {isViewerOpen && !isFetching && currentImage && (
+        <ImageViewer
+          src={[currentImage]}
+          currentIndex={0}
+          onClose={toggleIsViewerOpen}
+          backgroundStyle={{
+            backgroundColor: "rgba(0,0,0,0.8)",
+            zIndex: 9999,
+          }}
+          closeOnClickOutside={true}
+          disableZoom={false}
+        />
+      )}
       <Modal
         isOpen={openModal}
         toggle={() => {
           toggleModal();
-          setIsProceed(false);
         }}
-        fade={true}
         backdrop="static"
-        size="m"
         className="modal-dialog-centered"
-        style={{
-          //  maxHeight: "90vh",
-          overflowY: "auto",
-          // maxWidth: "1400px",
-        }}
-        unmountOnClose
+        size="m"
       >
         <ModalHeader
           toggle={() => {
             toggleModal();
-            setIsProceed(false);
           }}
         >
           <p
@@ -109,251 +126,277 @@ function EventModal({ openModal, toggleModal }) {
               fontWeight: "bold",
               letterSpacing: ".2rem",
               fontSize: "18pt",
-              margin: "0",
-              padding: "0",
+              margin: 0,
               color: "#368be0",
             }}
           >
-            {"EVENT"}
+            {isUpdate ? "UPDATE EVENT" : "EVENT"}
           </p>
         </ModalHeader>
+
         <ModalBody style={{ overflowX: "auto" }}>
           <Formik
             innerRef={formikRef}
             enableReinitialize={true}
+            validationSchema={validationSchema}
             initialValues={{
               type: "event",
-              requestor_name: "sample",
-              event_name: "sample",
-              event_date_from: "2024-10-19",
-              event_date_to: "2024-10-19",
-              event_time_from: "",
-              event_time_to: "",
-              event_type: "",
+              requestor_name: existingData?.requestor_name || "",
+              event_name: existingData?.event_name || "",
+              event_date_from: existingData?.event_date_from || "",
+              event_date_to: existingData?.event_date_to || "",
+              event_time_from: existingData?.event_time_from || "",
+              event_time_to: existingData?.event_time_to || "",
+              event_type: existingData?.event_type || "",
               request_letter: "",
-              route_plan: null,
+              route_plan: "",
               sworn_statement: "",
             }}
-            validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
             {(props) => (
               <Form>
                 <Row>
                   <Col>
-                    <Row>
-                      <Col md={12}>
-                        <FormGroup>
-                          <Label for="nameOfRequestor">
-                            Name of Requestor / Organization
-                          </Label>
-                          <Input
-                            id="nameOfRequestor"
-                            name={`requestor_name`}
-                            placeholder="Enter Name of Requestor / Organization"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    {/* <Row>
-                      <Col md={12}>
-                        <FormGroup>
-                          <Label>Type of Event</Label>
-                          <Select
-                            options={EVENT_TYPES}
-                            onChange={(selected) => {
-                              props.setFieldValue("event_type", selected);
-                            }}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row> */}
-                    <Row>
-                      <Col md={12}>
-                        <FormGroup>
-                          <Label for="nameOfEvent">Name of Event</Label>
-                          <Input
-                            id="nameOfEvent"
-                            name={`event_name`}
-                            placeholder="Enter Name of Event"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
+                    <FormGroup>
+                      <Label>
+                        Name of Requestor / Organization{" "}
+                        <span className="text-danger">*</span>
+                      </Label>
+                      <Input
+                        name="requestor_name"
+                        value={props.values.requestor_name}
+                        onChange={props.handleChange}
+                        onBlur={props.handleBlur}
+                        invalid={
+                          props.touched.requestor_name &&
+                          Boolean(props.errors.requestor_name)
+                        }
+                      />
+                      <FormFeedback>{props.errors.requestor_name}</FormFeedback>
+                    </FormGroup>
+
+                    {/* Event Name */}
+                    <FormGroup>
+                      <Label>
+                        Name of Event <span className="text-danger">*</span>
+                      </Label>
+                      <Input
+                        name="event_name"
+                        value={props.values.event_name}
+                        onChange={props.handleChange}
+                        onBlur={props.handleBlur}
+                        invalid={
+                          props.touched.event_name &&
+                          Boolean(props.errors.event_name)
+                        }
+                      />
+                      <FormFeedback>{props.errors.event_name}</FormFeedback>
+                    </FormGroup>
+
                     <Row>
                       <Col md={6}>
                         <FormGroup>
-                          <Label for="date">Start Date</Label>
+                          <Label>
+                            Start Date <span className="text-danger">*</span>
+                          </Label>
                           <Input
-                            id="date"
-                            name={`event_date_from`}
                             type="date"
+                            name="event_date_from"
+                            value={props.values.event_date_from}
                             onChange={props.handleChange}
+                            onBlur={props.handleBlur}
+                            invalid={
+                              props.touched.event_date_from &&
+                              Boolean(props.errors.event_date_from)
+                            }
                           />
+                          <FormFeedback>
+                            {props.errors.event_date_from}
+                          </FormFeedback>
                         </FormGroup>
                       </Col>
 
                       <Col md={6}>
                         <FormGroup>
-                          <Label for="date">End Date</Label>
+                          <Label>
+                            End Date <span className="text-danger">*</span>
+                          </Label>
                           <Input
-                            id="date"
-                            name={`event_date_to`}
                             type="date"
+                            name="event_date_to"
+                            value={props.values.event_date_to}
                             onChange={props.handleChange}
+                            onBlur={props.handleBlur}
+                            invalid={
+                              props.touched.event_date_to &&
+                              Boolean(props.errors.event_date_to)
+                            }
                           />
+                          <FormFeedback>
+                            {props.errors.event_date_to}
+                          </FormFeedback>
                         </FormGroup>
                       </Col>
                     </Row>
+
+                    {/* Time */}
                     <Row>
                       <Col md={6}>
                         <FormGroup>
-                          <Label for="timeOfEvent">Start Tine</Label>
+                          <Label>
+                            Start Time <span className="text-danger">*</span>
+                          </Label>
                           <Input
-                            id="timeOfEvent"
-                            name={`event_time_from`}
                             type="time"
+                            name="event_time_from"
+                            value={props.values.event_time_from}
                             onChange={props.handleChange}
+                            onBlur={props.handleBlur}
+                            invalid={
+                              props.touched.event_time_from &&
+                              Boolean(props.errors.event_time_from)
+                            }
                           />
+                          <FormFeedback>
+                            {props.errors.event_time_from}
+                          </FormFeedback>
                         </FormGroup>
                       </Col>
+
                       <Col md={6}>
                         <FormGroup>
-                          <Label for="timeOfEvent">End Time</Label>
+                          <Label>
+                            End Time <span className="text-danger">*</span>
+                          </Label>
                           <Input
-                            id="timeOfEvent"
-                            name={`event_time_to`}
                             type="time"
+                            name="event_time_to"
+                            value={props.values.event_time_to}
                             onChange={props.handleChange}
+                            onBlur={props.handleBlur}
+                            invalid={
+                              props.touched.event_time_to &&
+                              Boolean(props.errors.event_time_to)
+                            }
                           />
+                          <FormFeedback>
+                            {props.errors.event_time_to}
+                          </FormFeedback>
                         </FormGroup>
                       </Col>
                     </Row>
-                    <Row></Row>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <Label for="requestLetter">
-                            Request Letter Stamped (Received by Office of the
-                            City Mayor)
-                          </Label>
+
+                    {/* FILE INPUTS */}
+                    {[
+                      {
+                        key: "request_letter",
+                        label: "Request Letter (Stamped)",
+                      },
+                      { key: "route_plan", label: "Route Plan (Approved)" },
+                      {
+                        key: "sworn_statement",
+                        label: "Sworn Statement (if proceeds are donated)",
+                      },
+                    ].map((file) => (
+                      <FormGroup key={file.key}>
+                        <Label>
+                          {file.label} <span className="text-danger">*</span>
+                        </Label>
+                        <div className="d-flex gap-2">
                           <Input
-                            id="requestLetter"
-                            name={"request_letter"}
                             type="file"
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "request_letter",
-                                event.currentTarget.files[0]
-                              );
-                            }}
+                            name={file.key}
                             accept="image/*"
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <Label for="requestLetter">
-                            Route Plan approved by the CTTMD
-                          </Label>
-                          <Input
-                            id="routePlan"
-                            name={"route_plan"}
-                            type="file"
-                            onChange={(event) => {
-                              console.log(event);
+                            onChange={(e) =>
                               props.setFieldValue(
-                                "route_plan",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            accept="image/*"
+                                file.key,
+                                e.currentTarget.files[0]
+                              )
+                            }
+                            onBlur={() => props.setFieldTouched(file.key, true)}
+                            invalid={
+                              props.touched[file.key] &&
+                              Boolean(props.errors[file.key])
+                            }
                           />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <Label for="requestLetter">
-                            Sworn Statement (If all the proceeds are to be
-                            donated for charity).
-                          </Label>
-                          <Input
-                            id="swornStatement"
-                            name={"sworn_statement"}
-                            type="file"
-                            onChange={(event) => {
-                              props.setFieldValue(
-                                "sworn_statement",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            accept="image/*"
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
+
+                          <FormFeedback>{props.errors[file.key]}</FormFeedback>
+
+                          {isUpdate && uploadedFiles?.[file.key] && (
+                            <Button
+                              color="primary"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                getImageHandle({
+                                  path: uploadedFiles?.[file.key],
+                                  url: "api/client/attachment",
+                                  showLoader: true,
+                                });
+                                toggleIsViewerOpen();
+                              }}
+                            >
+                              <i className="mdi mdi-eye" color="warning"></i>
+                            </Button>
+                          )}
+                        </div>
+                      </FormGroup>
+                    ))}
                   </Col>
                 </Row>
               </Form>
             )}
           </Formik>
+
           <div className="d-flex gap-2">
             <div style={{ width: "30px" }}>
-              <Input type="checkbox" onClick={setProceedHandle} />
+              <Input
+                type="checkbox"
+                onChange={(e) => setIsProceed(e.target.checked)}
+              />
             </div>
             <p>{USER_PRIVACY}</p>
           </div>
         </ModalBody>
+
         <ModalFooter>
           <Button
             style={{
               backgroundColor: "#1a56db",
-              fontWeight: "600",
-              fontFamily:
-                "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
               color: "white",
-            }}
-            onClick={() => {
-              const formik = formikRef.current.values;
-
-              const formData = getFormData(formik);
-              if (proceed) {
-                handleSubmit(
-                  {
-                    url: "api/client/special-permit/event",
-                    headers: {
-                      "Content-Type": "multipart/form-data",
-                    },
-                    message: {
-                      title: "Are you sure you want to Proceed?",
-                      failedTitle: "FAILED",
-                      success: "Success!",
-                      error: "unknown error occured",
-                    },
-                    params: formData,
-                  },
-                  [],
-                  [toggleModal]
-                );
-                setIsProceed(false);
-              }
+              fontWeight: 600,
             }}
             disabled={!proceed}
+            onClick={() => {
+              const formik = formikRef.current.values;
+              const formData = getFormData(formik);
+
+              handleSubmit(
+                {
+                  url: isUpdate
+                    ? "api/client/special-permit/event/update"
+                    : "api/client/special-permit/event",
+                  headers: { "Content-Type": "multipart/form-data" },
+                  message: {
+                    title: "Are you sure you want to Proceed?",
+                    failedTitle: "FAILED",
+                    success: "Success!",
+                    error: "Unknown error occurred",
+                  },
+                  params: formData,
+                },
+                [],
+                [toggleModal, toggleRefresh]
+              );
+            }}
           >
-            Submit
+            {isUpdate ? "Update" : "Submit"}
           </Button>
+
           <Button
             color="secondary"
             onClick={() => {
               toggleModal();
-              setIsProceed(false);
             }}
           >
             Close

@@ -1,71 +1,30 @@
 import React from "react";
 import "../style.css";
 
-export default function Conditions({ conditions, permitType, scale }) {
-  const baseFontSize = 13; // pt
-  const fontSize = baseFontSize * scale;
+export default function Conditions({ conditions, permitType }) {
+  // No need to pass scale prop anymore!
+  // Component will inherit --scale from parent .certificate-wrapper
 
-  const marginTop = 3 * scale;
-  const marginLeftRight = 1.5 * scale; // cm
-  const marginBottom = 0.25 * scale; // cm
-  const olMarginTop = 10 * scale;
-  const olMarginBottom = 0.25 * scale; // cm
+  // Early return if not applicable
+  if (permitType === "good_moral" || permitType === "mayors_permit") {
+    return null;
+  }
 
   return (
-    <>
-      {permitType === "good_moral" || permitType === "mayors_permit" ? null : (
-        <tr>
-          <td colSpan="2">
-            <div
-              style={{
-                marginTop: `${marginTop}px`,
-                marginLeft: `${marginLeftRight}cm`,
-                marginBottom: `${marginBottom}cm`,
-                marginRight: `${marginLeftRight}cm`,
-                lineHeight: "1.2",
-              }}
-            >
-              <p
-                style={{
-                  fontFamily: "Cambria, serif",
-                  fontSize: `${fontSize}pt`,
-                  fontWeight: "bold",
-                  color: "#154172",
-                  marginBottom: "1em",
-                  textAlign: "justify",
-                  lineHeight: "1.5",
-                }}
-              >
-                Condition:
-              </p>
+    <tr>
+      <td colSpan="2">
+        <div className="conditions-wrapper">
+          <p className="conditions-title">Condition:</p>
 
-              <ol
-                style={{
-                  marginTop: `${olMarginTop}px`,
-                  marginBottom: `${olMarginBottom}cm`,
-                  lineHeight: "1.2",
-                }}
-              >
-                {conditions.map((item, index) => {
-                  return (
-                    <li
-                      key={index}
-                      style={{
-                        fontFamily: "Cambria, serif",
-                        fontSize: `${fontSize}pt`,
-                        fontWeight: "bold",
-                        textAlign: "justify",
-                        lineHeight: "1",
-                        fontStyle: "italic",
-                      }}
-                    >{`${item}`}</li>
-                  );
-                })}
-              </ol>
-            </div>
-          </td>
-        </tr>
-      )}
-    </>
+          <ol className="conditions-list">
+            {conditions.map((item, index) => (
+              <li key={index} className="condition-item">
+                {item}
+              </li>
+            ))}
+          </ol>
+        </div>
+      </td>
+    </tr>
   );
 }

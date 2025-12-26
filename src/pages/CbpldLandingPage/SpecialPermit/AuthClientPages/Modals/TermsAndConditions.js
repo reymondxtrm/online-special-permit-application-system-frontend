@@ -134,7 +134,7 @@ export default function TermsAndConditions({ toggle, isOpen, setApproveTerm }) {
           </li>
         </ol>
       </ModalBody>
-      <ModalFooter>
+      {/* <ModalFooter>
         <Button
           color="success"
           onClick={() => {
@@ -144,8 +144,16 @@ export default function TermsAndConditions({ toggle, isOpen, setApproveTerm }) {
         >
           I AGREE
         </Button>
-        <Button onClick={toggle}>CLOSE</Button>
-      </ModalFooter>
+        <Button
+          color="danger"
+          onClick={() => {
+            setApproveTerm(false);
+            toggle;
+          }}
+        >
+          Disagree
+        </Button>
+      </ModalFooter> */}
     </Modal>
   );
 }

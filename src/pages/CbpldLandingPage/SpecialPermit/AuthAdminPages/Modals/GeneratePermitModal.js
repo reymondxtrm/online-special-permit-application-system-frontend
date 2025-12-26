@@ -125,7 +125,7 @@ function GeneratePermitModal({
     const month = date.toLocaleString("en-US", { month: "long" });
 
     setthirdParagraph(
-      `Done this ${day} day of ${month} 2025 at the City Hall Building, Butuan City, Phillipines.`
+      `Issued this ${day} day of ${month} 2025 at the City Hall Building, Butuan City, Phillipines.`
     );
   }, []);
 
@@ -188,7 +188,7 @@ function GeneratePermitModal({
         setFirstParagraph(
           (prevText) =>
             prevText +
-            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${data?.applicant_name}</span>`
+            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.applicant_name}</span>`
         );
         setFirstParagraphTextArea(
           (prevText) => prevText + data?.applicant_name
@@ -197,7 +197,7 @@ function GeneratePermitModal({
         setSecondParagraph(
           (prevText) =>
             prevText +
-            ` <span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${data?.applicant_name}</span>`
+            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.applicant_name}</span>`
         );
         setSecondParagraphTextArea(
           (prevText) => prevText + data?.applicant_name
@@ -211,7 +211,7 @@ function GeneratePermitModal({
         setFirstParagraph(
           (prevText) =>
             prevText +
-            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${data?.requestor_name}</span>`
+            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.requestor_name}</span>`
         );
         setFirstParagraphTextArea(
           (prevText) => prevText + data?.requestor_name
@@ -220,7 +220,7 @@ function GeneratePermitModal({
         setSecondParagraph(
           (prevText) =>
             prevText +
-            ` <span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${data?.requestor_name}</span>`
+            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.requestor_name}</span>`
         );
         setSecondParagraphTextArea(
           (prevText) => prevText + data?.requestor_name
@@ -234,14 +234,14 @@ function GeneratePermitModal({
         setFirstParagraph(
           (prevText) =>
             prevText +
-            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${concatEventDate}</span>`
+            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${concatEventDate}</span>`
         );
         setFirstParagraphTextArea((prevText) => prevText + concatEventDate);
       } else if (activeParagraph === "second") {
         setSecondParagraph(
           (prevText) =>
             prevText +
-            ` <span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${concatEventDate}</span>`
+            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${concatEventDate}</span>`
         );
         setSecondParagraphTextArea((prevText) => prevText + concatEventDate);
       }
@@ -253,7 +253,7 @@ function GeneratePermitModal({
         setFirstParagraph(
           (prevText) =>
             prevText +
-            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${data?.name_of_property}</span>`
+            `<span style="fontFamily: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.name_of_property}</span>`
         );
         setFirstParagraphTextArea(
           (prevText) => prevText + data?.name_of_property
@@ -262,7 +262,7 @@ function GeneratePermitModal({
         setSecondParagraph(
           (prevText) =>
             prevText +
-            ` <span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${data?.name_of_property}</span>`
+            ` <span style="fontFamily: 'Golos Text', sans-serif, serif; font-weight: bold;  text-decoration: underline;">${data?.name_of_property}</span>`
         );
         setSecondParagraphTextArea(
           (prevText) => prevText + data?.name_of_property
@@ -399,20 +399,20 @@ function GeneratePermitModal({
                         if (applicantName) {
                           styledHTML = styledHTML.replace(
                             new RegExp(applicantName, "g"),
-                            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${applicantName}</span>`
+                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${applicantName}</span>`
                           );
                         }
 
                         if (requestorName) {
                           styledHTML = styledHTML.replace(
                             new RegExp(requestorName, "g"),
-                            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${requestorName}</span>`
+                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${requestorName}</span>`
                           );
                         }
                         if (propertyName) {
                           styledHTML = styledHTML.replace(
                             new RegExp(propertyName, "g"),
-                            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${propertyName}</span>`
+                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${propertyName}</span>`
                           );
                         }
 
@@ -421,7 +421,7 @@ function GeneratePermitModal({
 
                           styledHTML = styledHTML.replace(
                             new RegExp(safeEventDate, "g"),
-                            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold;  text-decoration: underline;">${eventDate}</span>`
+                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${eventDate}</span>`
                           );
                         }
 
@@ -622,7 +622,7 @@ function GeneratePermitModal({
                         if (applicantName) {
                           const styledHTML = plainText.replace(
                             new RegExp(applicantName, "g"),
-                            `<span style="font-family: 'Bookman Old Style', serif; font-weight: bold; text-decoration: underline;">${applicantName}</span>`
+                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold; text-decoration: underline;">${applicantName}</span>`
                           );
                           setSecondParagraph(styledHTML);
                         } else {

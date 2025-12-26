@@ -22,31 +22,22 @@ import Swal from "sweetalert2";
 import Select from "react-select";
 import * as Yup from "yup";
 import Pagination from "components/Pagination";
-import { userListSlice, getUserList } from "features/user/userListSlice";
+import {
+  userListSlice,
+  getUserList,
+  getCompanyListUnvalidated,
+} from "features/user/userListSlice";
 import BasicInputField from "components/Forms/BasicInputField";
 import { useFormik } from "formik";
-import { head } from "lodash";
-const AssessmentReceiverDashboard = () => {
+
+const adminUserControl = () => {
   const dispatch = useDispatch();
   const filter = useSelector((state) => state.dateFilter.params);
   const userList = useSelector((state) => state.userList);
-  // const [roleOptions, setRoleOptions] = useState();
   useEffect(() => {
-    dispatch(getUserList());
+    dispatch(getUserList({ unvalidated_user: 0 }));
+    dispatch(getCompanyListUnvalidated({ unvalidated_user: 1 }));
   }, []);
-  // useEffect(() => {
-  //   axios.get("api/get-roles").then(
-  //     (res) => {
-  //       const options = res.data.map((options) => ({
-  //         value: options.id,
-  //         label: options.description,
-  //       }));
-  //       setRoleOptions(options);
-  //     },
-  //     (error) => {}
-  //   );
-  // }, []);
-
   const validation = useFormik({
     enableReinitialize: false,
     initialValues: {
@@ -55,6 +46,7 @@ const AssessmentReceiverDashboard = () => {
       lname: "",
       password: "",
       confirm_password: "",
+      email: "",
     },
     validationSchema: Yup.object().shape({
       fname: Yup.string().required("First Name is required!"),
@@ -65,6 +57,9 @@ const AssessmentReceiverDashboard = () => {
       confirm_password: Yup.string()
         .required("Please confirm your password!")
         .oneOf([Yup.ref("password"), null], "Passwords must match"),
+      email: Yup.string()
+        .email("Email must be valid.")
+        .required("Email is required."),
     }),
     onSubmit: async (values, { resetForm }) => {
       Swal.fire({
@@ -181,6 +176,18 @@ const AssessmentReceiverDashboard = () => {
                     errors={validation.errors.confirm_password}
                     label={"Confirm Password"}
                   />
+                  <BasicInputField
+                    type={"email"}
+                    validation={validation}
+                    col={12}
+                    placeholder={"Email Address"}
+                    required
+                    name={"email"}
+                    value={validation.values.email}
+                    touched={validation.touched.email}
+                    errors={validation.errors.email}
+                    label={"Email"}
+                  />
                   <FormGroup>
                     <Label>Username</Label>
                     <Input
@@ -188,16 +195,6 @@ const AssessmentReceiverDashboard = () => {
                       value={`${validation.values.fname}.${validation.values.lname}`}
                     />
                   </FormGroup>
-                  {/* <Label>
-                    User Role<span style={{ color: "red" }}>&nbsp;*</span>
-                  </Label>
-                  <Select
-                    options={roleOptions || []}
-                    closeMenuOnSelect={false}
-                    onChange={(selected) => {
-                      validation.setFieldValue("role_id", selected.values);
-                    }}
-                  /> */}
                   <Row className="mt-2">
                     <Col>
                       <div className="text-end">
@@ -223,35 +220,69 @@ const AssessmentReceiverDashboard = () => {
               </Card>
             </Col>
             <Col md="8">
-              <Card className="shadow-lg mb-3">
-                <CardBody>
-                  <p
-                    style={{
-                      fontWeight: "bold",
-                      letterSpacing: ".2rem",
-                      fontSize: "18pt",
-                      margin: "0",
-                      padding: "0 0 0 12px", // top, right, bottom, left
-                      color: "#368be0",
-                    }}
-                  >
-                    Users
-                  </p>
-                  {/* <DashboardFilters action={getUserList} forAction={0} /> */}
-
-                  {/* <AddUserButton roleOptions={roleOptions}></AddUserButton> */}
-                  <UserControlsTable
-                    data={userList}
-                    tableData={userList?.users?.data}
-                  />
-                  <Pagination
-                    dataProps={userList.users}
-                    setDataProps={userListSlice.actions.setDataProps}
-                    setShowLoading={userListSlice.actions.setShowLoading}
-                    isLoading={userList.isFetching}
-                  />
-                </CardBody>
-              </Card>
+              <Row>
+                <Card className="shadow-lg mb-3">
+                  <CardBody>
+                    <p
+                      style={{
+                        fontWeight: "bold",
+                        letterSpacing: ".2rem",
+                        fontSize: "18pt",
+                        margin: "0",
+                        padding: "0 0 0 12px", // top, right, bottom, left
+                        color: "#368be0",
+                      }}
+                    >
+                      Unvalidated Company Account
+                    </p>
+                    <UserControlsTable
+                      isFetching={userList?.isFetching}
+                      tableData={userList?.unvalidatedUser?.data}
+                      tableName="company"
+                    />
+                    <Pagination
+                      dataProps={userList.unvalidatedUser}
+                      setDataProps={
+                        userListSlice.actions.setDataUnvalidatedUserProps
+                      }
+                      setShowLoading={
+                        userListSlice.actions.setShowUnvalidatedIsLoading
+                      }
+                      isLoading={userList.isFetching}
+                    />
+                  </CardBody>
+                </Card>
+              </Row>
+              <Row>
+                <Card className="shadow-lg mb-3">
+                  <CardBody>
+                    <p
+                      style={{
+                        fontWeight: "bold",
+                        letterSpacing: ".2rem",
+                        fontSize: "18pt",
+                        margin: "0",
+                        padding: "0 0 0 12px", // top, right, bottom, left
+                        color: "#368be0",
+                      }}
+                    >
+                      Users
+                    </p>
+                    <UserControlsTable
+                      isFetching={userList?.isFetching}
+                      tableData={userList?.users?.data}
+                      tableName="users"
+                      is_validated
+                    />
+                    <Pagination
+                      dataProps={userList.users}
+                      setDataProps={userListSlice.actions.setDataProps}
+                      setShowLoading={userListSlice.actions.setShowLoading}
+                      isLoading={userList.isFetching}
+                    />
+                  </CardBody>
+                </Card>
+              </Row>
             </Col>
           </Row>
         </Container>
@@ -260,4 +291,4 @@ const AssessmentReceiverDashboard = () => {
   );
 };
 
-export default AssessmentReceiverDashboard;
+export default adminUserControl;

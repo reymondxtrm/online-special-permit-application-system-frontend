@@ -370,7 +370,7 @@ const SidebarContent = (props) => {
                 <li>
                   <Link to="/client/declined">
                     <i className="mdi mdi-file-cancel fs-2"></i>
-                    <span>{props.t("Declined Application")}</span>
+                    <span>{props.t("Returned Application")}</span>
                   </Link>
                 </li>
 

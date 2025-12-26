@@ -69,7 +69,7 @@ function ReuploadModal({
               color: "#368be0",
             }}
           >
-            {"OVER THE COUNTER"}
+            {"Reupload Receipt"}
           </p>
         </ModalHeader>
         <ModalBody>

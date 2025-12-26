@@ -41,7 +41,7 @@ function SpecialPermit({ props }) {
     dispatch(userSlice.actions.clearState());
   }, []);
   const loginStatus = useSelector((state) => state.user);
-
+  console.log("loginStatus", loginStatus);
   const formikRef = useRef(null);
   const handleSubmit = useSubmit();
   const history = useHistory(); // Initialize useHistory
@@ -57,71 +57,6 @@ function SpecialPermit({ props }) {
   };
   return (
     <React.Fragment>
-      {/* <Modal
-        isOpen={selectAccountTypeModal}
-        toggle={toggleAccountTypeModal}
-        fade={true}
-        backdrop="static"
-        size="m"
-        className="modal-dialog-centered"
-        style={{
-          // minHeight: "70vh",
-          overflowY: "auto",
-          // maxWidth: "1400px",
-        }}
-        unmountOnClose
-      >
-        <ModalHeader toggle={toggleAccountTypeModal}>
-          <p
-            style={{
-              fontWeight: "bold",
-              letterSpacing: ".2rem",
-              fontSize: "18pt",
-              margin: "0",
-              padding: "0",
-              color: "#368be0",
-            }}
-          >
-            {"CHOOSE ACCOUNT TYPE"}
-          </p>
-        </ModalHeader>
-
-        <ModalBody style={{ overflowX: "auto", minHeight: "10vh" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-around",
-              alignItems: "center",
-              alignContent: "center",
-            }}
-          >
-            <Button
-              style={{
-                backgroundColor: "#1a56db",
-                fontWeight: "600",
-                fontFamily:
-                  "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
-                color: "white",
-                borderRadius: "10px",
-              }}
-            >
-              INDIVIDUAL
-            </Button>
-            <Button
-              style={{
-                backgroundColor: "#1a56db",
-                fontWeight: "600",
-                fontFamily:
-                  "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
-                color: "white",
-                borderRadius: "10px",
-              }}
-            >
-              CORPORATION
-            </Button>
-          </div>
-        </ModalBody>
-      </Modal> */}
       <LoginModal
         openModal={loginModalState}
         toggleModal={toggleLoginModal}
@@ -176,16 +111,17 @@ function SpecialPermit({ props }) {
                     {(props) => (
                       <Form>
                         <Row>
-                          {loginStatus.isLoginError && !loginStatus.isFetching && (
-                            <UncontrolledAlert
-                              color="danger"
-                              className="alert-dismissible fade show"
-                              role="alert"
-                            >
-                              <i className="mdi mdi-block-helper me-2"></i>
-                              {loginStatus.errorMessage}
-                            </UncontrolledAlert>
-                          )}
+                          {loginStatus?.isLoginError &&
+                            !loginStatus?.isFetching && (
+                              <UncontrolledAlert
+                                color="danger"
+                                className="alert-dismissible fade show"
+                                role="alert"
+                              >
+                                <i className="mdi mdi-block-helper me-2"></i>
+                                {loginStatus?.errorMessage}
+                              </UncontrolledAlert>
+                            )}
                           <FormGroup>
                             <Label for="username">Username</Label>
                             <Input

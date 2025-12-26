@@ -8,6 +8,9 @@
 .header-title {
   font-size: 13pt;
 }
+.header-logo-request-form {
+  width: "40px";
+}
 
 .table-header {
   margin-top: 20px;
@@ -19,7 +22,7 @@
 .checkbox {
   border: 2px solid black;
   width: 20px !important;
-  height: 20px;
+  height: 20px !important;
 }
 .main-table th,
 .main-table td {
@@ -71,7 +74,7 @@ p {
   .wrapper {
     width: 920px !important;
   }
-  .header-logo {
+  .header-logo-request-form {
     width: "40px";
   }
   .header-text > p {

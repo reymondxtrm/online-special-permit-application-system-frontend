@@ -1,38 +1,26 @@
 import React from "react";
 
-export default function EventName({ eventName, permitType, scale }) {
-  const baseFontSize = 17;
-  const fontSize = baseFontSize * scale;
-  const allowed = [
+export default function EventName({ eventName, permitType }) {
+  // No need to pass scale prop anymore!
+  // Component will inherit --scale from parent .certificate-wrapper
+
+  const allowedTypes = [
     "event",
-    "use_of_goverment_property",
+    "use_of_government_property", // Fixed typo: goverment → government
     "recorrida",
     "parade",
     "motorcade",
   ];
-  const go = allowed.some((item) => item === permitType);
+
+  const shouldDisplay = allowedTypes.includes(permitType);
+
+  if (!shouldDisplay) {
+    return null;
+  }
+
   return (
-    <>
-      {go ? (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <p
-            style={{
-              fontFamily: "Cambria, serif",
-              fontSize: `${fontSize}pt`, // Font size for the rest of the text
-              fontWeight: "bold", // Bold for the rest of the text
-              marginBottom: `${scale * 14}px`, // Add spacing for readability
-              textAlign: "center", // Justify the text
-              lineHeight: "1.5", // Set line height for readability
-            }}
-          >{`"${eventName}"`}</p>
-        </div>
-      ) : null}
-    </>
+    <div className="event-name-wrapper">
+      <p className="event-name-text">{`"${eventName}"`}</p>
+    </div>
   );
 }

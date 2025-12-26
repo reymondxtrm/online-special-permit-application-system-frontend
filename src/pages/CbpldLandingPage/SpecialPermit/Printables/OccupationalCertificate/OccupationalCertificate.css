@@ -1,0 +1,186 @@
+.permit-container {
+  border: 1px solid black;
+  width: 359px;
+  height: 510px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  color: black;
+  background-image: url("../../../../../assets/images/Occupational\ Permit\ Background.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  margin: 20px;
+}
+/*header*/
+.permit-logo {
+  width: 60px;
+  height: 60px;
+  left: 10px;
+  position: absolute;
+}
+.permit-header-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 9px;
+  gap: 0px;
+  width: 260px;
+  margin-left: 62px;
+  font-family: "Cambria, serif";
+}
+.permit-header-text > p {
+  padding: 0px;
+  margin: 0px;
+  line-height: 10px;
+  color: #154172;
+}
+.permit-header-upper-section {
+  display: flex;
+  position: relative;
+}
+.permit-header-upper-section > p {
+  padding: 0px;
+  margin: 0px;
+  width: 300px;
+}
+.permit-header {
+  display: flex;
+  flex-direction: column;
+  padding: 3px;
+  margin-top: 5px;
+}
+.permit-header-title {
+  font-size: 20px;
+  margin-top: 10px;
+  font-weight: bold;
+  color: #164d83;
+  text-align: center;
+  font-family: "Cambria, serif";
+}
+
+.permit-headerline {
+  width: 300px !important;
+  margin-left: -40px !important;
+}
+/*body*/
+.permit-body {
+  width: 100%;
+}
+.top {
+  /* margin-top: 10px; */
+  margin-left: 5px;
+}
+.body-reference-number {
+  text-align: end;
+  font-size: 10px;
+  margin-right: 15px;
+  margin-top: 5px;
+}
+.user-details {
+  font-size: 10px;
+}
+.occupation-section {
+  font-size: 14px;
+}
+.user-details-birth {
+  display: flex;
+  justify-content: space-between;
+  margin-right: 10px;
+}
+
+.idpicture-box {
+  border: 1px solid black;
+  height: 4.5cm;
+  width: 3.5cm;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.name {
+  font-size: 18px;
+  font-family: "Cambria, serif";
+}
+.name-container {
+  line-height: 17px;
+}
+.picture-section {
+  margin: 0 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.custom-image {
+  width: 132px;
+  height: 170px;
+  object-fit: cover;
+}
+.signatories {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+
+  align-items: center;
+  line-height: 10px;
+}
+.mayor {
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 5px;
+}
+.mayor-name {
+  font-weight: bold;
+  line-height: 5px;
+  text-decoration: underline;
+}
+.authority {
+  font-size: 7px;
+}
+
+.signatories-name {
+  font-weight: bold;
+  text-decoration: underline;
+}
+.note {
+  font-weight: bold;
+  font-size: 8px;
+  /* text-align: center; */
+  color: #e04136;
+  margin-left: 30px;
+  margin-bottom: 0px;
+}
+/* .signatories-container {
+  width: 100px;
+} */
+/*Footer*/
+.or-section {
+  display: flex;
+  flex-direction: column;
+}
+.butuan-on-logo {
+  width: 50px;
+  height: 20px;
+}
+
+.permit-footer-upper {
+  display: flex;
+  justify-content: flex-end; /* aligns content to the right */
+  align-items: center;
+}
+.logo-section {
+  display: flex;
+  align-items: end;
+  flex-direction: column;
+}
+.footer-line {
+  width: 100%;
+}
+.rev-code {
+  font-size: 7px;
+}
+.permit-footer {
+  margin-top: auto;
+}
+/*resusable*/

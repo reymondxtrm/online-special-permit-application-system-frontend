@@ -25,6 +25,7 @@ function ReturnRemarksModal({
   toggleModal,
   toggleRefresh,
   orderOfPaymentId,
+  type,
 }) {
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
@@ -111,6 +112,7 @@ function ReturnRemarksModal({
                   params: {
                     order_of_payment_id: orderOfPaymentId,
                     remarks: formik.remarks,
+                    type: type,
                   },
                 },
                 [],

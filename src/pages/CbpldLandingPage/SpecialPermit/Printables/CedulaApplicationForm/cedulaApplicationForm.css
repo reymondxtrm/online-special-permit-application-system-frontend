@@ -1,0 +1,83 @@
+.table-container {
+  border: 2px dashed rgb(19, 19, 65);
+  position: relative;
+}
+.request-header-right {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: center;
+  margin-top: 11px;
+  margin-left: 32px;
+  font-family: "Cambria, serif";
+}
+.cedula-form-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(348px, 1fr));
+  gap: 10px; /* Space between grid items */
+}
+.request-header-right > span {
+  font-size: 10px;
+  line-height: normal;
+}
+.request-header {
+  display: flex;
+}
+.headerline {
+  width: 310px;
+  margin-left: -20px !important;
+}
+.logo {
+  width: 90px;
+  position: absolute;
+}
+
+.request-header-title {
+  font-weight: bold;
+  font-size: 10px;
+  text-align: center;
+  font-family: "Cambria, serif";
+}
+.table-body > tr > td {
+  font-size: 9px;
+  border: 1px solid black;
+  width: 172px;
+}
+.footer-text {
+  font-size: 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.footer-text > span {
+  width: 50px;
+}
+.footer-text > p {
+  margin-top: 2px;
+  font-size: 8px;
+  padding: 0px !important;
+}
+
+.underline {
+  border-bottom: 1px solid black;
+  width: 200px !important;
+}
+.signature-area {
+  width: 250px;
+  padding: 0px !important;
+}
+
+.signature-area .underline {
+  width: 100%; /* fits container */
+  border-bottom: 1px solid black;
+  margin: 0 auto;
+  height: 2px;
+}
+.revnumber {
+  font-size: 8px;
+  font-weight: bold;
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+}

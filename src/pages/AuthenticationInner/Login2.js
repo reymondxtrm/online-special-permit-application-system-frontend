@@ -27,7 +27,7 @@ import login from "store/auth/login/reducer";
 
 const Login2 = (props) => {
   //meta title
-  document.title = "BPLD Document Tracker";
+  document.title = "BPLD | SPECIAL PERMIT";
   const dispatch = useDispatch();
 
   const loginStatus = useSelector((state) => state.user);

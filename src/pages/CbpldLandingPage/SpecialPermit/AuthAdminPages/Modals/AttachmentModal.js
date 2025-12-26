@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import {
   Button,
   Modal,
@@ -13,17 +13,22 @@ import {
   NavLink,
   TabContent,
   TabPane,
+  Spinner,
 } from "reactstrap";
 import classnames from "classnames";
-import Viewer from "react-viewer";
+import ReactSimpleImageViewer from "react-simple-image-viewer";
+
 import axios from "axios";
+import Viewer from "react-viewer";
 
 function AttachmentModal({
   openModal,
   toggleModal,
   uploadedFiles,
   applicationType,
-  mainActiveTab,
+  mainActiveTab = "individual_permit",
+  occupational = false,
+  isClient = false,
 }) {
   const getActiveTabInitialState = (applicationType) => {
     if (applicationType == "mayors_permit" || applicationType == "good_moral") {
@@ -41,7 +46,9 @@ function AttachmentModal({
   }, [mainActiveTab]);
 
   const [isViewerOpen, setIsViewerOpen] = useState(false);
-  const [currentImage, setCurrentImage] = useState(0);
+  const [currentImage, setCurrentImage] = useState(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const blobUrlRef = useRef(null);
   const fileMapping = {
     mayors_permit: {
       "Police Clearance": uploadedFiles?.police_clearance,
@@ -81,14 +88,55 @@ function AttachmentModal({
       "Certificate of Employment": uploadedFiles?.certificate_of_employment,
       "Community Tax Certificate": uploadedFiles?.community_tax_certificate,
       "ID Picture": uploadedFiles?.id_picture,
-      "Health Certificate": uploadedFiles?.health_certificate,
       "Training Certificate": uploadedFiles?.training_certificate,
     },
   };
+  useEffect(() => {
+    const filePath = fileMapping?.[applicationType]?.[activeTab];
 
-  const images = Object.values(fileMapping[applicationType]).filter(Boolean); // kuhaon tong naay mga values (.filter(boolean))
+    if (!activeTab || !filePath) return;
 
-  const openImageViewer = () => {
+    const fetchImage = async () => {
+      setIsFetching(true);
+      try {
+        const response = await axios({
+          url: isClient ? "/api/client/attachment" : "/api/admin/attachment",
+          method: "GET",
+          params: { filepath: filePath },
+          responseType: "blob",
+        });
+
+        if (response?.data) {
+          if (blobUrlRef.current) {
+            URL.revokeObjectURL(blobUrlRef.current);
+          }
+
+          const newBlobUrl = URL.createObjectURL(response.data);
+          blobUrlRef.current = newBlobUrl;
+          setCurrentImage(newBlobUrl);
+        }
+        setIsFetching(false);
+      } catch (error) {
+        setIsFetching(false);
+        console.log(error?.response?.data?.message || error);
+      }
+    };
+
+    fetchImage();
+
+    return () => {
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
+    };
+  }, [activeTab, applicationType, openModal, isClient]);
+  useEffect(() => {
+    if (isViewerOpen) {
+      setIsViewerOpen(false);
+    }
+  }, [activeTab]);
+  const toggleIsViewerOpen = () => {
     setIsViewerOpen((prev) => !prev);
   };
 
@@ -112,6 +160,7 @@ function AttachmentModal({
       console.error("Download error:", error);
     }
   };
+
   return (
     <Modal
       isOpen={openModal}
@@ -147,19 +196,30 @@ function AttachmentModal({
                 <Col lg="2" sm="4">
                   <Nav pills className="flex-column">
                     {Object.keys(fileMapping[applicationType]).map(
-                      (tabId, index) => (
-                        <>
-                          <NavLink
-                            key={tabId}
-                            className={classnames({
-                              active: activeTab === tabId,
-                            })}
-                            onClick={() => setActiveTab(tabId)}
-                          >
-                            <p className="font-weight-bold mb-0">{tabId}</p>
-                          </NavLink>
-                        </>
-                      )
+                      (tabId, index) => {
+                        return (
+                          <>
+                            <NavLink
+                              key={tabId}
+                              className={classnames({
+                                active: activeTab === tabId,
+                                "text-white": activeTab === tabId,
+                              })}
+                              onClick={() => setActiveTab(tabId)}
+                            >
+                              <p
+                                className="font-weight-bold mb-0"
+                                style={{
+                                  color:
+                                    activeTab === tabId ? "white" : "inherit",
+                                }}
+                              >
+                                {tabId}
+                              </p>
+                            </NavLink>
+                          </>
+                        );
+                      }
                     )}
                   </Nav>
                 </Col>
@@ -179,21 +239,50 @@ function AttachmentModal({
                                   <i className="mdi mdi-download "></i>
                                 </Button>
                               </div>
-                              {filePath ? (
-                                <img
-                                  src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${filePath}`}
-                                  alt={`Document ${index + 1}`}
-                                  style={{
-                                    maxWidth: "100%",
-                                    maxHeight: "80vh",
 
-                                    cursor: "pointer",
-                                  }}
-                                  onClick={() => {
-                                    openImageViewer();
-                                    setCurrentImage(index);
-                                  }}
-                                />
+                              {filePath ? (
+                                isFetching ? (
+                                  <div className="text-center">
+                                    <Spinner color="primary" type="grow">
+                                      Loading...
+                                    </Spinner>
+                                    <Spinner color="primary" type="grow">
+                                      Loading...
+                                    </Spinner>
+                                    <Spinner color="primary" type="grow">
+                                      Loading...
+                                    </Spinner>
+                                    <Spinner color="primary" type="grow">
+                                      Loading...
+                                    </Spinner>
+                                    <Spinner color="primary" type="grow">
+                                      Loading...
+                                    </Spinner>
+                                    <Spinner color="primary" type="grow">
+                                      Loading...
+                                    </Spinner>
+                                    <Spinner color="primary" type="grow">
+                                      Loading...
+                                    </Spinner>
+                                    <Spinner color="primary" type="grow">
+                                      Loading...
+                                    </Spinner>
+                                  </div>
+                                ) : (
+                                  <img
+                                    src={currentImage}
+                                    alt={activeTab}
+                                    style={{
+                                      cursor: "pointer",
+                                      maxWidth: "100%",
+                                    }}
+                                    onClick={
+                                      !isFetching && currentImage
+                                        ? toggleIsViewerOpen
+                                        : undefined
+                                    }
+                                  />
+                                )
                               ) : (
                                 <p>No file uploaded for this category.</p>
                               )}
@@ -214,23 +303,21 @@ function AttachmentModal({
           Close
         </Button>
       </ModalFooter>
-      {/* Image Viewer */}
-      {isViewerOpen && openModal && (
-        <Viewer
-          visible={isViewerOpen}
-          onClose={openImageViewer}
-          images={images.map((filePath) => ({
-            src: `${window.location.protocol}//${process.env.REACT_APP_API}storage/${filePath}`,
-            alt: "Attachment",
-          }))}
-          activeIndex={currentImage}
-          rotatable
-          zoomable
-          scalable
-          attribute={false}
-          zIndex={2000}
-        />
-      )}
+
+      <Viewer
+        visible={isViewerOpen}
+        onClose={toggleIsViewerOpen}
+        images={[{ src: currentImage, alt: "Attachment" }]}
+        activeIndex={0}
+        rotatable={true}
+        zoomable={true}
+        scalable={true}
+        noNavbar={false}
+        noToolbar={false}
+        attribute={false}
+        zIndex={2000}
+        key={currentImage}
+      />
     </Modal>
   );
 }

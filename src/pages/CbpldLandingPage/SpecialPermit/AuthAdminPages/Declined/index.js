@@ -35,6 +35,7 @@ import classnames from "classnames";
 
 import Pagination from "components/Pagination";
 import AdminTable from "../Common/AdminTable";
+import OccupationalTables from "../Common/OccupationalTables";
 const Declined = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -149,18 +150,15 @@ const Declined = () => {
                         />
                       ) : null}
                     </Tab>
-                    {/* <Tab
-                      eventKey="occupational_permit"
-                      title="OCCUPATIONAL PERMIT"
+                    <Tab
+                      eventKey="occupational"
+                      title={<>OCCUPATIONAL PERMIT </>}
                     >
-                      {activeTab === "occupational_permit" ? (
-                        <AdminTable
-                          status={"pending"}
-                          activeTab={activeTab}
-                          applicationType={"occupational_permit"}
-                        />
-                      ) : null}
-                    </Tab> */}
+                      <OccupationalTables
+                        status={"returned"}
+                        motherTab={activeTab}
+                      />
+                    </Tab>
                   </Tabs>
                 </CardBody>
               </Card>

@@ -91,7 +91,7 @@ export default function MayorsAndGoodMoralRequestForm({
                       <img
                         src={cgbLogo}
                         alt="CGB Logo"
-                        className="header-logo"
+                        className="header-logo-request-form "
                       />
                     </div>
                     <div style={{ marginTop: "10px" }}>
@@ -162,7 +162,7 @@ export default function MayorsAndGoodMoralRequestForm({
                                 borderColor: "red",
                                 width: "30px",
                                 height: "30px",
-                                backgroundColor: column1 ? "black" : "",
+                                // backgroundColor: column1 ? "black" : "",
                               }}
                             >
                               {" "}
@@ -183,7 +183,7 @@ export default function MayorsAndGoodMoralRequestForm({
                                 borderColor: "red",
                                 width: "30px",
                                 height: "30px",
-                                backgroundColor: !column1 ? "black" : "",
+                                // backgroundColor: !column1 ? "black" : "",
                               }}
                             ></div>
                             <div style={{ marginLeft: "120px" }}>
@@ -206,11 +206,11 @@ export default function MayorsAndGoodMoralRequestForm({
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.police_clearance && column1
-                                    ? "black"
-                                    : "",
+                                // backgroundColor:
+                                //   !!application?.uploaded_file
+                                //     ?.police_clearance && column1
+                                //     ? "black"
+                                //     : "",
                               }}
                             ></div>
                             <p className="fw-bold m-0 p-0">
@@ -227,11 +227,11 @@ export default function MayorsAndGoodMoralRequestForm({
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.police_clearance && !column1
-                                    ? "black"
-                                    : "",
+                                // backgroundColor:
+                                //   !!application?.uploaded_file
+                                //     ?.police_clearance && !column1
+                                //     ? "black"
+                                //     : "",
                               }}
                             ></div>
                             <p className="fw-bold m-0 p-0">Police Clearance</p>
@@ -248,11 +248,11 @@ export default function MayorsAndGoodMoralRequestForm({
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.community_tax_certificate && column1
-                                    ? "black"
-                                    : "",
+                                // backgroundColor:
+                                //   !!application?.uploaded_file
+                                //     ?.community_tax_certificate && column1
+                                //     ? "black"
+                                //     : "",
                               }}
                             ></div>
                             <p className="fw-bold m-0 p-0">
@@ -269,11 +269,11 @@ export default function MayorsAndGoodMoralRequestForm({
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.community_tax_certificate && !column1
-                                    ? "black"
-                                    : "",
+                                // backgroundColor:
+                                //   !!application?.uploaded_file
+                                //     ?.community_tax_certificate && !column1
+                                //     ? "black"
+                                //     : "",
                               }}
                             ></div>
                             <p className="fw-bold m-0 p-0">
@@ -292,11 +292,11 @@ export default function MayorsAndGoodMoralRequestForm({
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.barangay_clearance && column1
-                                    ? "black"
-                                    : "",
+                                // backgroundColor:
+                                //   !!application?.uploaded_file
+                                //     ?.barangay_clearance && column1
+                                //     ? "black"
+                                //     : "",
                               }}
                             ></div>
                             <p
@@ -320,11 +320,11 @@ export default function MayorsAndGoodMoralRequestForm({
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.barangay_clearance && !column1
-                                    ? "black"
-                                    : "",
+                                // backgroundColor:
+                                //   !!application?.uploaded_file
+                                //     ?.barangay_clearance && !column1
+                                //     ? "black"
+                                //     : "",
                               }}
                             ></div>
                             <p
@@ -351,11 +351,11 @@ export default function MayorsAndGoodMoralRequestForm({
                                 width: "20px",
                                 height: "20px",
                                 marginLeft: "30px",
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.official_receipt && column1
-                                    ? "black"
-                                    : "",
+                                // backgroundColor:
+                                //   !!application?.uploaded_file
+                                //     ?.official_receipt && column1
+                                //     ? "black"
+                                //     : "",
                               }}
                             ></div>
                             <div>
@@ -390,11 +390,11 @@ export default function MayorsAndGoodMoralRequestForm({
                                 width: "20px",
                                 height: "20px",
                                 marginLeft: "30px",
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.official_receipt && column1
-                                    ? "black"
-                                    : "",
+                                // backgroundColor:
+                                //   !!application?.uploaded_file
+                                //     ?.official_receipt && column1
+                                //     ? "black"
+                                //     : "",
                               }}
                             ></div>
                             <div>
@@ -431,11 +431,11 @@ export default function MayorsAndGoodMoralRequestForm({
 
                                   width: "20px",
                                   height: "20px",
-                                  backgroundColor:
-                                    !!application?.uploaded_file
-                                      ?.fiscal_clearance && column1
-                                      ? "black"
-                                      : "",
+                                  // backgroundColor:
+                                  //   !!application?.uploaded_file
+                                  //     ?.fiscal_clearance && column1
+                                  //     ? "black"
+                                  //     : "",
                                 }}
                               ></div>
                               <p className="fw-bold m-0 p-0">
@@ -450,11 +450,11 @@ export default function MayorsAndGoodMoralRequestForm({
 
                                   width: "20px",
                                   height: "20px",
-                                  backgroundColor:
-                                    !!application?.uploaded_file
-                                      ?.court_clearance && column1
-                                      ? "black"
-                                      : "",
+                                  // backgroundColor:
+                                  //   !!application?.uploaded_file
+                                  //     ?.court_clearance && column1
+                                  //     ? "black"
+                                  //     : "",
                                 }}
                               ></div>
                               <p className="fw-bold m-0 p-0">Court Clearance</p>
@@ -471,11 +471,11 @@ export default function MayorsAndGoodMoralRequestForm({
 
                                   width: "20px",
                                   height: "20px",
-                                  backgroundColor:
-                                    !!application?.uploaded_file
-                                      ?.fiscal_clearance && !column1
-                                      ? "black"
-                                      : "",
+                                  // backgroundColor:
+                                  //   !!application?.uploaded_file
+                                  //     ?.fiscal_clearance && !column1
+                                  //     ? "black"
+                                  //     : "",
                                 }}
                               ></div>
                               <p className="fw-bold m-0 p-0">
@@ -490,11 +490,11 @@ export default function MayorsAndGoodMoralRequestForm({
 
                                   width: "20px",
                                   height: "20px",
-                                  backgroundColor:
-                                    !!application?.uploaded_file
-                                      ?.court_clearance && !column1
-                                      ? "black"
-                                      : "",
+                                  // backgroundColor:
+                                  //   !!application?.uploaded_file
+                                  //     ?.court_clearance && !column1
+                                  //     ? "black"
+                                  //     : "",
                                 }}
                               ></div>
                               <p className="fw-bold m-0 p-0">Court Clearance</p>
@@ -532,11 +532,11 @@ export default function MayorsAndGoodMoralRequestForm({
                                 borderColor: "black",
                                 width: "20px",
                                 height: "20px",
-                                backgroundColor:
-                                  !!application?.uploaded_file
-                                    ?.court_clearance && !column1
-                                    ? "black"
-                                    : "",
+                                // backgroundColor:
+                                //   !!application?.uploaded_file
+                                //     ?.court_clearance && !column1
+                                //     ? "black"
+                                //     : "",
                               }}
                             ></div>
                             <p className="fw-bold m-0 p-0">
@@ -620,6 +620,11 @@ export default function MayorsAndGoodMoralRequestForm({
                               className="d-flex justify-content-around"
                               style={{ width: "90%" }}
                             >
+                              <p className="m-0 bolder-text">
+                                {application?.user?.lname
+                                  ? application.user.lname.toUpperCase()
+                                  : ""}
+                              </p>
                               <p className="m-0 bolder-text ">
                                 {application?.user?.fname
                                   ? application.user.fname.toUpperCase()
@@ -628,11 +633,6 @@ export default function MayorsAndGoodMoralRequestForm({
                               <p className="m-0 bolder-text">
                                 {application?.user?.mname
                                   ? application.user.mname.toUpperCase()
-                                  : ""}
-                              </p>
-                              <p className="m-0 bolder-text">
-                                {application?.user?.lname
-                                  ? application.user.lname.toUpperCase()
                                   : ""}
                               </p>
                             </div>

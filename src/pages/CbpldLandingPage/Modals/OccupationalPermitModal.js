@@ -6,520 +6,678 @@ import {
   ModalBody,
   ModalFooter,
   Table,
-  Badge,
   Form,
   Row,
   Col,
   Input,
   Label,
-  FormGroup,
+  Spinner,
+  FormFeedback,
 } from "reactstrap";
-import { faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Select, { StylesConfig } from "react-select";
-import { FieldArray, Formik } from "formik";
-import useSubmit from "hooks/Common/useSubmit";
 
-function OccupationalPermitModal({ openModal, toggleModal }) {
+import { Formik } from "formik";
+import useSubmit from "hooks/Common/useSubmit";
+import axios from "axios";
+import PassportCamera from "../SpecialPermit/AuthClientPages/Common/PassportCamera";
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
+import * as Yup from "yup";
+import PrivateImageViewer from "../SpecialPermit/Common/PrivateImageViewer";
+import BasicInputField from "components/Forms/BasicInputField";
+import { useSelector } from "react-redux";
+import ReactSimpleImageViewer from "react-simple-image-viewer";
+import useGetImage from "hooks/Common/useGetImage";
+function OccupationalPermitModal({
+  openModal,
+  toggleModal,
+  mode = "create", // "create" or "update"
+  title = "Occupational Permit",
+  fetchUrl,
+  submitUrl,
+  applicationId,
+  isUpdate = false,
+  toggleRefresh = () => {},
+}) {
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
+  const [tableData, setTableData] = useState(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const [cameraIsOpen, setCameraIsOpen] = useState(false);
+  const [uploadedFile, setUploadedFiles] = useState({});
+  const [imageViewer, setOpenImageViewer] = useState(false);
+  const [viewImage, setViewImage] = useState();
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const {
+    isFetching: getImageIsFetching,
+    currentImage,
+    getImageHandle,
+  } = useGetImage();
+  const user = useSelector((state) => state.user);
 
-  const purposeOptions = [
-    { value: 1, label: "Local Employment" },
-    { value: 2, label: "International Employment" },
-  ];
+  // useEffect(() => {
+  //   if (openModal && isUpdate && applicationId) {
+  //     axios
+  //       .get("api/client/get-single-permmit-application", {
+  //         params: {
+  //           special_permit_application_id: applicationId,
+  //         },
+  //       })
+  //       .then((res) => {
+  //         const data = res.data.data;
+  //         setExistingData({
+  //           requestor_name: data.requestor_name,
+  //           event_name: data.event_name,
+  //           event_date_from: data.event_date_from,
+  //           event_date_to: data.event_date_to,
+  //           event_time_from: data.event_time_from,
+  //           event_time_to: data.event_time_to,
+  //         });
+
+  //         setUploadedFiles(data.uploaded_file || {});
+  //       });
+  //   }
+  // }, [openModal, isUpdate, applicationId]);
+
+  const validationSchema = Yup.object().shape({
+    type: Yup.string().required(),
+
+    id: Yup.mixed().nullable(),
+
+    company_name: Yup.string().nullable(),
+    company_address: Yup.string().nullable(),
+    position: Yup.string().nullable(),
+
+    certificate_of_employment: Yup.mixed()
+      .required("Certificate of employment is required")
+      .test(
+        "fileType",
+        "Only image files are allowed",
+        (value) =>
+          value === null ||
+          value === "" ||
+          value instanceof File ||
+          value instanceof Blob
+      ),
+
+    community_tax_certificate: Yup.mixed().when("no_cedula", {
+      is: false,
+      then: Yup.mixed()
+        .required("Community tax certificate is required")
+        .test(
+          "fileType",
+          "Only image files are allowed",
+          (value) =>
+            value === null ||
+            value === "" ||
+            value instanceof File ||
+            value instanceof Blob
+        ),
+      otherwise: Yup.mixed().nullable(),
+    }),
+
+    id_picture: Yup.mixed()
+      .required("ID picture is required")
+      .test(
+        "fileType",
+        "Invalid ID picture format",
+        (value) =>
+          value instanceof File ||
+          value instanceof Blob ||
+          typeof value === "string" // when editing (already uploaded)
+      ),
+
+    training_certificate: Yup.mixed().when("company_type", {
+      is: (v) => v === "NON-FOOD-MASSEUR",
+      then: Yup.mixed()
+        .required("Training certificate is required")
+        .test(
+          "fileType",
+          "Only image files are allowed",
+          (value) =>
+            value === null ||
+            value === "" ||
+            value instanceof File ||
+            value instanceof Blob
+        ),
+      otherwise: Yup.mixed().nullable(),
+    }),
+  });
+  useEffect(() => {
+    if (openModal && fetchUrl) {
+      const fetchData = async () => {
+        try {
+          setIsFetching(true);
+          const response = await axios({
+            method: "GET",
+            url: fetchUrl,
+            params: {
+              special_permit_application_id: applicationId || null,
+            },
+          });
+          if (mode === "update") {
+            const res = response.data;
+            setTableData({
+              id: res?.special_permit_application_id,
+              monnthly_income: res?.occupation_details?.monthly_income,
+              company_name: res?.occupation_details?.company_name,
+              full_address: res?.occupation_details?.full_address,
+              position: res?.occupation_details?.position,
+              monthly_income: res?.occupation_details?.monthly_income,
+            });
+            setUploadedFiles({ ...res?.uploaded_files });
+          } else {
+            setTableData(response.data);
+          }
+          setIsFetching(false);
+        } catch (err) {
+          console.log(err);
+        } finally {
+          setIsFetching(false);
+        }
+      };
+
+      fetchData();
+    }
+  }, [openModal, fetchUrl]);
+
+  const setIdPicture = (capturedPicture) => {
+    formikRef.current.setFieldValue("id_picture", capturedPicture);
+  };
+
+  const togglePictureModal = () => {
+    setCameraIsOpen((prev) => !prev);
+  };
+  const toggleIsViewerOpen = () => {
+    setIsViewerOpen((prev) => !prev);
+  };
 
   const getFormData = (object) => {
     const formData = new FormData();
     Object.keys(object).forEach((key) => {
-      if (object[key] instanceof File || object[key] instanceof Blob) {
-        formData.append(key, object[key]); // Directly append files
-      } else if (Array.isArray(object[key])) {
-        object[key].forEach((item) => formData.append(`${key}[]`, item));
-      } else if (typeof object[key] === "object" && object[key] !== null) {
-        formData.append(key, JSON.stringify(object[key]));
+      const value = object[key];
+      if (value instanceof File || value instanceof Blob) {
+        formData.append(key, value);
+      } else if (Array.isArray(value)) {
+        value.forEach((v) => formData.append(`${key}[]`, v));
+      } else if (typeof value === "object" && value !== null) {
+        formData.append(key, JSON.stringify(value));
       } else {
-        formData.append(key, object[key]);
+        formData.append(key, value);
       }
     });
     return formData;
   };
+  const toggleImageViewer = () => {
+    setOpenImageViewer((prev) => !prev);
+  };
 
   return (
-    <React.Fragment>
+    <>
+      {isViewerOpen && !getImageIsFetching && currentImage && (
+        <ReactSimpleImageViewer
+          src={[currentImage]}
+          currentIndex={0}
+          onClose={toggleIsViewerOpen}
+          backgroundStyle={{
+            backgroundColor: "rgba(0,0,0,0.8)",
+            zIndex: 9999,
+          }}
+          closeOnClickOutside={true}
+          disableZoom={false}
+        />
+      )}
+      <PassportCamera
+        onCapture={setIdPicture}
+        isOpen={cameraIsOpen}
+        toggle={togglePictureModal}
+        image={formikRef?.current?.values?.id_picture}
+      />
+      <PrivateImageViewer
+        toggleModal={toggleImageViewer}
+        openModal={imageViewer}
+        path={viewImage}
+      />
+
       <Modal
         isOpen={openModal}
         toggle={toggleModal}
-        fade={true}
+        size="lg"
         backdrop="static"
-        size="xl"
+        fade
         className="modal-dialog-centered"
-        style={{
-          //  maxHeight: "90vh",
-          overflowY: "auto",
-          maxWidth: "1400px",
-        }}
-        unmountOnClose
       >
         <ModalHeader toggle={toggleModal}>
-          <p
-            style={{
-              fontWeight: "bold",
-              letterSpacing: ".2rem",
-              fontSize: "18pt",
-              margin: "0",
-              padding: "0",
-              color: "#368be0",
-            }}
-          >
-            {"OCCUPATIONAL PERMIT"}
-          </p>
+          <p className="fw-bold fs-4 text-primary">{title}</p>
         </ModalHeader>
+
         <ModalBody style={{ overflowX: "auto" }}>
           <Formik
             innerRef={formikRef}
+            enableReinitialize
+            validationSchema={isUpdate ? null : validationSchema}
+            validateOnChange={!isUpdate}
+            validateOnBlur={!isUpdate}
             initialValues={{
               type: "occupational_permit",
-              surname: "",
-              first_name: "",
-              middle_initial: "",
-              suffix: "",
-              date_of_birth: "",
-              place_of_birth: "",
-              civil_status: "",
-              sex: "",
-              contact_no: "",
-              email: "",
-              educational_attainment: "",
-              occupation: "",
-              province: "",
-              city: "",
-              barangay: "",
-              additional_address: "",
+              id: tableData?.id || null,
               certificate_of_employment: "",
               community_tax_certificate: "",
               id_picture: "",
-              health_certificate: "",
               training_certificate: "",
-              official_receipt: "",
-              or_no: "",
-              paid_amount: "",
+              // monthly_income: tableData?.monthly_income || "",
+              company_name: tableData?.company_name || "",
+              company_address: tableData?.full_address || "",
+              position: tableData?.position || "",
+              no_cedula: false,
             }}
             onSubmit={handleSubmit}
           >
             {(props) => (
               <Form>
-                <Row>
-                  {/* 1st main Col */}
-                  <Col
-                    md={8}
-                    style={{ borderRight: "2px solid", borderColor: "#f0f3f7" }}
-                  >
-                    <Row>
-                      <Col md={4}>
-                        <FormGroup>
-                          <Label for="surname">Surname</Label>
-                          <Input
-                            id="surname"
-                            name={"surname"}
-                            placeholder="Enter Surname"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col md={4}>
-                        <FormGroup>
-                          <Label for="firstName">First Name</Label>
-                          <Input
-                            id="firstName"
-                            name={"first_name"}
-                            placeholder="Enter First Name"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col md={2}>
-                        <FormGroup>
-                          <Label for="middleInitial">M.I</Label>
-                          <Input
-                            id="middleInitial"
-                            name={`middle_initial`}
-                            placeholder="M.I"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
+                {isFetching ? (
+                  <div className="text-center">
+                    <Spinner color="primary">Loading ...</Spinner>
+                  </div>
+                ) : (
+                  <Row>
+                    <Col>
+                      <Table borderless>
+                        <tbody>
+                          <tr>
+                            <td className="text-end">
+                              <Label>
+                                Company Name:
+                                <span style={{ color: "red" }}>&nbsp;*</span>
+                              </Label>
+                            </td>
+                            <td colSpan={2}>
+                              <BasicInputField
+                                col={12}
+                                label={null}
+                                name="company_name"
+                                type="text"
+                                value={props.values.company_name}
+                                touched={props.touched.company_name}
+                                errors={props.errors.company_name}
+                                validation={props}
+                                disable={true}
+                              />
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="text-end">
+                              <Label>
+                                Company Address:
+                                <span style={{ color: "red" }}>&nbsp;*</span>
+                              </Label>
+                            </td>
+                            <td colSpan={2}>
+                              <BasicInputField
+                                col={12}
+                                label={null}
+                                name="company_address"
+                                type="text"
+                                value={props.values.company_address}
+                                touched={props.touched.company_address}
+                                errors={props.errors.company_address}
+                                validation={props}
+                                disable={true}
+                              />
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="text-end">
+                              <Label>
+                                Occupation:
+                                <span style={{ color: "red" }}>&nbsp;*</span>
+                              </Label>
+                            </td>
+                            <td colSpan={2}>
+                              <BasicInputField
+                                col={12}
+                                label={null}
+                                name="position"
+                                type="text"
+                                value={props.values.position}
+                                touched={props.touched.position}
+                                errors={props.errors.position}
+                                validation={props}
+                                disable={true}
+                              />
+                            </td>
+                          </tr>
 
-                      <Col md={2}>
-                        <FormGroup>
-                          <Label for="suffix">Suffix</Label>
-                          <Input
-                            id="suffix"
-                            name={"suffix"}
-                            placeholder="Ext"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col md={6}>
-                        <FormGroup>
-                          <Label for="dateOfBirth">Date of Birth</Label>
-                          <Input
-                            id="dateOfBirth"
-                            name={"date_of_birth"}
-                            placeholder="Ext"
-                            onChange={props.handleChange}
-                            type="date"
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col md={6}>
-                        <FormGroup>
-                          <Label for="placeOfBirth">Place of Birth</Label>
-                          <Input
-                            id="placeOfBirth"
-                            name={"place_of_birth"}
-                            placeholder="Place of Birth"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col md={4}>
-                        <FormGroup>
-                          <Label for="civilStatus">Civil Status</Label>
-                          <Input
-                            id="civilStatus"
-                            name={"civil_status"}
-                            placeholder="Civil Status"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col md={4}>
-                        <FormGroup>
-                          <Label for="sex">Sex</Label>
-                          <Input
-                            id="sex"
-                            name={"sex"}
-                            placeholder="Sex"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col md={4}>
-                        <FormGroup>
-                          <Label for="contactNo">Contact Number</Label>
-                          <Input
-                            id="contactNo"
-                            name={"contact_no"}
-                            placeholder="Enter Contact No."
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col md={12}>
-                        <FormGroup>
-                          <Label for="email">Email Address</Label>
-                          <Input
-                            id="email"
-                            name={"email"}
-                            placeholder="Enter Email Address"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col md={6}>
-                        <FormGroup>
-                          <Label for="educationalAttainment">
-                            Educational Attainment
-                          </Label>
-                          <Input
-                            id="educationalAttainment"
-                            name={"educational_attainment"}
-                            placeholder="Educational Attainment"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col md={6}>
-                        <FormGroup>
-                          <Label for="occupation">Occupation</Label>
-                          <Input
-                            id="occupation"
-                            name={"occupation"}
-                            placeholder="Enter Occupation"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col md={4}>
-                        <FormGroup>
-                          <Label for="province">Province</Label>
-                          <Select
-                            name={"province"}
-                            // isMulti
-                            isClearable={true}
-                            placeholder="Select Province"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col md={4}>
-                        <FormGroup>
-                          <Label for="province">City</Label>
-                          <Select
-                            name={"city"}
-                            // isMulti
-                            isClearable={true}
-                            placeholder="Select City"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col md={4}>
-                        <FormGroup>
-                          <Label for="province">Barangay</Label>
-                          <Select
-                            name={"barangay"}
-                            // isMulti
-                            isClearable={true}
-                            placeholder="Select Barangay"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col md={12}>
-                        <FormGroup>
-                          <Label for="additionalAddress">
-                            Additional Address
-                          </Label>
-                          <Input
-                            id="additionalAddress"
-                            name={"additional_address"}
-                            placeholder="Enter Additional Address"
-                            onChange={props.handleChange}
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                  </Col>
-                  {/* 2nd Main Col */}
-                  <Col>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <Label for="certificateOfEmployment">
-                            Certificate of Employment
-                          </Label>
-                          <Input
-                            id="certificateOfEmployment"
-                            name={`certificate_of_employment`}
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "certificate_of_employment",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            type="file"
-                          />
-                          {/* <FormText>
-                        This is some placeholder block-level help text for the
-                        above input. It‘s a bit lighter and easily wraps to a
-                        new line.
-                      </FormText> */}
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <Label for="taxCert">Community Tax Certificate</Label>
-                          <Input
-                            id="taxCert"
-                            name={`community_tax_certificate`}
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "community_tax_certificate",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            type="file"
-                          />
-                          {/* <FormText>
-                        This is some placeholder block-level help text for the
-                        above input. It‘s a bit lighter and easily wraps to a
-                        new line.
-                      </FormText> */}
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <Label for="idPicture">ID Picture</Label>
-                          <Input
-                            id="idPicture"
-                            name={`id_picture`}
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "id_picture",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            type="file"
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <Label for="healthCertificate">
-                            Health Certificate
-                          </Label>
-                          <Input
-                            id="healthCertificate"
-                            name={`health_certificate`}
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "health_certificate",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            type="file"
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <Label for="trainingCertificate">
-                            Training Certificate
-                          </Label>
-                          <Input
-                            id="trainingCertificate"
-                            name={`training_certificate`}
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "training_certificate",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            type="file"
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <Label for="orNo">Official Receipt (OR)</Label>
-                          <Input
-                            id="orNo"
-                            name={`orNo`}
-                            onChange={props.handleChange}
-                            placeholder="Enter O.R No."
-                          />
-                        </FormGroup>
-                      </Col>
-                      <Col>
-                        <FormGroup>
-                          <Label for="amountPaid">Amount Paid</Label>
-                          <Input
-                            id="amountPaid"
-                            name={`paid_amount`}
-                            onChange={props.handleChange}
-                            placeholder="Enter Amount"
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col>
-                        <FormGroup>
-                          <Label for="officialReceipt">Official Receipt</Label>
-                          <Input
-                            id="officialReceipt"
-                            name={`official_receipt`}
-                            onChange={(event) => {
-                              console.log(event);
-                              props.setFieldValue(
-                                "official_receipt",
-                                event.currentTarget.files[0]
-                              );
-                            }}
-                            type="file"
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                  </Col>
-                </Row>
+                          {/* <tr>
+                            <td className="text-end">
+                              <Label>
+                                Monthly Income:
+                                <span style={{ color: "red" }}>&nbsp;*</span>
+                              </Label>
+                            </td>
+                            <td colSpan={2}>
+                              <BasicInputField
+                                col={12}
+                                label={null}
+                                name="monthly_income"
+                                type="number"
+                                placeholder="0.00"
+                                value={props.values.monthly_income}
+                                touched={props.touched.monthly_income}
+                                errors={props.errors.monthly_income}
+                                validation={props}
+                                required={true}
+                              />
+                            </td>
+                          </tr> */}
+
+                          <tr>
+                            <td className="text-end">
+                              <Label>
+                                Certificate of Employment:
+                                <span style={{ color: "red" }}>&nbsp;*</span>
+                              </Label>
+                            </td>
+                            <td colSpan={2}>
+                              <div className="d-flex gap-2">
+                                <div
+                                  className="d-flex flex-column"
+                                  style={{ maxWidth: "400px" }}
+                                >
+                                  <Input
+                                    accept="image/*"
+                                    id="certificateOfEmployment"
+                                    name="certificate_of_employment"
+                                    type="file"
+                                    onChange={(event) => {
+                                      props.setFieldValue(
+                                        "certificate_of_employment",
+                                        event.currentTarget.files[0]
+                                      );
+                                    }}
+                                    onBlur={props.handleBlur}
+                                    invalid={
+                                      props.touched.certificate_of_employment &&
+                                      props.errors.certificate_of_employment
+                                        ? true
+                                        : false
+                                    }
+                                  />
+
+                                  {props.touched.certificate_of_employment &&
+                                  props.errors.certificate_of_employment ? (
+                                    <FormFeedback type="invalid">
+                                      {props.errors.certificate_of_employment}
+                                    </FormFeedback>
+                                  ) : null}
+                                </div>
+
+                                {isUpdate &&
+                                  uploadedFile?.certificate_of_employment && (
+                                    <Button
+                                      color="primary"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        getImageHandle({
+                                          path: uploadedFile?.certificate_of_employment,
+                                          url: "api/client/attachment",
+                                          showLoader: true,
+                                        });
+                                        toggleIsViewerOpen();
+                                      }}
+                                    >
+                                      <i
+                                        className="mdi mdi-eye"
+                                        color="warning"
+                                      ></i>
+                                    </Button>
+                                  )}
+                              </div>
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td className="text-end">
+                              <Label>
+                                Community Tax Certificate:
+                                <span style={{ color: "red" }}>&nbsp;*</span>
+                              </Label>
+                            </td>
+
+                            <td>
+                              <div className="d-flex gap-2">
+                                <div
+                                  className="d-flex flex-column"
+                                  style={{ maxWidth: "300px" }}
+                                >
+                                  <Input
+                                    accept="image/*"
+                                    id="communityTaxCertificate"
+                                    name="community_tax_certificate"
+                                    type="file"
+                                    disabled={props.values.no_cedula}
+                                    onChange={(event) => {
+                                      props.setFieldValue(
+                                        "community_tax_certificate",
+                                        event.currentTarget.files[0]
+                                      );
+                                    }}
+                                    onBlur={props.handleBlur}
+                                    invalid={
+                                      props.touched.community_tax_certificate &&
+                                      props.errors.community_tax_certificate
+                                        ? true
+                                        : false
+                                    }
+                                  />
+
+                                  {props.touched.community_tax_certificate &&
+                                  props.errors.community_tax_certificate &&
+                                  !props.values.no_cedula ? (
+                                    <FormFeedback type="invalid">
+                                      {props.errors.community_tax_certificate}
+                                    </FormFeedback>
+                                  ) : null}
+                                </div>
+                                {isUpdate &&
+                                  uploadedFile?.community_tax_certificate && (
+                                    <Button
+                                      color="primary"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        getImageHandle({
+                                          path: uploadedFile?.community_tax_certificate,
+                                          url: "api/client/attachment",
+                                          showLoader: true,
+                                        });
+                                        toggleIsViewerOpen();
+                                      }}
+                                    >
+                                      <i
+                                        className="mdi mdi-eye"
+                                        color="warning"
+                                      ></i>
+                                    </Button>
+                                  )}
+                              </div>
+                            </td>
+
+                            {/* <td>
+                              <div className="d-flex gap-2 align-items-center">
+                                <Input
+                                  type="checkbox"
+                                  style={{ width: "20px", height: "20px" }}
+                                  onChange={(e) => {
+                                    props.setFieldValue(
+                                      "no_cedula",
+                                      e.target.checked
+                                    );
+                                  }}
+                                />
+                                <span
+                                  style={{ color: "red", cursor: "pointer" }}
+                                >
+                                  {"Don't have Cedula?"}
+                                </span>
+                              </div>
+                            </td> */}
+                          </tr>
+
+                          <tr>
+                            <td className="text-end">
+                              <Label>
+                                ID Picture:
+                                <span style={{ color: "red" }}>&nbsp;*</span>
+                              </Label>
+                            </td>
+                            <td colSpan={2}>
+                              <div className="d-flex align-items-center gap-2">
+                                <Button
+                                  color="primary"
+                                  outline
+                                  className="d-flex align-items-center gap-2"
+                                  style={{
+                                    borderRadius: "6px",
+                                    padding: "10px 14px",
+                                    fontWeight: 500,
+                                  }}
+                                  onClick={togglePictureModal}
+                                >
+                                  <i className="mdi mdi-camera fs-4"></i>
+                                  Take Picture
+                                </Button>
+                                {isUpdate && uploadedFile?.id_picture && (
+                                  <Button
+                                    color="primary"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      getImageHandle({
+                                        path: uploadedFile?.id_picture,
+                                        url: "api/client/attachment",
+                                        showLoader: true,
+                                      });
+                                      toggleIsViewerOpen();
+                                    }}
+                                  >
+                                    <i
+                                      className="mdi mdi-eye"
+                                      color="warning"
+                                    ></i>
+                                  </Button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                          {tableData?.company_type === "NON-FOOD-MASSEUR" && (
+                            <tr>
+                              <td className="text-end">
+                                <Label>
+                                  Training Certificate:
+                                  <span style={{ color: "red" }}>&nbsp;*</span>
+                                </Label>
+                              </td>
+
+                              <td colSpan={2}>
+                                <div className="d-flex gap-2">
+                                  <div
+                                    className="d-flex flex-column"
+                                    style={{ maxWidth: "400px" }}
+                                  >
+                                    <Input
+                                      accept="image/*"
+                                      id="trainingCertificate"
+                                      name="training_certificate"
+                                      type="file"
+                                      onChange={(event) => {
+                                        props.setFieldValue(
+                                          "training_certificate",
+                                          event.currentTarget.files[0]
+                                        );
+                                      }}
+                                      onBlur={props.handleBlur}
+                                      invalid={
+                                        props.touched.training_certificate &&
+                                        props.errors.training_certificate
+                                          ? true
+                                          : false
+                                      }
+                                    />
+
+                                    {props.touched.training_certificate &&
+                                    props.errors.training_certificate ? (
+                                      <FormFeedback type="invalid">
+                                        {props.errors.training_certificate}
+                                      </FormFeedback>
+                                    ) : null}
+                                  </div>
+                                  {isUpdate &&
+                                    uploadedFile?.community_tax_certificate && (
+                                      <Button
+                                        color="primary"
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          getImageHandle({
+                                            path: uploadedFile?.community_tax_certificate,
+                                            url: "api/client/attachment",
+                                            showLoader: true,
+                                          });
+                                          toggleIsViewerOpen();
+                                        }}
+                                      >
+                                        <i
+                                          className="mdi mdi-eye"
+                                          color="warning"
+                                        ></i>
+                                      </Button>
+                                    )}
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </Table>
+                    </Col>
+                  </Row>
+                )}
               </Form>
             )}
           </Formik>
         </ModalBody>
+
         <ModalFooter>
           <Button
-            style={{
-              backgroundColor: "#1a56db",
-              fontWeight: "600",
-              fontFamily:
-                "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
-              color: "white",
-            }}
-            onClick={() => {
-              const formik = formikRef.current.values;
-              // console.log(formik);
-              // console.log(formik.amountPaid);
-              // var bodyFormData = getFormData(formik);
-              const formData = getFormData(formik);
-              console.log(formData);
+            style={{ backgroundColor: "#1a56db", color: "white" }}
+            onClick={async () => {
+              const params = {
+                ...formikRef.current.values,
+                special_permit_application_id: applicationId,
+              };
+              const formData = getFormData(params);
               handleSubmit(
                 {
-                  url: "api/client/special-permit/occupational-permit",
-                  headers: {
-                    "Content-Type": "multipart/form-data",
-                  },
+                  url: submitUrl,
+                  headers: { "Content-Type": "multipart/form-data" },
                   message: {
-                    title: "Are you sure you want to Proceed?",
+                    title: "Are you sure you want to submit?",
                     failedTitle: "FAILED",
                     success: "Success!",
-                    error: "unknown error occured",
+                    error: "Unknown error occurred",
                   },
                   params: formData,
                 },
                 [],
-                [toggleModal]
+                [toggleModal, toggleRefresh]
               );
             }}
           >
-            Submit
+            {mode === "create" ? "Submit Application" : "Update Permit"}
           </Button>
+
           <Button color="secondary" onClick={toggleModal}>
             Close
           </Button>
         </ModalFooter>
       </Modal>
-    </React.Fragment>
+    </>
   );
 }
 

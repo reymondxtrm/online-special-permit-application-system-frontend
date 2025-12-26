@@ -17,7 +17,7 @@ import {
 import Select, { StylesConfig } from "react-select";
 import { FieldArray, Formik } from "formik";
 import axios from "axios";
-import ImageViewer from "react-simple-image-viewer";
+
 import useSubmit from "hooks/Common/useSubmit";
 
 function RemarksModal({

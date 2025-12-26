@@ -68,14 +68,11 @@ const useSubmit = () => {
                 typeof backendMessage === "object" &&
                 backendMessage !== null
               ) {
-                // If the message is an object, get its values and join them into a string
                 errorMessage = Object.values(backendMessage).join(",");
               } else {
-                // If the message is a string or other type, use it directly
                 errorMessage = backendMessage;
               }
             } else if (error.message) {
-              // Add more detail to the error message
               errorMessage = `${errorMessage} (Error: ${error.message})`;
             }
 
