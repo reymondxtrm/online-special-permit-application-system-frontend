@@ -261,8 +261,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                   {(permitType === "good_moral" ||
                     permitType === "mayors_permit") && (
                     <p className="footer-warning">
-                      <span style={{ color: "black" }}>Note:</span> This permit
-                      is valid until December 31, 2025 only.
+                      Note: This permit is valid until December 31, 2025 only.
                     </p>
                   )}
                   <p className="footer-code">{REVISION_CODE[permitType]}</p>

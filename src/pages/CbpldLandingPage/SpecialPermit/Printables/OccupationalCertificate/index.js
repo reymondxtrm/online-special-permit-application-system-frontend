@@ -189,12 +189,9 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
         </div>
       </div>
       <div className="top">
-        <div className="d-flex  justify-content-center">
-          <span className="d-flex align-items-end ">NAME:</span>
-          <span className="fw-bold name">
-            ATTY. LAWRENCE LEMUEL H. FORTUN LEMUELLEMUEL
-          </span>
-          {/* <span className="fw-bold name">
+        <p className="fw-bold text-center name-container">
+          <span>NAME: </span>
+          <span className="name">
             {isCompany
               ? concatString("toUpper", {
                   fname: applicationDetails?.corporation_member?.fname,
@@ -206,8 +203,9 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
                   mname: applicationDetails?.user?.mname || "",
                   lname: applicationDetails?.user?.lname,
                 }) || ""}
-          </span> */}
-        </div>
+          </span>
+        </p>
+
         <div className="mayor">
           <span className="mayor-name">ATTY. LAWRENCE LEMUEL H. FORTUN</span>
           <span>City Mayor</span>

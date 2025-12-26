@@ -42,7 +42,7 @@
 
 /* Paper sizes */
 .certificate-wrapper.a4 {
-  width: 192mm;
+  width: 194mm;
   height: 297mm;
 }
 
@@ -152,12 +152,12 @@
 .certificate-table {
   width: 100%;
   height: 100%;
-  background-image: url("../../../../../assets/images/Permit.png");
+  background-image: url("../../../../../assets/images/permit-background-1.png");
   background-size: cover;
   background-position: center;
   border-collapse: collapse;
   table-layout: fixed;
-  border: 3px dashed #3d69c2;
+  border: 1px dashed #3a38ad;
   border-collapse: collapse;
 }
 
@@ -230,9 +230,9 @@
 }
 
 .conditions-title {
-  font-family: "Golos Text", sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-size: calc(13pt * var(--scale));
-  font-weight: 300;
+  font-weight: 500;
   color: #154172;
   margin-bottom: 1em;
   text-align: justify;
@@ -247,9 +247,9 @@
 }
 
 .condition-item {
-  font-family: "Golos Text", sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-size: calc(13pt * var(--scale));
-  font-weight: 300;
+  font-weight: 500;
   font-style: italic;
   text-align: justify;
   line-height: 1.5;
@@ -259,7 +259,7 @@
 /* ===== MAYOR SIGNATORY SECTION ===== */
 .mayor-signatory {
   --mayor-font-size: 14pt;
-  --mayor-top-padding: 40px;
+  --mayor-top-padding: 50px;
   --mayor-bottom-padding: 30px;
 }
 
@@ -272,7 +272,7 @@
 }
 
 .signatory-section p {
-  font-family: "Golos Text", sans-serif;
+  font-family: "Montserrat", sans-serif;
   margin: 0;
   padding: 0;
 }
@@ -285,7 +285,7 @@
 
 .mayor-position {
   font-size: calc(var(--mayor-font-size) * var(--scale));
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .mayor-authority {
@@ -305,6 +305,7 @@
 .dept-head-name {
   font-size: calc(var(--dept-head-font-size) * var(--scale));
   padding-top: calc(var(--dept-head-top-padding) * var(--scale));
+  text-decoration: underline;
   font-weight: 600;
 }
 
@@ -321,7 +322,7 @@
 }
 
 .event-name-text {
-  font-family: "Golos Text", sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-size: calc(17pt * var(--scale));
   font-weight: 600;
   margin-bottom: calc(14px * var(--scale));
@@ -341,9 +342,9 @@
 }
 
 .first-paragraph-text {
-  font-family: "Golos Text", sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-size: calc(13pt * var(--scale));
-  font-weight: 300;
+  font-weight: 500;
   text-indent: calc(50px * var(--scale));
   margin-bottom: 1em;
   text-align: justify;
@@ -359,8 +360,8 @@
 }
 
 .headers-title-text {
-  font-family: "Golos Text", sans-serif;
-  font-size: calc(20pt * var(--scale));
+  font-family: "Montserrat", sans-serif;
+  font-size: calc(28pt * var(--scale));
   font-weight: 600;
   color: #154172;
   margin: 0;
@@ -376,7 +377,7 @@
 }
 
 .purpose-text {
-  font-family: "Golos Text", sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-size: calc(17pt * var(--scale));
   font-weight: 600;
   text-decoration: underline;
@@ -394,9 +395,9 @@
 }
 
 .second-paragraph-text {
-  font-family: "Golos Text", sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-size: calc(13pt * var(--scale));
-  font-weight: 300;
+  font-weight: 500;
   text-indent: calc(50px * var(--scale));
   margin-bottom: 1em;
   text-align: justify;
@@ -416,9 +417,9 @@
 }
 
 .subheader-title {
-  font-family: "Golos Text", sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-size: calc(17pt * var(--scale));
-  font-weight: 500;
+  font-weight: 600;
   color: #154172;
   margin: 0;
   padding: 0;
@@ -447,7 +448,7 @@
 }
 
 .third-paragraph-text {
-  font-family: "Golos Text", sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-size: calc(13pt * var(--scale));
   font-weight: 400;
   text-indent: calc(50px * var(--scale));
@@ -471,7 +472,7 @@
 }
 
 .with-cases-text {
-  font-family: "Golos Text", sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-size: calc(11pt * var(--scale));
   font-weight: 500;
   margin-bottom: 1em;
@@ -525,7 +526,8 @@
 .footer-warning {
   margin: 0;
   font-size: calc(15px * var(--scale));
-  color: rgb(204, 79, 79);
+  color: rgb(197, 55, 55);
+  font-weight: bold;
 }
 
 .footer-code {
@@ -537,7 +539,7 @@
   color: black;
 }
 
-/* ===== PRINT STYLES ===== */
+/* ===== PRINT  ===== */
 @media print {
   body {
     margin: 0;
@@ -549,7 +551,6 @@
     display: none;
   }
 
-  /* Reset scale to 1 for printing */
   .certificate-wrapper {
     --scale: 1;
   }
@@ -612,7 +613,6 @@
     print-color-adjust: exact;
   }
 
-  /* Ensure backgrounds print */
   .certificate-table {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;

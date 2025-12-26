@@ -806,7 +806,13 @@ function PaymentModal({
                                         const encoded =
                                           encodeURIComponent(encrypted);
                                         // const url = `http://ctd01.a.testing.butuan.gov.ph/payment?data=${encoded}`;
-                                        const url = `http://epay01.a.staging.butuan.gov.ph/payment?data=${encoded}`;
+                                        // const url = `http://epay.butuan.gov.ph/payment?data=${encoded}`;
+                                        const url =
+                                          window.location.protocol +
+                                          "//" +
+                                          process.env.REACT_APP_EPAY +
+                                          `payment?data=${encoded}`;
+
                                         const create = async () => {
                                           setIsPaying((prev) => !prev);
                                           try {

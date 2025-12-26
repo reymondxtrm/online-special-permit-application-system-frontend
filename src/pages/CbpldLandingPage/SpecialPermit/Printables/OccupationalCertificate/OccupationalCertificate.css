@@ -53,7 +53,7 @@
   font-size: 20px;
   margin-top: 10px;
   font-weight: bold;
-  color: #368be0;
+  color: #164d83;
   text-align: center;
   font-family: "Cambria, serif";
 }
@@ -98,8 +98,11 @@
   justify-content: center;
 }
 .name {
-  font-size: 20px;
+  font-size: 18px;
   font-family: "Cambria, serif";
+}
+.name-container {
+  line-height: 17px;
 }
 .picture-section {
   margin: 0 10px;

@@ -121,8 +121,8 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                       className="text-center"
                       style={{
                         position: "absolute",
-                        bottom: "-30px",
-                        left: "180px",
+                        bottom: "-40px",
+                        left: "250px",
                       }}
                     >
                       <h1 className="title">REQUEST FORM FOR SPECIAL PERMIT</h1>
@@ -136,7 +136,6 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    width: "765px",
                   }}
                 >
                   <table
@@ -145,7 +144,8 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                       borderCollapse: "collapse",
                       marginTop: "30px",
                       tableLayout: "fixed",
-                      width: "92%",
+
+                      width: "740px",
                     }}
                   >
                     <thead>
@@ -591,7 +591,7 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                 </td>
               </tr>
               <tr>
-                <td style={{ width: "900px" }}>
+                <td style={{ width: "900px", padding: "10px" }}>
                   <p style={{ textIndent: "40px" }} className="cambraText">
                     I hereby voluntarily declare that all the information
                     provided in this request form for the special permit is
@@ -605,7 +605,7 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
               <tr>
                 <td>
                   <div
-                    style={{ width: "200px" }}
+                    style={{ width: "200px", padding: "10px" }}
                     className="d-flex align-items-center flex-column"
                   >
                     <hr

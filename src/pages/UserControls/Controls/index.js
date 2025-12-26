@@ -46,6 +46,7 @@ const adminUserControl = () => {
       lname: "",
       password: "",
       confirm_password: "",
+      email: "",
     },
     validationSchema: Yup.object().shape({
       fname: Yup.string().required("First Name is required!"),
@@ -56,6 +57,9 @@ const adminUserControl = () => {
       confirm_password: Yup.string()
         .required("Please confirm your password!")
         .oneOf([Yup.ref("password"), null], "Passwords must match"),
+      email: Yup.string()
+        .email("Email must be valid.")
+        .required("Email is required."),
     }),
     onSubmit: async (values, { resetForm }) => {
       Swal.fire({
@@ -171,6 +175,18 @@ const adminUserControl = () => {
                     touched={validation.touched.confirm_password}
                     errors={validation.errors.confirm_password}
                     label={"Confirm Password"}
+                  />
+                  <BasicInputField
+                    type={"email"}
+                    validation={validation}
+                    col={12}
+                    placeholder={"Email Address"}
+                    required
+                    name={"email"}
+                    value={validation.values.email}
+                    touched={validation.touched.email}
+                    errors={validation.errors.email}
+                    label={"Email"}
                   />
                   <FormGroup>
                     <Label>Username</Label>

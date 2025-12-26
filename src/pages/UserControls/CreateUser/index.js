@@ -248,7 +248,7 @@ const CreateUser = () => {
                   </Row>
                   {userDetails &&
                     (userDetails.role === "Administrator" &&
-                    validation.values.userRole.value !== 1 ? (
+                    validation.values.userRole.value.length !== 1 ? (
                       <Row>
                         <Select2InputField
                           col={"12"}
