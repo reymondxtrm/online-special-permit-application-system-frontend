@@ -20,7 +20,7 @@ export default function EventName({ eventName, permitType }) {
 
   return (
     <div className="event-name-wrapper">
-      <p className="event-name-text">{`"${eventName}"`}</p>
+      <p className="event-name-text">{`"${eventName?.toUpperCase()}"`}</p>
     </div>
   );
 }

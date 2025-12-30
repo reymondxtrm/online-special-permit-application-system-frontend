@@ -192,8 +192,7 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
         <p className="fw-bold text-center name-container">
           <span>NAME: </span>
           <span className="name">
-            NAME NAME NAME NAME NAME NAME
-            {/* {isCompany
+            {isCompany
               ? concatString("toUpper", {
                   fname: applicationDetails?.corporation_member?.fname,
                   mname: applicationDetails?.corporation_member?.mname || "",
@@ -203,7 +202,7 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
                   fname: applicationDetails?.user?.fname,
                   mname: applicationDetails?.user?.mname || "",
                   lname: applicationDetails?.user?.lname,
-                }) || ""} */}
+                }) || ""}
           </span>
         </p>
 

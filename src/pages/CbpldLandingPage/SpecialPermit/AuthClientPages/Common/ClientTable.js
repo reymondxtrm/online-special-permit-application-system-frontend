@@ -458,6 +458,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
           toggleModal={toggleEventApplicationModal}
           isUpdate
           specialPermitApplicationId={selectedRow[0]}
+          toggleRefresh={toggleRefresh}
         />
       )}
 
@@ -663,7 +664,10 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
               )}
               {status === "for_payment" &&
               user?.accountType === "individual" ? (
-                <th>Actions</th>
+                <>
+                  <th>Actions</th>
+                  <th>Payment Status</th>
+                </>
               ) : null}
               {status === "completed" ? <th>Special Permit</th> : null}
               {status === "declined" ? (
@@ -685,6 +689,10 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         status === "for_payment" && (
                           <Input
                             type="checkbox"
+                            disabled={
+                              application?.order_of_payment
+                                ?.payment_on_progress === 1
+                            }
                             checked={selectedRow?.includes(application.id)}
                             onClick={(e) => {
                               handleSelect(application.id);
@@ -694,7 +702,9 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         )}
                     </td>
 
-                    <td>{`${index + 1}.`}</td>
+                    <td>
+                      <div className="d-flex gap-2">{`${index + 1}.`}</div>
+                    </td>
                     {status === "for_signature" && (
                       <td>{application.reference_no}</td>
                     )}
@@ -989,6 +999,10 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         <td>
                           <Button
                             color="primary"
+                            // disabled={
+                            //   application?.order_of_payment
+                            //     ?.payment_on_progress === 1
+                            // }
                             onClick={() => {
                               toggleOverTheCounterModal();
                               setSelectedRow([application?.id]);
@@ -1001,6 +1015,27 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                           >
                             Pay
                           </Button>
+                        </td>
+                        <td>
+                          <h4>
+                            <Badge
+                              style={{
+                                borderRadius: "20px",
+                                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+                              }}
+                              color={
+                                application?.order_of_payment
+                                  ?.payment_on_progress === 1
+                                  ? "warning"
+                                  : "primary"
+                              }
+                            >
+                              {application?.order_of_payment
+                                ?.payment_on_progress === 1
+                                ? "Paying"
+                                : "Unpaid"}
+                            </Badge>
+                          </h4>
                         </td>
                         {/* <td>
                           <>

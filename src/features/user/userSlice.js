@@ -87,7 +87,6 @@ export const specialPermitClientRegister = createAsyncThunk(
         method: "POST",
         data: params,
       });
-      // localStorage.setItem("authUser", JSON.stringify(response.data));
       localStorage.setItem("email", response.data.email);
       if (response.status === 200) {
         history.push(`/email-verification`);
@@ -108,7 +107,6 @@ export const specialPermitCompanyRegistration = createAsyncThunk(
         method: "POST",
         data: params,
       });
-      // localStorage.setItem("authUser", JSON.stringify(response.data));
       localStorage.setItem("email", response.data.email);
       if (response.status === 200) {
         history.push(`/email-verification`);

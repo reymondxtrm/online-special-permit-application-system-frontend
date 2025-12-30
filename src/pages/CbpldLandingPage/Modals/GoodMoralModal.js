@@ -31,7 +31,7 @@ function GoodMoralModal({
 }) {
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
-  const [purposeOptions, setpurposeOptions] = useState();
+  const [purposeOptions, setpurposeOptions] = useState([]);
   const [otherPurpose, setotherPurpose] = useState(false);
   const [employmentPurpose, setemploymentPurpose] = useState(false);
   const [discountOptions, setdiscountOptions] = useState([]);
@@ -94,7 +94,7 @@ function GoodMoralModal({
           exemptionCase: exemptionCaseValue,
         });
 
-        setUploadedFiles(data?.uploaded_files || []);
+        setUploadedFiles(data?.uploaded_files || {});
       })
       .catch((error) => console.log(error));
   }, [
@@ -107,10 +107,10 @@ function GoodMoralModal({
 
   useEffect(() => {
     if (!openModal) {
-      setpurposeOptions(undefined);
+      setpurposeOptions([]);
       setotherPurpose(false);
       setemploymentPurpose(false);
-      setdiscountOptions(undefined);
+      setdiscountOptions([]);
 
       if (formikRef.current) {
         formikRef.current.resetForm();
@@ -360,7 +360,7 @@ function GoodMoralModal({
                       </Row>
                     )}
 
-                    {discountOptions.length > 0 && (
+                    {discountOptions && discountOptions?.length > 0 ? (
                       <>
                         <Row>
                           <Col>
@@ -470,7 +470,7 @@ function GoodMoralModal({
                           </Col>
                         </Row>
                       </>
-                    )}
+                    ) : null}
 
                     {/* Police Clearance */}
                     <Row>

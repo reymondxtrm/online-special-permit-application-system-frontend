@@ -780,6 +780,16 @@ function PaymentModal({
                                             process.env.REACT_APP_URL +
                                             "client/for-payment/dashboard",
                                           new_collection: eor_collection,
+                                          updateUrl: {
+                                            link: "http://ospas01.b.staging.butuan.gov.ph/api/online/create-db-state",
+                                            params: {
+                                              application_type:
+                                                "occupational_permit",
+                                              special_permit_application_id: [
+                                                ...applicationId,
+                                              ],
+                                            },
+                                          },
                                           onSuccessCallbackUrl: {
                                             params: [
                                               "special_permit_application_id",
@@ -801,6 +811,7 @@ function PaymentModal({
                                               // "//" +
                                               // process.env.REACT_APP_API +
                                               `http://ospas01.b.staging.butuan.gov.ph/api/update-payment-status`,
+                                            // `https://backendospas.butuan.gov.ph/api/update-payment-status`,
                                           },
                                         };
                                         const jsonString = JSON.stringify(obj);
@@ -819,30 +830,32 @@ function PaymentModal({
                                         //   process.env.REACT_APP_EPAY +
                                         //   `payment?data=${encoded}`;
 
-                                        const create = async () => {
-                                          setIsPaying((prev) => !prev);
-                                          try {
-                                            const response = await axios({
-                                              method: "POST",
-                                              url: "api/client/create-db-state",
-                                              params: {
-                                                application_type:
-                                                  "occupational_permit",
-                                                special_permit_application_id: [
-                                                  ...applicationId,
-                                                ],
-                                              },
-                                            });
-                                            if (response) {
-                                              setTimeout(() => {
-                                                window.location.href = url;
-                                              }, 1000);
-                                            }
-                                          } catch (error) {
-                                            console.log(error.response);
-                                          }
-                                        };
-                                        create();
+                                        // const create = async () => {
+                                        //   setIsPaying((prev) => !prev);
+                                        //   try {
+                                        //     const response = await axios({
+                                        //       method: "POST",
+                                        //       url: "api/client/create-db-state",
+                                        //       params: {
+                                        //         application_type:
+                                        //           "occupational_permit",
+                                        //         special_permit_application_id: [
+                                        //           ...applicationId,
+                                        //         ],
+                                        //       },
+                                        //     });
+                                        //     if (response) {
+                                        //       setTimeout(() => {
+                                        //         window.location.href = url;
+                                        //       }, 1000);
+                                        //     }
+                                        //   } catch (error) {
+                                        //     console.log(error.response);
+                                        //   }
+                                        // };
+                                        // create();
+                                        setIsPaying((prev) => !prev);
+                                        window.location.href = url;
                                       } else {
                                         const formData = getFormData(formik);
                                         applicationId.forEach((id) => {

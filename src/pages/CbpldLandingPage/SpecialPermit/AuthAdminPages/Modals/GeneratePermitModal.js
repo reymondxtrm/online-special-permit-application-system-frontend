@@ -28,6 +28,7 @@ import { forEach } from "lodash";
 import Condition from "yup/lib/Condition";
 import { formateDateIntoString } from "common/utility/utilityFunction";
 import moment from "moment";
+import useGetImage from "hooks/Common/useGetImage";
 let debounce = null;
 function GeneratePermitModal({
   openModal,
@@ -38,7 +39,6 @@ function GeneratePermitModal({
 }) {
   const [data, setdata] = useState();
   const componentRef = useRef(null);
-
   const [firstParagraph, setFirstParagraph] = useState("");
   const [firstParagraphTextArea, setFirstParagraphTextArea] = useState("");
   const [withCase, setwithCase] = useState("");
@@ -47,6 +47,7 @@ function GeneratePermitModal({
   const [thirdParagraph, setthirdParagraph] = useState();
   const [conditionsTextArea, setConditionsTextArea] = useState("");
   const [activeParagraph, setActiveParagraph] = useState(null);
+  const { currentImage, getImageHandle, isFetching } = useGetImage();
   const openFirstColumn = useMemo(() => {
     if (
       permitType === "event" ||
@@ -82,6 +83,7 @@ function GeneratePermitModal({
         keys = null;
         break;
     }
+
     if (keys) {
       const con = keys?.map((key, index) => {
         if (key === 8) {
@@ -99,6 +101,7 @@ function GeneratePermitModal({
       setConditionsTextArea(arrayToString(con));
     }
   }, [permitType, data]);
+
   const conditions = useMemo(() => {
     if (conditionsTextArea) {
       const converted = conditionsTextArea
@@ -161,6 +164,26 @@ function GeneratePermitModal({
         );
     }
   }, [openModal]);
+  useEffect(() => {
+    if (data?.route_plan) {
+      getImageHandle({
+        path: data?.route_plan,
+        url: "api/admin/attachment",
+        showLoader: false,
+      });
+      // const fetchImage = async () => {
+      //   try {
+      //     const response = await axios.get("api/admin/attachment", {
+      //       params: { filepath: data?.route_plan },
+      //     });
+      //     setRoutePlan(response);
+      //   } catch (error) {
+      //     console.log(error);
+      //   }
+      // };
+      // fetchImage();
+    }
+  }, [data]);
   const concatEventDate = useMemo(() => {
     if (!data?.eventFromDate && !data?.eventToDate) return "";
 
@@ -188,7 +211,7 @@ function GeneratePermitModal({
         setFirstParagraph(
           (prevText) =>
             prevText +
-            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.applicant_name}</span>`
+            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.applicant_name?.toUpperCase()}</span>`
         );
         setFirstParagraphTextArea(
           (prevText) => prevText + data?.applicant_name
@@ -197,7 +220,7 @@ function GeneratePermitModal({
         setSecondParagraph(
           (prevText) =>
             prevText +
-            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.applicant_name}</span>`
+            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.applicant_name?.toUpperCase()}</span>`
         );
         setSecondParagraphTextArea(
           (prevText) => prevText + data?.applicant_name
@@ -342,11 +365,8 @@ function GeneratePermitModal({
                   ROUTE PLAN
                 </CardHeader>
                 <CardBody>
-                  {data?.route_plan ? (
-                    <img
-                      src={`http://127.0.0.1:8000/storage/${data?.route_plan}`}
-                      className="img-fluid"
-                    />
+                  {currentImage ? (
+                    <img src={currentImage} className="img-fluid" />
                   ) : (
                     <p className="text-center fw-bold">
                       No Route Plan Available

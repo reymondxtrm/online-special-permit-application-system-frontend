@@ -60,15 +60,28 @@ export default function CompanyRegistrationForm({
         ).unwrap();
 
         Swal.close();
-        resetForm();
       } catch (error) {
-        console.error(error);
-        Swal.fire({
-          icon: "error",
-          title: "Something went wrong!",
-          text: error.response?.data?.message || "Please try again later.",
-          confirmButtonColor: "#d33",
-        });
+        const errors = error?.errors;
+
+        if (errors && Object.keys(errors).length > 0) {
+          validation.setErrors(errors);
+
+          const errorMessages = Object.values(errors).flat().join("<br>");
+
+          Swal.fire({
+            icon: "error",
+            title: "Validation Error",
+            html: errorMessages,
+            confirmButtonColor: "#d33",
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Something went wrong!",
+            text: error.response?.data?.message || "Please try again later.",
+            confirmButtonColor: "#d33",
+          });
+        }
       }
     },
   });
