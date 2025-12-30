@@ -47,7 +47,7 @@ const PassportCropper = ({ imageSrc, onCropDone }) => {
 
   const handleDone = async () => {
     const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
-    console.log("hello", croppedImage);
+  
     onCropDone(croppedImage);
   };
 

@@ -79,7 +79,7 @@ const ForSignature = () => {
     const handler = (event) => {
       const { documentType, count } = event;
       // Only update state if value actually changes to avoid extra renders
-      console.log(event);
+     
       setNewCounts((prevCounts) => {
         return { ...prevCounts, [documentType]: count };
       });

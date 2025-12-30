@@ -30,7 +30,7 @@ function SelectPurposeModal({
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
   const [options, setoptions] = useState();
-  console.log(purposeData?.name);
+ 
   const getFormData = (object) => {
     const formData = new FormData();
     Object.keys(object).forEach((key) => {

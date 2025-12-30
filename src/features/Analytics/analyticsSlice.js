@@ -11,7 +11,7 @@ export const getAnalyticsData = createAsyncThunk(
         params: filters,
       });
       if (response.data) {
-        // console.log(response.data.gender.female);
+       
         return response.data;
       } else {
         return thunkAPI.rejectWithValue(response.data);

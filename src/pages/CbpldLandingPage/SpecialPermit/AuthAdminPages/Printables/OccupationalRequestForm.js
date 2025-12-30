@@ -15,7 +15,7 @@ export default function OccupationalRequestForm({
 }) {
   const [application, setApplication] = useState(null);
   const printRef = useRef();
-  console.log(applicationId);
+ 
   useEffect(() => {
     let mounted = true;
     const fetchData = async () => {

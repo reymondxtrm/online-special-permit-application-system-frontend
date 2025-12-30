@@ -183,7 +183,7 @@ export default function OccupationalTableIndividualAdmin({
           />
         </>
       ) : null}
-      {console.log(status)}
+     
       <Table hover>
         <thead>
           <tr>

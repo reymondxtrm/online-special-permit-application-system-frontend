@@ -14,7 +14,7 @@ export default function UpdateClearanceModal({
 }) {
   const handleSubmit = useSubmit();
   const dispatch = useDispatch();
-  console.log(selectedClearance);
+ 
 
   const validation = useFormik({
     enableReinitialize: true,

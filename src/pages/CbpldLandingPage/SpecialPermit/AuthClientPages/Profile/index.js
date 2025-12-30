@@ -99,7 +99,7 @@ const UserProfile = () => {
 
     return age;
   }
-  console.log(userData);
+
   const individual = useMemo(() => {
     if (userData) {
       return userData?.account_type === "individual";
@@ -599,7 +599,7 @@ const UserProfile = () => {
                             <Button
                               onClick={() => {
                                 const formik = formikRef.current.values;
-                                console.log(formik);
+                               
                                 // console.log(formik);
                                 // console.log(formik.amountPaid);
                                 // var bodyFormData = getFormData(formik);

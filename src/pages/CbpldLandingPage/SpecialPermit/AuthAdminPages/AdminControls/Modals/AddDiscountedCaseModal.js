@@ -171,7 +171,7 @@ function AddDiscountedCaseModal({ openModal, toggleModal, toggleRefresh }) {
                           id="attachment"
                           name={`attachment`}
                           onChange={(event) => {
-                            console.log(event);
+                            
                             props.setFieldValue(
                               "attachment",
                               event.currentTarget.files[0]
@@ -198,9 +198,9 @@ function AddDiscountedCaseModal({ openModal, toggleModal, toggleRefresh }) {
             }}
             onClick={() => {
               const formik = formikRef.current.values;
-              console.log(formik);
+            
               const formData = getFormData(formik);
-              console.log(formData);
+           
               handleSubmit(
                 {
                   url: "api/admin/create/discount-case",

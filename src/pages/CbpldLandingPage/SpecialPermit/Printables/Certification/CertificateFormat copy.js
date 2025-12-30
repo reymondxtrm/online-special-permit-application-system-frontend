@@ -74,7 +74,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
       const upperBound = maxHeight + tolerance;
 
       let newScale = scaleRef.current;
-      console.log(maxHeight, currentHeight);
+   
       if (currentHeight > upperBound && newScale > 0.5) {
         newScale = +Math.max(newScale - 0.01, 0.5).toFixed(2);
         setScale(newScale);

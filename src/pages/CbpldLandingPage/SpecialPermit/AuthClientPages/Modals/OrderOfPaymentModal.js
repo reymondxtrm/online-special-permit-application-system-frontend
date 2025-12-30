@@ -32,7 +32,7 @@ function OrderOfPaymentModal({
         });
     }
   };
-  // console.log(created_at, fullname);
+
 
   return (
     <React.Fragment>

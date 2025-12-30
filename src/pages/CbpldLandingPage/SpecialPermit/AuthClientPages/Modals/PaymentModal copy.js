@@ -263,7 +263,7 @@ function PaymentModal({
                               return Promise.resolve();
                             }}
                             onAfterPrint={() => {
-                              console.log("After print");
+                         
                               setForPrinting(0); // Reset after printing if needed
                             }}
                           />

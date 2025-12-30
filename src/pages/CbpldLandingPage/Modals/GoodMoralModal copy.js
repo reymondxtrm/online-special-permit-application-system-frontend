@@ -110,7 +110,7 @@ function GoodMoralModal({
     purposeOptions,
     discountOptions,
   ]);
-  console.log(existingData);
+  
   useEffect(() => {
     if (!openModal) {
       setpurposeOptions(undefined);
@@ -403,7 +403,7 @@ function GoodMoralModal({
                               name="police_clearance"
                               type="file"
                               onChange={(event) => {
-                                console.log(event);
+                                
                                 props.setFieldValue(
                                   "police_clearance",
                                   event.currentTarget.files[0]
@@ -444,7 +444,7 @@ function GoodMoralModal({
                               id="taxCert"
                               name={`community_tax_certificate`}
                               onChange={(event) => {
-                                console.log(event);
+                           
                                 props.setFieldValue(
                                   "community_tax_certificate",
                                   event.currentTarget.files[0]
@@ -487,7 +487,7 @@ function GoodMoralModal({
                               id="exampleFile"
                               name={`barangay_clearance`}
                               onChange={(event) => {
-                                console.log(event);
+                               
                                 props.setFieldValue(
                                   "barangay_clearance",
                                   event.currentTarget.files[0]
@@ -529,7 +529,7 @@ function GoodMoralModal({
                               id="fiscalClearance"
                               name={`fiscal_clearance`}
                               onChange={(event) => {
-                                console.log(event);
+                             
                                 props.setFieldValue(
                                   "fiscal_clearance",
                                   event.currentTarget.files[0]
@@ -571,7 +571,7 @@ function GoodMoralModal({
                               id="courtClearance"
                               name={`court_clearance`}
                               onChange={(event) => {
-                                console.log(event);
+                             
                                 props.setFieldValue(
                                   "court_clearance",
                                   event.currentTarget.files[0]

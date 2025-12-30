@@ -28,7 +28,7 @@ function AmountModal({
   permitType,
 }) {
   const handleSubmit = useSubmit();
-  console.log(permitType);
+ 
   const formikRef = useRef(null);
   const [discountOption, setDiscountOptions] = useState([]);
   const [exempted, setExempted] = useState(false);

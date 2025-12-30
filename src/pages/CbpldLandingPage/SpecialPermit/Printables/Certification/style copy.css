@@ -474,7 +474,7 @@
 
 .with-cases-text {
   font-family: "Montserrat", sans-serif;
-  font-size: calc(13pt * var(--scale));
+  font-size: calc(11pt * var(--scale));
   font-weight: 500;
   margin-bottom: 1em;
   text-align: justify;

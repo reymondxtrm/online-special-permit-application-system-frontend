@@ -28,7 +28,7 @@ const EditButton = ({ id, api, openModal, businessPermit, plateNo }) => {
   };
 
   const releaseDocument = () => {
-    console.log(openModal);
+    
     openModal
       ? toggleModal()
       : Swal.fire({
@@ -155,7 +155,7 @@ const EditButton = ({ id, api, openModal, businessPermit, plateNo }) => {
                   showConfirmButton: false,
                   timer: 1500,
                 }).then(function () {});
-                console.log(openModal);
+               
               },
               (error) => {
                 if (error.response.status === 401) {

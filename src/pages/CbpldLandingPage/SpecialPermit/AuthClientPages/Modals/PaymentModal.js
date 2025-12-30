@@ -577,7 +577,7 @@ function PaymentModal({
                                     </Row>
                                   </CardBody>
                                 </Card>
-                                {console.log(approveTerm)}
+                               
                                 <Row>
                                   <div className="d-flex gap-2">
                                     <Input

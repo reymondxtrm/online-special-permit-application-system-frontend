@@ -94,7 +94,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
         isRunning = false;
         clearTimeout(timeoutId);
       }
-      console.log(newScale);
+      
     };
     adjustScale();
     return () => {
@@ -221,10 +221,13 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                 <Conditions conditions={conditions} permitType={permitType} />
                 {permitType === "good_moral" && <Purpose purpose={purpose} />}
                 <ThirdParagraph thirdParagraph={thirdParagraph} />
-                {(permitType === "good_moral" ||
+
+                <MayorSignatory permitType={permitType} />
+
+                {/* {(permitType === "good_moral" ||
                   permitType === "mayors_permit") && (
                   <MayorSignatory permitType={permitType} />
-                )}
+                )} */}
                 <DepartmentHeadSingnatory />
               </td>
             </tr>

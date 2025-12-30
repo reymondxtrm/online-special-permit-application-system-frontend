@@ -168,7 +168,7 @@ const ReleaseButton = ({
       });
     },
   });
-  console.log(validation.errors);
+
   const handleServiceClick = (service) => {
     if (selectedService != service) {
       setSelectedService(service);

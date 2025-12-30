@@ -173,7 +173,7 @@ function MayorsCertificateModal({
         );
     }
   }, [openModal, isUpdate, specialPermitApplicationId, purposeOptions]);
-  console.log(existingData);
+
   const getFormData = (object) => {
     const formData = new FormData();
     Object.keys(object).forEach((key) => {

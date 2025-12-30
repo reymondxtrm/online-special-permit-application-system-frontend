@@ -31,7 +31,7 @@ export default function GenerateOccupationalPermitModal({
       fetchData();
     }
   }, [applicationID]);
-  console.log("wew", applicationDetails);
+  
   const isCompany = applicationDetails?.user?.account_type === "company";
   return (
     <Modal toggle={toggle} isOpen={openModal}>

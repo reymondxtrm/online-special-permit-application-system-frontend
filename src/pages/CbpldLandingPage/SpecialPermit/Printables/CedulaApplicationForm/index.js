@@ -11,7 +11,7 @@ import { getUserDetailsForCedulaApplication } from "features/SpecialPermitClient
 
 const CedulaApplicationForm = React.forwardRef((props, ref) => {
   const { forViewing } = props;
-  console.log(forViewing);
+
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const applicationForCedulaIds =

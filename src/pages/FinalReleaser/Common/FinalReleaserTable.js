@@ -27,7 +27,7 @@ const FinalReleaserTable = ({
   const [detailsModal, setDetailsModal] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [primaryIdOptions, setPrimaryIdOptions] = useState([]);
-  console.log(forAction);
+ 
   if (forAction === 1) {
     useEffect(() => {
       axios

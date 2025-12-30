@@ -26,7 +26,7 @@ function AddExemptedCaseModal({ openModal, toggleModal, mode, exemptedCase }) {
   const handleSubmit = useSubmit();
   const [options, setoptions] = useState([]);
   const dispatch = useDispatch();
-  console.log(exemptedCase, mode);
+ 
 
   const getFormData = (object) => {
     const formData = new FormData();
@@ -115,7 +115,7 @@ function AddExemptedCaseModal({ openModal, toggleModal, mode, exemptedCase }) {
       });
     }
   }, [mode, exemptedCase]);
-  console.log(validation.values);
+  
   return (
     <React.Fragment>
       <Modal

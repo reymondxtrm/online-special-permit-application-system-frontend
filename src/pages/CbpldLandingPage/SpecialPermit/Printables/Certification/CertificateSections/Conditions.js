@@ -14,7 +14,7 @@ export default function Conditions({ conditions, permitType }) {
     <tr>
       <td colSpan="2">
         <div className="conditions-wrapper">
-          <p className="conditions-title">Condition:</p>
+          <p className="conditions-title">Conditions:</p>
 
           <ol className="conditions-list">
             {conditions.map((item, index) => (

@@ -110,7 +110,7 @@ function GoodMoralModal({
     purposeOptions,
     discountOptions,
   ]);
-  console.log(existingData);
+  
   useEffect(() => {
     if (!openModal) {
       setpurposeOptions(undefined);
