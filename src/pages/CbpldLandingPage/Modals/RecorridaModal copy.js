@@ -49,7 +49,7 @@ function RecorridaModal({
       } else if (typeof val === "object" && val !== null) {
         formData.append(key, JSON.stringify(val));
       } else {
-        formData.append(key, val ?? "");
+        formData.append(key, val);
       }
     });
     return formData;
@@ -58,7 +58,6 @@ function RecorridaModal({
   useEffect(() => {
     if (isUpdate && openModal) {
       const fetchExistingRecorrida = async () => {
-        setLoadingExisting(true);
         try {
           const res = await axios.get(
             "api/client/get-single-permmit-application",
@@ -77,62 +76,36 @@ function RecorridaModal({
             event_time_from: d.event_time_from || "",
             event_time_to: d.event_time_to || "",
             number_of_participants: d.number_of_participants || 0,
+            request_letter: null,
+            route_plan: null,
           });
           setUploadedFiles(d.uploaded_file || {});
         } catch (err) {
           console.error(err);
-        } finally {
-          setLoadingExisting(false);
         }
       };
       fetchExistingRecorrida();
     }
   }, [isUpdate, openModal, specialPermitApplicationId]);
 
-  useEffect(() => {
-    if (!openModal) {
-      setExistingData(null);
-      setUploadedFiles({});
-      setIsProceed(false);
-      if (formikRef.current) {
-        formikRef.current.resetForm();
-      }
-    }
-  }, [openModal]);
+  const initialValues = {
+    type: "event",
+    requestor_name: existingData?.requestor_name || "",
+    event_name: existingData?.event_name || "",
+    event_date_from: existingData?.event_date_from || "",
+    event_date_to: existingData?.event_date_to || "",
+    event_time_from: existingData?.event_time_from || "",
+    event_time_to: existingData?.event_time_to || "",
+    number_of_participants: existingData?.number_of_participants || 0,
+    request_letter: null,
+    route_plan: null,
+    official_receipt: null,
+  };
 
+  if (!openModal) return null;
   const toggleIsViewerOpen = () => {
     setIsViewerOpen((prev) => !prev);
   };
-
-  const IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
-  const SUPPORTED_FORMATS = ["image/jpeg", "image/png", "image/jpg"];
-
-  const fileValidationRequired = Yup.mixed()
-    .required("This file is required")
-    .test(
-      "fileSize",
-      "File must be less than 5MB",
-      (value) => !value || value.size <= IMAGE_SIZE
-    )
-    .test(
-      "fileFormat",
-      "Only JPG and PNG images are allowed",
-      (value) => !value || SUPPORTED_FORMATS.includes(value.type)
-    );
-
-  const fileValidationOptional = Yup.mixed()
-    .nullable()
-    .test(
-      "fileSize",
-      "File must be less than 5MB",
-      (value) => !value || value.size <= IMAGE_SIZE
-    )
-    .test(
-      "fileFormat",
-      "Only JPG and PNG images are allowed",
-      (value) => !value || SUPPORTED_FORMATS.includes(value.type)
-    );
-
   const RecorridaSchema = Yup.object().shape({
     requestor_name: Yup.string()
       .trim()
@@ -145,38 +118,36 @@ function RecorridaModal({
       .min(1, "Must be at least 1 vehicle")
       .required("Maximum number of vehicles is required"),
 
-    event_date_from: Yup.date().required("Start date is required"),
+    event_date_from: Yup.string().required("Start date is required"),
 
-    event_date_to: Yup.date()
+    event_date_to: Yup.string()
       .required("End date is required")
-      .min(
-        Yup.ref("event_date_from"),
-        "End date must be after or equal to start date"
+      .test(
+        "date-check",
+        "End date must be later than start date",
+        function (value) {
+          const { event_date_from } = this.parent;
+          if (!event_date_from || !value) return true;
+          return new Date(value) >= new Date(event_date_from);
+        }
       ),
 
     event_time_from: Yup.string().required("Start time is required"),
 
     event_time_to: Yup.string().required("End time is required"),
 
-    request_letter: isUpdate ? fileValidationOptional : fileValidationRequired,
+    request_letter: Yup.mixed().when("$isUpdate", {
+      is: false,
+      then: Yup.mixed().required("Request letter is required"),
+      otherwise: Yup.mixed().nullable(),
+    }),
 
-    route_plan: isUpdate ? fileValidationOptional : fileValidationRequired,
+    route_plan: Yup.mixed().when("$isUpdate", {
+      is: false,
+      then: Yup.mixed().required("Route plan is required"),
+      otherwise: Yup.mixed().nullable(),
+    }),
   });
-
-  const initialValues = {
-    type: "event",
-    requestor_name: existingData?.requestor_name || "",
-    event_name: existingData?.event_name || "",
-    event_date_from: existingData?.event_date_from || "",
-    event_date_to: existingData?.event_date_to || "",
-    event_time_from: existingData?.event_time_from || "",
-    event_time_to: existingData?.event_time_to || "",
-    number_of_participants: existingData?.number_of_participants || "",
-    request_letter: null,
-    route_plan: null,
-  };
-
-  if (!openModal) return null;
 
   return (
     <>
@@ -195,14 +166,20 @@ function RecorridaModal({
       )}
       <Modal
         isOpen={openModal}
-        toggle={toggleModal}
+        toggle={() => {
+          toggleModal();
+        }}
         backdrop="static"
         size="m"
         className="modal-dialog-centered"
         style={{ overflowY: "auto" }}
         unmountOnClose
       >
-        <ModalHeader toggle={toggleModal}>
+        <ModalHeader
+          toggle={() => {
+            toggleModal();
+          }}
+        >
           <p
             style={{
               fontWeight: "bold",
@@ -224,8 +201,6 @@ function RecorridaModal({
               innerRef={formikRef}
               initialValues={initialValues}
               enableReinitialize={true}
-              validateOnChange={true}
-              validateOnBlur={true}
               onSubmit={handleSubmit}
               validationSchema={RecorridaSchema}
             >
@@ -234,10 +209,7 @@ function RecorridaModal({
                   <Row>
                     <Col>
                       <FormGroup>
-                        <Label>
-                          Name of Requestor / Organization{" "}
-                          <span className="text-danger">*</span>
-                        </Label>
+                        <Label>Name of Requestor / Organization</Label>
                         <Input
                           name="requestor_name"
                           onChange={props.handleChange}
@@ -254,9 +226,7 @@ function RecorridaModal({
                       </FormGroup>
 
                       <FormGroup>
-                        <Label>
-                          Name of Event <span className="text-danger">*</span>
-                        </Label>
+                        <Label>Name of Event</Label>
                         <Input
                           name="event_name"
                           onChange={props.handleChange}
@@ -271,10 +241,7 @@ function RecorridaModal({
                       </FormGroup>
 
                       <FormGroup>
-                        <Label>
-                          Maximum Number of Vehicles{" "}
-                          <span className="text-danger">*</span>
-                        </Label>
+                        <Label>Maximum Number of Vehicles</Label>
                         <Input
                           type="number"
                           name="number_of_participants"
@@ -294,9 +261,7 @@ function RecorridaModal({
                       <Row>
                         <Col md={6}>
                           <FormGroup>
-                            <Label>
-                              Start Date <span className="text-danger">*</span>
-                            </Label>
+                            <Label>Start Date</Label>
                             <Input
                               type="date"
                               name="event_date_from"
@@ -316,9 +281,7 @@ function RecorridaModal({
 
                         <Col md={6}>
                           <FormGroup>
-                            <Label>
-                              End Date <span className="text-danger">*</span>
-                            </Label>
+                            <Label>End Date</Label>
                             <Input
                               type="date"
                               name="event_date_to"
@@ -340,9 +303,7 @@ function RecorridaModal({
                       <Row>
                         <Col md={6}>
                           <FormGroup>
-                            <Label>
-                              Start Time <span className="text-danger">*</span>
-                            </Label>
+                            <Label>Start Time</Label>
                             <Input
                               type="time"
                               name="event_time_from"
@@ -362,9 +323,7 @@ function RecorridaModal({
 
                         <Col md={6}>
                           <FormGroup>
-                            <Label>
-                              End Time <span className="text-danger">*</span>
-                            </Label>
+                            <Label>End Time</Label>
                             <Input
                               type="time"
                               name="event_time_to"
@@ -385,48 +344,32 @@ function RecorridaModal({
 
                       {/* Request Letter */}
                       <FormGroup>
-                        <Label>
-                          Request Letter{" "}
-                          {!isUpdate && <span className="text-danger">*</span>}
-                        </Label>
-                        <div className="d-flex gap-2 align-items-start">
-                          <div className="flex-grow-1">
-                            <Input
-                              type="file"
-                              name="request_letter"
-                              accept="image/*"
-                              onChange={(e) => {
-                                const file = e.currentTarget.files[0] || null;
-                                props.setFieldValue("request_letter", file);
-                                props.setFieldTouched(
-                                  "request_letter",
-                                  true,
-                                  true
-                                );
-                              }}
-                              onBlur={() =>
-                                props.setFieldTouched(
-                                  "request_letter",
-                                  true,
-                                  true
-                                )
-                              }
-                            />
-                            {props.touched.request_letter &&
-                            props.errors.request_letter ? (
-                              <div
-                                className="text-danger mt-1"
-                                style={{ fontSize: "0.875rem" }}
-                              >
-                                {props.errors.request_letter}
-                              </div>
-                            ) : null}
-                          </div>
+                        <Label>Request Letter</Label>
+                        <div className="d-flex gap-2">
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) =>
+                              props.setFieldValue(
+                                "request_letter",
+                                e.currentTarget.files[0]
+                              )
+                            }
+                            onBlur={() =>
+                              props.setFieldTouched("request_letter", true)
+                            }
+                            invalid={
+                              props.touched.request_letter &&
+                              Boolean(props.errors.request_letter)
+                            }
+                          />
+                          <FormFeedback>
+                            {props.errors.request_letter}
+                          </FormFeedback>
 
                           {isUpdate && uploadedFiles?.request_letter && (
                             <Button
                               color="primary"
-                              size="sm"
                               onClick={(e) => {
                                 e.preventDefault();
                                 getImageHandle({
@@ -437,47 +380,37 @@ function RecorridaModal({
                                 toggleIsViewerOpen();
                               }}
                             >
-                              <i className="mdi mdi-eye"></i>
+                              <i className="mdi mdi-eye" color="warning"></i>
                             </Button>
                           )}
                         </div>
                       </FormGroup>
 
                       <FormGroup>
-                        <Label>
-                          Route Plan (CTTMD Approved){" "}
-                          {!isUpdate && <span className="text-danger">*</span>}
-                        </Label>
-                        <div className="d-flex gap-2 align-items-start">
-                          <div className="flex-grow-1">
-                            <Input
-                              type="file"
-                              name="route_plan"
-                              accept="image/*"
-                              onChange={(e) => {
-                                const file = e.currentTarget.files[0] || null;
-                                props.setFieldValue("route_plan", file);
-                                props.setFieldTouched("route_plan", true, true);
-                              }}
-                              onBlur={() =>
-                                props.setFieldTouched("route_plan", true, true)
-                              }
-                            />
-                            {props.touched.route_plan &&
-                            props.errors.route_plan ? (
-                              <div
-                                className="text-danger mt-1"
-                                style={{ fontSize: "0.875rem" }}
-                              >
-                                {props.errors.route_plan}
-                              </div>
-                            ) : null}
-                          </div>
+                        <Label>Route Plan (CTTMD Approved)</Label>
+                        <div className="d-flex gap-2">
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) =>
+                              props.setFieldValue(
+                                "route_plan",
+                                e.currentTarget.files[0]
+                              )
+                            }
+                            onBlur={() =>
+                              props.setFieldTouched("route_plan", true)
+                            }
+                            invalid={
+                              props.touched.route_plan &&
+                              Boolean(props.errors.route_plan)
+                            }
+                          />
+                          <FormFeedback>{props.errors.route_plan}</FormFeedback>
 
                           {isUpdate && uploadedFiles?.route_plan && (
                             <Button
                               color="primary"
-                              size="sm"
                               onClick={(e) => {
                                 e.preventDefault();
                                 getImageHandle({
@@ -488,7 +421,7 @@ function RecorridaModal({
                                 toggleIsViewerOpen();
                               }}
                             >
-                              <i className="mdi mdi-eye"></i>
+                              <i className="mdi mdi-eye" color="warning"></i>
                             </Button>
                           )}
                         </div>
@@ -518,65 +451,45 @@ function RecorridaModal({
               color: "white",
             }}
             disabled={!proceed}
-            onClick={async () => {
-              // Validate form first
-              const errors = await formikRef.current?.validateForm();
+            onClick={() => {
+              const params = {
+                ...formikRef.current.values,
+                special_permit_application_id: specialPermitApplicationId,
+              };
+              const formData = getFormData(params);
 
-              // Touch all fields to show errors
-              formikRef.current?.setTouched({
-                requestor_name: true,
-                event_name: true,
-                number_of_participants: true,
-                event_date_from: true,
-                event_date_to: true,
-                event_time_from: true,
-                event_time_to: true,
-                request_letter: true,
-                route_plan: true,
-              });
+              const url = isUpdate
+                ? "api/client/special-permit/recorrida/update"
+                : "api/client/special-permit/recorrida";
 
-              // If there are errors, don't proceed
-              if (errors && Object.keys(errors).length > 0) {
-                console.log("Validation errors:", errors);
-                return;
-              }
-
-              // If validation passes and proceed is checked
-              if (proceed) {
-                const params = {
-                  ...formikRef.current.values,
-                  special_permit_application_id: specialPermitApplicationId,
-                };
-                const formData = getFormData(params);
-
-                const url = isUpdate
-                  ? "api/client/special-permit/recorrida/update"
-                  : "api/client/special-permit/recorrida";
-
-                handleSubmit(
-                  {
-                    url,
-                    headers: { "Content-Type": "multipart/form-data" },
-                    message: {
-                      title: isUpdate
-                        ? "Update Recorrida?"
-                        : "Are you sure you want to submit?",
-                      failedTitle: "FAILED",
-                      success: isUpdate ? "Updated successfully!" : "Success!",
-                      error: "Unknown error occurred",
-                    },
-                    params: formData,
+              handleSubmit(
+                {
+                  url,
+                  headers: { "Content-Type": "multipart/form-data" },
+                  message: {
+                    title: isUpdate
+                      ? "Update Recorrida?"
+                      : "Are you sure you want to submit?",
+                    failedTitle: "FAILED",
+                    success: isUpdate ? "Updated successfully!" : "Success!",
+                    error: "Unknown error occurred",
                   },
-                  [],
-                  [toggleModal, toggleRefresh]
-                );
-              }
+                  params: formData,
+                },
+                [],
+                [toggleModal, toggleRefresh]
+              );
             }}
           >
             {isUpdate ? "Update" : "Submit"}
           </Button>
 
-          <Button color="secondary" onClick={toggleModal}>
+          <Button
+            color="secondary"
+            onClick={() => {
+              toggleModal();
+            }}
+          >
             Close
           </Button>
         </ModalFooter>

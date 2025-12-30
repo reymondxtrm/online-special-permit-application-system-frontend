@@ -11,7 +11,7 @@ import { useHistory, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 const SpecialPermitEmailVerication = (props) => {
-  document.title = "Email Verification";
+  document.title = "BPLD | SPECIAL PERMIT";
   const history = useHistory();
   const user = useSelector((state) => state.user);
   const email = localStorage.getItem("email");

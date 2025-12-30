@@ -169,7 +169,10 @@ function PaymentModal({
       },
     ];
 
-    if (applicationType === "good_moral" && Array.isArray(clearance)) {
+    if (
+      applicationType === "good_moral" ||
+      (applicationType === "mayors_permit" && Array.isArray(clearance))
+    ) {
       const clearanceItems = clearance.map((item) => ({
         name: item?.name ?? "",
         amount: (item?.amount ?? 0) * quantity,
@@ -330,7 +333,8 @@ function PaymentModal({
                                           <td>{`₱${paymentDetails?.billed_amount}.00`}</td>
                                           {/* <td>{`₱ ${orderOfPaymentData?.billed_amount}`}</td> */}
                                         </tr>
-                                        {applicationType === "good_moral"
+                                        {applicationType === "good_moral" ||
+                                        applicationType === "mayors_permit"
                                           ? clearance &&
                                             clearance.map((item) => (
                                               <tr key={item.id}>
@@ -577,7 +581,7 @@ function PaymentModal({
                                     </Row>
                                   </CardBody>
                                 </Card>
-                               
+
                                 <Row>
                                   <div className="d-flex gap-2">
                                     <Input
@@ -740,11 +744,11 @@ function PaymentModal({
                                       const formik = formikRef.current.values;
                                       if (paymentMethod === "online") {
                                         const secretKey =
-                                          process.env.REACT_SECRET_KEY;
-                                        // const secretKey =
-                                        //   "dbb0cf7063d880f7d416cc137a24f3625be78529196e8d91d360fef1994e76ef";
+                                          "dbb0cf7063d880f7d416cc137a24f3625be78529196e8d91d360fef1994e76ef";
+                                        // process.env.REACT_APP_SECRET_KEY;
+
                                         const obj = {
-                                          amount: paymentDetails.total_amount,
+                                          amount: paymentDetails?.total_amount,
                                           // amount: 100,
                                           transaction_type: "Tax/Fees",
                                           merchant_reference_number: `OSPAS-${applicationId}-${getTransactionDate()}`,
@@ -757,11 +761,13 @@ function PaymentModal({
                                           cedula: false,
                                           cedula_type: "individual",
                                           ref_no3: "0",
+                                          originator: "ospas",
                                           special_permit_application_id:
                                             applicationId,
                                           invoice_no: "12345",
                                           department: "CBPLD",
                                           downloadable: false,
+                                          application_type_id: 5,
                                           type_application: "miscellaneous",
                                           email: user.email,
                                           // email: "reymondxtrm@gmail.com",
@@ -791,13 +797,12 @@ function PaymentModal({
                                               TrxnAmount: "paid_amount",
                                             },
                                             link:
-                                              window.location.protocol +
-                                              "//" +
-                                              process.env.REACT_APP_API +
-                                              `api/update-payment-status`,
+                                              // window.location.protocol +
+                                              // "//" +
+                                              // process.env.REACT_APP_API +
+                                              `http://ospas01.b.staging.butuan.gov.ph/api/update-payment-status`,
                                           },
                                         };
-
                                         const jsonString = JSON.stringify(obj);
                                         const encrypted = CryptoJS.AES.encrypt(
                                           jsonString,
@@ -806,12 +811,13 @@ function PaymentModal({
                                         const encoded =
                                           encodeURIComponent(encrypted);
                                         // const url = `http://ctd01.a.testing.butuan.gov.ph/payment?data=${encoded}`;
-                                        // const url = `http://epay.butuan.gov.ph/payment?data=${encoded}`;
-                                        const url =
-                                          window.location.protocol +
-                                          "//" +
-                                          process.env.REACT_APP_EPAY +
-                                          `payment?data=${encoded}`;
+                                        const url = `http://epay01.a.staging.butuan.gov.ph/payment?data=${encoded}`;
+
+                                        // const url =
+                                        //   window.location.protocol +
+                                        //   "//" +
+                                        //   process.env.REACT_APP_EPAY +
+                                        //   `payment?data=${encoded}`;
 
                                         const create = async () => {
                                           setIsPaying((prev) => !prev);

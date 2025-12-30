@@ -12,29 +12,42 @@ const Authmiddleware = ({
   <Route
     {...rest}
     render={(props) => {
-      const isAuthenticated = localStorage.getItem("authUser");
-      const path = rest.path;
-      if (isAuthProtected && !isAuthenticated) {
-        if (path.startsWith("/client")) {
-          return <Redirect to="/home" />;
-        } else {
-          return (
-            <Redirect
-              to={{
-                pathname: "/login",
-                state: { from: props.location },
-              }}
-            />
-          );
-        }
-      } else if (isAuthProtected && !isVerified) {
-        return <Redirect to="/email-verification" />;
-      }
-
       return (
-        <Layout>
-          <Component {...props} />
-        </Layout>
+        <Route
+          {...rest}
+          render={(props) => {
+            const storedUser = localStorage.getItem("authUser");
+            const authUser = storedUser ? JSON.parse(storedUser) : null;
+            const isAuthenticated = !!authUser;
+            if (isAuthProtected && !isAuthenticated) {
+              return (
+                <Redirect
+                  to={{
+                    pathname: "/login",
+                    state: { from: props.location },
+                  }}
+                />
+              );
+            }
+
+            if (isAuthProtected && !isVerified) {
+              return <Redirect to="/email-verification" />;
+            }
+
+            if (!isAuthProtected && isAuthenticated) {
+              if (authUser.user.user_type === "admin")
+                return <Redirect to="/admin/dashboard" />;
+              if (authUser.user.user_type === "client")
+                return <Redirect to="/client/services" />;
+            }
+
+            return (
+              <Layout>
+                <Component {...props} />
+              </Layout>
+            );
+          }}
+        />
       );
     }}
   />

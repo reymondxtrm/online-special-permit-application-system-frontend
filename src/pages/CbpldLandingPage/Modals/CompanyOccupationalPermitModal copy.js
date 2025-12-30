@@ -33,6 +33,7 @@ export default function CompanyOccupationalPermitModal({
   const formikRef = useRef();
   const [cameraIsOpen, setCameraIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState();
+  // const [additionalDetails, setAdditionalDetailsModal] = useState(false);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [inputPicture, setInputPicture] = useState(null);
   const [uploadImageModal, setUploadImageModal] = useState(false);
@@ -45,37 +46,41 @@ export default function CompanyOccupationalPermitModal({
     { value: "FEMALE", label: "Female" },
     { value: "PREFER NOT TO SAY", label: "Prefer not to say" },
   ];
-
   const setIdPicture = (capturedPicture) => {
     formikRef.current.setFieldValue(
       `employees[${activeIndex}].id_picture`,
       capturedPicture
     );
   };
-
   const user = useSelector((state) => state.user);
-
   const togglePasssportCamera = () => {
     setCameraIsOpen((prev) => !prev);
   };
-
   const toggleImageViewer = useCallback(() => {
     setIsViewerOpen((prev) => !prev);
   }, []);
-
   const onCropDone = (image) => {
-    // Fixed: removed extra dot
     formikRef.current.setFieldValue(
-      `employees[${activeIndex}].id_picture`,
+      `employees.[${activeIndex}].id_picture`,
       image
     );
     toggleUploadImageModal();
   };
-
+  console.log(formikRef?.current?.values);
+  // const toggleAdditionalDetailsModal = () => {
+  //   setAdditionalDetailsModal((prev) => !prev);
+  // };
+  // const setAdditionalDetails = (detail) => {
+  //   Object.entries(detail).forEach(([key, value]) => {
+  //     formikRef.current.setFieldValue(
+  //       `employees[${activeIndex}].${key}`,
+  //       value || ""
+  //     );
+  //   });
+  // };
   const toggleUploadImageModal = () => {
     setUploadImageModal((prev) => !prev);
   };
-
   const handleClick = () => {
     fileInputRef.current.click();
   };
@@ -111,8 +116,6 @@ export default function CompanyOccupationalPermitModal({
     }
     return form;
   };
-
-  // Fixed validation schema
   const employeeSchema = Yup.object().shape({
     fname: Yup.string().required("First name is required"),
     lname: Yup.string().required("Last name is required"),
@@ -120,54 +123,99 @@ export default function CompanyOccupationalPermitModal({
     gender: Yup.string().required("Gender is required"),
     address_line: Yup.string().required("Home address is required"),
     contact_no: Yup.string().required("Contact number is required"),
-    occupation: Yup.string().required("Occupation is required"),
     no_cedula: Yup.boolean(),
-
-    // Fixed cedula validation with test
-    cedula: Yup.mixed().test(
-      "cedula_required",
-      "Cedula is required",
-      function (value) {
-        const { no_cedula } = this.parent;
-        if (no_cedula) return true;
-        return value instanceof File || value instanceof Blob;
-      }
+    // CEDULA is required only when no_cedula is false
+    cedula: Yup.mixed().when("no_cedula", {
+      is: false,
+      then: Yup.mixed()
+        .required("Cedula is required")
+        .test(
+          "fileRequired",
+          "Cedula file is required",
+          (value) => value instanceof File
+        ),
+      otherwise: Yup.mixed().nullable(),
+    }),
+    certificate_of_employment: Yup.mixed().required(
+      "Certificate of Employment is required"
     ),
 
-    // Fixed certificate validation
-    certificate_of_employment: Yup.mixed().test(
-      "certificate_required",
-      "Certificate of Employment is required",
-      function (value) {
-        return value instanceof File || value instanceof Blob;
-      }
-    ),
-
-    // Fixed training certificate validation
-    training_certificate: Yup.mixed().test(
-      "training_cert_required",
-      "Training certificate is required",
-      function (value) {
-        if (user?.companyType === "NON-FOOD-MASSEUR") {
-          return value instanceof File || value instanceof Blob;
+    training_certificate: Yup.mixed()
+      .test(
+        "requiredWhenCompanyType",
+        "Training certificate is required.",
+        function (value) {
+          if (user?.companyType === "NON-FOOD-MASSEUR") {
+            return value instanceof File;
+          }
+          return true;
         }
-        return true;
-      }
-    ),
+      )
+      .test("fileType", "Only image files are allowed.", function (value) {
+        if (!value) return true;
+        return [
+          "image/jpeg",
+          "image/png",
+          "image/jpg",
+          "application/pdf",
+        ].includes(value.type);
+      }),
 
-    id_picture: Yup.mixed().test(
-      "id_picture_required",
-      "ID picture is required",
-      function (value) {
-        return value !== null && value !== "";
-      }
-    ),
+    // citizenship: Yup.string().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.string().required("Nationality is required"),
+    //   otherwise: Yup.string().nullable(),
+    // }),
+    // civil_status: Yup.string().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.string().required("Civil status is required"),
+    //   otherwise: Yup.string().nullable(),
+    // }),
+    // place_of_birth: Yup.string().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.string().required("Place of birth is required"),
+    //   otherwise: Yup.string().nullable(),
+    // }),
+    // blood_type: Yup.string().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.string().required("Blood type is required"),
+    //   otherwise: Yup.string().nullable(),
+    // }),
+    // height: Yup.string().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.string().required("Height is required"),
+    //   otherwise: Yup.string().nullable(),
+    // }),
+    // weight: Yup.string().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.string().required("Weight is required"),
+    //   otherwise: Yup.string().nullable(),
+    // }),
+    // tin: Yup.string().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.string().required("TIN is required"),
+    //   otherwise: Yup.string().nullable(),
+    // }),
+    // occupation: Yup.string().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.string().required("Occupation is required"),
+    //   otherwise: Yup.string().nullable(),
+    // }),
+    // date_hired: Yup.string().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.string().required("Date hired is required"),
+    //   otherwise: Yup.string().nullable(),
+    // }),
+    // monthly_salary: Yup.number().when("no_cedula", {
+    //   is: true,
+    //   then: Yup.number()
+    //     .typeError("Monthly salary must be a number")
+    //     .required("Monthly salary is required"),
+    //   otherwise: Yup.number().nullable(),
+    // }),
   });
-
   const validationSchema = Yup.object().shape({
-    employees: Yup.array()
-      .of(employeeSchema)
-      .min(1, "At least one employee is required"),
+    employees: Yup.array().of(employeeSchema),
   });
 
   return (
@@ -204,6 +252,14 @@ export default function CompanyOccupationalPermitModal({
         />
       )}
 
+      {/* {additionalDetails && (
+        <CedulaAddtionalDetailsModal
+          isOpen={additionalDetails}
+          toggle={toggleAdditionalDetailsModal}
+          setAdditionalDetails={setAdditionalDetails}
+          values={formikRef.current.values.employees?.[activeIndex]}
+        />
+      )} */}
       <Modal toggle={toggleModal} isOpen={isOpen} fullscreen>
         <ModalHeader toggle={toggleModal}>
           <p
@@ -255,21 +311,14 @@ export default function CompanyOccupationalPermitModal({
                 },
               ],
             }}
-            onSubmit={async (values) => {
+            onSubmit={(values) => {
               const request = getFormData(values);
 
-              const response = await handleSubmit(
+              const response = handleSubmit(
                 {
                   url: "api/client/company-occupational-permit-application",
                   method: "POST",
                   params: request,
-                  headers: { "Content-Type": "multipart/form-data" },
-                  message: {
-                    title: "Are you sure you want to submit?",
-                    failedTitle: "FAILED",
-                    success: "Success!",
-                    error: "Unknown error occurred",
-                  },
                 },
                 [],
                 [toggleModal]
@@ -280,7 +329,7 @@ export default function CompanyOccupationalPermitModal({
             }}
           >
             {(props) => (
-              <Form>
+              <Form onSubmit={props.handleSubmit}>
                 <FieldArray name="employees">
                   {(fieldArrayHelper) => (
                     <>
@@ -289,7 +338,6 @@ export default function CompanyOccupationalPermitModal({
                           <tr>
                             <th>#</th>
                             <th>NAME</th>
-                            <th>OCCUPATION</th>
                             <th>DATE BIRTH</th>
                             <th>GENDER</th>
                             <th>HOME ADDRESS</th>
@@ -306,6 +354,7 @@ export default function CompanyOccupationalPermitModal({
                         <tbody>
                           {props?.values?.employees?.map((employee, index) => (
                             <tr key={index}>
+                              {/* <td className="fw-bold">{index + 1}</td> */}
                               <th scope="row">{index + 1}</th>
                               <td style={{ width: "10%" }}>
                                 <div className="d-flex flex-column gap-0">
@@ -356,23 +405,6 @@ export default function CompanyOccupationalPermitModal({
                               <td>
                                 <BasicInputField
                                   validation={props}
-                                  name={`employees[${index}].occupation`}
-                                  value={employee?.occupation}
-                                  type={"text"}
-                                  touched={
-                                    props?.touched?.employees?.[index]
-                                      ?.occupation
-                                  }
-                                  placeholder={"Occupation"}
-                                  errors={
-                                    props?.errors?.employees?.[index]
-                                      ?.occupation
-                                  }
-                                />
-                              </td>
-                              <td>
-                                <BasicInputField
-                                  validation={props}
                                   name={`employees[${index}].birth_date`}
                                   value={employee?.birth_date}
                                   type={"date"}
@@ -390,37 +422,17 @@ export default function CompanyOccupationalPermitModal({
                                 <Select
                                   placeholder="Gender"
                                   options={genderOptions}
-                                  value={genderOptions.find(
-                                    (option) => option.value === employee.gender
-                                  )}
                                   onChange={(selected) => {
                                     props.setFieldValue(
                                       `employees[${index}].gender`,
                                       selected.value
                                     );
                                   }}
-                                  onBlur={() =>
-                                    props.setFieldTouched(
-                                      `employees[${index}].gender`,
-                                      true
-                                    )
-                                  }
-                                  styles={{
-                                    control: (base) => ({
-                                      ...base,
-                                      borderColor:
-                                        props.touched.employees?.[index]
-                                          ?.gender &&
-                                        props.errors.employees?.[index]?.gender
-                                          ? "#dc3545"
-                                          : base.borderColor,
-                                    }),
-                                  }}
                                 />
                                 {props.touched.employees?.[index]?.gender &&
                                 props.errors.employees?.[index]?.gender ? (
                                   <div
-                                    className="text-danger mt-1"
+                                    className="text-danger"
                                     style={{ fontSize: "11px" }}
                                   >
                                     {props.errors.employees[index].gender}
@@ -517,7 +529,7 @@ export default function CompanyOccupationalPermitModal({
                                 />
                               </td>
                               <td>
-                                <div className="d-flex flex-column gap-2">
+                                <div className="d-flex flex-column">
                                   {props.values.employees?.[index]
                                     ?.id_picture && (
                                     <img
@@ -529,14 +541,12 @@ export default function CompanyOccupationalPermitModal({
                                       style={{
                                         transition: "0.3s",
                                         opacity: 1,
-                                        maxHeight: "150px",
-                                        objectFit: "cover",
                                       }}
                                     />
                                   )}
                                   <Button
                                     color="primary"
-                                    size="sm"
+                                    style={{ Width: "100%" }}
                                     type="button"
                                     onClick={(e) => {
                                       e.preventDefault();
@@ -544,12 +554,12 @@ export default function CompanyOccupationalPermitModal({
                                       setActiveIndex(index);
                                     }}
                                   >
-                                    <i className="mdi mdi-camera fs-5"></i>
+                                    <i className="mdi  mdi-camera fs-5"></i>
                                   </Button>
                                   <Button
                                     color="primary"
                                     outline
-                                    size="sm"
+                                    style={{ marginTop: "5px" }}
                                     onClick={() => {
                                       handleClick();
                                       setActiveIndex(index);
@@ -564,20 +574,6 @@ export default function CompanyOccupationalPermitModal({
                                     style={{ display: "none" }}
                                     onChange={handleChange}
                                   />
-                                  {props.touched?.employees?.[index]
-                                    ?.id_picture &&
-                                    props.errors?.employees?.[index]
-                                      ?.id_picture && (
-                                      <div
-                                        className="text-danger"
-                                        style={{ fontSize: "11px" }}
-                                      >
-                                        {
-                                          props.errors.employees[index]
-                                            .id_picture
-                                        }
-                                      </div>
-                                    )}
                                 </div>
                               </td>
                               <td style={{ width: "10%" }}>
@@ -585,38 +581,44 @@ export default function CompanyOccupationalPermitModal({
                                   type="file"
                                   accept="image/*"
                                   name={`employees[${index}].cedula`}
-                                  disabled={employee.no_cedula}
                                   onChange={(e) => {
                                     props.setFieldValue(
                                       `employees[${index}].cedula`,
                                       e.target.files[0]
                                     );
                                   }}
-                                  onBlur={() =>
-                                    props.setFieldTouched(
-                                      `employees[${index}].cedula`,
-                                      true
-                                    )
-                                  }
+                                  onBlur={props.handleBlur}
                                   invalid={
-                                    !employee.no_cedula &&
+                                    !props.values.employees?.[index]
+                                      ?.no_cedula &&
                                     props.touched.employees?.[index]?.cedula &&
-                                    Boolean(
-                                      props.errors.employees?.[index]?.cedula
-                                    )
+                                    props.errors.employees?.[index]?.cedula
+                                      ? true
+                                      : false
                                   }
                                 />
 
-                                {!employee.no_cedula &&
-                                  props.touched.employees?.[index]?.cedula &&
-                                  props.errors.employees?.[index]?.cedula && (
-                                    <div
-                                      className="text-danger mt-1"
-                                      style={{ fontSize: "11px" }}
-                                    >
-                                      {props.errors.employees[index].cedula}
-                                    </div>
-                                  )}
+                                {!props.values.employees?.[index]?.no_cedula &&
+                                props.touched.employees?.[index]?.cedula &&
+                                props.errors.employees?.[index]?.cedula ? (
+                                  <div
+                                    className="text-danger"
+                                    style={{ fontSize: "11px" }}
+                                  >
+                                    {props.errors.employees[index].cedula}
+                                  </div>
+                                ) : null}
+
+                                {/* <p
+                                  className=" fw-bold text-danger"
+                                  style={{ cursor: "pointer" }}
+                                  onClick={() => {
+                                    toggleAdditionalDetailsModal();
+                                    setActiveIndex(index);
+                                  }}
+                                >
+                                  {"Don't have Cedula?"}
+                                </p> */}
                               </td>
                               <td style={{ width: "10%" }}>
                                 <Input
@@ -637,27 +639,30 @@ export default function CompanyOccupationalPermitModal({
                                   invalid={
                                     props.touched?.employees?.[index]
                                       ?.certificate_of_employment &&
-                                    Boolean(
-                                      props.errors?.employees?.[index]
-                                        ?.certificate_of_employment
-                                    )
+                                    props.errors?.employees?.[index]
+                                      ?.certificate_of_employment
+                                      ? true
+                                      : false
                                   }
                                 />
 
                                 {props.touched?.employees?.[index]
                                   ?.certificate_of_employment &&
-                                  props.errors?.employees?.[index]
-                                    ?.certificate_of_employment && (
-                                    <div
-                                      className="text-danger mt-1"
-                                      style={{ fontSize: "11px" }}
-                                    >
-                                      {
-                                        props.errors.employees[index]
-                                          .certificate_of_employment
-                                      }
-                                    </div>
-                                  )}
+                                props.errors?.employees?.[index]
+                                  ?.certificate_of_employment ? (
+                                  <div
+                                    className="text-danger"
+                                    style={{
+                                      fontSize: "11px",
+                                      display: "block",
+                                    }}
+                                  >
+                                    {
+                                      props.errors.employees[index]
+                                        .certificate_of_employment
+                                    }
+                                  </div>
+                                ) : null}
                               </td>
 
                               {user?.companyType === "NON-FOOD-MASSEUR" && (
@@ -680,35 +685,36 @@ export default function CompanyOccupationalPermitModal({
                                     invalid={
                                       props.touched?.employees?.[index]
                                         ?.training_certificate &&
-                                      Boolean(
-                                        props.errors?.employees?.[index]
-                                          ?.training_certificate
-                                      )
+                                      props.errors?.employees?.[index]
+                                        ?.training_certificate
+                                        ? true
+                                        : false
                                     }
                                   />
 
                                   {props.touched?.employees?.[index]
                                     ?.training_certificate &&
-                                    props.errors?.employees?.[index]
-                                      ?.training_certificate && (
-                                      <div
-                                        className="text-danger mt-1"
-                                        style={{ fontSize: "11px" }}
-                                      >
-                                        {
-                                          props.errors.employees[index]
-                                            .training_certificate
-                                        }
-                                      </div>
-                                    )}
+                                  props.errors?.employees?.[index]
+                                    ?.training_certificate ? (
+                                    <div
+                                      className="text-danger"
+                                      style={{
+                                        fontSize: "11px",
+                                        display: "block",
+                                      }}
+                                    >
+                                      {
+                                        props.errors.employees[index]
+                                          .training_certificate
+                                      }
+                                    </div>
+                                  ) : null}
                                 </td>
                               )}
 
                               <td>
                                 <Button
                                   color="danger"
-                                  size="sm"
-                                  disabled={props.values.employees.length === 1}
                                   onClick={() => fieldArrayHelper.remove(index)}
                                 >
                                   <i className="mdi mdi-trash-can fs-5"></i>
@@ -720,9 +726,9 @@ export default function CompanyOccupationalPermitModal({
                       </Table>
                       <Row>
                         <Col>
-                          <Button
-                            color="primary"
-                            outline
+                          <i
+                            className="fa fas fa-plus fs-2 text-success "
+                            style={{ marginLeft: "10px", cursor: "pointer" }}
                             onClick={() => {
                               fieldArrayHelper.push({
                                 fname: "",
@@ -731,7 +737,6 @@ export default function CompanyOccupationalPermitModal({
                                 birth_date: "",
                                 gender: "",
                                 address_line: "",
-                                subdivision: "",
                                 barangay: "",
                                 city: "",
                                 province: "",
@@ -752,45 +757,19 @@ export default function CompanyOccupationalPermitModal({
                                 monthly_salary: 0.0,
                               });
                             }}
-                          >
-                            <i className="mdi mdi-plus"></i> Add Employee
-                          </Button>
+                          ></i>
                         </Col>
                       </Row>
                     </>
                   )}
                 </FieldArray>
-                <hr />
+                <hr></hr>
                 <Row>
                   <div className="d-flex gap-2 justify-content-end">
-                    <Button
-                      color="success"
-                      type="submit"
-                      onClick={async () => {
-                        const errors = await props.validateForm();
-                        props.setTouched({
-                          employees: props.values.employees.map(() => ({
-                            fname: true,
-                            lname: true,
-                            birth_date: true,
-                            gender: true,
-                            address_line: true,
-                            contact_no: true,
-                            cedula: true,
-                            certificate_of_employment: true,
-                            training_certificate: true,
-                            id_picture: true,
-                          })),
-                        });
-
-                        if (Object.keys(errors).length === 0) {
-                          props.handleSubmit();
-                        }
-                      }}
-                    >
+                    <Button color="success" type="submit">
                       Submit
                     </Button>
-                    <Button type="button" onClick={toggleModal}>
+                    <Button type="reset" onClick={toggleModal}>
                       Cancel
                     </Button>
                   </div>

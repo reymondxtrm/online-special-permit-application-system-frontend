@@ -37,36 +37,32 @@ export default function CompanyRegistrationForm({
       username: "",
     },
     onSubmit: async (values, { resetForm }) => {
+      Swal.fire({
+        title: "Processing...",
+        text: "Please wait",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+      let params = { ...values, outside_butuan: outsideButuan ? 1 : 0 };
+      if (!outsideButuan) {
+        params = {
+          ...values,
+          province: "Agusan del Norte",
+          city: "City of Butuan",
+          outside_butuan: outsideButuan ? 1 : 0,
+        };
+      }
       try {
-        Swal.fire({
-          title: "Processing...",
-          text: "Please wait",
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          },
-        });
-        let params = { ...values, outside_butuan: outsideButuan ? 1 : 0 };
-        if (!outsideButuan) {
-          params = {
-            ...values,
-            province: "Agusan del Norte",
-            city: "City of Butuan",
-            outside_butuan: outsideButuan ? 1 : 0,
-          };
-        }
+        await dispatch(
+          specialPermitCompanyRegistration({ params, history })
+        ).unwrap();
 
-        await dispatch(specialPermitCompanyRegistration({ params, history }));
-
-        Swal.fire({
-          icon: "success",
-          title: "Registration Successful!",
-          text: "Your account has been created.",
-          confirmButtonColor: "#3085d6",
-        });
+        Swal.close();
         resetForm();
       } catch (error) {
-        console.log(error.response.data);
+        console.error(error);
         Swal.fire({
           icon: "error",
           title: "Something went wrong!",

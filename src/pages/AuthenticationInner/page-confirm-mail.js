@@ -32,13 +32,9 @@ const ConfirmMail = () => {
     setIsFetching(true);
     const verifyEmail = async () => {
       try {
-        const response = await axios.get(
-          verificationUrl,
-          // { email: email },
-          {
-            withCredentials: true,
-          }
-        );
+        const response = await axios.get(verificationUrl, {
+          withCredentials: true,
+        });
 
         setMessage("✅ Email verified successfully!");
         setTimeout(() => history.push("/home"), 2000);

@@ -53,7 +53,6 @@ function MotorcadeModal({
             number_of_participants: data.number_of_participants,
             event_time_from: data.event_time_from,
             event_time_to: data.event_time_to,
-            or_no: data.or_no,
           });
 
           setUploadedFiles(data.uploaded_file || {});
@@ -73,48 +72,14 @@ function MotorcadeModal({
     const formData = new FormData();
     Object.keys(object).forEach((key) => {
       const value = object[key];
-      if (value instanceof File) {
-        formData.append(key, value);
-      } else {
-        formData.append(key, value ?? "");
-      }
+      if (value instanceof File) formData.append(key, value);
+      else formData.append(key, value);
     });
     return formData;
   };
-
   const toggleIsViewerOpen = () => {
     setIsViewerOpen((prev) => !prev);
   };
-
-  const IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
-  const SUPPORTED_FORMATS = ["image/jpeg", "image/png", "image/jpg"];
-
-  const fileValidationRequired = Yup.mixed()
-    .required("This file is required")
-    .test(
-      "fileSize",
-      "File must be less than 5MB",
-      (value) => !value || value.size <= IMAGE_SIZE
-    )
-    .test(
-      "fileFormat",
-      "Only JPG and PNG images are allowed",
-      (value) => !value || SUPPORTED_FORMATS.includes(value.type)
-    );
-
-  const fileValidationOptional = Yup.mixed()
-    .nullable()
-    .test(
-      "fileSize",
-      "File must be less than 5MB",
-      (value) => !value || value.size <= IMAGE_SIZE
-    )
-    .test(
-      "fileFormat",
-      "Only JPG and PNG images are allowed",
-      (value) => !value || SUPPORTED_FORMATS.includes(value.type)
-    );
-
   const MotorcadeSchema = Yup.object().shape({
     requestor_name: Yup.string()
       .trim()
@@ -127,22 +92,35 @@ function MotorcadeModal({
       .min(1, "Must be at least 1 vehicle")
       .required("Maximum number of vehicles is required"),
 
-    event_date_from: Yup.date().required("Start date is required"),
+    event_date_from: Yup.string().required("Start date is required"),
 
-    event_date_to: Yup.date()
+    event_date_to: Yup.string()
       .required("End date is required")
-      .min(
-        Yup.ref("event_date_from"),
-        "End date must be after or equal to start date"
+      .test(
+        "date-check",
+        "End date must be later than start date",
+        function (value) {
+          const { event_date_from } = this.parent;
+          if (!event_date_from || !value) return true;
+          return new Date(value) >= new Date(event_date_from);
+        }
       ),
 
     event_time_from: Yup.string().required("Start time is required"),
 
     event_time_to: Yup.string().required("End time is required"),
 
-    request_letter: isUpdate ? fileValidationOptional : fileValidationRequired,
+    request_letter: Yup.mixed().when("$isUpdate", {
+      is: false,
+      then: Yup.mixed().required("Request letter is required"),
+      otherwise: Yup.mixed().nullable(),
+    }),
 
-    route_plan: isUpdate ? fileValidationOptional : fileValidationRequired,
+    route_plan: Yup.mixed().when("$isUpdate", {
+      is: false,
+      then: Yup.mixed().required("Route plan is required"),
+      otherwise: Yup.mixed().nullable(),
+    }),
   });
 
   return (
@@ -162,14 +140,19 @@ function MotorcadeModal({
       )}
       <Modal
         isOpen={openModal}
-        toggle={toggleModal}
+        toggle={() => {
+          toggleModal();
+        }}
         fade
         backdrop="static"
         size="m"
         className="modal-dialog-centered"
-        unmountOnClose
       >
-        <ModalHeader toggle={toggleModal}>
+        <ModalHeader
+          toggle={() => {
+            toggleModal();
+          }}
+        >
           <p
             style={{
               fontWeight: "bold",
@@ -187,8 +170,6 @@ function MotorcadeModal({
           <Formik
             innerRef={formikRef}
             enableReinitialize
-            validateOnChange={true}
-            validateOnBlur={true}
             validationSchema={MotorcadeSchema}
             initialValues={{
               type: "event",
@@ -200,8 +181,9 @@ function MotorcadeModal({
               number_of_participants: existingData.number_of_participants || "",
               event_time_from: existingData.event_time_from || "",
               event_time_to: existingData.event_time_to || "",
-              request_letter: null,
-              route_plan: null,
+              request_letter: "",
+              route_plan: "",
+              official_receipt: "",
               or_no: existingData.or_no || "",
             }}
             onSubmit={handleSubmit}
@@ -209,10 +191,7 @@ function MotorcadeModal({
             {(props) => (
               <Form>
                 <FormGroup>
-                  <Label>
-                    Name of Requestor / Organization{" "}
-                    <span className="text-danger">*</span>
-                  </Label>
+                  <Label>Name of Requestor / Organization</Label>
                   <Input
                     name="requestor_name"
                     value={props.values.requestor_name}
@@ -227,9 +206,7 @@ function MotorcadeModal({
                 </FormGroup>
 
                 <FormGroup>
-                  <Label>
-                    Name of Event <span className="text-danger">*</span>
-                  </Label>
+                  <Label>Name of Event</Label>
                   <Input
                     name="event_name"
                     value={props.values.event_name}
@@ -244,10 +221,7 @@ function MotorcadeModal({
                 </FormGroup>
 
                 <FormGroup>
-                  <Label>
-                    Maximum Number of Vehicles{" "}
-                    <span className="text-danger">*</span>
-                  </Label>
+                  <Label>Maximum Number of Vehicles</Label>
                   <Input
                     type="number"
                     name="number_of_participants"
@@ -267,9 +241,7 @@ function MotorcadeModal({
                 <Row>
                   <Col md={6}>
                     <FormGroup>
-                      <Label>
-                        Start Date <span className="text-danger">*</span>
-                      </Label>
+                      <Label>Start Date</Label>
                       <Input
                         type="date"
                         name="event_date_from"
@@ -289,9 +261,7 @@ function MotorcadeModal({
 
                   <Col md={6}>
                     <FormGroup>
-                      <Label>
-                        End Date <span className="text-danger">*</span>
-                      </Label>
+                      <Label>End Date</Label>
                       <Input
                         type="date"
                         name="event_date_to"
@@ -311,9 +281,7 @@ function MotorcadeModal({
                 <Row>
                   <Col md={6}>
                     <FormGroup>
-                      <Label>
-                        Start Time <span className="text-danger">*</span>
-                      </Label>
+                      <Label>Start Time</Label>
                       <Input
                         type="time"
                         name="event_time_from"
@@ -333,60 +301,50 @@ function MotorcadeModal({
 
                   <Col md={6}>
                     <FormGroup>
-                      <Label>
-                        End Time <span className="text-danger">*</span>
-                      </Label>
+                      <Label>End Time</Label>
                       <Input
                         type="time"
-                        name="event_time_to"
-                        value={props.values.event_time_to}
+                        name="event_time_from"
+                        value={props.values.event_time_from}
                         onChange={props.handleChange}
                         onBlur={props.handleBlur}
                         invalid={
-                          props.touched.event_time_to &&
-                          Boolean(props.errors.event_time_to)
+                          props.touched.event_time_from &&
+                          Boolean(props.errors.event_time_from)
                         }
                       />
-                      <FormFeedback>{props.errors.event_time_to}</FormFeedback>
+                      <FormFeedback>
+                        {props.errors.event_time_from}
+                      </FormFeedback>
                     </FormGroup>
                   </Col>
                 </Row>
 
                 <FormGroup>
-                  <Label>
-                    Request Letter (Stamped){" "}
-                    {!isUpdate && <span className="text-danger">*</span>}
-                  </Label>
-                  <div className="d-flex gap-2 align-items-start">
-                    <div className="flex-grow-1">
-                      <Input
-                        accept="image/*"
-                        type="file"
-                        name="request_letter"
-                        onChange={(e) => {
-                          const file = e.currentTarget.files[0] || null;
-                          props.setFieldValue("request_letter", file);
-                          props.setFieldTouched("request_letter", true, true);
-                        }}
-                        onBlur={() =>
-                          props.setFieldTouched("request_letter", true, true)
-                        }
-                      />
-                      {props.touched.request_letter &&
-                      props.errors.request_letter ? (
-                        <div
-                          className="text-danger mt-1"
-                          style={{ fontSize: "0.875rem" }}
-                        >
-                          {props.errors.request_letter}
-                        </div>
-                      ) : null}
-                    </div>
+                  <Label>Request Letter (Stamped)</Label>
+                  <div className="d-flex gap-2">
+                    <Input
+                      accept="image/*"
+                      type="file"
+                      onChange={(e) =>
+                        props.setFieldValue(
+                          "request_letter",
+                          e.currentTarget.files[0]
+                        )
+                      }
+                      onBlur={() =>
+                        props.setFieldTouched("request_letter", true)
+                      }
+                      invalid={
+                        props.touched.request_letter &&
+                        Boolean(props.errors.request_letter)
+                      }
+                    />
+                    <FormFeedback>{props.errors.request_letter}</FormFeedback>
 
                     {isUpdate && uploadedFiles?.request_letter && (
                       <Button
                         color="primary"
-                        size="sm"
                         onClick={(e) => {
                           e.preventDefault();
                           getImageHandle({
@@ -397,46 +355,35 @@ function MotorcadeModal({
                           toggleIsViewerOpen();
                         }}
                       >
-                        <i className="mdi mdi-eye"></i>
+                        <i className="mdi mdi-eye" color="warning"></i>
                       </Button>
                     )}
                   </div>
                 </FormGroup>
 
                 <FormGroup>
-                  <Label>
-                    Route Plan (Approved by CTTMD){" "}
-                    {!isUpdate && <span className="text-danger">*</span>}
-                  </Label>
-                  <div className="d-flex gap-2 align-items-start">
-                    <div className="flex-grow-1">
-                      <Input
-                        type="file"
-                        name="route_plan"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.currentTarget.files[0] || null;
-                          props.setFieldValue("route_plan", file);
-                          props.setFieldTouched("route_plan", true, true);
-                        }}
-                        onBlur={() =>
-                          props.setFieldTouched("route_plan", true, true)
-                        }
-                      />
-                      {props.touched.route_plan && props.errors.route_plan ? (
-                        <div
-                          className="text-danger mt-1"
-                          style={{ fontSize: "0.875rem" }}
-                        >
-                          {props.errors.route_plan}
-                        </div>
-                      ) : null}
-                    </div>
+                  <Label>Route Plan (Approved by CTTMD)</Label>
+                  <div className="d-flex gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) =>
+                        props.setFieldValue(
+                          "route_plan",
+                          e.currentTarget.files[0]
+                        )
+                      }
+                      onBlur={() => props.setFieldTouched("route_plan", true)}
+                      invalid={
+                        props.touched.route_plan &&
+                        Boolean(props.errors.route_plan)
+                      }
+                    />
+                    <FormFeedback>{props.errors.route_plan}</FormFeedback>
 
                     {isUpdate && uploadedFiles?.route_plan && (
                       <Button
                         color="primary"
-                        size="sm"
                         onClick={(e) => {
                           e.preventDefault();
                           getImageHandle({
@@ -447,7 +394,7 @@ function MotorcadeModal({
                           toggleIsViewerOpen();
                         }}
                       >
-                        <i className="mdi mdi-eye"></i>
+                        <i className="mdi mdi-eye" color="warning"></i>
                       </Button>
                     )}
                   </div>
@@ -471,61 +418,40 @@ function MotorcadeModal({
           <Button
             style={{ backgroundColor: "#1a56db", color: "white" }}
             disabled={!proceed}
-            onClick={async () => {
-              // Validate form first
-              const errors = await formikRef.current?.validateForm();
-
-              // Touch all fields to show errors
-              formikRef.current?.setTouched({
-                requestor_name: true,
-                event_name: true,
-                number_of_participants: true,
-                event_date_from: true,
-                event_date_to: true,
-                event_time_from: true,
-                event_time_to: true,
-                request_letter: true,
-                route_plan: true,
-              });
-
-              // If there are errors, don't proceed
-              if (errors && Object.keys(errors).length > 0) {
-                console.log("Validation errors:", errors);
-                return;
-              }
-
-              // If validation passes and proceed is checked
-              if (proceed) {
-                const formik = {
-                  ...formikRef.current.values,
-                  special_permit_application_id: specialPermitApplicationId,
-                };
-                const formData = getFormData(formik);
-
-                handleSubmit(
-                  {
-                    url: isUpdate
-                      ? "api/client/special-permit/motorcade/update"
-                      : "api/client/special-permit/motorcade",
-                    headers: { "Content-Type": "multipart/form-data" },
-                    message: {
-                      title: "Are you sure you want to Proceed?",
-                      failedTitle: "FAILED",
-                      success: "Success!",
-                      error: "Unknown error occurred",
-                    },
-                    params: formData,
+            onClick={() => {
+              const formik = {
+                ...formikRef.current.values,
+                special_permit_application_id: specialPermitApplicationId,
+              };
+              const formData = getFormData(formik);
+              handleSubmit(
+                {
+                  url: isUpdate
+                    ? "api/client/special-permit/motorcade/update"
+                    : "api/client/special-permit/motorcade",
+                  headers: { "Content-Type": "multipart/form-data" },
+                  message: {
+                    title: "Are you sure you want to Proceed?",
+                    failedTitle: "FAILED",
+                    success: "Success!",
+                    error: "Unknown error occurred",
                   },
-                  [],
-                  [toggleModal, toggleRefresh]
-                );
-              }
+                  params: formData,
+                },
+                [],
+                [toggleModal, toggleRefresh]
+              );
             }}
           >
             {isUpdate ? "Update" : "Submit"}
           </Button>
 
-          <Button color="secondary" onClick={toggleModal}>
+          <Button
+            color="secondary"
+            onClick={() => {
+              toggleModal();
+            }}
+          >
             Close
           </Button>
         </ModalFooter>

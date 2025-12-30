@@ -32,8 +32,10 @@ function OrderOfPaymentModal({
         });
     }
   };
-
-
+  const multiplier = ["mayors_permit", "good_moral"].includes(applicationType)
+    ? 3
+    : 1;
+  console.log(clearance);
   return (
     <React.Fragment>
       <Modal
@@ -172,6 +174,12 @@ function OrderOfPaymentModal({
                               textAlign: "right",
                             }}
                           >
+                            {(applicationType === "good_moral" ||
+                              applicationType === "mayors_permit") &&
+                            (desc.type === "fiscal_clearance" ||
+                              desc.type === "court_clearance")
+                              ? paymentDetails.quantity
+                              : null}
                             {applicationType === desc.type
                               ? paymentDetails.quantity
                               : null}
@@ -183,6 +191,15 @@ function OrderOfPaymentModal({
                               textAlign: "right",
                             }}
                           >
+                            {" "}
+                            {applicationType === "good_moral" ||
+                            applicationType === "mayors_permit"
+                              ? desc.type === "fiscal_clearance"
+                                ? `₱ ${clearance?.[1]?.amount}`
+                                : desc.type === "court_clearance"
+                                ? `₱ ${clearance?.[0]?.amount}`
+                                : null
+                              : null}
                             {applicationType === desc.type
                               ? `₱ ${paymentDetails.billed_amount}`
                               : null}
@@ -207,7 +224,7 @@ function OrderOfPaymentModal({
                           textAlign: "end",
                         }}
                       >
-                        {paymentDetails?.quantity}
+                        {Number(paymentDetails?.quantity || 0) * multiplier}
                       </td>
                       <td
                         style={{
@@ -216,7 +233,7 @@ function OrderOfPaymentModal({
                           textAlign: "right",
                         }}
                       >
-                        {`₱ ${paymentDetails.total_amount}`}
+                        {`₱ ${paymentDetails.total_amount}.00`}
                       </td>
                     </tr>
                   </tbody>

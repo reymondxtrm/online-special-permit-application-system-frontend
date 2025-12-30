@@ -97,7 +97,8 @@ function ReturnRemarksModal({
                 "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
               color: "white",
             }}
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
               const formik = formikRef.current.values;
 
               handleSubmit(

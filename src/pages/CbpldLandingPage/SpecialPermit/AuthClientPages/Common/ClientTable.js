@@ -1064,10 +1064,12 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                             display: "flex",
                           }}
                         >
-                          <div style={{ paddingRight: "10px" }}>
+                          <div
+                            style={{ paddingRight: "10px" }}
+                            className="d-flex gap-2"
+                          >
                             <Button
                               color="success"
-                              style={{ width: "95px" }}
                               onClick={() => {
                                 const fileId = application?.id;
 
@@ -1112,7 +1114,19 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                                   });
                               }}
                             >
+                              <i className="mdi mdi-download fs-4 me-2"></i>
                               Download
+                            </Button>
+                            <Button
+                              color="primary"
+                              onClick={() => {
+                                const url = process.env.REACT_APP_FEEDBACK_URL;
+
+                                window.open(url, "_blank");
+                              }}
+                            >
+                              <i className="mdi mdi-star fs-4 me-2 text-warning"></i>
+                              Submit Feedback
                             </Button>
                           </div>
                         </div>

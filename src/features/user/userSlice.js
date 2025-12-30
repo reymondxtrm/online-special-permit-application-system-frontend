@@ -125,11 +125,12 @@ export const logoutUser = createAsyncThunk(
   "user/logoutUser",
   async ({ history }, thunkAPI) => {
     try {
+      localStorage.removeItem("authUser");
+      localStorage.removeItem("authToken");
       const res = await axios.post("/api/logout");
       if (res.data.status === 200) {
         history.push("/home");
-        localStorage.removeItem("authUser");
-        localStorage.removeItem("authToken");
+
         userSlice.actions.clearState();
       } else {
         return thunkAPI.rejectWithValue(res.data);

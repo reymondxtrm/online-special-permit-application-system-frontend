@@ -26,7 +26,6 @@ function AddExemptedCaseModal({ openModal, toggleModal, mode, exemptedCase }) {
   const handleSubmit = useSubmit();
   const [options, setoptions] = useState([]);
   const dispatch = useDispatch();
- 
 
   const getFormData = (object) => {
     const formData = new FormData();
@@ -43,6 +42,14 @@ function AddExemptedCaseModal({ openModal, toggleModal, mode, exemptedCase }) {
     });
     return formData;
   };
+  useEffect(() => {
+    validation.setValues({
+      permit_type: "",
+      ordinance: "",
+      attachment: null,
+      name: "",
+    });
+  }, [openModal]);
 
   const validation = useFormik({
     enableReinitialize: true,
@@ -115,7 +122,7 @@ function AddExemptedCaseModal({ openModal, toggleModal, mode, exemptedCase }) {
       });
     }
   }, [mode, exemptedCase]);
-  
+
   return (
     <React.Fragment>
       <Modal

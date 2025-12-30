@@ -94,7 +94,6 @@ const CertificateFormat = React.forwardRef((props, ref) => {
         isRunning = false;
         clearTimeout(timeoutId);
       }
-      
     };
     adjustScale();
     return () => {
@@ -145,6 +144,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
       ref={ref}
       className={` certificate-wrapper ${paperSize}`}
       style={{ "--scale": scale }}
+      id="dynamic-print-style"
     >
       <div ref={certificateRef}>
         <table className="certificate-table">

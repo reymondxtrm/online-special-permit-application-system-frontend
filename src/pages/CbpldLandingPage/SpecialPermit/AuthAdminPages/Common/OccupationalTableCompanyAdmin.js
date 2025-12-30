@@ -143,7 +143,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
       {status === "for_payment_approval" ? (
         <>
           <ReturnRemarksModal
-            toggleModal={toggleRemarksModal}
+            toggleModal={toggleReturnRemarksModal}
             openModal={returnRemarksModal}
             orderOfPaymentId={orderOfPaymentId}
             toggleRefresh={toggleRefresh}

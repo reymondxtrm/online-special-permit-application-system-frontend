@@ -19,6 +19,7 @@ import { FieldArray, Formik } from "formik";
 import axios from "axios";
 import ImageViewer from "react-simple-image-viewer";
 import useSubmit from "hooks/Common/useSubmit";
+import Swal from "sweetalert2";
 
 function AmountModal({
   openModal,
@@ -28,7 +29,7 @@ function AmountModal({
   permitType,
 }) {
   const handleSubmit = useSubmit();
- 
+
   const formikRef = useRef(null);
   const [discountOption, setDiscountOptions] = useState([]);
   const [exempted, setExempted] = useState(false);
@@ -40,8 +41,8 @@ function AmountModal({
   useEffect(() => {
     if (openModal) {
       axios
-        .get("api/admin//get/exempted-cases/admin", {
-          params: { permit_type: "event" },
+        .get("api/admin/get/exempted-cases/admin", {
+          params: { permit_type: permitType },
         })
         .then(
           (res) => {
@@ -118,23 +119,41 @@ function AmountModal({
             {(props) => (
               <Form>
                 <Col>
+                  <Row style={{ backgroundColor: "#cddfebff" }}>
+                    <Col md={12}>
+                      <FormGroup>
+                        <Label for="amount">Amount</Label>
+                        <Input
+                          id="amount"
+                          name={`amount`}
+                          type="number"
+                          placeholder="Enter amount"
+                          disabled={exempted}
+                          value={props.values.amount}
+                          onChange={props.handleChange}
+                        />
+                      </FormGroup>
+                    </Col>
+                  </Row>
                   {permitType === "event" && (
+                    <Row>
+                      <Col md={12}>
+                        <FormGroup>
+                          <Label for="event_type">Event Type</Label>
+                          <Input
+                            id="event_type"
+                            name={`event_type`}
+                            type="text"
+                            placeholder="Event Type"
+                            value={props.values.event_type}
+                            onChange={props.handleChange}
+                          />
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                  )}
+                  {!!discountOption && (
                     <>
-                      <Row>
-                        <Col md={12}>
-                          <FormGroup>
-                            <Label for="event_type">Event Type</Label>
-                            <Input
-                              id="event_type"
-                              name={`event_type`}
-                              type="text"
-                              placeholder="Event Type"
-                              value={props.values.event_type}
-                              onChange={props.handleChange}
-                            />
-                          </FormGroup>
-                        </Col>
-                      </Row>
                       <Row
                         style={{
                           backgroundColor: "#cddfebff",
@@ -160,7 +179,9 @@ function AmountModal({
                               className="me-2"
                               style={{ width: "17px", height: "17px" }}
                               value={exempted}
-                              onChange={(e) => setExempted(e.target.checked)}
+                              onChange={(e) => {
+                                setExempted(e.target.checked);
+                              }}
                             />
                             <Label
                               style={{
@@ -174,43 +195,27 @@ function AmountModal({
                           </FormGroup>
                         </div>
                       </Row>{" "}
+                      <Row
+                        style={{
+                          backgroundColor: "#cddfebff",
+                          paddingBottom: "15px",
+                        }}
+                      >
+                        <Col>
+                          <Label>Exemption</Label>
+                          <Select
+                            options={discountOption}
+                            onChange={(selected) => {
+                              props.setFieldValue(
+                                "exemption_id",
+                                selected.value
+                              );
+                            }}
+                            isDisabled={!exempted}
+                          />
+                        </Col>
+                      </Row>
                     </>
-                  )}
-
-                  <Row style={{ backgroundColor: "#cddfebff" }}>
-                    <Col md={12}>
-                      <FormGroup>
-                        <Label for="amount">Amount</Label>
-                        <Input
-                          id="amount"
-                          name={`amount`}
-                          type="number"
-                          placeholder="Enter amount"
-                          disabled={exempted}
-                          value={props.values.amount}
-                          onChange={props.handleChange}
-                        />
-                      </FormGroup>
-                    </Col>
-                  </Row>
-                  {permitType === "event" && (
-                    <Row
-                      style={{
-                        backgroundColor: "#cddfebff",
-                        paddingBottom: "15px",
-                      }}
-                    >
-                      <Col>
-                        <Label>Exemption</Label>
-                        <Select
-                          options={discountOption}
-                          onChange={(selected) => {
-                            props.setFieldValue("exemption_id", selected.value);
-                          }}
-                          isDisabled={!exempted}
-                        />
-                      </Col>
-                    </Row>
                   )}
                 </Col>
               </Form>
@@ -228,12 +233,20 @@ function AmountModal({
             }}
             onClick={() => {
               const formik = formikRef.current?.values || {};
-
+              if (exempted && !formik.exemption_id) {
+                Swal.fire({
+                  icon: "warning",
+                  title: "Oops...",
+                  text: "Exemption type is required when 'Exempted' is checked.",
+                });
+                return;
+              }
               handleSubmit(
                 {
-                  url: formik.exemption_id
-                    ? "api/admin/approve/exemption"
-                    : "api/admin/check-attachments",
+                  url:
+                    formik.exemption_id && exempted
+                      ? "api/admin/approve/exemption"
+                      : "api/admin/check-attachments",
                   message: {
                     title: "Are you sure you want to Proceed?",
                     failedTitle: "FAILED",
@@ -244,7 +257,7 @@ function AmountModal({
                     special_permit_application_id: applicationId,
                     billed_amount: formik.amount,
                     event_type: formik.event_type,
-                    exemption_id: formik.exemption_id,
+                    exemption_id: exempted ? formik.exemption_id : null,
                     admin: exempted,
                   },
                 },

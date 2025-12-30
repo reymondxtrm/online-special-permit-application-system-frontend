@@ -27,7 +27,6 @@ import BasicInputField from "components/Forms/BasicInputField";
 import { useSelector } from "react-redux";
 import ReactSimpleImageViewer from "react-simple-image-viewer";
 import useGetImage from "hooks/Common/useGetImage";
-
 function OccupationalPermitModal({
   openModal,
   toggleModal,
@@ -55,7 +54,30 @@ function OccupationalPermitModal({
   } = useGetImage();
   const user = useSelector((state) => state.user);
 
-  // Fixed validation schema
+  // useEffect(() => {
+  //   if (openModal && isUpdate && applicationId) {
+  //     axios
+  //       .get("api/client/get-single-permmit-application", {
+  //         params: {
+  //           special_permit_application_id: applicationId,
+  //         },
+  //       })
+  //       .then((res) => {
+  //         const data = res.data.data;
+  //         setExistingData({
+  //           requestor_name: data.requestor_name,
+  //           event_name: data.event_name,
+  //           event_date_from: data.event_date_from,
+  //           event_date_to: data.event_date_to,
+  //           event_time_from: data.event_time_from,
+  //           event_time_to: data.event_time_to,
+  //         });
+
+  //         setUploadedFiles(data.uploaded_file || {});
+  //       });
+  //   }
+  // }, [openModal, isUpdate, applicationId]);
+
   const validationSchema = Yup.object().shape({
     type: Yup.string().required(),
 
@@ -65,60 +87,61 @@ function OccupationalPermitModal({
     company_address: Yup.string().nullable(),
     position: Yup.string().nullable(),
 
-    certificate_of_employment: Yup.mixed().test(
-      "certificate_required",
-      "Certificate of employment is required",
-      function (value) {
-        // If updating and file already exists, it's valid
-        if (isUpdate && uploadedFile?.certificate_of_employment) return true;
-        // Otherwise require upload
-        return value instanceof File || value instanceof Blob;
-      }
-    ),
+    certificate_of_employment: Yup.mixed()
+      .required("Certificate of employment is required")
+      .test(
+        "fileType",
+        "Only image files are allowed",
+        (value) =>
+          value === null ||
+          value === "" ||
+          value instanceof File ||
+          value instanceof Blob
+      ),
 
-    community_tax_certificate: Yup.mixed().test(
-      "cedula_required",
-      "Community tax certificate is required",
-      function (value) {
-        const { no_cedula } = this.parent;
-        // If no_cedula is checked, not required
-        if (no_cedula) return true;
-        // If updating and file already exists, it's valid
-        if (isUpdate && uploadedFile?.community_tax_certificate) return true;
-        // Otherwise require upload
-        return value instanceof File || value instanceof Blob;
-      }
-    ),
+    community_tax_certificate: Yup.mixed().when("no_cedula", {
+      is: false,
+      then: Yup.mixed()
+        .required("Community tax certificate is required")
+        .test(
+          "fileType",
+          "Only image files are allowed",
+          (value) =>
+            value === null ||
+            value === "" ||
+            value instanceof File ||
+            value instanceof Blob
+        ),
+      otherwise: Yup.mixed().nullable(),
+    }),
 
-    id_picture: Yup.mixed().test(
-      "id_picture_required",
-      "ID picture is required",
-      function (value) {
-        // If updating and file already exists, it's valid
-        if (isUpdate && uploadedFile?.id_picture) return true;
-        // Otherwise require upload
-        return (
+    id_picture: Yup.mixed()
+      .required("ID picture is required")
+      .test(
+        "fileType",
+        "Invalid ID picture format",
+        (value) =>
           value instanceof File ||
           value instanceof Blob ||
-          typeof value === "string"
-        );
-      }
-    ),
+          typeof value === "string" // when editing (already uploaded)
+      ),
 
-    training_certificate: Yup.mixed().test(
-      "training_cert_required",
-      "Training certificate is required",
-      function (value) {
-        // Only required for NON-FOOD-MASSEUR
-        if (tableData?.company_type !== "NON-FOOD-MASSEUR") return true;
-        // If updating and file already exists, it's valid
-        if (isUpdate && uploadedFile?.training_certificate) return true;
-        // Otherwise require upload
-        return value instanceof File || value instanceof Blob;
-      }
-    ),
+    training_certificate: Yup.mixed().when("company_type", {
+      is: (v) => v === "NON-FOOD-MASSEUR",
+      then: Yup.mixed()
+        .required("Training certificate is required")
+        .test(
+          "fileType",
+          "Only image files are allowed",
+          (value) =>
+            value === null ||
+            value === "" ||
+            value instanceof File ||
+            value instanceof Blob
+        ),
+      otherwise: Yup.mixed().nullable(),
+    }),
   });
-
   useEffect(() => {
     if (openModal && fetchUrl) {
       const fetchData = async () => {
@@ -140,7 +163,6 @@ function OccupationalPermitModal({
               full_address: res?.occupation_details?.full_address,
               position: res?.occupation_details?.position,
               monthly_income: res?.occupation_details?.monthly_income,
-              company_type: res?.occupation_details?.company_type,
             });
             setUploadedFiles({ ...res?.uploaded_files });
           } else {
@@ -165,7 +187,6 @@ function OccupationalPermitModal({
   const togglePictureModal = () => {
     setCameraIsOpen((prev) => !prev);
   };
-
   const toggleIsViewerOpen = () => {
     setIsViewerOpen((prev) => !prev);
   };
@@ -186,7 +207,6 @@ function OccupationalPermitModal({
     });
     return formData;
   };
-
   const toggleImageViewer = () => {
     setOpenImageViewer((prev) => !prev);
   };
@@ -244,6 +264,7 @@ function OccupationalPermitModal({
               community_tax_certificate: "",
               id_picture: "",
               training_certificate: "",
+              // monthly_income: tableData?.monthly_income || "",
               company_name: tableData?.company_name || "",
               company_address: tableData?.full_address || "",
               position: tableData?.position || "",
@@ -326,6 +347,29 @@ function OccupationalPermitModal({
                             </td>
                           </tr>
 
+                          {/* <tr>
+                            <td className="text-end">
+                              <Label>
+                                Monthly Income:
+                                <span style={{ color: "red" }}>&nbsp;*</span>
+                              </Label>
+                            </td>
+                            <td colSpan={2}>
+                              <BasicInputField
+                                col={12}
+                                label={null}
+                                name="monthly_income"
+                                type="number"
+                                placeholder="0.00"
+                                value={props.values.monthly_income}
+                                touched={props.touched.monthly_income}
+                                errors={props.errors.monthly_income}
+                                validation={props}
+                                required={true}
+                              />
+                            </td>
+                          </tr> */}
+
                           <tr>
                             <td className="text-end">
                               <Label>
@@ -336,7 +380,7 @@ function OccupationalPermitModal({
                             <td colSpan={2}>
                               <div className="d-flex gap-2">
                                 <div
-                                  className="flex-grow-1"
+                                  className="d-flex flex-column"
                                   style={{ maxWidth: "400px" }}
                                 >
                                   <Input
@@ -353,20 +397,18 @@ function OccupationalPermitModal({
                                     onBlur={props.handleBlur}
                                     invalid={
                                       props.touched.certificate_of_employment &&
-                                      Boolean(
-                                        props.errors.certificate_of_employment
-                                      )
+                                      props.errors.certificate_of_employment
+                                        ? true
+                                        : false
                                     }
                                   />
+
                                   {props.touched.certificate_of_employment &&
-                                    props.errors.certificate_of_employment && (
-                                      <div
-                                        className="text-danger mt-1"
-                                        style={{ fontSize: "80%" }}
-                                      >
-                                        {props.errors.certificate_of_employment}
-                                      </div>
-                                    )}
+                                  props.errors.certificate_of_employment ? (
+                                    <FormFeedback type="invalid">
+                                      {props.errors.certificate_of_employment}
+                                    </FormFeedback>
+                                  ) : null}
                                 </div>
 
                                 {isUpdate &&
@@ -383,7 +425,10 @@ function OccupationalPermitModal({
                                         toggleIsViewerOpen();
                                       }}
                                     >
-                                      <i className="mdi mdi-eye"></i>
+                                      <i
+                                        className="mdi mdi-eye"
+                                        color="warning"
+                                      ></i>
                                     </Button>
                                   )}
                               </div>
@@ -398,11 +443,11 @@ function OccupationalPermitModal({
                               </Label>
                             </td>
 
-                            <td colSpan={2}>
+                            <td>
                               <div className="d-flex gap-2">
                                 <div
-                                  className="flex-grow-1"
-                                  style={{ maxWidth: "400px" }}
+                                  className="d-flex flex-column"
+                                  style={{ maxWidth: "300px" }}
                                 >
                                   <Input
                                     accept="image/*"
@@ -419,24 +464,20 @@ function OccupationalPermitModal({
                                     onBlur={props.handleBlur}
                                     invalid={
                                       props.touched.community_tax_certificate &&
-                                      Boolean(
-                                        props.errors.community_tax_certificate
-                                      ) &&
-                                      !props.values.no_cedula
+                                      props.errors.community_tax_certificate
+                                        ? true
+                                        : false
                                     }
                                   />
-                                  {props.touched.community_tax_certificate &&
-                                    props.errors.community_tax_certificate &&
-                                    !props.values.no_cedula && (
-                                      <div
-                                        className="text-danger mt-1"
-                                        style={{ fontSize: "80%" }}
-                                      >
-                                        {props.errors.community_tax_certificate}
-                                      </div>
-                                    )}
-                                </div>
 
+                                  {props.touched.community_tax_certificate &&
+                                  props.errors.community_tax_certificate &&
+                                  !props.values.no_cedula ? (
+                                    <FormFeedback type="invalid">
+                                      {props.errors.community_tax_certificate}
+                                    </FormFeedback>
+                                  ) : null}
+                                </div>
                                 {isUpdate &&
                                   uploadedFile?.community_tax_certificate && (
                                     <Button
@@ -451,11 +492,34 @@ function OccupationalPermitModal({
                                         toggleIsViewerOpen();
                                       }}
                                     >
-                                      <i className="mdi mdi-eye"></i>
+                                      <i
+                                        className="mdi mdi-eye"
+                                        color="warning"
+                                      ></i>
                                     </Button>
                                   )}
                               </div>
                             </td>
+
+                            {/* <td>
+                              <div className="d-flex gap-2 align-items-center">
+                                <Input
+                                  type="checkbox"
+                                  style={{ width: "20px", height: "20px" }}
+                                  onChange={(e) => {
+                                    props.setFieldValue(
+                                      "no_cedula",
+                                      e.target.checked
+                                    );
+                                  }}
+                                />
+                                <span
+                                  style={{ color: "red", cursor: "pointer" }}
+                                >
+                                  {"Don't have Cedula?"}
+                                </span>
+                              </div>
+                            </td> */}
                           </tr>
 
                           <tr>
@@ -494,22 +558,15 @@ function OccupationalPermitModal({
                                       toggleIsViewerOpen();
                                     }}
                                   >
-                                    <i className="mdi mdi-eye"></i>
+                                    <i
+                                      className="mdi mdi-eye"
+                                      color="warning"
+                                    ></i>
                                   </Button>
                                 )}
                               </div>
-                              {props.touched.id_picture &&
-                                props.errors.id_picture && (
-                                  <div
-                                    className="text-danger mt-1"
-                                    style={{ fontSize: "80%" }}
-                                  >
-                                    {props.errors.id_picture}
-                                  </div>
-                                )}
                             </td>
                           </tr>
-
                           {tableData?.company_type === "NON-FOOD-MASSEUR" && (
                             <tr>
                               <td className="text-end">
@@ -522,7 +579,7 @@ function OccupationalPermitModal({
                               <td colSpan={2}>
                                 <div className="d-flex gap-2">
                                   <div
-                                    className="flex-grow-1"
+                                    className="d-flex flex-column"
                                     style={{ maxWidth: "400px" }}
                                   >
                                     <Input
@@ -539,37 +596,37 @@ function OccupationalPermitModal({
                                       onBlur={props.handleBlur}
                                       invalid={
                                         props.touched.training_certificate &&
-                                        Boolean(
-                                          props.errors.training_certificate
-                                        )
+                                        props.errors.training_certificate
+                                          ? true
+                                          : false
                                       }
                                     />
-                                    {props.touched.training_certificate &&
-                                      props.errors.training_certificate && (
-                                        <div
-                                          className="text-danger mt-1"
-                                          style={{ fontSize: "80%" }}
-                                        >
-                                          {props.errors.training_certificate}
-                                        </div>
-                                      )}
-                                  </div>
 
+                                    {props.touched.training_certificate &&
+                                    props.errors.training_certificate ? (
+                                      <FormFeedback type="invalid">
+                                        {props.errors.training_certificate}
+                                      </FormFeedback>
+                                    ) : null}
+                                  </div>
                                   {isUpdate &&
-                                    uploadedFile?.training_certificate && (
+                                    uploadedFile?.community_tax_certificate && (
                                       <Button
                                         color="primary"
                                         onClick={(e) => {
                                           e.preventDefault();
                                           getImageHandle({
-                                            path: uploadedFile?.training_certificate,
+                                            path: uploadedFile?.community_tax_certificate,
                                             url: "api/client/attachment",
                                             showLoader: true,
                                           });
                                           toggleIsViewerOpen();
                                         }}
                                       >
-                                        <i className="mdi mdi-eye"></i>
+                                        <i
+                                          className="mdi mdi-eye"
+                                          color="warning"
+                                        ></i>
                                       </Button>
                                     )}
                                 </div>
@@ -590,19 +647,6 @@ function OccupationalPermitModal({
           <Button
             style={{ backgroundColor: "#1a56db", color: "white" }}
             onClick={async () => {
-              // Validate form before submitting
-              const errors = await formikRef.current.validateForm();
-              formikRef.current.setTouched({
-                certificate_of_employment: true,
-                community_tax_certificate: true,
-                id_picture: true,
-                training_certificate: true,
-              });
-
-              if (Object.keys(errors).length > 0) {
-                return;
-              }
-
               const params = {
                 ...formikRef.current.values,
                 special_permit_application_id: applicationId,

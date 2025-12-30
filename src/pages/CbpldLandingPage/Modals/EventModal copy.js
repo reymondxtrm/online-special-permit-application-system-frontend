@@ -63,12 +63,11 @@ function EventModal({
         });
     }
   }, [openModal, isUpdate, specialPermitApplicationId]);
-  console.log(uploadedFiles);
+
   useEffect(() => {
     if (!openModal) {
       setExistingData({});
       setUploadedFiles({});
-      setIsProceed(false);
     }
   }, [openModal]);
 
@@ -93,8 +92,6 @@ function EventModal({
     event_time_to: Yup.string().required("Required"),
   });
 
-  const setProceedHandle = () => setIsProceed((prev) => !prev);
-
   return (
     <React.Fragment>
       {isViewerOpen && !isFetching && currentImage && (
@@ -114,7 +111,6 @@ function EventModal({
         isOpen={openModal}
         toggle={() => {
           toggleModal();
-          setIsProceed(false);
         }}
         backdrop="static"
         className="modal-dialog-centered"
@@ -123,7 +119,6 @@ function EventModal({
         <ModalHeader
           toggle={() => {
             toggleModal();
-            setIsProceed(false);
           }}
         >
           <p
@@ -156,6 +151,7 @@ function EventModal({
               request_letter: "",
               route_plan: "",
               sworn_statement: "",
+              special_permit_application_id: specialPermitApplicationId,
             }}
             onSubmit={handleSubmit}
           >
@@ -306,7 +302,10 @@ function EventModal({
                     ].map((file) => (
                       <FormGroup key={file.key}>
                         <Label>
-                          {file.label} <span className="text-danger">*</span>
+                          {file.label}
+                          {file.key !== "sworn_statement" && (
+                            <span className="text-danger">*</span>
+                          )}
                         </Label>
                         <div className="d-flex gap-2">
                           <Input
@@ -327,7 +326,7 @@ function EventModal({
                           />
 
                           <FormFeedback>{props.errors[file.key]}</FormFeedback>
-
+                          {console.log(uploadedFiles)}
                           {isUpdate && uploadedFiles?.[file.key] && (
                             <Button
                               color="primary"
@@ -355,7 +354,10 @@ function EventModal({
 
           <div className="d-flex gap-2">
             <div style={{ width: "30px" }}>
-              <Input type="checkbox" onClick={setProceedHandle} />
+              <Input
+                type="checkbox"
+                onChange={(e) => setIsProceed(e.target.checked)}
+              />
             </div>
             <p>{USER_PRIVACY}</p>
           </div>
@@ -390,8 +392,6 @@ function EventModal({
                 [],
                 [toggleModal, toggleRefresh]
               );
-
-              setIsProceed(false);
             }}
           >
             {isUpdate ? "Update" : "Submit"}
@@ -401,7 +401,6 @@ function EventModal({
             color="secondary"
             onClick={() => {
               toggleModal();
-              setIsProceed(false);
             }}
           >
             Close

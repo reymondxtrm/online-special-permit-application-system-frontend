@@ -5,15 +5,13 @@ export default function FirstParagraph({ firstParagraph }) {
   // Component will inherit --scale from parent .certificate-wrapper
 
   return (
-    <tr>
-      <td colSpan="2">
-        <div className="first-paragraph-wrapper">
-          <p
-            className="first-paragraph-text"
-            dangerouslySetInnerHTML={{ __html: firstParagraph }}
-          />
-        </div>
-      </td>
-    </tr>
+    <td colSpan="2">
+      <div className="first-paragraph-wrapper">
+        <p
+          className="first-paragraph-text"
+          dangerouslySetInnerHTML={{ __html: firstParagraph }}
+        />
+      </div>
+    </td>
   );
 }

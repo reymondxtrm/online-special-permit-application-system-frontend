@@ -79,6 +79,8 @@ function UseOfGovernmentPropertyModal({
       fetch();
     }
   }, [openModal]);
+
+  // Fixed validation schema
   const UseOfGovernmentPropertySchema = Yup.object().shape({
     requestor_name: Yup.string()
       .trim()
@@ -106,17 +108,28 @@ function UseOfGovernmentPropertyModal({
 
     event_time_to: Yup.string().required("End time is required"),
 
-    request_letter: Yup.mixed().when("$isUpdate", {
-      is: false,
-      then: Yup.mixed().required("Request letter is required"),
-      otherwise: Yup.mixed().nullable(),
-    }),
+    // Fixed file validation
+    request_letter: Yup.mixed().test(
+      "request_letter_required",
+      "Request letter is required",
+      function (value) {
+        // If updating and file already exists, it's valid
+        if (isUpdate && uploadedFiles?.request_letter) return true;
+        // If not updating or no existing file, require upload
+        return value !== null && value !== undefined;
+      }
+    ),
 
-    route_plan: Yup.mixed().when("$isUpdate", {
-      is: false,
-      then: Yup.mixed().required("Route plan is required"),
-      otherwise: Yup.mixed().nullable(),
-    }),
+    route_plan: Yup.mixed().test(
+      "route_plan_required",
+      "Route plan is required",
+      function (value) {
+        // If updating and file already exists, it's valid
+        if (isUpdate && uploadedFiles?.route_plan) return true;
+        // If not updating or no existing file, require upload
+        return value !== null && value !== undefined;
+      }
+    ),
   });
 
   useEffect(() => {
@@ -283,6 +296,16 @@ function UseOfGovernmentPropertyModal({
                           onBlur={() =>
                             props.setFieldTouched("name_of_property", true)
                           }
+                          styles={{
+                            control: (base) => ({
+                              ...base,
+                              borderColor:
+                                props.touched.name_of_property &&
+                                props.errors.name_of_property
+                                  ? "#dc3545"
+                                  : base.borderColor,
+                            }),
+                          }}
                         />
                         {props.touched.name_of_property &&
                           props.errors.name_of_property && (
@@ -392,31 +415,39 @@ function UseOfGovernmentPropertyModal({
                         </Col>
                       </Row>
 
-                      {/* Request Letter */}
+                      {/* Request Letter - Fixed */}
                       <FormGroup>
                         <Label>Request Letter</Label>
 
                         <div className="d-flex gap-2">
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) =>
-                              props.setFieldValue(
-                                "request_letter",
-                                e.currentTarget.files[0]
-                              )
-                            }
-                            onBlur={() =>
-                              props.setFieldTouched("request_letter", true)
-                            }
-                            invalid={
-                              props.touched.request_letter &&
-                              Boolean(props.errors.request_letter)
-                            }
-                          />
-                          <FormFeedback>
-                            {props.errors.request_letter}
-                          </FormFeedback>
+                          <div className="flex-grow-1">
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                props.setFieldValue(
+                                  "request_letter",
+                                  e.currentTarget.files[0]
+                                );
+                              }}
+                              onBlur={() =>
+                                props.setFieldTouched("request_letter", true)
+                              }
+                              invalid={
+                                props.touched.request_letter &&
+                                Boolean(props.errors.request_letter)
+                              }
+                            />
+                            {props.touched.request_letter &&
+                              props.errors.request_letter && (
+                                <div
+                                  className="text-danger mt-1"
+                                  style={{ fontSize: "80%" }}
+                                >
+                                  {props.errors.request_letter}
+                                </div>
+                              )}
+                          </div>
 
                           {isUpdate && uploadedFiles?.request_letter && (
                             <Button
@@ -431,34 +462,44 @@ function UseOfGovernmentPropertyModal({
                                 toggleIsViewerOpen();
                               }}
                             >
-                              <i className="mdi mdi-eye" color="warning"></i>
+                              <i className="mdi mdi-eye"></i>
                             </Button>
                           )}
                         </div>
                       </FormGroup>
 
-                      {/* Route Plan */}
+                      {/* Route Plan - Fixed */}
                       <FormGroup>
                         <Label>Route Plan (CTTMD Approved)</Label>
                         <div className="d-flex gap-2">
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) =>
-                              props.setFieldValue(
-                                "route_plan",
-                                e.currentTarget.files[0]
-                              )
-                            }
-                            onBlur={() =>
-                              props.setFieldTouched("route_plan", true)
-                            }
-                            invalid={
-                              props.touched.route_plan &&
-                              Boolean(props.errors.route_plan)
-                            }
-                          />
-                          <FormFeedback>{props.errors.route_plan}</FormFeedback>
+                          <div className="flex-grow-1">
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                props.setFieldValue(
+                                  "route_plan",
+                                  e.currentTarget.files[0]
+                                );
+                              }}
+                              onBlur={() =>
+                                props.setFieldTouched("route_plan", true)
+                              }
+                              invalid={
+                                props.touched.route_plan &&
+                                Boolean(props.errors.route_plan)
+                              }
+                            />
+                            {props.touched.route_plan &&
+                              props.errors.route_plan && (
+                                <div
+                                  className="text-danger mt-1"
+                                  style={{ fontSize: "80%" }}
+                                >
+                                  {props.errors.route_plan}
+                                </div>
+                              )}
+                          </div>
 
                           {isUpdate && uploadedFiles?.route_plan && (
                             <Button
@@ -473,7 +514,7 @@ function UseOfGovernmentPropertyModal({
                                 toggleIsViewerOpen();
                               }}
                             >
-                              <i className="mdi mdi-eye" color="warning"></i>
+                              <i className="mdi mdi-eye"></i>
                             </Button>
                           )}
                         </div>
@@ -504,7 +545,25 @@ function UseOfGovernmentPropertyModal({
               color: "white",
             }}
             disabled={!proceed}
-            onClick={() => {
+            onClick={async () => {
+              // Validate form before submitting
+              const errors = await formikRef.current.validateForm();
+              formikRef.current.setTouched({
+                requestor_name: true,
+                name_of_property: true,
+                event_name: true,
+                event_date_from: true,
+                event_date_to: true,
+                event_time_from: true,
+                event_time_to: true,
+                request_letter: true,
+                route_plan: true,
+              });
+
+              if (Object.keys(errors).length > 0) {
+                return;
+              }
+
               const params = {
                 ...formikRef.current.values,
                 special_permit_application_id: specialPermitApplicationId,

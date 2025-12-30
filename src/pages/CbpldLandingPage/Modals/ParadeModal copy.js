@@ -5,6 +5,8 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
+  Table,
+  Badge,
   Form,
   Row,
   Col,
@@ -14,7 +16,7 @@ import {
   FormFeedback,
 } from "reactstrap";
 
-import { Formik } from "formik";
+import { FieldArray, Formik } from "formik";
 import useSubmit from "hooks/Common/useSubmit";
 import { USER_PRIVACY } from "assets/data/data";
 import axios from "axios";
@@ -51,7 +53,7 @@ function ParadeModal({
             requestor_name: data.requestor_name,
             event_name: data.event_name,
             event_date_from: data.event_date_from,
-            event_date_to: data.event_date_to, // Fixed: was event_to
+            event_date_to: data.event_to,
             event_time_from: data.event_time_from,
             event_time_to: data.event_time_to,
           });
@@ -60,25 +62,17 @@ function ParadeModal({
     }
   }, [openModal, isUpdate, specialPermitApplicationId]);
 
-  useEffect(() => {
-    if (!openModal && formikRef.current) {
-      formikRef.current.resetForm();
-      setExistingData({});
-      setUploadedFiles({});
-    }
-  }, [openModal]);
-
   const getFormData = (object) => {
     const formData = new FormData();
     Object.keys(object).forEach((key) => {
       if (object[key] instanceof File || object[key] instanceof Blob) {
-        formData.append(key, object[key]);
+        formData.append(key, object[key]); // Directly append files
       } else if (Array.isArray(object[key])) {
         object[key].forEach((item) => formData.append(`${key}[]`, item));
       } else if (typeof object[key] === "object" && object[key] !== null) {
         formData.append(key, JSON.stringify(object[key]));
       } else {
-        formData.append(key, object[key] ?? "");
+        formData.append(key, object[key]);
       }
     });
     return formData;
@@ -87,36 +81,6 @@ function ParadeModal({
   const toggleIsViewerOpen = () => {
     setIsViewerOpen((prev) => !prev);
   };
-
-  const IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
-  const SUPPORTED_FORMATS = ["image/jpeg", "image/png", "image/jpg"];
-
-  const fileValidationRequired = Yup.mixed()
-    .required("This file is required")
-    .test(
-      "fileSize",
-      "File must be less than 5MB",
-      (value) => !value || value.size <= IMAGE_SIZE
-    )
-    .test(
-      "fileFormat",
-      "Only JPG and PNG images are allowed",
-      (value) => !value || SUPPORTED_FORMATS.includes(value.type)
-    );
-
-  const fileValidationOptional = Yup.mixed()
-    .nullable()
-    .test(
-      "fileSize",
-      "File must be less than 5MB",
-      (value) => !value || value.size <= IMAGE_SIZE
-    )
-    .test(
-      "fileFormat",
-      "Only JPG and PNG images are allowed",
-      (value) => !value || SUPPORTED_FORMATS.includes(value.type)
-    );
-
   const ParadeSchema = Yup.object().shape({
     requestor_name: Yup.string().required(
       "Requestor / Organization is required"
@@ -127,19 +91,24 @@ function ParadeModal({
     event_date_from: Yup.date().required("Start date is required"),
 
     event_date_to: Yup.date()
-      .min(
-        Yup.ref("event_date_from"),
-        "End date must be after or equal to start date"
-      )
+      .min(Yup.ref("event_date_from"), "End date must be after start date")
       .required("End date is required"),
 
     event_time_from: Yup.string().required("Start time is required"),
 
     event_time_to: Yup.string().required("End time is required"),
 
-    request_letter: isUpdate ? fileValidationOptional : fileValidationRequired,
+    request_letter: Yup.mixed().when("$isUpdate", {
+      is: false,
+      then: (schema) => schema.required("Request letter is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
 
-    route_plan: isUpdate ? fileValidationOptional : fileValidationRequired,
+    route_plan: Yup.mixed().when("$isUpdate", {
+      is: false,
+      then: (schema) => schema.required("Route plan is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
   });
 
   return (
@@ -159,15 +128,23 @@ function ParadeModal({
       )}
       <Modal
         isOpen={openModal}
-        toggle={toggleModal}
+        toggle={() => {
+          toggleModal();
+        }}
         fade={true}
         backdrop="static"
         size="m"
         className="modal-dialog-centered"
-        style={{ overflowY: "auto" }}
+        style={{
+          overflowY: "auto",
+        }}
         unmountOnClose
       >
-        <ModalHeader toggle={toggleModal}>
+        <ModalHeader
+          toggle={() => {
+            toggleModal();
+          }}
+        >
           <p
             style={{
               fontWeight: "bold",
@@ -186,19 +163,17 @@ function ParadeModal({
             innerRef={formikRef}
             validationSchema={ParadeSchema}
             enableReinitialize
-            validateOnChange={true}
-            validateOnBlur={true}
             initialValues={{
               type: "parade",
               permit_type_id: "parade",
               requestor_name: existingData?.requestor_name || "",
               event_name: existingData?.event_name || "",
               event_date_from: existingData?.event_date_from || "",
-              event_date_to: existingData?.event_date_to || "",
+              event_date_to: existingData?.event_to || "",
               event_time_from: existingData?.event_time_from || "",
               event_time_to: existingData?.event_time_to || "",
-              route_plan: null,
-              request_letter: null,
+              route_plan: "",
+              request_letter: "",
             }}
             onSubmit={handleSubmit}
           >
@@ -210,8 +185,7 @@ function ParadeModal({
                       <Col md={12}>
                         <FormGroup>
                           <Label for="nameOfRequestor">
-                            Name of Requestor / Organization{" "}
-                            <span className="text-danger">*</span>
+                            Name of Requestor / Organization
                           </Label>
                           <Input
                             id="nameOfRequestor"
@@ -235,9 +209,7 @@ function ParadeModal({
                     <Row>
                       <Col md={12}>
                         <FormGroup>
-                          <Label for="nameOfEvent">
-                            Name of Event <span className="text-danger">*</span>
-                          </Label>
+                          <Label for="nameOfEvent">Name of Event</Label>
                           <Input
                             id="nameOfEvent"
                             name="event_name"
@@ -253,15 +225,11 @@ function ParadeModal({
                         </FormGroup>
                       </Col>
                     </Row>
-
                     <Row>
                       <Col md={6}>
                         <FormGroup>
-                          <Label for="dateOfEventFrom">
-                            Start Date <span className="text-danger">*</span>
-                          </Label>
+                          <Label for="dateOfEventFrom">Start Date</Label>
                           <Input
-                            id="dateOfEventFrom"
                             type="date"
                             name="event_date_from"
                             value={props.values.event_date_from}
@@ -279,9 +247,8 @@ function ParadeModal({
                       </Col>
                       <Col md={6}>
                         <FormGroup>
-                          <Label for="dateOfEventTo">
-                            End Date <span className="text-danger">*</span>
-                          </Label>
+                          <Label for="dateOfEventTo">End Date</Label>
+
                           <Input
                             id="dateOfEventTo"
                             type="date"
@@ -300,15 +267,11 @@ function ParadeModal({
                         </FormGroup>
                       </Col>
                     </Row>
-
                     <Row>
                       <Col md={6}>
                         <FormGroup>
-                          <Label for="timeOfEventFrom">
-                            Start Time <span className="text-danger">*</span>
-                          </Label>
+                          <Label for="timeOfEventFrom">Start Time</Label>
                           <Input
-                            id="timeOfEventFrom"
                             type="time"
                             name="event_time_from"
                             value={props.values.event_time_from}
@@ -326,11 +289,8 @@ function ParadeModal({
                       </Col>
                       <Col md={6}>
                         <FormGroup>
-                          <Label for="timeOfEventTo">
-                            End Time <span className="text-danger">*</span>
-                          </Label>
+                          <Label for="timeOfEventTo">End Time</Label>
                           <Input
-                            id="timeOfEventTo"
                             type="time"
                             name="event_time_to"
                             value={props.values.event_time_to}
@@ -347,56 +307,39 @@ function ParadeModal({
                         </FormGroup>
                       </Col>
                     </Row>
-
                     <Row>
                       <Col>
                         <FormGroup>
                           <Label for="requestLetter">
                             Request Letter Stamped (Received by Office of the
-                            City Mayor){" "}
-                            {!isUpdate && (
-                              <span className="text-danger">*</span>
-                            )}
+                            City Mayor)
                           </Label>
-                          <div className="d-flex gap-2 align-items-start">
-                            <div className="flex-grow-1">
-                              <Input
-                                id="requestLetter"
-                                type="file"
-                                name="request_letter"
-                                accept="image/*"
-                                onChange={(e) => {
-                                  const file = e.currentTarget.files[0] || null;
-                                  props.setFieldValue("request_letter", file);
-                                  props.setFieldTouched(
-                                    "request_letter",
-                                    true,
-                                    true
-                                  );
-                                }}
-                                onBlur={() =>
-                                  props.setFieldTouched(
-                                    "request_letter",
-                                    true,
-                                    true
-                                  )
-                                }
-                              />
-                              {props.touched.request_letter &&
-                              props.errors.request_letter ? (
-                                <div
-                                  className="text-danger mt-1"
-                                  style={{ fontSize: "0.875rem" }}
-                                >
-                                  {props.errors.request_letter}
-                                </div>
-                              ) : null}
-                            </div>
+                          <div className="d-flex gap-2">
+                            <Input
+                              type="file"
+                              name="request_letter"
+                              accept="image/*"
+                              onChange={(e) =>
+                                props.setFieldValue(
+                                  "request_letter",
+                                  e.currentTarget.files[0]
+                                )
+                              }
+                              onBlur={() =>
+                                props.setFieldTouched("request_letter", true)
+                              }
+                              invalid={
+                                props.touched.request_letter &&
+                                Boolean(props.errors.request_letter)
+                              }
+                            />
+                            <FormFeedback>
+                              {props.errors.request_letter}
+                            </FormFeedback>
 
                             {isUpdate && uploadedFiles?.request_letter && (
                               <Button
                                 color="primary"
-                                size="sm"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   getImageHandle({
@@ -407,62 +350,45 @@ function ParadeModal({
                                   toggleIsViewerOpen();
                                 }}
                               >
-                                <i className="mdi mdi-eye"></i>
+                                <i className="mdi mdi-eye" color="warning"></i>
                               </Button>
                             )}
                           </div>
                         </FormGroup>
                       </Col>
                     </Row>
-
                     <Row>
                       <Col>
                         <FormGroup>
                           <Label for="route_plan">
-                            Route Plan approved by CTTMD{" "}
-                            {!isUpdate && (
-                              <span className="text-danger">*</span>
-                            )}
+                            Route Plan approved by CTTMD
                           </Label>
-                          <div className="d-flex gap-2 align-items-start">
-                            <div className="flex-grow-1">
-                              <Input
-                                id="route_plan"
-                                type="file"
-                                name="route_plan"
-                                accept="image/*"
-                                onChange={(e) => {
-                                  const file = e.currentTarget.files[0] || null;
-                                  props.setFieldValue("route_plan", file);
-                                  props.setFieldTouched(
-                                    "route_plan",
-                                    true,
-                                    true
-                                  );
-                                }}
-                                onBlur={() =>
-                                  props.setFieldTouched(
-                                    "route_plan",
-                                    true,
-                                    true
-                                  )
-                                }
-                              />
-                              {props.touched.route_plan &&
-                              props.errors.route_plan ? (
-                                <div
-                                  className="text-danger mt-1"
-                                  style={{ fontSize: "0.875rem" }}
-                                >
-                                  {props.errors.route_plan}
-                                </div>
-                              ) : null}
-                            </div>
+                          <div className="d-flex gap-2">
+                            <Input
+                              type="file"
+                              name="route_plan"
+                              accept="image/*"
+                              onChange={(e) =>
+                                props.setFieldValue(
+                                  "route_plan",
+                                  e.currentTarget.files[0]
+                                )
+                              }
+                              onBlur={() =>
+                                props.setFieldTouched("route_plan", true)
+                              }
+                              invalid={
+                                props.touched.route_plan &&
+                                Boolean(props.errors.route_plan)
+                              }
+                            />
+                            <FormFeedback>
+                              {props.errors.route_plan}
+                            </FormFeedback>
 
                             {isUpdate && uploadedFiles?.route_plan && (
                               <Button
                                 color="primary"
-                                size="sm"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   getImageHandle({
@@ -473,7 +399,7 @@ function ParadeModal({
                                   toggleIsViewerOpen();
                                 }}
                               >
-                                <i className="mdi mdi-eye"></i>
+                                <i className="mdi mdi-eye" color="warning"></i>
                               </Button>
                             )}
                           </div>
@@ -504,36 +430,13 @@ function ParadeModal({
                 "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
               color: "white",
             }}
-            onClick={async () => {
-              // Validate form first
-              const errors = await formikRef.current?.validateForm();
-
-              // Touch all fields to show errors
-              formikRef.current?.setTouched({
-                requestor_name: true,
-                event_name: true,
-                event_date_from: true,
-                event_date_to: true,
-                event_time_from: true,
-                event_time_to: true,
-                request_letter: true,
-                route_plan: true,
-              });
-
-              // If there are errors, don't proceed
-              if (errors && Object.keys(errors).length > 0) {
-                console.log("Validation errors:", errors);
-                return;
-              }
-
-              // If validation passes and proceed is checked
+            onClick={() => {
+              const params = {
+                ...formikRef.current.values,
+                special_permit_application_id: specialPermitApplicationId,
+              };
+              const formData = getFormData(params);
               if (proceed) {
-                const params = {
-                  ...formikRef.current.values,
-                  special_permit_application_id: specialPermitApplicationId,
-                };
-                const formData = getFormData(params);
-
                 handleSubmit(
                   {
                     url: isUpdate
@@ -559,7 +462,12 @@ function ParadeModal({
           >
             Submit
           </Button>
-          <Button color="secondary" onClick={toggleModal}>
+          <Button
+            color="secondary"
+            onClick={() => {
+              toggleModal();
+            }}
+          >
             Close
           </Button>
         </ModalFooter>

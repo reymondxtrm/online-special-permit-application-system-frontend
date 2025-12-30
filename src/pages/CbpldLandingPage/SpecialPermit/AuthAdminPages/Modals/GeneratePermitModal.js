@@ -174,7 +174,7 @@ function GeneratePermitModal({
     }
   }, [data]);
 
-  const handleDefaultFileNmae = async () => {
+  const handleBeforePrint = async () => {
     const originalTitle = document.title;
     document.title = data?.application_reference;
     setTimeout(() => {
@@ -801,8 +801,8 @@ function GeneratePermitModal({
       <ModalFooter>
         <ReactToPrint
           trigger={() => <Button color="primary">Print</Button>}
-          content={() => componentRef.current} // Specify the content to print
-          onBeforePrint={handleDefaultFileNmae}
+          content={() => componentRef.current}
+          onBeforePrint={handleBeforePrint}
         />
         <Button color="secondary" onClick={toggleModal}>
           Close

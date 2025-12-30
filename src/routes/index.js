@@ -161,13 +161,12 @@ const authProtectedRoutes = [
     path: "/user-control",
     component: Controls,
   },
+  { path: "/forgot-password", component: ForgetPwd },
+  { path: "/logout", component: Logout },
+  { path: "/profile", component: UserProfile },
 ];
 
 const publicRoutes = [
-  { path: "/profile", component: UserProfile },
-  { path: "/logout", component: Logout },
-  // { path: "/login", component: Login },
-  { path: "/forgot-password", component: ForgetPwd },
   { path: "/register", component: Register },
   { path: "/home", component: CbpldLandingPage },
 
