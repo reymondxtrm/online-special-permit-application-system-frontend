@@ -781,7 +781,8 @@ function PaymentModal({
                                             "client/for-payment/dashboard",
                                           new_collection: eor_collection,
                                           updateUrl: {
-                                            link: "http://ospas01.b.staging.butuan.gov.ph/api/online/create-db-state",
+                                            // link: "http://ospas01.b.staging.butuan.gov.ph/api/online/create-db-state",
+                                            link: "https://backendospas.butuan.gov.ph/api/online/create-db-state",
                                             params: {
                                               application_type:
                                                 "occupational_permit",
@@ -810,8 +811,8 @@ function PaymentModal({
                                               // window.location.protocol +
                                               // "//" +
                                               // process.env.REACT_APP_API +
-                                              `http://ospas01.b.staging.butuan.gov.ph/api/update-payment-status`,
-                                            // `https://backendospas.butuan.gov.ph/api/update-payment-status`,
+                                              // `http://ospas01.b.staging.butuan.gov.ph/api/update-payment-status`,
+                                              `https://backendospas.butuan.gov.ph/api/update-payment-status`,
                                           },
                                         };
                                         const jsonString = JSON.stringify(obj);

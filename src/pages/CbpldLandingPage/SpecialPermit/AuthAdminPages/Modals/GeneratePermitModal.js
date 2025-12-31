@@ -234,7 +234,7 @@ function GeneratePermitModal({
         setFirstParagraph(
           (prevText) =>
             prevText +
-            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.requestor_name}</span>`
+            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.requestor_name.toUpperCase()}</span>`
         );
         setFirstParagraphTextArea(
           (prevText) => prevText + data?.requestor_name
@@ -243,7 +243,7 @@ function GeneratePermitModal({
         setSecondParagraph(
           (prevText) =>
             prevText +
-            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.requestor_name}</span>`
+            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.requestor_name.toUpperCase()}</span>`
         );
         setSecondParagraphTextArea(
           (prevText) => prevText + data?.requestor_name

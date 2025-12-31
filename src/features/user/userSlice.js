@@ -109,8 +109,10 @@ export const specialPermitCompanyRegistration = createAsyncThunk(
       });
       localStorage.setItem("email", response.data.email);
       if (response.status === 200) {
-        history.push(`/email-verification`);
-        return response;
+        setTimeout(() => {
+          history.push(`/email-verification`);
+        }, 1500);
+        return response.data;
       }
       return thunkAPI.rejectWithValue(response.data);
     } catch (error) {
@@ -356,7 +358,7 @@ export const userSlice = createSlice({
     },
     [specialPermitCompanyRegistration.fulfilled]: (state, { payload }) => {
       // state.name = payload.user.fname;
-      state.email = payload.user.email;
+      state.email = payload.email;
       // state.id = payload.user.id;
       // state.user_type = payload.user.user_type;
       // state.accountType = payload.user.account_type;

@@ -54,12 +54,12 @@ const CertificateFormat = React.forwardRef((props, ref) => {
   const paperSize =
     permitType === "good_moral" || permitType === "mayors_permit"
       ? "a4"
-      : "folio";
+      : "legal";
   const maxHeight = useMemo(() => {
     const baseHeight =
       permitType === "good_moral" || permitType === "mayors_permit"
         ? 1090
-        : 1223;
+        : 1319;
 
     const minus18mmInPx = (18 * 96) / 25.4; // ~68 px
     return baseHeight - minus18mmInPx;

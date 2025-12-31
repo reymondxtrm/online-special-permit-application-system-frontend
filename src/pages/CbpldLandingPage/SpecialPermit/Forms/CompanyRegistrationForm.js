@@ -60,7 +60,20 @@ export default function CompanyRegistrationForm({
         ).unwrap();
 
         Swal.close();
+
+        await Swal.fire({
+          icon: "success",
+          title: "Registration Successful!",
+          text: "Redirecting to email verification...",
+          confirmButtonColor: "#3085d6",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+
+        resetForm();
       } catch (error) {
+        Swal.close();
+
         const errors = error?.errors;
 
         if (errors && Object.keys(errors).length > 0) {
@@ -75,10 +88,11 @@ export default function CompanyRegistrationForm({
             confirmButtonColor: "#d33",
           });
         } else {
+          // Check for direct message from backend
           Swal.fire({
             icon: "error",
-            title: "Something went wrong!",
-            text: error.response?.data?.message || "Please try again later.",
+            title: "Registration Failed",
+            text: error?.message || error || "Please try again later.", // Added error fallback
             confirmButtonColor: "#d33",
           });
         }
