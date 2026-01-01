@@ -81,7 +81,7 @@ export default function CedulaAddtionalDetailsModal({
     setAdditionalDetails(details);
     handleCancel();
   };
-  console.log("details", details, "values", values);
+
   useEffect(() => {
     if (isOpen) {
       setDetails({

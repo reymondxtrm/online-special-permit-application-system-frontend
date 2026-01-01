@@ -82,6 +82,7 @@ import CedulaApplicationFormModal from "pages/CbpldLandingPage/SpecialPermit/Aut
 import PassportCropper from "pages/TrialPages/PassportCropper";
 import TwostepVerification2 from "pages/AuthenticationInner/auth-two-step-verification-2";
 import TwostepVerification from "pages/AuthenticationInner/auth-two-step-verification";
+import SuperAdminControl from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/SuperAdminControl";
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: Analytics },
@@ -164,6 +165,10 @@ const authProtectedRoutes = [
   { path: "/forgot-password", component: ForgetPwd },
   { path: "/logout", component: Logout },
   { path: "/profile", component: UserProfile },
+  {
+    path: "/super-admin",
+    component: SuperAdminControl,
+  },
 ];
 
 const publicRoutes = [

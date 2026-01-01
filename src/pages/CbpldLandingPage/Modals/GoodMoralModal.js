@@ -167,21 +167,6 @@ function GoodMoralModal({
   const IMAGE_SIZE = 2 * 1024 * 1024;
   const SUPPORTED_IMAGE_FORMATS = ["image/jpeg", "image/png", "image/jpg"];
 
-  // File validation for create mode
-  const fileValidationRequired = Yup.mixed()
-    .required("This file is required")
-    .test(
-      "fileSize",
-      "File must be less than 2MB",
-      (value) => value && value.size <= IMAGE_SIZE
-    )
-    .test(
-      "fileFormat",
-      "Only JPG and PNG images are allowed",
-      (value) => value && SUPPORTED_IMAGE_FORMATS.includes(value.type)
-    );
-
-  // File validation for update mode (optional)
   const fileValidationOptional = Yup.mixed()
     .nullable()
     .test(
@@ -195,6 +180,19 @@ function GoodMoralModal({
       (value) => !value || SUPPORTED_IMAGE_FORMATS.includes(value.type)
     );
 
+  const fileValidationRequired = Yup.mixed()
+    .required("File is required")
+    .test(
+      "fileSize",
+      "File must be less than 2MB",
+      (value) => value && value.size <= IMAGE_SIZE
+    )
+    .test(
+      "fileFormat",
+      "Only JPG and PNG images are allowed",
+      (value) => value && SUPPORTED_IMAGE_FORMATS.includes(value.type)
+    );
+
   const validationSchema = Yup.object().shape({
     purpose: Yup.object().nullable().required("Purpose is required"),
 
@@ -204,8 +202,8 @@ function GoodMoralModal({
       otherwise: (schema) => schema.notRequired(),
     }),
 
-    exemption_proof: Yup.mixed().when("purpose", {
-      is: (purpose) => purpose?.label === "Local Employment",
+    exemption_proof: Yup.mixed().when("exemption", {
+      is: (exemption) => exemption !== null,
       then: () => (isUpdate ? fileValidationOptional : fileValidationRequired),
       otherwise: (schema) => schema.notRequired(),
     }),
@@ -314,10 +312,13 @@ function GoodMoralModal({
                                 setemploymentPurpose(
                                   selectedOption?.label === "Local Employment"
                                 );
-                                props.setFieldValue(
-                                  "purpose",
-                                  selectedOption || null
-                                );
+
+                                props.setValues({
+                                  ...props.values,
+                                  purpose: selectedOption || null,
+                                  exemption_proof: null,
+                                  exemption: null,
+                                });
                               }}
                               onBlur={() =>
                                 props.setFieldTouched("purpose", true)

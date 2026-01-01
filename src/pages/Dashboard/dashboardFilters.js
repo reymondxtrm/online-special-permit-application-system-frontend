@@ -26,12 +26,12 @@ const DashboardFilters = ({
   const validation = useFormik({
     enableReinitialize: false,
     initialValues: {
-      keyword: "",
+      // keyword: "",
       date_from: "",
       date_to: "",
     },
     validationSchema: Yup.object({
-      keyword: Yup.string().notRequired(),
+      // keyword: Yup.string().notRequired(),
       date_from: Yup.string().notRequired(),
       date_to: Yup.string().notRequired(),
     }),
@@ -41,7 +41,7 @@ const DashboardFilters = ({
         ...tableParams,
         ...values,
       };
-      console.log(params);
+      
       setParams(params);
       dispatch(action(params));
       dispatch(dateFilterSlice.actions.setParams(params));
@@ -106,7 +106,7 @@ const DashboardFilters = ({
           </Col>
         </>
       ) : null}
-      <BasicInputField
+      {/* <BasicInputField
         col={"6"}
         type={"text"}
         label={"Keyword"}
@@ -116,7 +116,7 @@ const DashboardFilters = ({
         validation={validation}
         placeholder={"Enter keyword"}
         value={validation.values.keyword}
-      />
+      /> */}
       <BasicInputField
         col={"6"}
         type={"date"}

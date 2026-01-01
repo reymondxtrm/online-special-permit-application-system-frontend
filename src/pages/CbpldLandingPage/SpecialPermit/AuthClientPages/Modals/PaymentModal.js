@@ -71,7 +71,8 @@ function PaymentModal({
     return (
       d.getFullYear().toString() +
       String(d.getMonth() + 1).padStart(2, "0") +
-      String(d.getDate()).padStart(2, "0")
+      String(d.getDate()).padStart(2, "0") +
+      String(d.getMilliseconds()).padStart(2, "0")
     );
   }
   const [isPaying, setIsPaying] = useState(false);
@@ -782,7 +783,12 @@ function PaymentModal({
                                           new_collection: eor_collection,
                                           updateUrl: {
                                             // link: "http://ospas01.b.staging.butuan.gov.ph/api/online/create-db-state",
-                                            link: "https://backendospas.butuan.gov.ph/api/online/create-db-state",
+                                            // link: "https://backendospas.butuan.gov.ph/api/online/create-db-state",
+                                            link:
+                                              window.location.protocol +
+                                              "//" +
+                                              process.env.REACT_APP_API +
+                                              "api/online/create-db-state",
                                             params: {
                                               application_type:
                                                 "occupational_permit",
@@ -808,11 +814,12 @@ function PaymentModal({
                                               TrxnAmount: "paid_amount",
                                             },
                                             link:
-                                              // window.location.protocol +
-                                              // "//" +
-                                              // process.env.REACT_APP_API +
-                                              // `http://ospas01.b.staging.butuan.gov.ph/api/update-payment-status`,
-                                              `https://backendospas.butuan.gov.ph/api/update-payment-status`,
+                                              window.location.protocol +
+                                              "//" +
+                                              process.env.REACT_APP_API +
+                                              "api/update-payment-status",
+                                            // `http://ospas01.b.staging.butuan.gov.ph/api/update-payment-status`,
+                                            // `https://backendospas.butuan.gov.ph/api/update-payment-status`,
                                           },
                                         };
                                         const jsonString = JSON.stringify(obj);
@@ -823,8 +830,13 @@ function PaymentModal({
                                         const encoded =
                                           encodeURIComponent(encrypted);
                                         // const url = `http://ctd01.a.testing.butuan.gov.ph/payment?data=${encoded}`;
-                                        const url = `http://epay01.a.staging.butuan.gov.ph/payment?data=${encoded}`;
-
+                                        // const url = `http://epay01.a.staging.butuan.gov.ph/payment?data=${encoded}`;
+                                        const url =
+                                          window.location.protocol +
+                                          "//" +
+                                          process.env.REACT_APP_EPAY +
+                                          `payment?data=${encoded}`;
+                                        setIsPaying((prev) => !prev);
                                         // const url =
                                         //   window.location.protocol +
                                         //   "//" +
@@ -855,7 +867,7 @@ function PaymentModal({
                                         //   }
                                         // };
                                         // create();
-                                        setIsPaying((prev) => !prev);
+
                                         window.location.href = url;
                                       } else {
                                         const formData = getFormData(formik);

@@ -999,11 +999,23 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         <td>
                           <Button
                             color="primary"
-                            // disabled={
-                            //   application?.order_of_payment
-                            //     ?.payment_on_progress === 1
-                            // }
+                            disabled={
+                              application?.order_of_payment
+                                ?.payment_on_progress === 1
+                            }
                             onClick={() => {
+                              if (
+                                application?.order_of_payment
+                                  ?.payment_on_progress === 1
+                              ) {
+                                Swal.fire({
+                                  icon: "info",
+                                  title: "Processing Payment",
+                                  text: "Your application payment is currently being processed. Please wait for further updates.",
+                                  confirmButtonText: "OK",
+                                });
+                                return;
+                              }
                               toggleOverTheCounterModal();
                               setSelectedRow([application?.id]);
                               dispatch(

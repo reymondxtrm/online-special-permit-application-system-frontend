@@ -559,10 +559,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               color="success"
                               className="me-2"
                               onClick={() => {
-                                console.log(
-                                  application?.order_of_payment?.payment_detail
-                                    ?.attachment
-                                );
+                               
                                 window.open(
                                   application?.order_of_payment?.payment_detail
                                     ?.attachment,

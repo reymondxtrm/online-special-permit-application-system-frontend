@@ -35,7 +35,7 @@ function OrderOfPaymentModal({
   const multiplier = ["mayors_permit", "good_moral"].includes(applicationType)
     ? 3
     : 1;
-  console.log(clearance);
+ 
   return (
     <React.Fragment>
       <Modal

@@ -37,7 +37,7 @@ const PermitCard = ({ title, content, buttonText, onClick }) => (
 function SpecialPermit() {
   const [permitType, setpermitType] = useState("");
   const [formModal, setformModal] = useState(false);
-  console.log(formModal);
+
   const toggleModal = () => {
     setformModal((prevState) => !prevState);
   };

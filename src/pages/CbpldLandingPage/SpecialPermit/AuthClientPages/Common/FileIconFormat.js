@@ -15,6 +15,7 @@ const FILE_LABELS = {
   training_certificate: "Training Certificate", // fixed typo
   sworn_statement: "Sworn Statement",
   official_receipt: "Official Receipt",
+  exemption_proof: "Froof of Exemption",
 };
 
 export default function FileIconFormat({
@@ -22,6 +23,7 @@ export default function FileIconFormat({
   path,
   toggleIsViewerOpen,
   getImageHandle,
+  isAdmin = false,
 }) {
   const text = FILE_LABELS[fileType] || "";
   if (!text) return null;
@@ -35,7 +37,7 @@ export default function FileIconFormat({
       if (toggleIsViewerOpen) toggleIsViewerOpen();
       await getImageHandle({
         path: path,
-        url: "api/client/attachment",
+        url: isAdmin ? "api/admin/attachment" : "api/client/attachment",
         showLoader: true,
       });
     } catch (err) {

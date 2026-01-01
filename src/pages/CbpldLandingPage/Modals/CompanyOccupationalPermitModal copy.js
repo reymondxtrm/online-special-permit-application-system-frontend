@@ -66,7 +66,7 @@ export default function CompanyOccupationalPermitModal({
     );
     toggleUploadImageModal();
   };
-  console.log(formikRef?.current?.values);
+  
   // const toggleAdditionalDetailsModal = () => {
   //   setAdditionalDetailsModal((prev) => !prev);
   // };

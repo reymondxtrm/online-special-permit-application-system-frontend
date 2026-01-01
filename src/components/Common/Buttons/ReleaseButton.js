@@ -147,7 +147,7 @@ const ReleaseButton = ({
                   showConfirmButton: false,
                   timer: 1500,
                 }).then(function () {});
-                console.log(openModal);
+               
               },
               (error) => {
                 if (error.response.status === 401) {

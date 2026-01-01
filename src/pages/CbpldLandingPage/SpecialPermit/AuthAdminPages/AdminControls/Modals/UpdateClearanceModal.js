@@ -14,7 +14,6 @@ export default function UpdateClearanceModal({
 }) {
   const handleSubmit = useSubmit();
   const dispatch = useDispatch();
- 
 
   const validation = useFormik({
     enableReinitialize: true,
@@ -44,7 +43,7 @@ export default function UpdateClearanceModal({
       name: selectedClearance?.name,
       amount: selectedClearance?.amount,
     });
-  }, [selectedClearance]);
+  }, [selectedClearance, isOpen]);
   return (
     <Modal toggle={toggle} isOpen={isOpen}>
       <ModalHeader>

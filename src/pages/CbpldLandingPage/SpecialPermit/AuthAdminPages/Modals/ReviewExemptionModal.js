@@ -10,6 +10,9 @@ import {
 import axios from "axios";
 import ImageViewer from "react-simple-image-viewer";
 import useSubmit from "hooks/Common/useSubmit";
+import FileIconFormat from "../../AuthClientPages/Common/FileIconFormat";
+import useGetImage from "hooks/Common/useGetImage";
+import Viewer from "react-viewer";
 
 function ReviewExemptionModal({
   openModal,
@@ -17,18 +20,13 @@ function ReviewExemptionModal({
   toggleRefresh,
   exemptionData,
 }) {
+ 
   const [isViewerOpen, setIsViewerOpen] = useState(false);
-  const [currentImage, setCurrentImage] = useState(null);
+
   const handleSubmit = useSubmit();
-
-  const openImageViewer = useCallback((imageUrl) => {
-    setCurrentImage(imageUrl);
-    setIsViewerOpen(true);
-  }, []);
-
-  const closeImageViewer = () => {
-    setIsViewerOpen(false);
-    setCurrentImage(null);
+  const { currentImage, getImageHandle, isFetching } = useGetImage();
+  const toggleIsViewerOpen = () => {
+    setIsViewerOpen((prev) => !prev);
   };
   useEffect(() => {
     if (openModal) {
@@ -45,7 +43,6 @@ function ReviewExemptionModal({
     }
   }, [openModal]);
 
-  // console.log(exemptionData);
   return (
     <React.Fragment>
       <Modal
@@ -85,20 +82,12 @@ function ReviewExemptionModal({
               <tr>
                 <td>{exemptionData?.exempted_case_name}</td>
                 <td>
-                  <img
-                    src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${exemptionData.attachment}`}
-                    alt={`Thumbnail`}
-                    style={{
-                      width: "100px",
-                      height: "50px",
-                      margin: "5px",
-                      cursor: "pointer",
-                    }}
-                    onClick={() =>
-                      openImageViewer(
-                        `${window.location.protocol}//${process.env.REACT_APP_API}storage/${exemptionData.attachment}`
-                      )
-                    }
+                  <FileIconFormat
+                    fileType="exemption_proof"
+                    path={exemptionData.attachment}
+                    toggleIsViewerOpen={toggleIsViewerOpen}
+                    getImageHandle={getImageHandle}
+                    isAdmin
                   />
                 </td>
                 <td className="text-center">
@@ -120,7 +109,9 @@ function ReviewExemptionModal({
                             error: "unknown error occured",
                           },
                           params: {
-                            permit_application_exemption_id: exemptionData.id,
+                            special_permit_application_id:
+                              exemptionData?.special_permit_application_id,
+                            exemption_id: exemptionData?.exempted_case_id,
                           },
                         },
                         [],
@@ -178,13 +169,20 @@ function ReviewExemptionModal({
           </Button>
         </ModalFooter>
 
-        {isViewerOpen && currentImage && (
-          <ImageViewer
-            src={[currentImage]} // Pass the current image as an array
-            currentIndex={0}
-            onClose={closeImageViewer}
-            closeOnClickOutside={true}
-            backgroundStyle={{ backgroundColor: "rgba(0,0,0,0.8)" }}
+        {isViewerOpen && currentImage && !isFetching && (
+          <Viewer
+            visible={isViewerOpen}
+            onClose={toggleIsViewerOpen}
+            images={[{ src: currentImage, alt: "Attachment" }]}
+            activeIndex={0}
+            rotatable={true}
+            zoomable={true}
+            scalable={true}
+            noNavbar={false}
+            noToolbar={false}
+            attribute={false}
+            zIndex={2000}
+            key={currentImage}
           />
         )}
       </Modal>

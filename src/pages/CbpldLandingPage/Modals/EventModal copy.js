@@ -326,7 +326,7 @@ function EventModal({
                           />
 
                           <FormFeedback>{props.errors[file.key]}</FormFeedback>
-                          {console.log(uploadedFiles)}
+                         
                           {isUpdate && uploadedFiles?.[file.key] && (
                             <Button
                               color="primary"

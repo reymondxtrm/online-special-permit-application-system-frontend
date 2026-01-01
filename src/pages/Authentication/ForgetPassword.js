@@ -64,7 +64,7 @@ const ForgetPasswordPage = (props) => {
     })
   );
 
-  console.log("her", forgetError, "her", forgetSuccessMsg);
+  
   return (
     <React.Fragment>
       <div className="home-btn d-none d-sm-block">
