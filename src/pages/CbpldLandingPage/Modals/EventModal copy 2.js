@@ -17,10 +17,11 @@ import {
 import { Formik } from "formik";
 import useSubmit from "hooks/Common/useSubmit";
 import axios from "axios";
-import { EVENT_TYPES, USER_PRIVACY } from "assets/data/data";
+import { USER_PRIVACY } from "assets/data/data";
 import * as Yup from "yup";
 import useGetImage from "hooks/Common/useGetImage";
 import ImageViewer from "react-simple-image-viewer";
+import useImageCompressor from "hooks/Common/useImageCompressor";
 
 function EventModal({
   openModal,
@@ -37,9 +38,20 @@ function EventModal({
   const [uploadedFiles, setUploadedFiles] = useState({});
   const { getImageHandle, currentImage, isFetching } = useGetImage();
   const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const {
+    compressedFiles,
+    isCompressing,
+    errors: compressionErrors,
+    handleImageChange,
+  } = useImageCompressor({
+    maxSizeMB: 2,
+    maxWidthOrHeight: 1920,
+  });
+
   const toggleIsViewerOpen = () => {
     setIsViewerOpen((prev) => !prev);
   };
+
   useEffect(() => {
     if (openModal && isUpdate && specialPermitApplicationId) {
       axios
@@ -70,6 +82,15 @@ function EventModal({
       setUploadedFiles({});
     }
   }, [openModal]);
+  const handleFileChange = async (e, fieldName, index, props) => {
+    const file = e.currentTarget.files[0];
+    if (!file) return;
+    const compressed = await handleImageChange(e, index);
+    if (compressed) {
+      props.setFieldValue(fieldName, compressed);
+      props.setFieldTouched(fieldName, true, true);
+    }
+  };
 
   const getFormData = (object) => {
     const formData = new FormData();
@@ -83,13 +104,40 @@ function EventModal({
     return formData;
   };
 
+  const IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+  const SUPPORTED_FORMATS = ["image/jpeg", "image/png", "image/jpg"];
+
+  const fileValidationRequired = Yup.mixed()
+    .required("This file is required")
+    .test(
+      "fileFormat",
+      "Only JPG and PNG images are allowed",
+      (value) => !value || SUPPORTED_FORMATS.includes(value.type)
+    );
+
+  const fileValidationOptional = Yup.mixed()
+    .nullable()
+    .test(
+      "fileFormat",
+      "Only JPG and PNG images are allowed",
+      (value) => !value || SUPPORTED_FORMATS.includes(value.type)
+    );
+
   const validationSchema = Yup.object().shape({
-    requestor_name: Yup.string().required("Required"),
-    event_name: Yup.string().required("Required"),
-    event_date_from: Yup.date().required("Required"),
-    event_date_to: Yup.date().required("Required"),
-    event_time_from: Yup.string().required("Required"),
-    event_time_to: Yup.string().required("Required"),
+    requestor_name: Yup.string().required("Requestor name is required"),
+    event_name: Yup.string().required("Event name is required"),
+    event_date_from: Yup.date().required("Start date is required"),
+    event_date_to: Yup.date()
+      .required("End date is required")
+      .min(
+        Yup.ref("event_date_from"),
+        "End date must be after or equal to start date"
+      ),
+    event_time_from: Yup.string().required("Start time is required"),
+    event_time_to: Yup.string().required("End time is required"),
+    request_letter: isUpdate ? fileValidationOptional : fileValidationRequired,
+    route_plan: isUpdate ? fileValidationOptional : fileValidationRequired,
+    sworn_statement: fileValidationOptional, // Always optional
   });
 
   return (
@@ -109,18 +157,13 @@ function EventModal({
       )}
       <Modal
         isOpen={openModal}
-        toggle={() => {
-          toggleModal();
-        }}
+        toggle={toggleModal}
         backdrop="static"
         className="modal-dialog-centered"
         size="m"
+        unmountOnClose
       >
-        <ModalHeader
-          toggle={() => {
-            toggleModal();
-          }}
-        >
+        <ModalHeader toggle={toggleModal}>
           <p
             style={{
               fontWeight: "bold",
@@ -138,6 +181,8 @@ function EventModal({
           <Formik
             innerRef={formikRef}
             enableReinitialize={true}
+            validateOnChange={true}
+            validateOnBlur={true}
             validationSchema={validationSchema}
             initialValues={{
               type: "event",
@@ -148,9 +193,9 @@ function EventModal({
               event_time_from: existingData?.event_time_from || "",
               event_time_to: existingData?.event_time_to || "",
               event_type: existingData?.event_type || "",
-              request_letter: "",
-              route_plan: "",
-              sworn_statement: "",
+              request_letter: null,
+              route_plan: null,
+              sworn_statement: null,
               special_permit_application_id: specialPermitApplicationId,
             }}
             onSubmit={handleSubmit}
@@ -288,48 +333,62 @@ function EventModal({
                       </Col>
                     </Row>
 
-                    {/* FILE INPUTS */}
                     {[
                       {
                         key: "request_letter",
                         label: "Request Letter (Stamped)",
+                        required: !isUpdate,
                       },
-                      { key: "route_plan", label: "Route Plan (Approved)" },
+                      {
+                        key: "route_plan",
+                        label: "Route Plan (Approved)",
+                        required: !isUpdate,
+                      },
                       {
                         key: "sworn_statement",
                         label: "Sworn Statement (if proceeds are donated)",
+                        required: false,
                       },
                     ].map((file) => (
                       <FormGroup key={file.key}>
                         <Label>
                           {file.label}
-                          {file.key !== "sworn_statement" && (
-                            <span className="text-danger">*</span>
+                          {file.required && (
+                            <span className="text-danger"> *</span>
                           )}
                         </Label>
-                        <div className="d-flex gap-2">
-                          <Input
-                            type="file"
-                            name={file.key}
-                            accept="image/*"
-                            onChange={(e) =>
-                              props.setFieldValue(
-                                file.key,
-                                e.currentTarget.files[0]
-                              )
-                            }
-                            onBlur={() => props.setFieldTouched(file.key, true)}
-                            invalid={
-                              props.touched[file.key] &&
-                              Boolean(props.errors[file.key])
-                            }
-                          />
+                        <div className="d-flex gap-2 align-items-start">
+                          <div className="flex-grow-1">
+                            <Input
+                              type="file"
+                              name={file.key}
+                              accept="image/*"
+                              onChange={(e) => {
+                                const selectedFile =
+                                  e.currentTarget.files[0] || null;
+                                props.setFieldValue(file.key, selectedFile);
+                                props.setFieldTouched(file.key, true, true);
+                                handleFileChange(e, file.key, 0, props);
+                              }}
+                              onBlur={() =>
+                                props.setFieldTouched(file.key, true, true)
+                              }
+                            />
+                            {props.touched[file.key] &&
+                            props.errors[file.key] ? (
+                              <div
+                                className="text-danger mt-1"
+                                style={{ fontSize: "0.875rem" }}
+                              >
+                                {props.errors[file.key]}
+                              </div>
+                            ) : null}
+                          </div>
 
-                          <FormFeedback>{props.errors[file.key]}</FormFeedback>
-                         
                           {isUpdate && uploadedFiles?.[file.key] && (
                             <Button
                               color="primary"
+                              size="sm"
                               onClick={(e) => {
                                 e.preventDefault();
                                 getImageHandle({
@@ -340,7 +399,7 @@ function EventModal({
                                 toggleIsViewerOpen();
                               }}
                             >
-                              <i className="mdi mdi-eye" color="warning"></i>
+                              <i className="mdi mdi-eye"></i>
                             </Button>
                           )}
                         </div>
@@ -370,39 +429,59 @@ function EventModal({
               color: "white",
               fontWeight: 600,
             }}
-            disabled={!proceed}
-            onClick={() => {
-              const formik = formikRef.current.values;
-              const formData = getFormData(formik);
+            disabled={!proceed || isCompressing}
+            onClick={async () => {
+              // Validate form first
+              const errors = await formikRef.current?.validateForm();
 
-              handleSubmit(
-                {
-                  url: isUpdate
-                    ? "api/client/special-permit/event/update"
-                    : "api/client/special-permit/event",
-                  headers: { "Content-Type": "multipart/form-data" },
-                  message: {
-                    title: "Are you sure you want to Proceed?",
-                    failedTitle: "FAILED",
-                    success: "Success!",
-                    error: "Unknown error occurred",
+              // Touch all fields to show errors
+              formikRef.current?.setTouched({
+                requestor_name: true,
+                event_name: true,
+                event_date_from: true,
+                event_date_to: true,
+                event_time_from: true,
+                event_time_to: true,
+                request_letter: true,
+                route_plan: true,
+                sworn_statement: true,
+              });
+
+              // If there are errors, don't proceed
+              if (errors && Object.keys(errors).length > 0) {
+                console.log("Validation errors:", errors);
+                return;
+              }
+
+              // If validation passes and proceed is checked
+              if (proceed) {
+                const formik = formikRef.current.values;
+                const formData = getFormData(formik);
+
+                handleSubmit(
+                  {
+                    url: isUpdate
+                      ? "api/client/special-permit/event/update"
+                      : "api/client/special-permit/event",
+                    headers: { "Content-Type": "multipart/form-data" },
+                    message: {
+                      title: "Are you sure you want to Proceed?",
+                      failedTitle: "FAILED",
+                      success: "Success!",
+                      error: "Unknown error occurred",
+                    },
+                    params: formData,
                   },
-                  params: formData,
-                },
-                [],
-                [toggleModal, toggleRefresh]
-              );
+                  [],
+                  [toggleModal, toggleRefresh]
+                );
+              }
             }}
           >
             {isUpdate ? "Update" : "Submit"}
           </Button>
 
-          <Button
-            color="secondary"
-            onClick={() => {
-              toggleModal();
-            }}
-          >
+          <Button color="secondary" onClick={toggleModal}>
             Close
           </Button>
         </ModalFooter>

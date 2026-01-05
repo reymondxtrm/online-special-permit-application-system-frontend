@@ -48,7 +48,7 @@ function AmountModal({
           (res) => {
             const options = res.data.map((options) => ({
               value: options.id,
-              label: options.name,
+              label: options.ordinance,
             }));
             // options.push({ value: "others", label: "Others" });
             setDiscountOptions(options);

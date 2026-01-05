@@ -49,6 +49,7 @@ const ForSignature = () => {
     parade: 0,
     recorrida: 0,
     use_of_government_property: 0,
+    occupational_permit: 0,
   });
 
   const handleTabSelect = (key) => {

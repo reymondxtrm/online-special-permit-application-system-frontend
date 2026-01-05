@@ -21,6 +21,7 @@ import { USER_PRIVACY } from "assets/data/data";
 import * as Yup from "yup";
 import useGetImage from "hooks/Common/useGetImage";
 import ImageViewer from "react-simple-image-viewer";
+import useImageCompressor from "hooks/Common/useImageCompressor";
 
 function EventModal({
   openModal,
@@ -37,6 +38,15 @@ function EventModal({
   const [uploadedFiles, setUploadedFiles] = useState({});
   const { getImageHandle, currentImage, isFetching } = useGetImage();
   const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const {
+    compressedFiles,
+    isCompressing,
+    errors: compressionErrors,
+    handleImageChange,
+  } = useImageCompressor({
+    maxSizeMB: 2,
+    maxWidthOrHeight: 1920,
+  });
 
   const toggleIsViewerOpen = () => {
     setIsViewerOpen((prev) => !prev);
@@ -72,6 +82,15 @@ function EventModal({
       setUploadedFiles({});
     }
   }, [openModal]);
+  const handleFileChange = async (e, fieldName, index, props) => {
+    const file = e.currentTarget.files[0];
+    if (!file) return;
+    const compressed = await handleImageChange(e, index);
+    if (compressed) {
+      props.setFieldValue(fieldName, compressed);
+      props.setFieldTouched(fieldName, true, true);
+    }
+  };
 
   const getFormData = (object) => {
     const formData = new FormData();
@@ -91,11 +110,6 @@ function EventModal({
   const fileValidationRequired = Yup.mixed()
     .required("This file is required")
     .test(
-      "fileSize",
-      "File must be less than 5MB",
-      (value) => !value || value.size <= IMAGE_SIZE
-    )
-    .test(
       "fileFormat",
       "Only JPG and PNG images are allowed",
       (value) => !value || SUPPORTED_FORMATS.includes(value.type)
@@ -103,11 +117,6 @@ function EventModal({
 
   const fileValidationOptional = Yup.mixed()
     .nullable()
-    .test(
-      "fileSize",
-      "File must be less than 5MB",
-      (value) => !value || value.size <= IMAGE_SIZE
-    )
     .test(
       "fileFormat",
       "Only JPG and PNG images are allowed",
@@ -324,7 +333,6 @@ function EventModal({
                       </Col>
                     </Row>
 
-                    {/* FILE INPUTS */}
                     {[
                       {
                         key: "request_letter",
@@ -341,7 +349,7 @@ function EventModal({
                         label: "Sworn Statement (if proceeds are donated)",
                         required: false,
                       },
-                    ].map((file) => (
+                    ].map((file, index) => (
                       <FormGroup key={file.key}>
                         <Label>
                           {file.label}
@@ -356,15 +364,21 @@ function EventModal({
                               name={file.key}
                               accept="image/*"
                               onChange={(e) => {
-                                const selectedFile =
-                                  e.currentTarget.files[0] || null;
-                                props.setFieldValue(file.key, selectedFile);
-                                props.setFieldTouched(file.key, true, true);
+                                handleFileChange(e, file.key, index, props);
                               }}
                               onBlur={() =>
                                 props.setFieldTouched(file.key, true, true)
                               }
+                              disabled={isCompressing}
                             />
+                            {compressionErrors[index] && (
+                              <div
+                                className="text-warning mt-1"
+                                style={{ fontSize: "0.875rem" }}
+                              >
+                                Compression error: {compressionErrors[index]}
+                              </div>
+                            )}
                             {props.touched[file.key] &&
                             props.errors[file.key] ? (
                               <div
@@ -469,7 +483,7 @@ function EventModal({
               }
             }}
           >
-            {isUpdate ? "Update" : "Submit"}
+            {isUpdate ? "Update" : isCompressing ? "Compressing..." : "Submit"}
           </Button>
 
           <Button color="secondary" onClick={toggleModal}>

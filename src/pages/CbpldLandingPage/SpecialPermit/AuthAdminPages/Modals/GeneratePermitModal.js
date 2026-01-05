@@ -53,7 +53,8 @@ function GeneratePermitModal({
       permitType === "event" ||
       permitType === "motorcade" ||
       permitType === "parade" ||
-      permitType === "recorrida"
+      permitType === "recorrida" ||
+      permitType === "use_of_government_property"
     ) {
       return true;
     } else {
@@ -126,9 +127,10 @@ function GeneratePermitModal({
     const date = new Date();
     const day = getOrdinal(date.getDate());
     const month = date.toLocaleString("en-US", { month: "long" });
+    const year = date.getFullYear();
 
     setthirdParagraph(
-      `Issued this ${day} day of ${month} 2025 at the City Hall Building, Butuan City, Phillipines.`
+      `Issued this ${day} day of ${month} ${year} at the City Hall Building, Butuan City, Philipines.`
     );
   }, []);
 
@@ -297,7 +299,7 @@ function GeneratePermitModal({
   const addAddressToActiveParagraph = () => {
     if (data?.applicant_name && activeParagraph) {
       if (activeParagraph === "first") {
-        setFirstParagraph((prevText) => prevText + `${data?.address}`);
+        setFirstParagraph((prevText) => prevText + `${C?.address}`);
         setFirstParagraphTextArea((prevText) => prevText + `${data?.address}`);
       } else if (activeParagraph === "second") {
         setSecondParagraph((prevText) => prevText + `${data?.address}`);
@@ -792,7 +794,7 @@ function GeneratePermitModal({
               </Row>
             )}
           </Col>
-
+          {console.log(data)}
           <Col md={openFirstColumn ? 5 : 7}>
             <CertificateFormat
               ref={componentRef}

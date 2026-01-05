@@ -20,6 +20,7 @@ import { USER_PRIVACY } from "assets/data/data";
 import useGetImage from "hooks/Common/useGetImage";
 import ImageViewer from "react-simple-image-viewer";
 import * as Yup from "yup";
+import useImageCompressor from "hooks/Common/useImageCompressor";
 
 function MotorcadeModal({
   openModal,
@@ -36,6 +37,15 @@ function MotorcadeModal({
   const [proceed, setIsProceed] = useState(false);
   const { getImageHandle, isFetching, currentImage } = useGetImage();
   const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const {
+    compressedFiles,
+    isCompressing,
+    errors: compressionErrors,
+    handleImageChange,
+  } = useImageCompressor({
+    maxSizeMB: 2,
+    maxWidthOrHeight: 1920,
+  });
 
   useEffect(() => {
     if (openModal && isUpdate) {
@@ -85,17 +95,20 @@ function MotorcadeModal({
   const toggleIsViewerOpen = () => {
     setIsViewerOpen((prev) => !prev);
   };
+  const handleFileChange = async (e, fieldName, index, props) => {
+    const file = e.currentTarget.files[0];
+    if (!file) return;
+    const compressed = await handleImageChange(e, index);
+    if (compressed) {
+      props.setFieldValue(fieldName, compressed);
+      props.setFieldTouched(fieldName, true, true);
+    }
+  };
 
-  const IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
   const SUPPORTED_FORMATS = ["image/jpeg", "image/png", "image/jpg"];
 
   const fileValidationRequired = Yup.mixed()
     .required("This file is required")
-    .test(
-      "fileSize",
-      "File must be less than 5MB",
-      (value) => !value || value.size <= IMAGE_SIZE
-    )
     .test(
       "fileFormat",
       "Only JPG and PNG images are allowed",
@@ -104,11 +117,6 @@ function MotorcadeModal({
 
   const fileValidationOptional = Yup.mixed()
     .nullable()
-    .test(
-      "fileSize",
-      "File must be less than 5MB",
-      (value) => !value || value.size <= IMAGE_SIZE
-    )
     .test(
       "fileFormat",
       "Only JPG and PNG images are allowed",
@@ -364,14 +372,21 @@ function MotorcadeModal({
                         type="file"
                         name="request_letter"
                         onChange={(e) => {
-                          const file = e.currentTarget.files[0] || null;
-                          props.setFieldValue("request_letter", file);
-                          props.setFieldTouched("request_letter", true, true);
+                          handleFileChange(e, "request_letter", 0, props);
                         }}
                         onBlur={() =>
                           props.setFieldTouched("request_letter", true, true)
                         }
+                        disabled={isCompressing}
                       />
+                      {compressionErrors[0] && (
+                        <div
+                          className="text-warning mt-1"
+                          style={{ fontSize: "0.875rem" }}
+                        >
+                          Compression error: {compressionErrors[0]}
+                        </div>
+                      )}
                       {props.touched.request_letter &&
                       props.errors.request_letter ? (
                         <div
@@ -415,14 +430,21 @@ function MotorcadeModal({
                         name="route_plan"
                         accept="image/*"
                         onChange={(e) => {
-                          const file = e.currentTarget.files[0] || null;
-                          props.setFieldValue("route_plan", file);
-                          props.setFieldTouched("route_plan", true, true);
+                          handleFileChange(e, "route_plan", 1, props);
                         }}
                         onBlur={() =>
                           props.setFieldTouched("route_plan", true, true)
                         }
+                        disabled={isCompressing}
                       />
+                      {compressionErrors[1] && (
+                        <div
+                          className="text-warning mt-1"
+                          style={{ fontSize: "0.875rem" }}
+                        >
+                          Compression error: {compressionErrors[1]}
+                        </div>
+                      )}
                       {props.touched.route_plan && props.errors.route_plan ? (
                         <div
                           className="text-danger mt-1"
@@ -470,7 +492,7 @@ function MotorcadeModal({
         <ModalFooter>
           <Button
             style={{ backgroundColor: "#1a56db", color: "white" }}
-            disabled={!proceed}
+            disabled={!proceed || isCompressing}
             onClick={async () => {
               // Validate form first
               const errors = await formikRef.current?.validateForm();
@@ -522,9 +544,8 @@ function MotorcadeModal({
               }
             }}
           >
-            {isUpdate ? "Update" : "Submit"}
+            {isUpdate ? "Update" : isCompressing ? "Compressing..." : "Submit"}
           </Button>
-
           <Button color="secondary" onClick={toggleModal}>
             Close
           </Button>

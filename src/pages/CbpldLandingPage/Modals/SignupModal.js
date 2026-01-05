@@ -11,36 +11,77 @@ import {
 import IndividualRegistrationForm from "../SpecialPermit/Forms/IndividualRegistrationForm";
 import CompanyRegistrationForm from "../SpecialPermit/Forms/CompanyRegistrationForm";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 function SignupModal({ openModal, toggleModal, props }) {
   const [brangaysOptions, setBarangaysOptions] = useState();
   const [selectedType, setSelectedType] = useState("individual");
-  useEffect(() => {
-    if (openModal) {
-      axios.get("api/geolocation/caraga").then(
-        (res) => {
-          const barangays = res.data.region.provinces
-            .find((item) => item.name === "Agusan del Norte")
-            .cities.find((item) => item.name === "City of Butuan ").barangays;
+  const [civilStatusOptions, setcivilStatusOptions] = useState();
+  const [loading, setLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
-          const uniqueBarangays = [];
-          const seen = new Set();
-          for (const item of barangays) {
-            if (!seen.has(item.psgc_id)) {
-              seen.add(item.psgc_id);
-              uniqueBarangays.push(item);
-            }
-          }
-          const options = uniqueBarangays.map((item) => {
-            return { value: item.barangay_id, label: item.name };
-          });
-          setBarangaysOptions(options);
+  useEffect(() => {
+    if (!openModal) return;
+    setLoading(true);
+    const fetchData = async () => {
+      Swal.fire({
+        title: "Loading...",
+        text: "Please wait while we fetch the data",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
         },
-        (error) => {
-          console.log(error);
+      });
+
+      try {
+        const [geoRes, civilRes] = await Promise.all([
+          axios.get("api/geolocation/caraga"),
+          axios.get("api/get-civil-status", {
+            params: { permit_type: "good_moral" },
+          }),
+        ]);
+
+        const barangays = geoRes.data.region.provinces
+          .find((item) => item.name === "Agusan del Norte")
+          .cities.find((item) => item.name === "City of Butuan ").barangays;
+
+        const uniqueBarangays = [];
+        const seen = new Set();
+
+        for (const item of barangays) {
+          if (!seen.has(item.psgc_id)) {
+            seen.add(item.psgc_id);
+            uniqueBarangays.push(item);
+          }
         }
-      );
-    }
+
+        const barangayOptions = uniqueBarangays.map((item) => ({
+          value: item.barangay_id,
+          label: item.name,
+        }));
+
+        setBarangaysOptions(barangayOptions);
+
+        const civilStatusOptions = civilRes.data.map((item) => ({
+          value: item.id,
+          label: item.name,
+        }));
+
+        setcivilStatusOptions(civilStatusOptions);
+        setLoading(false);
+        Swal.close();
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to load data. Please reload.",
+        });
+        console.log(error);
+        toggleModal();
+      }
+    };
+
+    fetchData();
   }, [openModal]);
 
   return (
@@ -188,6 +229,7 @@ function SignupModal({ openModal, toggleModal, props }) {
                 openModal={selectedType === "individual"}
                 brangaysOptions={brangaysOptions}
                 props={props}
+                civilStatusOptions={civilStatusOptions}
               />
             )}
             {selectedType === "company" && (
@@ -196,6 +238,7 @@ function SignupModal({ openModal, toggleModal, props }) {
                 openModal={selectedType === "company"}
                 toggleModal={toggleModal}
                 props={props}
+                civilStatusOptions={civilStatusOptions}
               />
             )}
           </div>

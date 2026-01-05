@@ -25,6 +25,7 @@ import { useSelector } from "react-redux";
 import useGetImage from "hooks/Common/useGetImage";
 import Viewer from "react-viewer";
 import UploadWithCropperModal from "./UploadWithCropperModal";
+import useImageCompressor from "hooks/Common/useImageCompressor";
 
 export default function CompanyOccupationalPermitModal({
   isOpen,
@@ -37,6 +38,22 @@ export default function CompanyOccupationalPermitModal({
   const [inputPicture, setInputPicture] = useState(null);
   const [uploadImageModal, setUploadImageModal] = useState(false);
   const { getImageHandle, isFetching, currentImage } = useGetImage();
+
+  // Separate compressor hooks for each file type
+  const cedulaCompressor = useImageCompressor({
+    maxSizeMB: 2,
+    maxWidthOrHeight: 1920,
+  });
+
+  const certificateCompressor = useImageCompressor({
+    maxSizeMB: 2,
+    maxWidthOrHeight: 1920,
+  });
+
+  const trainingCompressor = useImageCompressor({
+    maxSizeMB: 2,
+    maxWidthOrHeight: 1920,
+  });
 
   const fileInputRef = useRef(null);
   const handleSubmit = useSubmit();
@@ -64,7 +81,6 @@ export default function CompanyOccupationalPermitModal({
   }, []);
 
   const onCropDone = (image) => {
-    // Fixed: removed extra dot
     formikRef.current.setFieldValue(
       `employees[${activeIndex}].id_picture`,
       image
@@ -112,7 +128,53 @@ export default function CompanyOccupationalPermitModal({
     return form;
   };
 
-  // Fixed validation schema
+  const handleCedulaChange = async (e, index, props) => {
+    const file = e.currentTarget.files[0];
+    if (!file) return;
+
+    const compressed = await cedulaCompressor.handleImageChange(e, index);
+    if (compressed) {
+      props.setFieldValue(`employees[${index}].cedula`, compressed);
+      props.setFieldTouched(`employees[${index}].cedula`, true, true);
+    }
+  };
+
+  const handleCertificateChange = async (e, index, props) => {
+    const file = e.currentTarget.files[0];
+    if (!file) return;
+
+    const compressed = await certificateCompressor.handleImageChange(e, index);
+    if (compressed) {
+      props.setFieldValue(
+        `employees[${index}].certificate_of_employment`,
+        compressed
+      );
+      props.setFieldTouched(
+        `employees[${index}].certificate_of_employment`,
+        true,
+        true
+      );
+    }
+  };
+
+  const handleTrainingChange = async (e, index, props) => {
+    const file = e.currentTarget.files[0];
+    if (!file) return;
+
+    const compressed = await trainingCompressor.handleImageChange(e, index);
+    if (compressed) {
+      props.setFieldValue(
+        `employees[${index}].training_certificate`,
+        compressed
+      );
+      props.setFieldTouched(
+        `employees[${index}].training_certificate`,
+        true,
+        true
+      );
+    }
+  };
+
   const employeeSchema = Yup.object().shape({
     fname: Yup.string().required("First name is required"),
     lname: Yup.string().required("Last name is required"),
@@ -123,7 +185,6 @@ export default function CompanyOccupationalPermitModal({
     occupation: Yup.string().required("Occupation is required"),
     no_cedula: Yup.boolean(),
 
-    // Fixed cedula validation with test
     cedula: Yup.mixed().test(
       "cedula_required",
       "Cedula is required",
@@ -134,7 +195,6 @@ export default function CompanyOccupationalPermitModal({
       }
     ),
 
-    // Fixed certificate validation
     certificate_of_employment: Yup.mixed().test(
       "certificate_required",
       "Certificate of Employment is required",
@@ -143,7 +203,6 @@ export default function CompanyOccupationalPermitModal({
       }
     ),
 
-    // Fixed training certificate validation
     training_certificate: Yup.mixed().test(
       "training_cert_required",
       "Training certificate is required",
@@ -276,6 +335,9 @@ export default function CompanyOccupationalPermitModal({
               );
               if (response) {
                 formikRef.current.reset();
+                cedulaCompressor.reset();
+                certificateCompressor.reset();
+                trainingCompressor.reset();
               }
             }}
           >
@@ -585,13 +647,10 @@ export default function CompanyOccupationalPermitModal({
                                   type="file"
                                   accept="image/*"
                                   name={`employees[${index}].cedula`}
-                                  disabled={employee.no_cedula}
-                                  onChange={(e) => {
-                                    props.setFieldValue(
-                                      `employees[${index}].cedula`,
-                                      e.target.files[0]
-                                    );
-                                  }}
+                                  disabled={cedulaCompressor.isCompressing}
+                                  onChange={(e) =>
+                                    handleCedulaChange(e, index, props)
+                                  }
                                   onBlur={() =>
                                     props.setFieldTouched(
                                       `employees[${index}].cedula`,
@@ -606,6 +665,23 @@ export default function CompanyOccupationalPermitModal({
                                     )
                                   }
                                 />
+                                {cedulaCompressor.isCompressing && (
+                                  <div
+                                    className="text-info mt-1"
+                                    style={{ fontSize: "11px" }}
+                                  >
+                                    Compressing...
+                                  </div>
+                                )}
+                                {cedulaCompressor.errors[index] && (
+                                  <div
+                                    className="text-warning mt-1"
+                                    style={{ fontSize: "11px" }}
+                                  >
+                                    Compression error:{" "}
+                                    {cedulaCompressor.errors[index]}
+                                  </div>
+                                )}
 
                                 {!employee.no_cedula &&
                                   props.touched.employees?.[index]?.cedula &&
@@ -622,12 +698,10 @@ export default function CompanyOccupationalPermitModal({
                                 <Input
                                   type="file"
                                   accept="image/*"
-                                  onChange={(e) => {
-                                    props.setFieldValue(
-                                      `employees[${index}].certificate_of_employment`,
-                                      e.target.files[0]
-                                    );
-                                  }}
+                                  disabled={certificateCompressor.isCompressing}
+                                  onChange={(e) =>
+                                    handleCertificateChange(e, index, props)
+                                  }
                                   onBlur={() =>
                                     props.setFieldTouched(
                                       `employees[${index}].certificate_of_employment`,
@@ -643,6 +717,23 @@ export default function CompanyOccupationalPermitModal({
                                     )
                                   }
                                 />
+                                {certificateCompressor.isCompressing && (
+                                  <div
+                                    className="text-info mt-1"
+                                    style={{ fontSize: "11px" }}
+                                  >
+                                    Compressing...
+                                  </div>
+                                )}
+                                {certificateCompressor.errors[index] && (
+                                  <div
+                                    className="text-warning mt-1"
+                                    style={{ fontSize: "11px" }}
+                                  >
+                                    Compression error:{" "}
+                                    {certificateCompressor.errors[index]}
+                                  </div>
+                                )}
 
                                 {props.touched?.employees?.[index]
                                   ?.certificate_of_employment &&
@@ -665,12 +756,10 @@ export default function CompanyOccupationalPermitModal({
                                   <Input
                                     type="file"
                                     accept="image/*"
-                                    onChange={(e) => {
-                                      props.setFieldValue(
-                                        `employees[${index}].training_certificate`,
-                                        e.target.files[0]
-                                      );
-                                    }}
+                                    disabled={trainingCompressor.isCompressing}
+                                    onChange={(e) =>
+                                      handleTrainingChange(e, index, props)
+                                    }
                                     onBlur={() =>
                                       props.setFieldTouched(
                                         `employees[${index}].training_certificate`,
@@ -686,6 +775,23 @@ export default function CompanyOccupationalPermitModal({
                                       )
                                     }
                                   />
+                                  {trainingCompressor.isCompressing && (
+                                    <div
+                                      className="text-info mt-1"
+                                      style={{ fontSize: "11px" }}
+                                    >
+                                      Compressing...
+                                    </div>
+                                  )}
+                                  {trainingCompressor.errors[index] && (
+                                    <div
+                                      className="text-warning mt-1"
+                                      style={{ fontSize: "11px" }}
+                                    >
+                                      Compression error:{" "}
+                                      {trainingCompressor.errors[index]}
+                                    </div>
+                                  )}
 
                                   {props.touched?.employees?.[index]
                                     ?.training_certificate &&

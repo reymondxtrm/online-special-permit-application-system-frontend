@@ -27,6 +27,8 @@ import BasicInputField from "components/Forms/BasicInputField";
 import { useSelector } from "react-redux";
 import ReactSimpleImageViewer from "react-simple-image-viewer";
 import useGetImage from "hooks/Common/useGetImage";
+import UploadWithCropperModal from "./UploadWithCropperModal";
+import useImageCompressor from "hooks/Common/useImageCompressor";
 
 function OccupationalPermitModal({
   openModal,
@@ -48,14 +50,39 @@ function OccupationalPermitModal({
   const [imageViewer, setOpenImageViewer] = useState(false);
   const [viewImage, setViewImage] = useState();
   const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [inputPicture, setInputPicture] = useState();
+  const [uploadImageModal, setUploadImageModal] = useState(false);
+  const fileInputRef = useRef();
   const {
     isFetching: getImageIsFetching,
     currentImage,
     getImageHandle,
   } = useGetImage();
+  const {
+    compressedFiles,
+    isCompressing,
+    errors: compressionErrors,
+    handleImageChange,
+  } = useImageCompressor({
+    maxSizeMB: 2,
+    maxWidthOrHeight: 1920,
+  });
+
   const user = useSelector((state) => state.user);
 
-  // Fixed validation schema
+  const handleClick = () => {
+    fileInputRef.current.click();
+  };
+  const handleChange = (e) => {
+    const file = e.target.files[0];
+    const url = URL.createObjectURL(file);
+    setInputPicture(url);
+    toggleUploadImageModal();
+  };
+  const onCropDone = (image) => {
+    formikRef.current.setFieldValue(`id_picture`, image);
+    toggleUploadImageModal();
+  };
   const validationSchema = Yup.object().shape({
     type: Yup.string().required(),
 
@@ -65,60 +92,36 @@ function OccupationalPermitModal({
     company_address: Yup.string().nullable(),
     position: Yup.string().nullable(),
 
-    certificate_of_employment: Yup.mixed().test(
-      "certificate_required",
-      "Certificate of employment is required",
-      function (value) {
-        // If updating and file already exists, it's valid
-        if (isUpdate && uploadedFile?.certificate_of_employment) return true;
-        // Otherwise require upload
-        return value instanceof File || value instanceof Blob;
-      }
+    certificate_of_employment: Yup.mixed().required(
+      "Certificate of employment is required"
     ),
 
-    community_tax_certificate: Yup.mixed().test(
-      "cedula_required",
-      "Community tax certificate is required",
-      function (value) {
-        const { no_cedula } = this.parent;
-        // If no_cedula is checked, not required
-        if (no_cedula) return true;
-        // If updating and file already exists, it's valid
-        if (isUpdate && uploadedFile?.community_tax_certificate) return true;
-        // Otherwise require upload
-        return value instanceof File || value instanceof Blob;
-      }
+    community_tax_certificate: Yup.mixed().required(
+      "Community tax certificate is required"
     ),
 
-    id_picture: Yup.mixed().test(
-      "id_picture_required",
-      "ID picture is required",
-      function (value) {
-        // If updating and file already exists, it's valid
-        if (isUpdate && uploadedFile?.id_picture) return true;
-        // Otherwise require upload
-        return (
-          value instanceof File ||
-          value instanceof Blob ||
-          typeof value === "string"
-        );
-      }
-    ),
-
+    id_picture: Yup.mixed().required("ID picture is required"),
     training_certificate: Yup.mixed().test(
       "training_cert_required",
       "Training certificate is required",
       function (value) {
-        // Only required for NON-FOOD-MASSEUR
         if (tableData?.company_type !== "NON-FOOD-MASSEUR") return true;
-        // If updating and file already exists, it's valid
+
         if (isUpdate && uploadedFile?.training_certificate) return true;
-        // Otherwise require upload
+
         return value instanceof File || value instanceof Blob;
       }
     ),
   });
-
+  const handleFileChange = async (e, fieldName, index, props) => {
+    const file = e.currentTarget.files[0];
+    if (!file) return;
+    const compressed = await handleImageChange(e, index);
+    if (compressed) {
+      props.setFieldValue(fieldName, compressed);
+      props.setFieldTouched(fieldName, true, true);
+    }
+  };
   useEffect(() => {
     if (openModal && fetchUrl) {
       const fetchData = async () => {
@@ -160,6 +163,7 @@ function OccupationalPermitModal({
 
   const setIdPicture = (capturedPicture) => {
     formikRef.current.setFieldValue("id_picture", capturedPicture);
+    handleImageChange(capturedPicture, 1, "base64");
   };
 
   const togglePictureModal = () => {
@@ -168,6 +172,9 @@ function OccupationalPermitModal({
 
   const toggleIsViewerOpen = () => {
     setIsViewerOpen((prev) => !prev);
+  };
+  const toggleUploadImageModal = () => {
+    setUploadImageModal((prev) => !prev);
   };
 
   const getFormData = (object) => {
@@ -217,6 +224,14 @@ function OccupationalPermitModal({
         openModal={imageViewer}
         path={viewImage}
       />
+      {uploadImageModal && (
+        <UploadWithCropperModal
+          openModal={uploadImageModal}
+          toggleModal={toggleUploadImageModal}
+          image={inputPicture}
+          onCropDone={onCropDone}
+        />
+      )}
 
       <Modal
         isOpen={openModal}
@@ -344,12 +359,15 @@ function OccupationalPermitModal({
                                     id="certificateOfEmployment"
                                     name="certificate_of_employment"
                                     type="file"
-                                    onChange={(event) => {
-                                      props.setFieldValue(
+                                    onChange={(e) => {
+                                      handleFileChange(
+                                        e,
                                         "certificate_of_employment",
-                                        event.currentTarget.files[0]
+                                        0,
+                                        props
                                       );
                                     }}
+                                    disabled={isCompressing}
                                     onBlur={props.handleBlur}
                                     invalid={
                                       props.touched.certificate_of_employment &&
@@ -358,6 +376,14 @@ function OccupationalPermitModal({
                                       )
                                     }
                                   />
+                                  {compressionErrors[0] && (
+                                    <div
+                                      className="text-warning mt-1"
+                                      style={{ fontSize: "0.875rem" }}
+                                    >
+                                      Compression error: {compressionErrors[0]}
+                                    </div>
+                                  )}
                                   {props.touched.certificate_of_employment &&
                                     props.errors.certificate_of_employment && (
                                       <div
@@ -409,11 +435,13 @@ function OccupationalPermitModal({
                                     id="communityTaxCertificate"
                                     name="community_tax_certificate"
                                     type="file"
-                                    disabled={props.values.no_cedula}
-                                    onChange={(event) => {
-                                      props.setFieldValue(
+                                    disabled={isCompressing}
+                                    onChange={(e) => {
+                                      handleFileChange(
+                                        e,
                                         "community_tax_certificate",
-                                        event.currentTarget.files[0]
+                                        1,
+                                        props
                                       );
                                     }}
                                     onBlur={props.handleBlur}
@@ -425,6 +453,14 @@ function OccupationalPermitModal({
                                       !props.values.no_cedula
                                     }
                                   />
+                                  {compressionErrors[1] && (
+                                    <div
+                                      className="text-warning mt-1"
+                                      style={{ fontSize: "0.875rem" }}
+                                    >
+                                      Compression error: {compressionErrors[1]}
+                                    </div>
+                                  )}
                                   {props.touched.community_tax_certificate &&
                                     props.errors.community_tax_certificate &&
                                     !props.values.no_cedula && (
@@ -467,20 +503,51 @@ function OccupationalPermitModal({
                             </td>
                             <td colSpan={2}>
                               <div className="d-flex align-items-center gap-2">
-                                <Button
-                                  color="primary"
-                                  outline
-                                  className="d-flex align-items-center gap-2"
-                                  style={{
-                                    borderRadius: "6px",
-                                    padding: "10px 14px",
-                                    fontWeight: 500,
-                                  }}
-                                  onClick={togglePictureModal}
-                                >
-                                  <i className="mdi mdi-camera fs-4"></i>
-                                  Take Picture
-                                </Button>
+                                {props.values?.id_picture && (
+                                  <img
+                                    src={props.values.id_picture}
+                                    alt="Captured ID"
+                                    className="img-fluid rounded border"
+                                    style={{
+                                      transition: "0.3s",
+                                      opacity: 1,
+                                      maxHeight: "150px",
+                                      objectFit: "cover",
+                                    }}
+                                  />
+                                )}
+                                <div className="d-flex flex-column gap-2">
+                                  <Button
+                                    color="primary"
+                                    outline
+                                    className="d-flex align-items-center gap-2"
+                                    style={{
+                                      borderRadius: "6px",
+                                      padding: "10px 14px",
+                                      fontWeight: 500,
+                                    }}
+                                    onClick={togglePictureModal}
+                                  >
+                                    <i className="mdi mdi-camera fs-4"></i>
+                                    Take Picture
+                                  </Button>
+                                  <Button
+                                    color="primary"
+                                    onClick={() => {
+                                      handleClick();
+                                    }}
+                                  >
+                                    Upload image
+                                  </Button>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    ref={fileInputRef}
+                                    style={{ display: "none" }}
+                                    onChange={handleChange}
+                                  />
+                                </div>
+
                                 {isUpdate && uploadedFile?.id_picture && (
                                   <Button
                                     color="primary"

@@ -180,7 +180,11 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
     if (selectedRow.length === rows.length) {
       setSelectedRow([]);
     } else {
-      setSelectedRow(rows.map((r) => r.id));
+      const selectedIds = [];
+      rows.forEach((r) => {
+        selectedIds.push(r.id);
+      });
+      setSelectedRow(selectedIds);
     }
   };
 
@@ -413,14 +417,17 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
         isClient
       />
 
-      <OverTheCounterModal
-        toggleModal={toggleOverTheCounterModal}
-        openModal={overTheCounterModal}
-        applicationId={selectedRow}
-        toggleRefresh={toggleRefresh}
-        applicationType={applicationType}
-        paymentDetails={paymentDetails}
-      />
+      {overTheCounterModal && (
+        <OverTheCounterModal
+          toggleModal={toggleOverTheCounterModal}
+          openModal={overTheCounterModal}
+          applicationId={selectedRow}
+          toggleRefresh={toggleRefresh}
+          applicationType={applicationType}
+          paymentDetails={paymentDetails}
+        />
+      )}
+
       <OccupationalPermitModal
         openModal={updateOccupationalPermitModal}
         toggleModal={toggleUpdateOccupationalPermitModal}
@@ -622,9 +629,17 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                 applicationType === "recorrida" ||
                 applicationType === "use_of_government_property") && (
                 <>
+                  <th>Requestor</th>
                   <th>Name of Event</th>
                   <th>Date From</th>
                   <th>Date To</th>
+                  {status === "returned" && (
+                    <>
+                      <th>Remarks</th>
+                      <th>O.R</th>
+                      <th>Action</th>
+                    </>
+                  )}
                 </>
               )}
 
@@ -658,6 +673,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                   {status === "returned" && (
                     <>
                       <th>O.R</th>
+                      <th>Action</th>
                     </>
                   )}
                 </>
@@ -817,15 +833,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         )}
 
                         {(status === "declined" || status === "returned") && (
-                          <td>
-                            {application.status_histories
-                              ? application.status_histories.map(
-                                  (items, index) => {
-                                    <div key={index}>{items.remarks}</div>;
-                                  }
-                                )
-                              : "N/A"}
-                          </td>
+                          <td>{application?.status_histories?.[0]?.remarks}</td>
                         )}
 
                         {status === "returned" &&
@@ -991,6 +999,35 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                             application?.event_date_to
                           )}
                         </td>
+                        {status === "returned" && (
+                          <>
+                            <td>
+                              {application?.status_histories?.[0]?.remarks}
+                            </td>
+                            <td>
+                              <FileIconFormat
+                                fileType="official_receipt"
+                                path={
+                                  application?.order_of_payment?.payment_detail
+                                    ?.attachment
+                                }
+                                toggleIsViewerOpen={toggleIsViewerOpen}
+                                getImageHandle={getImageHandle}
+                              />
+                            </td>
+                            <td>
+                              <Button
+                                color="primary"
+                                onClick={() => {
+                                  setSelectedRow([application?.id]);
+                                  toggleReUploadModal();
+                                }}
+                              >
+                                Reupload O.R
+                              </Button>
+                            </td>
+                          </>
+                        )}
                       </>
                     ) : null}
                     {status === "for_payment" &&
@@ -1003,7 +1040,14 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                               application?.order_of_payment
                                 ?.payment_on_progress === 1
                             }
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.preventDefault();
+
+                              if (!application?.id) {
+                                console.error("Application data is missing");
+                                return;
+                              }
+
                               if (
                                 application?.order_of_payment
                                   ?.payment_on_progress === 1
@@ -1016,13 +1060,14 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                                 });
                                 return;
                               }
-                              toggleOverTheCounterModal();
+
                               setSelectedRow([application?.id]);
                               dispatch(
-                                SpecialPermitClientSlice.actions.setApplicationIdsForPayment(
+                                SpecialPermitClientSlice?.actions?.setApplicationIdsForPayment(
                                   [application?.id]
                                 )
                               );
+                              toggleOverTheCounterModal();
                             }}
                           >
                             Pay

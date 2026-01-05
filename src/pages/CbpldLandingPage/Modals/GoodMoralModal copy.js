@@ -5,8 +5,6 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Table,
-  Badge,
   Form,
   Row,
   Col,
@@ -15,146 +13,34 @@ import {
   FormGroup,
   FormFeedback,
 } from "reactstrap";
-
 import Select from "react-select";
 import { Formik } from "formik";
 import useSubmit from "hooks/Common/useSubmit";
 import axios from "axios";
 import { USER_PRIVACY } from "assets/data/data";
+import * as Yup from "yup";
 import useGetImage from "hooks/Common/useGetImage";
 import ImageViewer from "react-simple-image-viewer";
-import * as Yup from "yup";
-import BasicInputField from "components/Forms/BasicInputField";
 import useImageCompressor from "hooks/Common/useImageCompressor";
 
-export const createMayorsCertificateSchema = (isUpdate) =>
-  Yup.object().shape({
-    purpose: Yup.object().nullable().required("Purpose is required"),
-
-    other_purpose: Yup.string().when("purpose", {
-      is: (purpose) => purpose?.label === "Others",
-      then: Yup.string().trim().required("Other purpose is required"),
-      otherwise: Yup.string().nullable(),
-    }),
-
-    police_clearance: isUpdate
-      ? Yup.mixed()
-          .nullable()
-          .test(
-            "fileType",
-            "Only image files are allowed",
-            (value) =>
-              !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
-          )
-      : Yup.mixed()
-          .required("Police clearance is required")
-          .test(
-            "fileType",
-            "Only image files are allowed",
-            (value) =>
-              value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
-          ),
-
-    community_tax_certificate: isUpdate
-      ? Yup.mixed()
-          .nullable()
-          .test(
-            "fileType",
-            "Only image files are allowed",
-            (value) =>
-              !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
-          )
-      : Yup.mixed()
-          .required("Community tax certificate is required")
-          .test(
-            "fileType",
-            "Only image files are allowed",
-            (value) =>
-              value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
-          ),
-
-    barangay_clearance: isUpdate
-      ? Yup.mixed()
-          .nullable()
-          .test(
-            "fileType",
-            "Only image files are allowed",
-            (value) =>
-              !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
-          )
-      : Yup.mixed()
-          .required("Barangay clearance is required")
-          .test(
-            "fileType",
-            "Only image files are allowed",
-            (value) =>
-              value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
-          ),
-
-    fiscal_clearance: isUpdate
-      ? Yup.mixed()
-          .nullable()
-          .test(
-            "fileType",
-            "Only image files are allowed",
-            (value) =>
-              !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
-          )
-      : Yup.mixed()
-          .required("Fiscal clearance is required")
-          .test(
-            "fileType",
-            "Only image files are allowed",
-            (value) =>
-              value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
-          ),
-
-    court_clearance: isUpdate
-      ? Yup.mixed()
-          .nullable()
-          .test(
-            "fileType",
-            "Only image files are allowed",
-            (value) =>
-              !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
-          )
-      : Yup.mixed()
-          .required("Court clearance is required")
-          .test(
-            "fileType",
-            "Only image files are allowed",
-            (value) =>
-              value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
-          ),
-  });
-
-function MayorsCertificateModal({
+function GoodMoralModal({
   openModal,
   toggleModal,
-  isUpdate = false,
+  isUpdate,
   specialPermitApplicationId,
   toggleRefresh,
 }) {
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
-  const [purposeOptions, setpurposeOptions] = useState();
+  const [purposeOptions, setpurposeOptions] = useState([]);
   const [otherPurpose, setotherPurpose] = useState(false);
+  const [employmentPurpose, setemploymentPurpose] = useState(false);
+  const [discountOptions, setdiscountOptions] = useState([]);
   const [proceed, setIsProceed] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState({});
   const [existingData, setExistingData] = useState({});
   const [isViewingOpen, setIsViewingOpen] = useState(false);
   const { currentImage, getImageHandle, isFetching } = useGetImage();
-
   const {
     compressedFiles,
     isCompressing,
@@ -165,19 +51,11 @@ function MayorsCertificateModal({
     maxWidthOrHeight: 1920,
   });
 
-  const toggleIsViewerOpen = () => {
-    setIsViewingOpen((prev) => !prev);
-  };
-
-  useEffect(() => {
-    setotherPurpose(Boolean(existingData?.other_purpose));
-  }, [existingData]);
-
   useEffect(() => {
     if (openModal) {
       axios
         .get("api/get-purpose", {
-          params: { permit_type: "mayors_certificate" },
+          params: { permit_type: "good_moral" },
         })
         .then(
           (res) => {
@@ -196,42 +74,98 @@ function MayorsCertificateModal({
   }, [openModal]);
 
   useEffect(() => {
-    if (openModal && isUpdate) {
+    if (!openModal || !isUpdate) return;
+    axios
+      .get("api/client/get-single-occupational/permit-application", {
+        params: { special_permit_application_id: specialPermitApplicationId },
+      })
+      .then((res) => {
+        let data = res.data;
+        let purposeValue = null;
+        let otherPurposeValue = "";
+        if (data?.application_purpose?.type === "temporary") {
+          purposeValue = { value: 0, label: "Others" };
+          otherPurposeValue = data?.application_purpose?.name || "";
+        } else {
+          purposeValue =
+            purposeOptions?.find(
+              (item) => item.value === data?.application_purpose?.id
+            ) || null;
+        }
+        const exemptionCaseValue =
+          discountOptions?.find(
+            (opt) => opt.value === data?.permitApplicationExemption?.id
+          ) || null;
+
+        setExistingData({
+          purpose: purposeValue,
+          other_purpose: otherPurposeValue,
+          hasExemptionCase: !!data?.permitApplicationExemption,
+          exemptionCase: exemptionCaseValue,
+        });
+
+        setUploadedFiles(data?.uploaded_files || {});
+      })
+      .catch((error) => console.log(error));
+  }, [
+    openModal,
+    isUpdate,
+    specialPermitApplicationId,
+    purposeOptions,
+    discountOptions,
+  ]);
+
+  useEffect(() => {
+    if (!openModal) {
+      setpurposeOptions([]);
+      setotherPurpose(false);
+      setemploymentPurpose(false);
+      setdiscountOptions([]);
+
+      if (formikRef.current) {
+        formikRef.current.resetForm();
+      }
+    }
+  }, [openModal]);
+
+  const toggleIsViewerOpen = () => {
+    setIsViewingOpen((prev) => !prev);
+  };
+
+  useEffect(() => {
+    if (openModal) {
       axios
-        .get("api/client/get-single-occupational/permit-application", {
-          params: { special_permit_application_id: specialPermitApplicationId },
+        .get("api/client/get/exempted-cases", {
+          params: { permit_type: "good_moral" },
         })
         .then(
           (res) => {
-            let data = res.data;
-
-            setExistingData(() => {
-              if (data?.application_purpose?.type === "temporary") {
-                data = {
-                  ...data,
-                  other_purpose: data?.application_purpose?.name,
-                  purpose: { value: 0, label: "Others" },
-                };
-              } else {
-                data = {
-                  ...data,
-                  purpose: purposeOptions?.find(
-                    (item) => item.value === data?.application?.purpose
-                  ),
-                };
-              }
-              return {
-                purpose: data?.purpose,
-                other_purpose: data?.other_purpose || "",
-              };
-            });
-
-            setUploadedFiles(data?.uploaded_files || []);
+            const options = res.data.map((options) => ({
+              value: options.id,
+              label: options.name,
+            }));
+            setdiscountOptions(options);
           },
-          (error) => console.log(error)
+          (error) => {
+            console.log(error);
+          }
         );
     }
-  }, [openModal, isUpdate, specialPermitApplicationId, purposeOptions]);
+  }, [openModal, employmentPurpose]);
+
+  useEffect(() => {
+    setotherPurpose(Boolean(existingData?.other_purpose));
+    setemploymentPurpose(Boolean(existingData?.hasExemptionCase));
+  }, [existingData]);
+  const handleFileChange = async (e, fieldName, index, props) => {
+    const file = e.currentTarget.files[0];
+    if (!file) return;
+    const compressed = await handleImageChange(e, index);
+    if (compressed) {
+      props.setFieldValue(fieldName, compressed);
+      props.setFieldTouched(fieldName, true, true);
+    }
+  };
 
   const getFormData = (object) => {
     const formData = new FormData();
@@ -249,15 +183,54 @@ function MayorsCertificateModal({
     return formData;
   };
 
-  const handleFileChange = async (e, fieldName, index, props) => {
-    const file = e.currentTarget.files[0];
-    if (!file) return;
-    const compressed = await handleImageChange(e, index);
-    if (compressed) {
-      props.setFieldValue(fieldName, compressed);
-      props.setFieldTouched(fieldName, true, true);
-    }
-  };
+  const IMAGE_SIZE = 2 * 1024 * 1024;
+  const SUPPORTED_IMAGE_FORMATS = ["image/jpeg", "image/png", "image/jpg"];
+
+  const fileValidationOptional = Yup.mixed()
+    .nullable()
+    .test(
+      "fileFormat",
+      "Only JPG and PNG images are allowed",
+      (value) => !value || SUPPORTED_IMAGE_FORMATS.includes(value.type)
+    );
+
+  const fileValidationRequired = Yup.mixed()
+    .required("File is required")
+    .test(
+      "fileFormat",
+      "Only JPG and PNG images are allowed",
+      (value) => value && SUPPORTED_IMAGE_FORMATS.includes(value.type)
+    );
+
+  const validationSchema = Yup.object().shape({
+    purpose: Yup.object().nullable().required("Purpose is required"),
+
+    other_purpose: Yup.string().when("purpose", {
+      is: (purpose) => purpose?.label === "Others",
+      then: (schema) => schema.required("Please specify other purpose"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+
+    exemption_proof: Yup.mixed().when("exemption", {
+      is: (exemption) => exemption !== null,
+      then: () => (isUpdate ? fileValidationOptional : fileValidationRequired),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+
+    police_clearance: isUpdate
+      ? fileValidationOptional
+      : fileValidationRequired,
+    community_tax_certificate: isUpdate
+      ? fileValidationOptional
+      : fileValidationRequired,
+    barangay_clearance: isUpdate
+      ? fileValidationOptional
+      : fileValidationRequired,
+    fiscal_clearance: isUpdate
+      ? fileValidationOptional
+      : fileValidationRequired,
+    court_clearance: isUpdate ? fileValidationOptional : fileValidationRequired,
+  });
 
   return (
     <React.Fragment>
@@ -295,7 +268,7 @@ function MayorsCertificateModal({
               color: "#368be0",
             }}
           >
-            {isUpdate ? "UPDATE MAYOR'S CERTIFICATE" : "MAYOR'S CERTIFICATE"}
+            {isUpdate ? "UPDATE GOOD MORAL" : "GOOD MORAL"}
           </p>
         </ModalHeader>
         <ModalBody style={{ overflowX: "auto" }}>
@@ -304,15 +277,17 @@ function MayorsCertificateModal({
             enableReinitialize
             validateOnChange={true}
             validateOnBlur={true}
-            validationSchema={createMayorsCertificateSchema(isUpdate)}
+            validationSchema={validationSchema}
             initialValues={{
-              type: "mayors_permit",
+              type: "good_moral",
               purpose: existingData?.purpose || null,
+              exemption: existingData?.exemptionCase || null,
               other_purpose: existingData?.other_purpose || "",
               police_clearance: null,
               community_tax_certificate: null,
               barangay_clearance: null,
               fiscal_clearance: null,
+              exemption_proof: null,
               court_clearance: null,
             }}
             onSubmit={handleSubmit}
@@ -337,20 +312,26 @@ function MayorsCertificateModal({
                             <Select
                               isClearable
                               name="purpose"
-                              value={props.values.purpose || null}
+                              value={props.values.purpose}
+                              options={purposeOptions}
                               onChange={(selectedOption) => {
-                                const label = selectedOption?.label;
-                                setotherPurpose(label === "Others");
-                                props.setFieldValue(
-                                  "purpose",
-                                  selectedOption || null
+                                setotherPurpose(
+                                  selectedOption?.label === "Others"
                                 );
+                                setemploymentPurpose(
+                                  selectedOption?.label === "Local Employment"
+                                );
+
+                                props.setValues({
+                                  ...props.values,
+                                  purpose: selectedOption || null,
+                                  exemption_proof: null,
+                                  exemption: {},
+                                });
                               }}
                               onBlur={() =>
                                 props.setFieldTouched("purpose", true)
                               }
-                              options={purposeOptions}
-                              placeholder="Select Purpose"
                             />
                           </div>
                           {props.touched.purpose && props.errors.purpose && (
@@ -364,20 +345,150 @@ function MayorsCertificateModal({
 
                     {otherPurpose && (
                       <Row>
-                        <BasicInputField
-                          col={12}
-                          label="Specify Other Purpose"
-                          name="other_purpose"
-                          type="text"
-                          placeholder="Enter other purpose"
-                          validation={props}
-                          value={props.values.other_purpose}
-                          touched={props.touched.other_purpose}
-                          errors={props.errors.other_purpose}
-                          required={true}
-                        />
+                        <Col md={12}>
+                          <FormGroup>
+                            <Label>
+                              Specify Other Purpose{" "}
+                              <span className="text-danger">*</span>
+                            </Label>
+                            <Input
+                              type="text"
+                              name="other_purpose"
+                              value={props.values.other_purpose}
+                              onChange={props.handleChange}
+                              onBlur={props.handleBlur}
+                              invalid={
+                                props.touched.other_purpose &&
+                                Boolean(props.errors.other_purpose)
+                              }
+                            />
+                            <FormFeedback>
+                              {props.errors.other_purpose}
+                            </FormFeedback>
+                          </FormGroup>
+                        </Col>
                       </Row>
                     )}
+
+                    {discountOptions && discountOptions?.length > 0 ? (
+                      <>
+                        <Row>
+                          <Col>
+                            <FormGroup>
+                              <Label>
+                                Exempted Cases{" "}
+                                <span className="text-danger">*</span>
+                              </Label>
+                              <div
+                                className={
+                                  props.touched.exemption &&
+                                  props.errors.exemption
+                                    ? "is-invalid"
+                                    : ""
+                                }
+                              >
+                                <Select
+                                  isClearable
+                                  name="exemption"
+                                  value={props.values.exemption}
+                                  options={discountOptions}
+                                  onChange={(opt) =>
+                                    props.setFieldValue(
+                                      "exemption",
+                                      opt || null
+                                    )
+                                  }
+                                  onBlur={() =>
+                                    props.setFieldTouched("exemption", true)
+                                  }
+                                />
+                              </div>
+                              {props.touched.exemption &&
+                                props.errors.exemption && (
+                                  <FormFeedback className="d-block">
+                                    {props.errors.exemption}
+                                  </FormFeedback>
+                                )}
+                            </FormGroup>
+                          </Col>
+                        </Row>
+                        <Row>
+                          <Col>
+                            <FormGroup>
+                              <Label>
+                                Attachment (Upload Image as Proof for Exemption){" "}
+                                {!isUpdate && (
+                                  <span className="text-danger">*</span>
+                                )}
+                              </Label>
+                              <div className="d-flex gap-2 align-items-start">
+                                <div className="flex-grow-1">
+                                  <Input
+                                    type="file"
+                                    name="exemption_proof"
+                                    accept="image/*"
+                                    // onChange={(e) => {
+                                    //   const file =
+                                    //     e.currentTarget.files[0] || null;
+                                    //   props.setFieldValue(
+                                    //     "exemption_proof",
+                                    //     file
+                                    //   );
+                                    //   props.setFieldTouched(
+                                    //     "exemption_proof",
+                                    //     true,
+                                    //     true
+                                    //   );
+                                    // }}
+                                    onChange={(e) =>
+                                      handleFileChange(
+                                        e,
+                                        "exemption_proof",
+                                        0,
+                                        props
+                                      )
+                                    }
+                                    onBlur={() =>
+                                      props.setFieldTouched(
+                                        "exemption_proof",
+                                        true,
+                                        true
+                                      )
+                                    }
+                                  />
+                                  {props.touched.exemption_proof &&
+                                  props.errors.exemption_proof ? (
+                                    <div
+                                      className="text-danger mt-1"
+                                      style={{ fontSize: "0.875rem" }}
+                                    >
+                                      {props.errors.exemption_proof}
+                                    </div>
+                                  ) : null}
+                                </div>
+                                {isUpdate && uploadedFiles?.exemption_proof && (
+                                  <Button
+                                    color="primary"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      getImageHandle({
+                                        path: uploadedFiles?.exemption_proof,
+                                        url: "api/client/attachment",
+                                        showLoader: true,
+                                      });
+                                      toggleIsViewerOpen();
+                                    }}
+                                  >
+                                    <i className="mdi mdi-eye"></i>
+                                  </Button>
+                                )}
+                              </div>
+                            </FormGroup>
+                          </Col>
+                        </Row>
+                      </>
+                    ) : null}
 
                     {/* Police Clearance */}
                     <Row>
@@ -395,14 +506,15 @@ function MayorsCertificateModal({
                                 type="file"
                                 name="police_clearance"
                                 accept="image/*"
-                                onChange={(e) =>
-                                  handleFileChange(
-                                    e,
+                                onChange={(e) => {
+                                  const file = e.currentTarget.files[0] || null;
+                                  props.setFieldValue("police_clearance", file);
+                                  props.setFieldTouched(
                                     "police_clearance",
-                                    0,
-                                    props
-                                  )
-                                }
+                                    true,
+                                    true
+                                  );
+                                }}
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "police_clearance",
@@ -410,16 +522,7 @@ function MayorsCertificateModal({
                                     true
                                   )
                                 }
-                                disabled={isCompressing}
                               />
-                              {compressionErrors[0] && (
-                                <div
-                                  className="text-warning mt-1"
-                                  style={{ fontSize: "0.875rem" }}
-                                >
-                                  Compression error: {compressionErrors[0]}
-                                </div>
-                              )}
                               {props.touched.police_clearance &&
                               props.errors.police_clearance ? (
                                 <div
@@ -468,14 +571,18 @@ function MayorsCertificateModal({
                                 type="file"
                                 name="community_tax_certificate"
                                 accept="image/*"
-                                onChange={(e) =>
-                                  handleFileChange(
-                                    e,
+                                onChange={(e) => {
+                                  const file = e.currentTarget.files[0] || null;
+                                  props.setFieldValue(
                                     "community_tax_certificate",
-                                    1,
-                                    props
-                                  )
-                                }
+                                    file
+                                  );
+                                  props.setFieldTouched(
+                                    "community_tax_certificate",
+                                    true,
+                                    true
+                                  );
+                                }}
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "community_tax_certificate",
@@ -483,16 +590,7 @@ function MayorsCertificateModal({
                                     true
                                   )
                                 }
-                                disabled={isCompressing}
                               />
-                              {compressionErrors[1] && (
-                                <div
-                                  className="text-warning mt-1"
-                                  style={{ fontSize: "0.875rem" }}
-                                >
-                                  Compression error: {compressionErrors[1]}
-                                </div>
-                              )}
                               {props.touched.community_tax_certificate &&
                               props.errors.community_tax_certificate ? (
                                 <div
@@ -531,7 +629,7 @@ function MayorsCertificateModal({
                       <Col>
                         <FormGroup>
                           <Label>
-                            Barangay Clearance{" "}
+                            Barangay Clearance (As proof of Residency){" "}
                             {!isUpdate && (
                               <span className="text-danger">*</span>
                             )}
@@ -542,14 +640,18 @@ function MayorsCertificateModal({
                                 type="file"
                                 name="barangay_clearance"
                                 accept="image/*"
-                                onChange={(e) =>
-                                  handleFileChange(
-                                    e,
+                                onChange={(e) => {
+                                  const file = e.currentTarget.files[0] || null;
+                                  props.setFieldValue(
                                     "barangay_clearance",
-                                    2,
-                                    props
-                                  )
-                                }
+                                    file
+                                  );
+                                  props.setFieldTouched(
+                                    "barangay_clearance",
+                                    true,
+                                    true
+                                  );
+                                }}
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "barangay_clearance",
@@ -557,16 +659,7 @@ function MayorsCertificateModal({
                                     true
                                   )
                                 }
-                                disabled={isCompressing}
                               />
-                              {compressionErrors[2] && (
-                                <div
-                                  className="text-warning mt-1"
-                                  style={{ fontSize: "0.875rem" }}
-                                >
-                                  Compression error: {compressionErrors[2]}
-                                </div>
-                              )}
                               {props.touched.barangay_clearance &&
                               props.errors.barangay_clearance ? (
                                 <div
@@ -615,14 +708,15 @@ function MayorsCertificateModal({
                                 type="file"
                                 name="fiscal_clearance"
                                 accept="image/*"
-                                onChange={(e) =>
-                                  handleFileChange(
-                                    e,
+                                onChange={(e) => {
+                                  const file = e.currentTarget.files[0] || null;
+                                  props.setFieldValue("fiscal_clearance", file);
+                                  props.setFieldTouched(
                                     "fiscal_clearance",
-                                    3,
-                                    props
-                                  )
-                                }
+                                    true,
+                                    true
+                                  );
+                                }}
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "fiscal_clearance",
@@ -630,16 +724,7 @@ function MayorsCertificateModal({
                                     true
                                   )
                                 }
-                                disabled={isCompressing}
                               />
-                              {compressionErrors[3] && (
-                                <div
-                                  className="text-warning mt-1"
-                                  style={{ fontSize: "0.875rem" }}
-                                >
-                                  Compression error: {compressionErrors[3]}
-                                </div>
-                              )}
                               {props.touched.fiscal_clearance &&
                               props.errors.fiscal_clearance ? (
                                 <div
@@ -688,14 +773,15 @@ function MayorsCertificateModal({
                                 type="file"
                                 name="court_clearance"
                                 accept="image/*"
-                                onChange={(e) =>
-                                  handleFileChange(
-                                    e,
+                                onChange={(e) => {
+                                  const file = e.currentTarget.files[0] || null;
+                                  props.setFieldValue("court_clearance", file);
+                                  props.setFieldTouched(
                                     "court_clearance",
-                                    4,
-                                    props
-                                  )
-                                }
+                                    true,
+                                    true
+                                  );
+                                }}
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "court_clearance",
@@ -703,16 +789,7 @@ function MayorsCertificateModal({
                                     true
                                   )
                                 }
-                                disabled={isCompressing}
                               />
-                              {compressionErrors[4] && (
-                                <div
-                                  className="text-warning mt-1"
-                                  style={{ fontSize: "0.875rem" }}
-                                >
-                                  Compression error: {compressionErrors[4]}
-                                </div>
-                              )}
                               {props.touched.court_clearance &&
                               props.errors.court_clearance ? (
                                 <div
@@ -769,11 +846,15 @@ function MayorsCertificateModal({
               color: "white",
             }}
             onClick={async () => {
+              // Validate form first
               const errors = await formikRef.current?.validateForm();
 
+              // Touch all fields to show errors
               formikRef.current?.setTouched({
                 purpose: true,
                 other_purpose: true,
+                exemption: true,
+                exemption_proof: true,
                 police_clearance: true,
                 community_tax_certificate: true,
                 barangay_clearance: true,
@@ -781,23 +862,40 @@ function MayorsCertificateModal({
                 court_clearance: true,
               });
 
+              // If there are errors, don't proceed
               if (errors && Object.keys(errors).length > 0) {
                 console.log("Validation errors:", errors);
                 return;
               }
 
+              // If validation passes and proceed is checked
               if (proceed) {
                 const formik = {
-                  ...formikRef.current?.values,
+                  purpose: formikRef?.current?.values?.purpose,
+                  exemption_id:
+                    formikRef?.current?.values?.exemption?.value || null,
+                  barangay_clearance:
+                    formikRef?.current?.values?.barangay_clearance,
+                  community_tax_certificate:
+                    formikRef?.current?.values?.community_tax_certificate,
+                  court_clearance: formikRef?.current?.values?.court_clearance,
+                  exemption_proof: formikRef?.current?.values?.exemption_proof,
+                  fiscal_clearance:
+                    formikRef?.current?.values?.fiscal_clearance,
+                  other_purpose: formikRef?.current?.values?.other_purpose,
+                  police_clearance:
+                    formikRef?.current?.values?.police_clearance,
+                  type: formikRef?.current?.values?.type,
                   special_permit_application_id: specialPermitApplicationId,
                 };
+
                 const formData = getFormData(formik);
 
                 handleSubmit(
                   {
                     url: isUpdate
-                      ? "api/client/special-permit/mayors-permit/update"
-                      : "api/client/special-permit/mayors-permit",
+                      ? "api/client/special-permit/good-moral/update"
+                      : "api/client/special-permit/good-moral",
                     headers: {
                       "Content-Type": "multipart/form-data",
                     },
@@ -814,9 +912,9 @@ function MayorsCertificateModal({
                 );
               }
             }}
-            disabled={!proceed || isCompressing}
+            disabled={!proceed}
           >
-            {isCompressing ? "Compressing..." : "Submit"}
+            Submit
           </Button>
           <Button color="secondary" onClick={toggleModal}>
             Close
@@ -827,4 +925,4 @@ function MayorsCertificateModal({
   );
 }
 
-export default MayorsCertificateModal;
+export default GoodMoralModal;

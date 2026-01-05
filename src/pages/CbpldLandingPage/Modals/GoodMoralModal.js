@@ -21,6 +21,7 @@ import { USER_PRIVACY } from "assets/data/data";
 import * as Yup from "yup";
 import useGetImage from "hooks/Common/useGetImage";
 import ImageViewer from "react-simple-image-viewer";
+import useImageCompressor from "hooks/Common/useImageCompressor";
 
 function GoodMoralModal({
   openModal,
@@ -40,6 +41,15 @@ function GoodMoralModal({
   const [existingData, setExistingData] = useState({});
   const [isViewingOpen, setIsViewingOpen] = useState(false);
   const { currentImage, getImageHandle, isFetching } = useGetImage();
+  const {
+    compressedFiles,
+    isCompressing,
+    errors: compressionErrors,
+    handleImageChange,
+  } = useImageCompressor({
+    maxSizeMB: 2,
+    maxWidthOrHeight: 1920,
+  });
 
   useEffect(() => {
     if (openModal) {
@@ -123,7 +133,7 @@ function GoodMoralModal({
   };
 
   useEffect(() => {
-    if (openModal && employmentPurpose) {
+    if (openModal) {
       axios
         .get("api/client/get/exempted-cases", {
           params: { permit_type: "good_moral" },
@@ -148,6 +158,16 @@ function GoodMoralModal({
     setemploymentPurpose(Boolean(existingData?.hasExemptionCase));
   }, [existingData]);
 
+  const handleFileChange = async (e, fieldName, index, props) => {
+    const file = e.currentTarget.files[0];
+    if (!file) return;
+    const compressed = await handleImageChange(e, index);
+    if (compressed) {
+      props.setFieldValue(fieldName, compressed);
+      props.setFieldTouched(fieldName, true, true);
+    }
+  };
+
   const getFormData = (object) => {
     const formData = new FormData();
     Object.keys(object).forEach((key) => {
@@ -170,11 +190,6 @@ function GoodMoralModal({
   const fileValidationOptional = Yup.mixed()
     .nullable()
     .test(
-      "fileSize",
-      "File must be less than 2MB",
-      (value) => !value || value.size <= IMAGE_SIZE
-    )
-    .test(
       "fileFormat",
       "Only JPG and PNG images are allowed",
       (value) => !value || SUPPORTED_IMAGE_FORMATS.includes(value.type)
@@ -182,11 +197,6 @@ function GoodMoralModal({
 
   const fileValidationRequired = Yup.mixed()
     .required("File is required")
-    .test(
-      "fileSize",
-      "File must be less than 2MB",
-      (value) => value && value.size <= IMAGE_SIZE
-    )
     .test(
       "fileFormat",
       "Only JPG and PNG images are allowed",
@@ -203,7 +213,7 @@ function GoodMoralModal({
     }),
 
     exemption_proof: Yup.mixed().when("exemption", {
-      is: (exemption) => exemption !== null,
+      is: (exemption) => Boolean(exemption?.value),
       then: () => (isUpdate ? fileValidationOptional : fileValidationRequired),
       otherwise: (schema) => schema.notRequired(),
     }),
@@ -317,7 +327,7 @@ function GoodMoralModal({
                                   ...props.values,
                                   purpose: selectedOption || null,
                                   exemption_proof: null,
-                                  exemption: null,
+                                  exemption: {},
                                 });
                               }}
                               onBlur={() =>
@@ -368,7 +378,7 @@ function GoodMoralModal({
                             <FormGroup>
                               <Label>
                                 Exempted Cases{" "}
-                                <span className="text-danger">*</span>
+                                {/* <span className="text-danger">*</span> */}
                               </Label>
                               <div
                                 className={
@@ -408,9 +418,9 @@ function GoodMoralModal({
                             <FormGroup>
                               <Label>
                                 Attachment (Upload Image as Proof for Exemption){" "}
-                                {!isUpdate && (
+                                {/* {(!isUpdate || Boolean(exemption?.value)) && (
                                   <span className="text-danger">*</span>
-                                )}
+                                )} */}
                               </Label>
                               <div className="d-flex gap-2 align-items-start">
                                 <div className="flex-grow-1">
@@ -418,19 +428,14 @@ function GoodMoralModal({
                                     type="file"
                                     name="exemption_proof"
                                     accept="image/*"
-                                    onChange={(e) => {
-                                      const file =
-                                        e.currentTarget.files[0] || null;
-                                      props.setFieldValue(
+                                    onChange={(e) =>
+                                      handleFileChange(
+                                        e,
                                         "exemption_proof",
-                                        file
-                                      );
-                                      props.setFieldTouched(
-                                        "exemption_proof",
-                                        true,
-                                        true
-                                      );
-                                    }}
+                                        0,
+                                        props
+                                      )
+                                    }
                                     onBlur={() =>
                                       props.setFieldTouched(
                                         "exemption_proof",
@@ -438,7 +443,16 @@ function GoodMoralModal({
                                         true
                                       )
                                     }
+                                    disabled={isCompressing}
                                   />
+                                  {compressionErrors[0] && (
+                                    <div
+                                      className="text-warning mt-1"
+                                      style={{ fontSize: "0.875rem" }}
+                                    >
+                                      Compression error: {compressionErrors[0]}
+                                    </div>
+                                  )}
                                   {props.touched.exemption_proof &&
                                   props.errors.exemption_proof ? (
                                     <div
@@ -473,7 +487,6 @@ function GoodMoralModal({
                       </>
                     ) : null}
 
-                    {/* Police Clearance */}
                     <Row>
                       <Col>
                         <FormGroup>
@@ -489,15 +502,14 @@ function GoodMoralModal({
                                 type="file"
                                 name="police_clearance"
                                 accept="image/*"
-                                onChange={(e) => {
-                                  const file = e.currentTarget.files[0] || null;
-                                  props.setFieldValue("police_clearance", file);
-                                  props.setFieldTouched(
+                                onChange={(e) =>
+                                  handleFileChange(
+                                    e,
                                     "police_clearance",
-                                    true,
-                                    true
-                                  );
-                                }}
+                                    1,
+                                    props
+                                  )
+                                }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "police_clearance",
@@ -505,7 +517,16 @@ function GoodMoralModal({
                                     true
                                   )
                                 }
+                                disabled={isCompressing}
                               />
+                              {compressionErrors[1] && (
+                                <div
+                                  className="text-warning mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  Compression error: {compressionErrors[1]}
+                                </div>
+                              )}
                               {props.touched.police_clearance &&
                               props.errors.police_clearance ? (
                                 <div
@@ -554,18 +575,14 @@ function GoodMoralModal({
                                 type="file"
                                 name="community_tax_certificate"
                                 accept="image/*"
-                                onChange={(e) => {
-                                  const file = e.currentTarget.files[0] || null;
-                                  props.setFieldValue(
+                                onChange={(e) =>
+                                  handleFileChange(
+                                    e,
                                     "community_tax_certificate",
-                                    file
-                                  );
-                                  props.setFieldTouched(
-                                    "community_tax_certificate",
-                                    true,
-                                    true
-                                  );
-                                }}
+                                    2,
+                                    props
+                                  )
+                                }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "community_tax_certificate",
@@ -573,7 +590,16 @@ function GoodMoralModal({
                                     true
                                   )
                                 }
+                                disabled={isCompressing}
                               />
+                              {compressionErrors[2] && (
+                                <div
+                                  className="text-warning mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  Compression error: {compressionErrors[2]}
+                                </div>
+                              )}
                               {props.touched.community_tax_certificate &&
                               props.errors.community_tax_certificate ? (
                                 <div
@@ -623,18 +649,14 @@ function GoodMoralModal({
                                 type="file"
                                 name="barangay_clearance"
                                 accept="image/*"
-                                onChange={(e) => {
-                                  const file = e.currentTarget.files[0] || null;
-                                  props.setFieldValue(
+                                onChange={(e) =>
+                                  handleFileChange(
+                                    e,
                                     "barangay_clearance",
-                                    file
-                                  );
-                                  props.setFieldTouched(
-                                    "barangay_clearance",
-                                    true,
-                                    true
-                                  );
-                                }}
+                                    3,
+                                    props
+                                  )
+                                }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "barangay_clearance",
@@ -642,7 +664,16 @@ function GoodMoralModal({
                                     true
                                   )
                                 }
+                                disabled={isCompressing}
                               />
+                              {compressionErrors[3] && (
+                                <div
+                                  className="text-warning mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  Compression error: {compressionErrors[3]}
+                                </div>
+                              )}
                               {props.touched.barangay_clearance &&
                               props.errors.barangay_clearance ? (
                                 <div
@@ -691,15 +722,14 @@ function GoodMoralModal({
                                 type="file"
                                 name="fiscal_clearance"
                                 accept="image/*"
-                                onChange={(e) => {
-                                  const file = e.currentTarget.files[0] || null;
-                                  props.setFieldValue("fiscal_clearance", file);
-                                  props.setFieldTouched(
+                                onChange={(e) =>
+                                  handleFileChange(
+                                    e,
                                     "fiscal_clearance",
-                                    true,
-                                    true
-                                  );
-                                }}
+                                    4,
+                                    props
+                                  )
+                                }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "fiscal_clearance",
@@ -707,7 +737,16 @@ function GoodMoralModal({
                                     true
                                   )
                                 }
+                                disabled={isCompressing}
                               />
+                              {compressionErrors[4] && (
+                                <div
+                                  className="text-warning mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  Compression error: {compressionErrors[4]}
+                                </div>
+                              )}
                               {props.touched.fiscal_clearance &&
                               props.errors.fiscal_clearance ? (
                                 <div
@@ -756,15 +795,14 @@ function GoodMoralModal({
                                 type="file"
                                 name="court_clearance"
                                 accept="image/*"
-                                onChange={(e) => {
-                                  const file = e.currentTarget.files[0] || null;
-                                  props.setFieldValue("court_clearance", file);
-                                  props.setFieldTouched(
+                                onChange={(e) =>
+                                  handleFileChange(
+                                    e,
                                     "court_clearance",
-                                    true,
-                                    true
-                                  );
-                                }}
+                                    5,
+                                    props
+                                  )
+                                }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "court_clearance",
@@ -772,7 +810,16 @@ function GoodMoralModal({
                                     true
                                   )
                                 }
+                                disabled={isCompressing}
                               />
+                              {compressionErrors[5] && (
+                                <div
+                                  className="text-warning mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  Compression error: {compressionErrors[5]}
+                                </div>
+                              )}
                               {props.touched.court_clearance &&
                               props.errors.court_clearance ? (
                                 <div
@@ -829,10 +876,8 @@ function GoodMoralModal({
               color: "white",
             }}
             onClick={async () => {
-              // Validate form first
               const errors = await formikRef.current?.validateForm();
 
-              // Touch all fields to show errors
               formikRef.current?.setTouched({
                 purpose: true,
                 other_purpose: true,
@@ -845,13 +890,11 @@ function GoodMoralModal({
                 court_clearance: true,
               });
 
-              // If there are errors, don't proceed
               if (errors && Object.keys(errors).length > 0) {
                 console.log("Validation errors:", errors);
                 return;
               }
 
-              // If validation passes and proceed is checked
               if (proceed) {
                 const formik = {
                   purpose: formikRef?.current?.values?.purpose,
@@ -895,9 +938,9 @@ function GoodMoralModal({
                 );
               }
             }}
-            disabled={!proceed}
+            disabled={!proceed || isCompressing}
           >
-            Submit
+            {isUpdate ? "Update" : isCompressing ? "Compressing..." : "Submit"}
           </Button>
           <Button color="secondary" onClick={toggleModal}>
             Close

@@ -336,7 +336,8 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
             </>
           )}
         </div>
-        <tr>
+
+        <div>
           <Button
             color="primary"
             style={{ position: "absolute", right: "20px", top: "14px" }}
@@ -345,7 +346,8 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
             <i className="mdi mdi-reload me-2 fs-5" />
             Reload
           </Button>
-        </tr>
+        </div>
+
         <Table hover>
           <thead
             className="table-light"
@@ -559,7 +561,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               color="success"
                               className="me-2"
                               onClick={() => {
-                               
                                 window.open(
                                   application?.order_of_payment?.payment_detail
                                     ?.attachment,
@@ -643,9 +644,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                     {status === "returned" ? (
                       <td>
                         {application.status_histories
-                          ? application.status_histories.map((items) => {
-                              return items.remarks;
-                            })
+                          ? application.status_histories?.[0].remarks
                           : "N/A"}
                       </td>
                     ) : null}
@@ -754,7 +753,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               </DropdownItem>
                               <DropdownItem
                                 onClick={() => {
-                                  // call the appropriate toggle function instead of returning it
                                   if (
                                     applicationType === "good_moral" ||
                                     applicationType === "mayors_permit"

@@ -154,16 +154,7 @@ function MayorsCertificateModal({
   const [existingData, setExistingData] = useState({});
   const [isViewingOpen, setIsViewingOpen] = useState(false);
   const { currentImage, getImageHandle, isFetching } = useGetImage();
-
-  const {
-    compressedFiles,
-    isCompressing,
-    errors: compressionErrors,
-    handleImageChange,
-  } = useImageCompressor({
-    maxSizeMB: 2,
-    maxWidthOrHeight: 1920,
-  });
+  const {co} = useImageCompressor();
 
   const toggleIsViewerOpen = () => {
     setIsViewingOpen((prev) => !prev);
@@ -247,16 +238,6 @@ function MayorsCertificateModal({
       }
     });
     return formData;
-  };
-
-  const handleFileChange = async (e, fieldName, index, props) => {
-    const file = e.currentTarget.files[0];
-    if (!file) return;
-    const compressed = await handleImageChange(e, index);
-    if (compressed) {
-      props.setFieldValue(fieldName, compressed);
-      props.setFieldTouched(fieldName, true, true);
-    }
   };
 
   return (
@@ -395,14 +376,15 @@ function MayorsCertificateModal({
                                 type="file"
                                 name="police_clearance"
                                 accept="image/*"
-                                onChange={(e) =>
-                                  handleFileChange(
-                                    e,
+                                onChange={(e) => {
+                                  const file = e.currentTarget.files[0] || null;
+                                  props.setFieldValue("police_clearance", file);
+                                  props.setFieldTouched(
                                     "police_clearance",
-                                    0,
-                                    props
-                                  )
-                                }
+                                    true,
+                                    true
+                                  );
+                                }}
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "police_clearance",
@@ -410,16 +392,7 @@ function MayorsCertificateModal({
                                     true
                                   )
                                 }
-                                disabled={isCompressing}
                               />
-                              {compressionErrors[0] && (
-                                <div
-                                  className="text-warning mt-1"
-                                  style={{ fontSize: "0.875rem" }}
-                                >
-                                  Compression error: {compressionErrors[0]}
-                                </div>
-                              )}
                               {props.touched.police_clearance &&
                               props.errors.police_clearance ? (
                                 <div
@@ -468,14 +441,18 @@ function MayorsCertificateModal({
                                 type="file"
                                 name="community_tax_certificate"
                                 accept="image/*"
-                                onChange={(e) =>
-                                  handleFileChange(
-                                    e,
+                                onChange={(e) => {
+                                  const file = e.currentTarget.files[0] || null;
+                                  props.setFieldValue(
                                     "community_tax_certificate",
-                                    1,
-                                    props
-                                  )
-                                }
+                                    file
+                                  );
+                                  props.setFieldTouched(
+                                    "community_tax_certificate",
+                                    true,
+                                    true
+                                  );
+                                }}
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "community_tax_certificate",
@@ -483,16 +460,7 @@ function MayorsCertificateModal({
                                     true
                                   )
                                 }
-                                disabled={isCompressing}
                               />
-                              {compressionErrors[1] && (
-                                <div
-                                  className="text-warning mt-1"
-                                  style={{ fontSize: "0.875rem" }}
-                                >
-                                  Compression error: {compressionErrors[1]}
-                                </div>
-                              )}
                               {props.touched.community_tax_certificate &&
                               props.errors.community_tax_certificate ? (
                                 <div
@@ -542,14 +510,18 @@ function MayorsCertificateModal({
                                 type="file"
                                 name="barangay_clearance"
                                 accept="image/*"
-                                onChange={(e) =>
-                                  handleFileChange(
-                                    e,
+                                onChange={(e) => {
+                                  const file = e.currentTarget.files[0] || null;
+                                  props.setFieldValue(
                                     "barangay_clearance",
-                                    2,
-                                    props
-                                  )
-                                }
+                                    file
+                                  );
+                                  props.setFieldTouched(
+                                    "barangay_clearance",
+                                    true,
+                                    true
+                                  );
+                                }}
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "barangay_clearance",
@@ -557,16 +529,7 @@ function MayorsCertificateModal({
                                     true
                                   )
                                 }
-                                disabled={isCompressing}
                               />
-                              {compressionErrors[2] && (
-                                <div
-                                  className="text-warning mt-1"
-                                  style={{ fontSize: "0.875rem" }}
-                                >
-                                  Compression error: {compressionErrors[2]}
-                                </div>
-                              )}
                               {props.touched.barangay_clearance &&
                               props.errors.barangay_clearance ? (
                                 <div
@@ -615,14 +578,15 @@ function MayorsCertificateModal({
                                 type="file"
                                 name="fiscal_clearance"
                                 accept="image/*"
-                                onChange={(e) =>
-                                  handleFileChange(
-                                    e,
+                                onChange={(e) => {
+                                  const file = e.currentTarget.files[0] || null;
+                                  props.setFieldValue("fiscal_clearance", file);
+                                  props.setFieldTouched(
                                     "fiscal_clearance",
-                                    3,
-                                    props
-                                  )
-                                }
+                                    true,
+                                    true
+                                  );
+                                }}
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "fiscal_clearance",
@@ -630,16 +594,7 @@ function MayorsCertificateModal({
                                     true
                                   )
                                 }
-                                disabled={isCompressing}
                               />
-                              {compressionErrors[3] && (
-                                <div
-                                  className="text-warning mt-1"
-                                  style={{ fontSize: "0.875rem" }}
-                                >
-                                  Compression error: {compressionErrors[3]}
-                                </div>
-                              )}
                               {props.touched.fiscal_clearance &&
                               props.errors.fiscal_clearance ? (
                                 <div
@@ -688,14 +643,15 @@ function MayorsCertificateModal({
                                 type="file"
                                 name="court_clearance"
                                 accept="image/*"
-                                onChange={(e) =>
-                                  handleFileChange(
-                                    e,
+                                onChange={(e) => {
+                                  const file = e.currentTarget.files[0] || null;
+                                  props.setFieldValue("court_clearance", file);
+                                  props.setFieldTouched(
                                     "court_clearance",
-                                    4,
-                                    props
-                                  )
-                                }
+                                    true,
+                                    true
+                                  );
+                                }}
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "court_clearance",
@@ -703,16 +659,7 @@ function MayorsCertificateModal({
                                     true
                                   )
                                 }
-                                disabled={isCompressing}
                               />
-                              {compressionErrors[4] && (
-                                <div
-                                  className="text-warning mt-1"
-                                  style={{ fontSize: "0.875rem" }}
-                                >
-                                  Compression error: {compressionErrors[4]}
-                                </div>
-                              )}
                               {props.touched.court_clearance &&
                               props.errors.court_clearance ? (
                                 <div
@@ -769,8 +716,10 @@ function MayorsCertificateModal({
               color: "white",
             }}
             onClick={async () => {
+              // Validate form first
               const errors = await formikRef.current?.validateForm();
 
+              // Touch all fields to show errors
               formikRef.current?.setTouched({
                 purpose: true,
                 other_purpose: true,
@@ -781,11 +730,13 @@ function MayorsCertificateModal({
                 court_clearance: true,
               });
 
+              // If there are errors, don't proceed
               if (errors && Object.keys(errors).length > 0) {
                 console.log("Validation errors:", errors);
                 return;
               }
 
+              // If validation passes and proceed is checked
               if (proceed) {
                 const formik = {
                   ...formikRef.current?.values,
@@ -814,9 +765,9 @@ function MayorsCertificateModal({
                 );
               }
             }}
-            disabled={!proceed || isCompressing}
+            disabled={!proceed}
           >
-            {isCompressing ? "Compressing..." : "Submit"}
+            Submit
           </Button>
           <Button color="secondary" onClick={toggleModal}>
             Close

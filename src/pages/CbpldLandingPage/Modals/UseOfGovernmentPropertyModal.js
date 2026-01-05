@@ -21,6 +21,7 @@ import axios from "axios";
 import useGetImage from "hooks/Common/useGetImage";
 import * as Yup from "yup";
 import ReactSimpleImageViewer from "react-simple-image-viewer";
+import useImageCompressor from "hooks/Common/useImageCompressor";
 
 function UseOfGovernmentPropertyModal({
   openModal,
@@ -41,7 +42,15 @@ function UseOfGovernmentPropertyModal({
     setIsViewerOpen((prev) => !prev);
   };
   const [loadingExisting, setLoadingExisting] = useState(false);
-
+  const {
+    compressedFiles,
+    isCompressing,
+    errors: compressionErrors,
+    handleImageChange,
+  } = useImageCompressor({
+    maxSizeMB: 2,
+    maxWidthOrHeight: 1920,
+  });
   const getFormData = (object) => {
     const formData = new FormData();
     Object.keys(object).forEach((key) => {
@@ -80,7 +89,15 @@ function UseOfGovernmentPropertyModal({
     }
   }, [openModal]);
 
-  // Fixed validation schema
+  const handleFileChange = async (e, fieldName, index, props) => {
+    const file = e.currentTarget.files[0];
+    if (!file) return;
+    const compressed = await handleImageChange(e, index);
+    if (compressed) {
+      props.setFieldValue(fieldName, compressed);
+      props.setFieldTouched(fieldName, true, true);
+    }
+  };
   const UseOfGovernmentPropertySchema = Yup.object().shape({
     requestor_name: Yup.string()
       .trim()
@@ -113,20 +130,7 @@ function UseOfGovernmentPropertyModal({
       "request_letter_required",
       "Request letter is required",
       function (value) {
-        // If updating and file already exists, it's valid
         if (isUpdate && uploadedFiles?.request_letter) return true;
-        // If not updating or no existing file, require upload
-        return value !== null && value !== undefined;
-      }
-    ),
-
-    route_plan: Yup.mixed().test(
-      "route_plan_required",
-      "Route plan is required",
-      function (value) {
-        // If updating and file already exists, it's valid
-        if (isUpdate && uploadedFiles?.route_plan) return true;
-        // If not updating or no existing file, require upload
         return value !== null && value !== undefined;
       }
     ),
@@ -425,10 +429,7 @@ function UseOfGovernmentPropertyModal({
                               type="file"
                               accept="image/*"
                               onChange={(e) => {
-                                props.setFieldValue(
-                                  "request_letter",
-                                  e.currentTarget.files[0]
-                                );
+                                handleFileChange(e, "request_letter", 0, props);
                               }}
                               onBlur={() =>
                                 props.setFieldTouched("request_letter", true)
@@ -437,7 +438,16 @@ function UseOfGovernmentPropertyModal({
                                 props.touched.request_letter &&
                                 Boolean(props.errors.request_letter)
                               }
+                              disabled={isCompressing}
                             />
+                            {compressionErrors[0] && (
+                              <div
+                                className="text-warning mt-1"
+                                style={{ fontSize: "0.875rem" }}
+                              >
+                                Compression error: {compressionErrors[0]}
+                              </div>
+                            )}
                             {props.touched.request_letter &&
                               props.errors.request_letter && (
                                 <div
@@ -475,12 +485,9 @@ function UseOfGovernmentPropertyModal({
                           <div className="flex-grow-1">
                             <Input
                               type="file"
-                              accept="image/*"
+                              accept="image/jpeg,image/png"
                               onChange={(e) => {
-                                props.setFieldValue(
-                                  "route_plan",
-                                  e.currentTarget.files[0]
-                                );
+                                handleFileChange(e, "route_plan", 1, props);
                               }}
                               onBlur={() =>
                                 props.setFieldTouched("route_plan", true)
@@ -489,7 +496,16 @@ function UseOfGovernmentPropertyModal({
                                 props.touched.route_plan &&
                                 Boolean(props.errors.route_plan)
                               }
+                              disabled={isCompressing}
                             />
+                            {compressionErrors[1] && (
+                              <div
+                                className="text-warning mt-1"
+                                style={{ fontSize: "0.875rem" }}
+                              >
+                                Compression error: {compressionErrors[1]}
+                              </div>
+                            )}
                             {props.touched.route_plan &&
                               props.errors.route_plan && (
                                 <div
@@ -544,7 +560,7 @@ function UseOfGovernmentPropertyModal({
               fontWeight: 600,
               color: "white",
             }}
-            disabled={!proceed}
+            disabled={!proceed || isCompressing}
             onClick={async () => {
               // Validate form before submitting
               const errors = await formikRef.current.validateForm();
@@ -593,7 +609,7 @@ function UseOfGovernmentPropertyModal({
               );
             }}
           >
-            {isUpdate ? "Update" : "Submit"}
+            {isUpdate ? "Update" : isCompressing ? "Compressing..." : "Submit"}
           </Button>
 
           <Button

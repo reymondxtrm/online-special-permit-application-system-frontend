@@ -20,6 +20,7 @@ import { USER_PRIVACY } from "assets/data/data";
 import useGetImage from "hooks/Common/useGetImage";
 import ReactSimpleImageViewer from "react-simple-image-viewer";
 import * as Yup from "yup";
+import useImageCompressor from "hooks/Common/useImageCompressor";
 
 function RecorridaModal({
   openModal,
@@ -36,6 +37,15 @@ function RecorridaModal({
   const { currentImage, isFetching, getImageHandle } = useGetImage();
   const [uploadedFiles, setUploadedFiles] = useState({});
   const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const {
+    compressedFiles,
+    isCompressing,
+    errors: compressionErrors,
+    handleImageChange,
+  } = useImageCompressor({
+    maxSizeMB: 2,
+    maxWidthOrHeight: 1920,
+  });
 
   const getFormData = (object) => {
     const formData = new FormData();
@@ -53,6 +63,15 @@ function RecorridaModal({
       }
     });
     return formData;
+  };
+  const handleFileChange = async (e, fieldName, index, props) => {
+    const file = e.currentTarget.files[0];
+    if (!file) return;
+    const compressed = await handleImageChange(e, index);
+    if (compressed) {
+      props.setFieldValue(fieldName, compressed);
+      props.setFieldTouched(fieldName, true, true);
+    }
   };
 
   useEffect(() => {
@@ -110,11 +129,6 @@ function RecorridaModal({
   const fileValidationRequired = Yup.mixed()
     .required("This file is required")
     .test(
-      "fileSize",
-      "File must be less than 5MB",
-      (value) => !value || value.size <= IMAGE_SIZE
-    )
-    .test(
       "fileFormat",
       "Only JPG and PNG images are allowed",
       (value) => !value || SUPPORTED_FORMATS.includes(value.type)
@@ -122,11 +136,6 @@ function RecorridaModal({
 
   const fileValidationOptional = Yup.mixed()
     .nullable()
-    .test(
-      "fileSize",
-      "File must be less than 5MB",
-      (value) => !value || value.size <= IMAGE_SIZE
-    )
     .test(
       "fileFormat",
       "Only JPG and PNG images are allowed",
@@ -396,8 +405,7 @@ function RecorridaModal({
                               name="request_letter"
                               accept="image/*"
                               onChange={(e) => {
-                                const file = e.currentTarget.files[0] || null;
-                                props.setFieldValue("request_letter", file);
+                                handleFileChange(e, "request_letter", 0, props);
                                 props.setFieldTouched(
                                   "request_letter",
                                   true,
@@ -411,7 +419,16 @@ function RecorridaModal({
                                   true
                                 )
                               }
+                              disabled={isCompressing}
                             />
+                            {compressionErrors[0] && (
+                              <div
+                                className="text-warning mt-1"
+                                style={{ fontSize: "0.875rem" }}
+                              >
+                                Compression error: {compressionErrors[0]}
+                              </div>
+                            )}
                             {props.touched.request_letter &&
                             props.errors.request_letter ? (
                               <div
@@ -455,14 +472,22 @@ function RecorridaModal({
                               name="route_plan"
                               accept="image/*"
                               onChange={(e) => {
-                                const file = e.currentTarget.files[0] || null;
-                                props.setFieldValue("route_plan", file);
+                                handleFileChange(e, "route_plan", 1, props);
                                 props.setFieldTouched("route_plan", true, true);
                               }}
                               onBlur={() =>
                                 props.setFieldTouched("route_plan", true, true)
                               }
+                              disabled={isCompressing}
                             />
+                            {compressionErrors[1] && (
+                              <div
+                                className="text-warning mt-1"
+                                style={{ fontSize: "0.875rem" }}
+                              >
+                                Compression error: {compressionErrors[1]}
+                              </div>
+                            )}
                             {props.touched.route_plan &&
                             props.errors.route_plan ? (
                               <div
@@ -517,7 +542,7 @@ function RecorridaModal({
               fontWeight: 600,
               color: "white",
             }}
-            disabled={!proceed}
+            disabled={!proceed || isCompressing}
             onClick={async () => {
               // Validate form first
               const errors = await formikRef.current?.validateForm();
@@ -573,7 +598,7 @@ function RecorridaModal({
               }
             }}
           >
-            {isUpdate ? "Update" : "Submit"}
+            {isUpdate ? "Update" : isCompressing ? "Compressing..." : "Submit"}
           </Button>
 
           <Button color="secondary" onClick={toggleModal}>

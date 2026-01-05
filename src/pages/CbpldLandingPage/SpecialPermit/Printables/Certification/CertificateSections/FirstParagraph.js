@@ -9,7 +9,7 @@ export default function FirstParagraph({ firstParagraph }) {
       <div className="first-paragraph-wrapper">
         <p
           className="first-paragraph-text"
-          dangerouslySetInnerHTML={{ __html: firstParagraph }}
+          dangerouslySetInnerHTML={{ __html: firstParagraph }}  
         />
       </div>
     </td>

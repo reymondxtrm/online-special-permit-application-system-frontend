@@ -37,14 +37,14 @@ export const USER_PRIVACY =
   "I hereby voluntarily declare that all the information provided in this request form for the special permit is true, accurate, and complete to the best of my knowledge and belief. I fully understand that any false, misleading, or incomplete information may result in the disapproval of my application.";
 
 export const REVISION_CODE = {
-  good_moral: "CBPLD.BPLD.C.002.REV02",
-  mayors_permit: "CBPLD.BPLD.C.002.REV00",
-  event: "CBPLD.BPLD.P.019.REV01",
-  motorcade: "CBPLD.BPLD.P.014.REV01",
-  parade: "CBPLD.BPLD.P.015.REV01",
-  recorrida: "CBPLD.BPLD.P.016.REV01",
-  use_of_goverment_property: "CBPLD.BPLD.P.018.REV01",
-  occupational_permit: "CBPLD.BPLD.C.002.REV01", // not final yet
+  good_moral: "CBPLD.BPLD.C.002.REV01",
+  mayors_permit: "CBPLD.BPLD.C.002.REV01",
+  event: "CBPLD.BPLD.P.019.REV02",
+  motorcade: "CBPLD.BPLD.P.014.REV02",
+  parade: "CBPLD.BPLD.P.015.REV02",
+  recorrida: "CBPLD.BPLD.P.016.REV02",
+  use_of_government_property: "CBPLD.BPLD.P.018.REV02",
+  occupational_permit: "CBPLD.BPLD.P.013.REV03",
 };
 export const CITIZENSHIP_OPTIONS = [
   { value: "afghan", label: "Afghan" },

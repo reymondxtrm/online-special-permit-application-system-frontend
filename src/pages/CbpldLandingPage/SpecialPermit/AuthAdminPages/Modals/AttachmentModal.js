@@ -198,7 +198,7 @@ function AttachmentModal({
                     {Object.keys(fileMapping[applicationType]).map(
                       (tabId, index) => {
                         return (
-                          <>
+                          <React.Fragment key={index}>
                             <NavLink
                               key={tabId}
                               className={classnames({
@@ -217,7 +217,7 @@ function AttachmentModal({
                                 {tabId}
                               </p>
                             </NavLink>
-                          </>
+                          </React.Fragment>
                         );
                       }
                     )}

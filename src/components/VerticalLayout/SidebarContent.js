@@ -127,7 +127,7 @@ const SidebarContent = (props) => {
       <SimpleBar className="h-100" ref={ref}>
         <div id="sidebar-menu">
           <ul className="metismenu list-unstyled" id="side-menu">
-            {checkUserType(["admin"]) &&
+            {/* {checkUserType(["admin"]) &&
               checkRole([
                 "super_admin",
                 "admin",
@@ -145,9 +145,9 @@ const SidebarContent = (props) => {
                     </Link>
                   </li>
                 </>
-              )}
+              )} */}
 
-            {checkUserType(["admin"]) &&
+            {/* {checkUserType(["admin"]) &&
               checkRole([
                 "super_admin",
                 "admin",
@@ -290,12 +290,12 @@ const SidebarContent = (props) => {
                           <span>{props.t("User Controls")}</span>
                         </Link>
                       </li>
-                      {/* <li>
+                      <li>
                         <Link to="/releasing-records">
                           <i className="fas fa-th-list"></i>
                           <span>{props.t("Releasing Records")}</span>
                         </Link>
-                      </li> */}
+                      </li>
                     </>
                   )}
                   {checkRole([""])}
@@ -316,7 +316,7 @@ const SidebarContent = (props) => {
                     </li>
                   )}
                 </>
-              )}
+              )} */}
 
             {checkUserType(["client"]) && (
               <>
@@ -459,6 +459,14 @@ const SidebarContent = (props) => {
                     <span>{props.t("User Control")}</span>
                   </Link>
                 </li>
+                {checkRole(["super_admin"]) && (
+                  <li>
+                    <Link to="/super-admin">
+                      <i className="mdi mdi-robot-angry fs-2"> </i>
+                      <span>{props.t("Super Admin Config")}</span>
+                    </Link>
+                  </li>
+                )}
               </>
             )}
           </ul>

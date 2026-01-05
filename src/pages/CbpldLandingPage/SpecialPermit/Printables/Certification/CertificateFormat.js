@@ -51,6 +51,8 @@ const CertificateFormat = React.forwardRef((props, ref) => {
   } = props;
   const [scale, setScale] = useState(1);
   const certificateRef = useRef();
+ 
+  const year = new Date();
   const paperSize =
     permitType === "good_moral" || permitType === "mayors_permit"
       ? "a4"
@@ -264,7 +266,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                   {(permitType === "good_moral" ||
                     permitType === "mayors_permit") && (
                     <p className="footer-warning">
-                      Note: This permit is valid until December 31, 2025 only.
+                      {`Note: This permit is valid until December 31, ${year.getFullYear()} only.`}
                     </p>
                   )}
                   <p className="footer-code">{REVISION_CODE[permitType]}</p>

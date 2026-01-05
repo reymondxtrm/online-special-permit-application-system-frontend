@@ -21,6 +21,7 @@ import axios from "axios";
 import ReactSimpleImageViewer from "react-simple-image-viewer";
 import useGetImage from "hooks/Common/useGetImage";
 import * as Yup from "yup";
+import useImageCompressor from "hooks/Common/useImageCompressor";
 
 function ParadeModal({
   openModal,
@@ -36,6 +37,15 @@ function ParadeModal({
   const [uploadedFiles, setUploadedFiles] = useState({});
   const { currentImage, isFetching, getImageHandle } = useGetImage();
   const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const {
+    compressedFiles,
+    isCompressing,
+    errors: compressionErrors,
+    handleImageChange,
+  } = useImageCompressor({
+    maxSizeMB: 2,
+    maxWidthOrHeight: 1920,
+  });
 
   useEffect(() => {
     if (openModal && isUpdate && specialPermitApplicationId) {
@@ -60,6 +70,15 @@ function ParadeModal({
     }
   }, [openModal, isUpdate, specialPermitApplicationId]);
 
+  const handleFileChange = async (e, fieldName, index, props) => {
+    const file = e.currentTarget.files[0];
+    if (!file) return;
+    const compressed = await handleImageChange(e, index);
+    if (compressed) {
+      props.setFieldValue(fieldName, compressed);
+      props.setFieldTouched(fieldName, true, true);
+    }
+  };
   useEffect(() => {
     if (!openModal && formikRef.current) {
       formikRef.current.resetForm();
@@ -93,11 +112,7 @@ function ParadeModal({
 
   const fileValidationRequired = Yup.mixed()
     .required("This file is required")
-    .test(
-      "fileSize",
-      "File must be less than 5MB",
-      (value) => !value || value.size <= IMAGE_SIZE
-    )
+
     .test(
       "fileFormat",
       "Only JPG and PNG images are allowed",
@@ -106,11 +121,7 @@ function ParadeModal({
 
   const fileValidationOptional = Yup.mixed()
     .nullable()
-    .test(
-      "fileSize",
-      "File must be less than 5MB",
-      (value) => !value || value.size <= IMAGE_SIZE
-    )
+
     .test(
       "fileFormat",
       "Only JPG and PNG images are allowed",
@@ -366,8 +377,12 @@ function ParadeModal({
                                 name="request_letter"
                                 accept="image/*"
                                 onChange={(e) => {
-                                  const file = e.currentTarget.files[0] || null;
-                                  props.setFieldValue("request_letter", file);
+                                  handleFileChange(
+                                    e,
+                                    "request_letter",
+                                    0,
+                                    props
+                                  );
                                   props.setFieldTouched(
                                     "request_letter",
                                     true,
@@ -381,7 +396,16 @@ function ParadeModal({
                                     true
                                   )
                                 }
+                                disabled={isCompressing}
                               />
+                              {compressionErrors[0] && (
+                                <div
+                                  className="text-warning mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  Compression error: {compressionErrors[0]}
+                                </div>
+                              )}
                               {props.touched.request_letter &&
                               props.errors.request_letter ? (
                                 <div
@@ -432,8 +456,7 @@ function ParadeModal({
                                 name="route_plan"
                                 accept="image/*"
                                 onChange={(e) => {
-                                  const file = e.currentTarget.files[0] || null;
-                                  props.setFieldValue("route_plan", file);
+                                  handleFileChange(e, "route_plan", 1, props);
                                   props.setFieldTouched(
                                     "route_plan",
                                     true,
@@ -448,6 +471,14 @@ function ParadeModal({
                                   )
                                 }
                               />
+                              {compressionErrors[1] && (
+                                <div
+                                  className="text-warning mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  Compression error: {compressionErrors[1]}
+                                </div>
+                              )}
                               {props.touched.route_plan &&
                               props.errors.route_plan ? (
                                 <div
@@ -555,9 +586,9 @@ function ParadeModal({
                 );
               }
             }}
-            disabled={!proceed}
+            disabled={!proceed || isCompressing}
           >
-            Submit
+            {isUpdate ? "Update" : isCompressing ? "Compressing..." : "Submit"}
           </Button>
           <Button color="secondary" onClick={toggleModal}>
             Close

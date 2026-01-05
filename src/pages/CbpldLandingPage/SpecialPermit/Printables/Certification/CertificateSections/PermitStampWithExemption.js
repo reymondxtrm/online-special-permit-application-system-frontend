@@ -28,7 +28,9 @@ export default function PermitStampWithExemption({
           fontFamily: "Bookman Old Style, serif",
           fontSize: "13px",
         }}
-      >{`(${toPascalCaseWithSpaces(exemptedCases ?? "")})`}</p>
+      >
+        {exemptedCases ? `(${toPascalCaseWithSpaces(exemptedCases)})` : ""}
+      </p>
       <p className="footer-small" style={{ fontSize: "12px" }}>
         {moment(dateIssued).format("MM/DD/YYYY hh:mm A")} by: {approvedBy}
       </p>
