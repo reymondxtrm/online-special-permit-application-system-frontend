@@ -12,7 +12,6 @@ export default function ThirdParagraph({ thirdParagraph }) {
 
     let t = escapeHtml(input);
 
-    // Transform ordinal numbers (1st, 2nd, 3rd, etc.) to underlined with superscript
     t = t.replace(
       /\b(\d+)(st|nd|rd|th)\b/gi,
       (_, num, suffix) => `<u>${num}<sup>${suffix}</sup></u>&nbsp;`

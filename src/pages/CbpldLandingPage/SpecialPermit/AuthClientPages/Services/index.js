@@ -25,6 +25,7 @@ import { useSelector } from "react-redux";
 import CompanyOccupationalPermitModal from "pages/CbpldLandingPage/Modals/CompanyOccupationalPermitModal";
 
 const PermitCard = ({ title, content, onClick, isDisabled }) => {
+  document.title = "BPLD | Special Permit Application System";
   const popoverId = `permitHelp-${title.replace(/\s+/g, "-")}`;
 
   let info = "";

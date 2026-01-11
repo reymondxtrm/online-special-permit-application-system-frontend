@@ -34,10 +34,10 @@ const IndividualRegistrationForm = ({
   openModal,
   toggleModal,
   brangaysOptions,
+  civilStatusOptions,
 }) => {
   const formikRef = useRef(null);
   const user = useSelector((state) => state.user);
-  const [civilStatusOptions, setcivilStatusOptions] = useState();
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -86,27 +86,6 @@ const IndividualRegistrationForm = ({
     "employed",
     "mixed_income_earner",
   ];
-  useEffect(() => {
-    if (openModal) {
-      axios
-        .get("api/get-civil-status", {
-          params: { permit_type: "good_moral" },
-        })
-        .then(
-          (res) => {
-            const options = res.data.map((options) => ({
-              value: options.id,
-              label: options.name,
-            }));
-
-            setcivilStatusOptions(options);
-          },
-          (error) => {
-            console.log(error);
-          }
-        );
-    }
-  }, [openModal]);
 
   const validationSchema = Yup.object().shape({
     surname: Yup.string().required("Surname is required"),
@@ -193,7 +172,7 @@ const IndividualRegistrationForm = ({
           email: "",
           contact_no: "",
           province: "Agusan del Norte",
-          city: "City of Butuan",
+          city: "Butuan City",
           barangay: null,
           date_of_birth: "",
           place_of_birth: "",

@@ -82,56 +82,11 @@ import CedulaApplicationFormModal from "pages/CbpldLandingPage/SpecialPermit/Aut
 import PassportCropper from "pages/TrialPages/PassportCropper";
 import TwostepVerification2 from "pages/AuthenticationInner/auth-two-step-verification-2";
 import TwostepVerification from "pages/AuthenticationInner/auth-two-step-verification";
+import SuperAdminControl from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/SuperAdminControl";
+import AdminDeclined from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Declined";
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: Analytics },
-
-  // { path: "/initial-receiver/dashboard", component: InitialReceiverDashboard },
-  // { path: "/initial-receiver/receive", component: Receive },
-  // {
-  //   path: "/assessment-receiver/dashboard",
-  //   component: AssessmentReceiverDashboard,
-  // },
-  // {
-  //   path: "/assessment-receiver/for-receiving",
-  //   component: AssessmentForReceiving,
-  // },
-  // {
-  //   path: "/assessment-releaser/dashboard",
-  //   component: AssessmentReleaserDashboard,
-  // },
-  // {
-  //   path: "/assessment-releaser/for-releasing",
-  //   component: AssessmentForReleasing,
-  // },
-  // {
-  //   path: "/complete-receiver/dashboard",
-  //   component: CompleteReceiverDashboard,
-  // },
-  // {
-  //   path: "/complete-receiver/for-receiving",
-  //   component: CompleteForReceiving,
-  // },
-  // {
-  //   path: "/final-releaser/dashboard",
-  //   component: FinalReleaserDashboard,
-  // },
-  // {
-  //   path: "/final-releaser/for-printing",
-  //   component: ForPrinting,
-  // },
-  // {
-  //   path: "/final-releaser/for-releasing",
-  //   component: FinalForReleasing,
-  // },
-  // {
-  //   path: "/summary",
-  //   component: Summary,
-  // },
-  // {
-  //   path: "/user-control",
-  //   component: Controls,
-  // },
 
   // Special Permit Routes
   { path: "/client/services", component: ClientServices },
@@ -151,6 +106,7 @@ const authProtectedRoutes = [
   { path: "/admin/for-signature", component: AdminForSignature },
   { path: "/admin/for-payment/dashboard", component: AdminForPaymentDashboard },
   { path: "/admin/returned/dashboard", component: AdminReturnedDashboard },
+  { path: "/admin/declined", component: AdminDeclined },
   {
     path: "/admin/for-payment/approval",
     component: AdminForPaymentApproval,
@@ -161,13 +117,16 @@ const authProtectedRoutes = [
     path: "/user-control",
     component: Controls,
   },
+  { path: "/forgot-password", component: ForgetPwd },
+  { path: "/logout", component: Logout },
+  { path: "/profile", component: UserProfile },
+  {
+    path: "/super-admin",
+    component: SuperAdminControl,
+  },
 ];
 
 const publicRoutes = [
-  { path: "/profile", component: UserProfile },
-  { path: "/logout", component: Logout },
-  // { path: "/login", component: Login },
-  { path: "/forgot-password", component: ForgetPwd },
   { path: "/register", component: Register },
   { path: "/home", component: CbpldLandingPage },
 

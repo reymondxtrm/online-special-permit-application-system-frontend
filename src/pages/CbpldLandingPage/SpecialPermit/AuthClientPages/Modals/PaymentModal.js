@@ -54,7 +54,7 @@ function PaymentModal({
 }) {
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
-  const [paymentMethod, setPaymenyMethod] = useState("online");
+  const [paymentMethod, setPaymenyMethod] = useState("counter");
   const [generateModal, setgenerateModal] = useState(false);
   const [clearance, setClearance] = useState([]);
   const [isLoading, setisLoading] = useState();
@@ -71,7 +71,8 @@ function PaymentModal({
     return (
       d.getFullYear().toString() +
       String(d.getMonth() + 1).padStart(2, "0") +
-      String(d.getDate()).padStart(2, "0")
+      String(d.getDate()).padStart(2, "0") +
+      String(d.getMilliseconds()).padStart(2, "0")
     );
   }
   const [isPaying, setIsPaying] = useState(false);
@@ -127,7 +128,7 @@ function PaymentModal({
     { label: "Motorcade", type: "motorcade" },
     { label: "Parade", type: "parade" },
     { label: "Recorrida", type: "recorrida" },
-    { label: "Use Government Property", type: "government_property" },
+    { label: "Use Government Property", type: "use_of_government_property" },
     { label: "Certificate of Good Moral Character", type: "good_moral" },
     { label: "Occupational Permit", type: "occupational_permit" },
     { label: "Fiscal Clearance Fee", type: "fiscal_clearance" },
@@ -169,7 +170,10 @@ function PaymentModal({
       },
     ];
 
-    if (applicationType === "good_moral" && Array.isArray(clearance)) {
+    if (
+      applicationType === "good_moral" ||
+      (applicationType === "mayors_permit" && Array.isArray(clearance))
+    ) {
       const clearanceItems = clearance.map((item) => ({
         name: item?.name ?? "",
         amount: (item?.amount ?? 0) * quantity,
@@ -223,7 +227,7 @@ function PaymentModal({
           <Formik
             innerRef={formikRef}
             initialValues={{
-              paid_amount: paymentDetails?.total_amount,
+              paid_amount: paymentDetails?.total_amount || 0,
               or_no: "",
               date_of_payment: "",
               attachment: "",
@@ -271,7 +275,7 @@ function PaymentModal({
                                 <Card
                                   style={{
                                     backgroundColor: "#1B244B",
-                                    backgroundImage: `url(${bgImage})`,
+                                    // backgroundImage: `url(${bgImage})`,
                                     backgroundSize: "cover",
                                     backgroundRepeat: "no-repeat",
                                     backgroundPosition: "center",
@@ -325,12 +329,13 @@ function PaymentModal({
                                       </thead>
                                       <tbody>
                                         <tr>
-                                          <td>{type.label}</td>
+                                          <td>{type?.label}</td>
                                           <td>{paymentDetails?.quantity}</td>
                                           <td>{`₱${paymentDetails?.billed_amount}.00`}</td>
                                           {/* <td>{`₱ ${orderOfPaymentData?.billed_amount}`}</td> */}
                                         </tr>
-                                        {applicationType === "good_moral"
+                                        {applicationType === "good_moral" ||
+                                        applicationType === "mayors_permit"
                                           ? clearance &&
                                             clearance.map((item) => (
                                               <tr key={item.id}>
@@ -419,12 +424,32 @@ function PaymentModal({
                                                 : "#243375ff",
 
                                             maxWidth: "200px",
+                                            position: "relative",
                                           }}
-                                          onClick={() =>
-                                            setPaymenyMethod("online")
-                                          }
+                                          // onClick={() =>
+                                          //   setPaymenyMethod("online")
+                                          // }
                                         >
                                           <CardBody style={{ padding: "10px" }}>
+                                            <div
+                                              style={{
+                                                position: "absolute",
+                                                left: "-2px",
+                                                top: "-1px",
+                                                backgroundColor: "#9f9fa088",
+                                              }}
+                                            >
+                                              <p
+                                                style={{
+                                                  fontWeight: "bold",
+                                                  fontSize: "20px",
+                                                  color: "white",
+                                                  textAlign: "center",
+                                                }}
+                                              >
+                                                COMMING SOON
+                                              </p>
+                                            </div>
                                             <div className="d-flex gap-2 justify-content-between ">
                                               <i
                                                 className=" mdi mdi-bank fs-2"
@@ -577,7 +602,7 @@ function PaymentModal({
                                     </Row>
                                   </CardBody>
                                 </Card>
-                                {console.log(approveTerm)}
+
                                 <Row>
                                   <div className="d-flex gap-2">
                                     <Input
@@ -740,14 +765,17 @@ function PaymentModal({
                                       const formik = formikRef.current.values;
                                       if (paymentMethod === "online") {
                                         const secretKey =
-                                          process.env.REACT_SECRET_KEY;
-                                        // const secretKey =
-                                        //   "dbb0cf7063d880f7d416cc137a24f3625be78529196e8d91d360fef1994e76ef";
+                                          "dbb0cf7063d880f7d416cc137a24f3625be78529196e8d91d360fef1994e76ef";
+                                        // process.env.REACT_APP_SECRET_KEY;
+
                                         const obj = {
-                                          amount: paymentDetails.total_amount,
+                                          amount:
+                                            paymentDetails?.total_amount?.toString(),
                                           // amount: 100,
-                                          transaction_type: "Tax/Fees",
-                                          merchant_reference_number: `OSPAS-${applicationId}-${getTransactionDate()}`,
+                                          transaction_type: "Business Permit",
+                                          merchant_reference_number: `OSPAS-${[
+                                            applicationId?.[0],
+                                          ]}-${getTransactionDate()}`,
                                           full_name: user.name,
                                           user_id: user.id,
                                           ref_no: "1",
@@ -757,12 +785,14 @@ function PaymentModal({
                                           cedula: false,
                                           cedula_type: "individual",
                                           ref_no3: "0",
+                                          originator: "ospas",
                                           special_permit_application_id:
                                             applicationId,
                                           invoice_no: "12345",
                                           department: "CBPLD",
                                           downloadable: false,
-                                          type_application: "miscellaneous",
+                                          application_type_id: 5,
+                                          type_application: "Special Permit",
                                           email: user.email,
                                           // email: "reymondxtrm@gmail.com",
                                           remarks: "Remarks",
@@ -774,6 +804,22 @@ function PaymentModal({
                                             process.env.REACT_APP_URL +
                                             "client/for-payment/dashboard",
                                           new_collection: eor_collection,
+                                          updateUrl: {
+                                            // link: "http://ospas01.b.staging.butuan.gov.ph/api/online/create-db-state",
+                                            // link: "https://backendospas.butuan.gov.ph/api/online/create-db-state",
+                                            link:
+                                              window.location.protocol +
+                                              "//" +
+                                              process.env.REACT_APP_API +
+                                              "api/online/create-db-state",
+                                            params: {
+                                              application_type:
+                                                "occupational_permit",
+                                              special_permit_application_id: [
+                                                ...applicationId,
+                                              ],
+                                            },
+                                          },
                                           onSuccessCallbackUrl: {
                                             params: [
                                               "special_permit_application_id",
@@ -794,10 +840,11 @@ function PaymentModal({
                                               window.location.protocol +
                                               "//" +
                                               process.env.REACT_APP_API +
-                                              `api/update-payment-status`,
+                                              "api/update-payment-status",
+                                            // `http://ospas01.b.staging.butuan.gov.ph/api/update-payment-status`,
+                                            // `https://backendospas.butuan.gov.ph/api/update-payment-status`,
                                           },
                                         };
-
                                         const jsonString = JSON.stringify(obj);
                                         const encrypted = CryptoJS.AES.encrypt(
                                           jsonString,
@@ -806,37 +853,46 @@ function PaymentModal({
                                         const encoded =
                                           encodeURIComponent(encrypted);
                                         // const url = `http://ctd01.a.testing.butuan.gov.ph/payment?data=${encoded}`;
-                                        // const url = `http://epay.butuan.gov.ph/payment?data=${encoded}`;
-                                        const url =
-                                          window.location.protocol +
-                                          "//" +
-                                          process.env.REACT_APP_EPAY +
-                                          `payment?data=${encoded}`;
+                                        // const url = `http://epay01.a.staging.butuan.gov.ph/payment?data=${encoded}`;
+                                        setIsPaying((prev) => !prev);
+                                        const url = `http://epay01.a.staging.butuan.gov.ph/payment?data=${encoded}`;
+                                        // const url =
+                                        //   window.location.protocol +
+                                        //   "//" +
+                                        //   process.env.REACT_APP_EPAY +
+                                        //   `payment?data=${encoded}`;
+                                        // const url =
+                                        //   window.location.protocol +
+                                        //   "//" +
+                                        //   process.env.REACT_APP_EPAY +
+                                        //   `payment?data=${encoded}`;
 
-                                        const create = async () => {
-                                          setIsPaying((prev) => !prev);
-                                          try {
-                                            const response = await axios({
-                                              method: "POST",
-                                              url: "api/client/create-db-state",
-                                              params: {
-                                                application_type:
-                                                  "occupational_permit",
-                                                special_permit_application_id: [
-                                                  ...applicationId,
-                                                ],
-                                              },
-                                            });
-                                            if (response) {
-                                              setTimeout(() => {
-                                                window.location.href = url;
-                                              }, 1000);
-                                            }
-                                          } catch (error) {
-                                            console.log(error.response);
-                                          }
-                                        };
-                                        create();
+                                        // const create = async () => {
+                                        //   setIsPaying((prev) => !prev);
+                                        //   try {
+                                        //     const response = await axios({
+                                        //       method: "POST",
+                                        //       url: "api/client/create-db-state",
+                                        //       params: {
+                                        //         application_type:
+                                        //           "occupational_permit",
+                                        //         special_permit_application_id: [
+                                        //           ...applicationId,
+                                        //         ],
+                                        //       },
+                                        //     });
+                                        //     if (response) {
+                                        //       setTimeout(() => {
+                                        //         window.location.href = url;
+                                        //       }, 1000);
+                                        //     }
+                                        //   } catch (error) {
+                                        //     console.log(error.response);
+                                        //   }
+                                        // };
+                                        // create();
+
+                                        window.location.href = url;
                                       } else {
                                         const formData = getFormData(formik);
                                         applicationId.forEach((id) => {

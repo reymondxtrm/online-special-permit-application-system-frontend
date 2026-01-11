@@ -11,7 +11,6 @@ import { useSelector, useDispatch } from "react-redux";
 
 const Logout = (props) => {
   const userDetails = useSelector((state) => state.user);
-  console.log(userDetails.user_type);
   const dispatch = useDispatch();
   const pusher = useSelector((state) => state.pusher.pusherData);
   useEffect(() => {

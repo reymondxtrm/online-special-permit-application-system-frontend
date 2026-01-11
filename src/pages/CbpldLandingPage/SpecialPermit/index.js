@@ -41,7 +41,7 @@ function SpecialPermit({ props }) {
     dispatch(userSlice.actions.clearState());
   }, []);
   const loginStatus = useSelector((state) => state.user);
-  console.log("loginStatus", loginStatus);
+ 
   const formikRef = useRef(null);
   const handleSubmit = useSubmit();
   const history = useHistory(); // Initialize useHistory

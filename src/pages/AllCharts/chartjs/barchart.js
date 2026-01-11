@@ -62,7 +62,7 @@ const BarChart = ({ legendTitle, barColor, count, sample }) => {
       },
     },
   };
-  // console.log(data.gender);
+ 
 
   // var monthlyData = [12, 12, 12];
   const countPerMonth = labels.map((items, index) => {

@@ -27,13 +27,11 @@ import useSubmit from "hooks/Common/useSubmit";
 import UploadPermitModal from "../Modals/UploadPermitModal";
 import GeneratePermitModal from "../Modals/GeneratePermitModal";
 import ReviewPurposeModal from "../Modals/ReviewPurposeModal";
-import ReviewDiscountModal from "../Modals/ReviewDiscountModal";
 import AmountModal from "../Modals/AmountModal";
 import ReviewExemptionModal from "../Modals/ReviewExemptionModal";
 import ImageViewer from "react-simple-image-viewer";
 import RemarksModal from "../Modals/RemarksModal";
 import ReturnRemarksModal from "../Modals/ReturnRemarksModal";
-import { PhotoView } from "react-photo-view";
 import Viewer from "react-viewer";
 import {
   formateDateIntoString,
@@ -49,6 +47,7 @@ import {
 } from "features/SpecialPermitAdmin";
 import { useDispatch, useSelector } from "react-redux";
 import useGetImage from "hooks/Common/useGetImage";
+import FileViewerModal from "../AdminControls/Modals/FileViewerModal";
 
 const AdminTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
@@ -60,8 +59,8 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const [amountModal, setamountModal] = useState(false);
   const [remarksModal, setremarksModal] = useState(false);
   const [returnRemarksModal, setreturnRemarksModal] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(""); // State for the selected image
-  const [selectedFiles, setSelectedFiles] = useState(null); // State for selected application's uploaded files
+  const [selectedImage, setSelectedImage] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState(null);
   const [refreshPage, setrefreshPage] = useState(false);
   const [generateModal, setgenerateModal] = useState(false);
   const [uploadModal, setuploadModal] = useState(false);
@@ -76,9 +75,10 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const [referenceNo, setreferenceNo] = useState(null);
   const [imageViewerScale, setimageViewScale] = useState(1);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
-
+  const [pdfViewer, setPdfViewer] = useState(false);
   const [selectedRow, setSelectedRow] = useState([]);
   const [openRequestFormModal, setOpenRequestFormModal] = useState(false);
+  const [completedPermit, setCompletedPermit] = useState(null);
   const [
     openMayorsAndGoodMoralRequestForm,
     setOpenMayorsAndGoodMoralRequestForm,
@@ -126,11 +126,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const toggleReturnRemarksModal = () => {
     setreturnRemarksModal(!returnRemarksModal);
   };
-  const handleWheel = (e) => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    setScale((prev) => Math.min(Math.max(prev + delta, 1), 3));
-  };
 
   const toggleMayorsAndGoodMoralRequestModal = () => {
     setOpenMayorsAndGoodMoralRequestForm((prev) => !prev);
@@ -164,7 +159,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const toggleExemptionModal = () => {
     setreviewExemptionModal(!reviewExemptionModal);
   };
-
   useEffect(() => {
     if (applicationType === activeTab) {
       dispatch(getTableData(params));
@@ -172,73 +166,37 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
     }
   }, [activeTab, refreshPage]);
 
-  const handleViewImage = (imageUrl) => {
-    setSelectedImage(imageUrl);
-    setIsModalOpen(true);
-  };
-
-  // Function to toggle image viewer modal
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
-  };
-
-  // Function to open the attachment modal
   const handleViewAttachments = (uploadedFiles) => {
     setSelectedFiles(uploadedFiles);
     setAttachmentModal(true);
   };
-  // Function to toggle attachment modal
+  const togglePdfViewer = () => {
+    setPdfViewer((prev) => !prev);
+  };
   const toggleAttachmentModal = () => {
     setAttachmentModal(!attachmentModal);
   };
   const toggleUploadModal = () => {
     setuploadModal(!uploadModal);
   };
-  const dateOfEvent = (date, time) => {
-    if (date || time) {
-      // if (date === date && time) {
-      //   return (
-      //     formateDateIntoString(date) +
-      //     " " +
-      //     moment(time, "h:mm A").format("h:mm A") +
-      //     " to " +
-      //     moment(time, "h:mm A").format("h:mm A")
-      //   );
-      // }
-      return (
-        formateDateIntoString(date) +
-        " " +
-        moment(time, "h:mm A").format("h:mm A")
-      );
-    }
 
-    return "";
-  };
-  const zoomIn = () => setScale((prev) => Math.min(prev + 0.2, 3)); // max 3x
-  const zoomOut = () => setScale((prev) => Math.max(prev - 0.2, 1)); // min 1x
-  const handleSelectRow = (index) => {
-    if (selectedItem.includes(index)) {
-      const filteritem = selectedItem.filter((id) => id !== index);
-      setSelectedRow(filteritem);
-    } else {
-      setSelectedRow((prevItems) => [...prevItems, index]);
-    }
+  const dateOfEvent = (date, time) => {
+    const newTime =
+      time !== null ? moment(time, "h:mm A").format("h:mm A") : "";
+    return formateDateIntoString(date) + " " + newTime;
   };
   const toggleRequestFormModal = () => {
     setOpenRequestFormModal((prev) => !prev);
   };
-
   const handleRowOnclick = (permit_id) => {
     const response = updateTabNotification(applicationType, permit_id, status);
   };
   return (
     <>
-      {/* Attachment Modal */}
-
       <AttachmentModal
         toggleModal={toggleAttachmentModal}
         openModal={attachmentModal}
-        uploadedFiles={selectedFiles} // Pass the uploaded files to the modal
+        uploadedFiles={selectedFiles}
         applicationType={applicationType}
         mainActiveTab={activeTab}
       />
@@ -252,7 +210,13 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
         toggle={toggleMayorsAndGoodMoralRequestModal}
         applicationId={applicationId}
       />
-
+      {pdfViewer && (
+        <FileViewerModal
+          fileUrl={completedPermit}
+          isOpen={pdfViewer}
+          toggle={togglePdfViewer}
+        />
+      )}
       {status === "pending" ? (
         <>
           <ReviewPurposeModal
@@ -336,7 +300,8 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
             </>
           )}
         </div>
-        <tr>
+
+        <div>
           <Button
             color="primary"
             style={{ position: "absolute", right: "20px", top: "14px" }}
@@ -345,7 +310,8 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
             <i className="mdi mdi-reload me-2 fs-5" />
             Reload
           </Button>
-        </tr>
+        </div>
+
         <Table hover>
           <thead
             className="table-light"
@@ -375,13 +341,8 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                       )}
                     </>
                   ) : null}
-
-                  {/* {applicationType === "good_moral" && (
-                    <th>Name of Employer</th>
-                  )} */}
                   <th>Sex</th>
                   <th>Email</th>
-                  <th>Contact</th>
                 </>
               ) : null}
               {status === "for_payment" ||
@@ -398,7 +359,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
               applicationType === "recorrida" ||
               applicationType === "use_of_government_property" ? (
                 <>
-                  <th>Contact</th>
                   <th>Name of Requestor/Organization</th>
                   <th>Name of Event</th>
                   <th>Date From</th>
@@ -410,7 +370,9 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                 <th>Attachment</th>
               )}
 
-              {status === "returned" ? <th>Remarks</th> : null}
+              {status === "returned" || status === "declined" ? (
+                <th>Remarks</th>
+              ) : null}
 
               {status === "pending" ? <th>Actions</th> : null}
               {status === "for_signature" ? <th>Actions</th> : null}
@@ -479,12 +441,12 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                         )}
                         <td>{application.user?.gender}</td>
                         <td>{application.user?.email}</td>
-                        <td>
+                        {/* <td>
                           {
                             application.user?.user_phone_numbers[0]
                               ?.phone_number
                           }
-                        </td>
+                        </td> */}
                       </>
                     ) : null}
                     {status === "for_payment" ||
@@ -500,12 +462,12 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                     applicationType === "recorrida" ||
                     applicationType === "use_of_government_property" ? (
                       <>
-                        <td>
+                        {/* <td>
                           {
                             application.user?.user_phone_numbers[0]
                               ?.phone_number
                           }
-                        </td>
+                        </td> */}
                         <td>
                           {application?.requestor_name}{" "}
                           {application?.mark_as_read ? (
@@ -539,12 +501,12 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                       )} */}
                         <td>{application.user?.gender}</td>
                         <td>{application.user?.email}</td>
-                        <td>
+                        {/* <td>
                           {
                             application.user?.user_phone_numbers[0]
                               ?.phone_number
                           }
-                        </td>
+                        </td> */}
                         <td>{application.user?.email}</td>
                       </>
                     ) : null}
@@ -559,10 +521,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               color="success"
                               className="me-2"
                               onClick={() => {
-                                console.log(
-                                  application?.order_of_payment?.payment_detail
-                                    ?.attachment
-                                );
                                 window.open(
                                   application?.order_of_payment?.payment_detail
                                     ?.attachment,
@@ -608,14 +566,29 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                           </>
                         )
                       ) : (
-                        <Button
-                          color="success"
-                          onClick={() =>
-                            handleViewAttachments(application.uploaded_file)
-                          }
-                        >
-                          Attachments
-                        </Button>
+                        <div className="d-flex gap-2">
+                          <Button
+                            color="success"
+                            onClick={() =>
+                              handleViewAttachments(application.uploaded_file)
+                            }
+                          >
+                            Attachments
+                          </Button>
+                          {status === "completed" && (
+                            <Button
+                              color="success"
+                              onClick={() => {
+                                togglePdfViewer();
+                                setCompletedPermit(
+                                  application?.complete_special_permit?.file
+                                );
+                              }}
+                            >
+                              Permit
+                            </Button>
+                          )}
+                        </div>
                       )}
                     </td>
 
@@ -643,12 +616,10 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                         </td>
                       )} */}
 
-                    {status === "returned" ? (
+                    {status === "returned" || status === "declined" ? (
                       <td>
                         {application.status_histories
-                          ? application.status_histories.map((items) => {
-                              return items.remarks;
-                            })
+                          ? application.status_histories?.[0]?.remarks
                           : "N/A"}
                       </td>
                     ) : null}
@@ -757,7 +728,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               </DropdownItem>
                               <DropdownItem
                                 onClick={() => {
-                                  // call the appropriate toggle function instead of returning it
                                   if (
                                     applicationType === "good_moral" ||
                                     applicationType === "mayors_permit"
@@ -791,11 +761,13 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               style={{ width: "90px" }}
                               onClick={() => {
                                 toggleGenerateModal();
-                                setname(formatName(application.user?.fullname));
-                                setpurpose(
-                                  application.application_purpose?.name?.toUpperCase()
+                                setname(
+                                  formatName(application?.user?.fullname)
                                 );
-                                setreferenceNo(application.reference_no);
+                                setpurpose(
+                                  application?.application_purpose?.name?.toUpperCase()
+                                );
+                                setreferenceNo(application?.reference_no);
 
                                 setspecialPermitID(application?.id);
                               }}

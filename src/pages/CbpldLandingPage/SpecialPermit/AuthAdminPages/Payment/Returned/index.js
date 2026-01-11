@@ -49,6 +49,7 @@ const Returned = () => {
     parade: 0,
     recorrida: 0,
     use_of_government_property: 0,
+    occupational_permit: 0,
   });
   const handleTabSelect = (key) => {
     setActiveTab(key);
@@ -78,7 +79,7 @@ const Returned = () => {
     const handler = (event) => {
       const { documentType, count } = event;
       // Only update state if value actually changes to avoid extra renders
-      console.log(event);
+
       setNewCounts((prevCounts) => {
         return { ...prevCounts, [documentType]: count };
       });
@@ -98,7 +99,7 @@ const Returned = () => {
       try {
         const response = await axios.get(
           "api/admin/special-permit/all-counts",
-          { params: { permit_type_id: 6 } }
+          { params: { status_id: 6 } }
         );
 
         if (response && response.data) {
@@ -292,9 +293,9 @@ const Returned = () => {
                       title={
                         <>
                           OCCUPATIONAL PERMIT{" "}
-                          {newCounts.use_of_government_property !== 0 && (
+                          {newCounts.occupational_permit !== 0 && (
                             <Badge color="danger" className="ms-1">
-                              {newCounts.use_of_government_property}
+                              {newCounts.occupational_permit}
                             </Badge>
                           )}
                         </>

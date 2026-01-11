@@ -1,19 +1,19 @@
 {
-  "short_name": "BPLD Document Tracker",
-  "name": "BPLD Document Tracker",
+  "short_name": "BPLD | Special Permit Application System",
+  "name": "BPLD | Special Permit Application System",
   "icons": [
     {
-      "src": "itsm_logo.png",
+      "src": "cgbLogo.png",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },
     {
-      "src": "itsm_logo.png",
+      "src": "cgbLogo.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "itsm_logo.png",
+      "src": "cgbLogo.png",
       "type": "image/png",
       "sizes": "512x512"
     }

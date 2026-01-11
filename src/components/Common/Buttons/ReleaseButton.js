@@ -29,7 +29,6 @@ const ReleaseButton = ({
 }) => {
   const [modal, setModal] = useState(false);
   const toggleModal = () => setModal(!modal);
-  console.log(openModal);
 
   const releaseDocument = () => {
     openModal
@@ -74,7 +73,7 @@ const ReleaseButton = ({
                     showConfirmButton: false,
                     timer: 1500,
                   }).then(function () {});
-                  console.log(openModal);
+                  
                 },
                 (error) => {
                   if (error.response.status === 401) {
@@ -148,7 +147,7 @@ const ReleaseButton = ({
                   showConfirmButton: false,
                   timer: 1500,
                 }).then(function () {});
-                console.log(openModal);
+               
               },
               (error) => {
                 if (error.response.status === 401) {

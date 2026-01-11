@@ -19,7 +19,7 @@ const EventCertificateFormat = React.forwardRef((props, ref) => {
     paidAmounmt,
     withCase,
   } = props;
-  console.log(orNo);
+
 
   const formatDate = (dateString) => {
     const date = new Date(dateString); // Parse the date string

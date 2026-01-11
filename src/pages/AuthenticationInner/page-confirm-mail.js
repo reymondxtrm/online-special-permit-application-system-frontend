@@ -24,23 +24,18 @@ const ConfirmMail = () => {
   const [isFetching, setIsFetching] = useState(false);
   const query = new URLSearchParams(location.search);
   const verificationUrl = decodeURIComponent(query.get("url"));
-  // const parts = verificationUrl?.split("/");
-  // const id = parts[parts?.length - 2];
-  // const hash = parts[parts?.length - 1].split("?")[0];
-  // const email = localStorage.getItem("email");
+
   useEffect(() => {
     setIsFetching(true);
     const verifyEmail = async () => {
       try {
-        const response = await axios.get(
-          verificationUrl,
-          // { email: email },
-          {
-            withCredentials: true,
-          }
-        );
+        const response = await axios.get(verificationUrl, {
+          withCredentials: true,
+        });
 
-        setMessage("✅ Email verified successfully!");
+        setMessage(
+          "✅ Email verified successfully. Please don’t close this page—we will redirect you shortly."
+        );
         setTimeout(() => history.push("/home"), 2000);
         setIsFetching(false);
       } catch (error) {

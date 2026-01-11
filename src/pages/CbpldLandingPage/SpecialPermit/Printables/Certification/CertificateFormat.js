@@ -29,6 +29,7 @@ import { REVISION_CODE } from "assets/data/data";
 import { debounce } from "lodash";
 import QrCodeGenerator from "./CertificateSections/QrCodeGenerator";
 import index from "pages/Dashboard-Blog";
+import AdditionalParagraphForWithCase from "./CertificateSections/AdditionalParagraphForWithCase";
 const CertificateFormat = React.forwardRef((props, ref) => {
   const {
     permitType,
@@ -48,18 +49,22 @@ const CertificateFormat = React.forwardRef((props, ref) => {
     conditions,
     eventName,
     specialPermitApplicationId,
+    isCase,
+    additionalParagraphForWithCase,
   } = props;
   const [scale, setScale] = useState(1);
   const certificateRef = useRef();
+
+  const year = new Date();
   const paperSize =
     permitType === "good_moral" || permitType === "mayors_permit"
       ? "a4"
-      : "folio";
+      : "legal";
   const maxHeight = useMemo(() => {
     const baseHeight =
       permitType === "good_moral" || permitType === "mayors_permit"
         ? 1090
-        : 1223;
+        : 1319;
 
     const minus18mmInPx = (18 * 96) / 25.4; // ~68 px
     return baseHeight - minus18mmInPx;
@@ -94,7 +99,6 @@ const CertificateFormat = React.forwardRef((props, ref) => {
         isRunning = false;
         clearTimeout(timeoutId);
       }
-      console.log(newScale);
     };
     adjustScale();
     return () => {
@@ -116,7 +120,9 @@ const CertificateFormat = React.forwardRef((props, ref) => {
   if (permitType === "mayors_permit") {
     headerTitle = "MAYOR'S CERTIFICATION";
   } else if (permitType === "good_moral") {
-    headerTitle = "MAYOR'S CLEARANCE";
+    if (isCase) {
+      headerTitle = "MAYOR'S CERTIFICATION";
+    } else headerTitle = "MAYOR'S CLEARANCE";
   } else if (
     permitType === "event" ||
     permitType === "motorcade" ||
@@ -136,7 +142,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
     subHeader = "PARADE";
   } else if (permitType === "motorcade") {
     subHeader = "MOTORCADE";
-  } else if (permitType === "good_moral") {
+  } else if (permitType === "good_moral" && !isCase) {
     subHeader = "Certificate of Good Moral Character";
   } else subHeader = "";
 
@@ -145,6 +151,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
       ref={ref}
       className={` certificate-wrapper ${paperSize}`}
       style={{ "--scale": scale }}
+      id="dynamic-print-style"
     >
       <div ref={certificateRef}>
         <table className="certificate-table">
@@ -168,7 +175,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                         {" "}
                         <p>Republic of the Philippines</p>
                         <p>CITY GOVERNMENT OF BUTUAN</p>
-                        <p>City Business Permits and Licensing Department</p>
+                        <p>CITY BUSINESS PERMITS AND LICENSING DEPARTMENT</p>
                         <p>
                           City Hall Bldg., J.P. Rosales Ave., Doongan, Butuan
                           City
@@ -212,6 +219,18 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                   purpose={purpose}
                   subHeader={subHeader}
                 />
+                {isCase && (
+                  <div className="case-additional-text-wrapper">
+                    <p className="case-additional-text">
+                      TO WHOM IT MAY CONCERN:
+                    </p>
+                  </div>
+                )}
+                <AdditionalParagraphForWithCase
+                  additionalParagraphForWithCase={
+                    additionalParagraphForWithCase
+                  }
+                />
                 <FirstParagraph firstParagraph={firstParagraph} />
                 <EventName permitType={permitType} eventName={eventName} />
                 {!!withCase && <WithCases withCase={withCase} />}
@@ -221,10 +240,13 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                 <Conditions conditions={conditions} permitType={permitType} />
                 {permitType === "good_moral" && <Purpose purpose={purpose} />}
                 <ThirdParagraph thirdParagraph={thirdParagraph} />
-                {(permitType === "good_moral" ||
+
+                <MayorSignatory permitType={permitType} />
+
+                {/* {(permitType === "good_moral" ||
                   permitType === "mayors_permit") && (
                   <MayorSignatory permitType={permitType} />
-                )}
+                )} */}
                 <DepartmentHeadSingnatory />
               </td>
             </tr>
@@ -261,7 +283,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                   {(permitType === "good_moral" ||
                     permitType === "mayors_permit") && (
                     <p className="footer-warning">
-                      Note: This permit is valid until December 31, 2025 only.
+                      {`Note: This permit is valid until December 31, ${year.getFullYear()} only.`}
                     </p>
                   )}
                   <p className="footer-code">{REVISION_CODE[permitType]}</p>

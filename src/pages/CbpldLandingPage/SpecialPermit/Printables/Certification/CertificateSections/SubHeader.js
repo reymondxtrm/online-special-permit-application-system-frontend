@@ -14,7 +14,7 @@ export default function SubHeader({ permitType, purpose, subHeader }) {
 
   // Determine if font weight should be lighter (for good_moral)
   const isGoodMoral = permitType === "good_moral";
-
+  const text = headerText ? `(${headerText})` : "";
   return (
     <div className="subheader-section">
       {showPermitTypeHeader && (
@@ -24,7 +24,7 @@ export default function SubHeader({ permitType, purpose, subHeader }) {
               isGoodMoral ? "subheader-title--light" : ""
             }`}
           >
-            ({headerText})
+            {text}
           </p>
         </div>
       )}

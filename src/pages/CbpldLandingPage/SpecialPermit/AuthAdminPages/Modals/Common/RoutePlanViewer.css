@@ -1,0 +1,120 @@
+/* Route Plan Card Styling */
+.route-plan-card {
+  border-radius: 10px;
+  box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.1);
+  height: auto;
+  transition: all 0.3s ease;
+  border: none;
+  overflow: hidden;
+}
+
+.route-plan-card:hover {
+  box-shadow: 3px 3px 25px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Card Header Styling */
+.route-plan-header {
+  background: linear-gradient(135deg, #0d6dfc 0%, #0a56d4 100%);
+  color: white;
+  font-weight: bold;
+  font-size: 12pt;
+  letter-spacing: 0.2rem;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  padding: 15px 20px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Card Body Styling */
+.route-plan-body {
+  padding: 20px;
+  background-color: #ffffff;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Image Wrapper Styling */
+.image-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  overflow: hidden;
+  min-height: 400px;
+}
+
+.image-wrapper img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 4px;
+  cursor: grab;
+}
+
+.image-wrapper img:active {
+  cursor: grabbing;
+}
+
+/* No Route Plan Message */
+.no-route-message {
+  text-align: center;
+  font-weight: bold;
+  color: #6c757d;
+  font-size: 14pt;
+  padding: 40px 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .route-plan-header {
+    font-size: 10pt;
+    letter-spacing: 0.15rem;
+    min-height: 50px;
+    padding: 12px 15px;
+  }
+
+  .route-plan-body {
+    padding: 15px;
+    min-height: 250px;
+  }
+
+  .image-wrapper {
+    min-height: 300px;
+  }
+
+  .no-route-message {
+    font-size: 12pt;
+    padding: 30px 15px;
+  }
+}
+
+/* Loading State (Optional) */
+.route-plan-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: #0d6dfc;
+}
+
+/* Additional enhancement for TransformWrapper */
+.react-transform-wrapper,
+.react-transform-component {
+  width: 100%;
+  height: 100%;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}

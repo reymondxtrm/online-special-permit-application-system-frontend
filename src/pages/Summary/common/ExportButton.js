@@ -242,7 +242,6 @@ const ExportButton = (params) => {
       },
     }).then(
       function (res) {
-        console.log(res);
         exportDocument(res.data);
         setIsLoading(false);
       },

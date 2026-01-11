@@ -41,7 +41,7 @@ const DashboardFilters = ({
         ...tableParams,
         ...values,
       };
-      console.log(params);
+
       setParams(params);
       dispatch(action(params));
       dispatch(dateFilterSlice.actions.setParams(params));
@@ -50,12 +50,7 @@ const DashboardFilters = ({
   const clearFilter = () => {
     validation.resetForm();
     setParams("");
-    dispatch(
-      action({
-        status: tableParams.status,
-        permit_type: tableParams.permit_type,
-      })
-    );
+    dispatch(action(tableParams));
     dispatch(dateFilterSlice.actions.clearState());
   };
 
@@ -106,6 +101,7 @@ const DashboardFilters = ({
           </Col>
         </>
       ) : null}
+
       <BasicInputField
         col={"6"}
         type={"text"}
@@ -117,7 +113,12 @@ const DashboardFilters = ({
         placeholder={"Enter keyword"}
         value={validation.values.keyword}
       />
-      <BasicInputField
+      <div className="d-flex align-items-center" style={{ marginTop: "27px" }}>
+        <Button type="submit">
+          <i className="fas fa-search"></i>
+        </Button>
+      </div>
+      {/* <BasicInputField
         col={"6"}
         type={"date"}
         label={"Date From:"}
@@ -127,9 +128,9 @@ const DashboardFilters = ({
         validation={validation}
         placeholder={""}
         value={validation.values.date_from}
-      />
+      /> */}
 
-      <Col xs={12} style={{ width: "208px", paddingRight: "10px" }}>
+      {/* <Col xs={12} style={{ width: "208px", paddingRight: "10px" }}>
         <label
           // className="visually-hidden"
           htmlFor="inlineFormInputGroupUsername"
@@ -150,7 +151,7 @@ const DashboardFilters = ({
             <i className="fas fa-search"></i>
           </Button>
         </InputGroup>
-      </Col>
+      </Col> */}
       <Col>
         <label
           // className="visually-hidden"

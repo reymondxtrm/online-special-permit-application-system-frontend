@@ -13,11 +13,69 @@ import {
   getUserList,
   getCompanyListUnvalidated,
 } from "features/user/userListSlice";
+import BasicInputField from "components/Forms/BasicInputField";
+import { useFormik } from "formik";
+import DashboardFilters from "pages/Dashboard/dashboardFilters";
 
-const UserControlsTable = ({ isFetching, tableData, tableName }) => {
+const UserControlsTable = ({
+  isFetching,
+  tableData,
+  tableName,
+  is_validated,
+}) => {
   const [sortedData, setSortedData] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [refreshPage, setRefreshPage] = useState(false);
   const handleSubmit = useSubmit();
+
+  const toggleRefreshPage = () => {
+    setRefreshPage((prev) => !prev);
+  };
+
+  const validation = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      id: selectedUser?.id || null,
+      fname: selectedUser?.first_name || "",
+      mname: selectedUser?.middle_name || "",
+      lname: selectedUser?.last_name || "",
+      email: selectedUser?.email || "",
+      city:
+        selectedUser?.account_type === "individual"
+          ? selectedUser?.user_addresses?.[0]?.city || ""
+          : selectedUser?.user_address_morph?.[0].city || "",
+      address_line:
+        selectedUser?.account_type === "individual"
+          ? selectedUser?.user_addresses?.[0]?.address_line || ""
+          : selectedUser?.user_address_morph?.[0].address_line || "",
+      barangay:
+        selectedUser?.account_type === "individual"
+          ? selectedUser?.user_addresses?.[0]?.barangay || ""
+          : selectedUser?.user_address_morph?.[0].barangay || "",
+      province:
+        selectedUser?.account_type === "individual"
+          ? selectedUser?.user_addresses?.[0]?.province || ""
+          : selectedUser?.user_address_morph?.[0].province || "",
+    },
+    onSubmit: async (values) => {
+      handleSubmit(
+        {
+          url: "api/admin/update-user",
+          params: {
+            ...values,
+          },
+          message: { title: "Are you sure to update this user info? " },
+        },
+        [
+          getUserList({ unvalidated_user: 0 }),
+          getCompanyListUnvalidated({ unvalidated_user: 1 }),
+        ],
+        [toggleRefreshPage]
+      );
+    },
+  });
   useEffect(() => {
     setSortedData(
       _.orderBy(tableData, [sortConfig.key], [sortConfig.direction])
@@ -34,7 +92,7 @@ const UserControlsTable = ({ isFetching, tableData, tableName }) => {
         getUserList({ unvalidated_user: 0 }),
         getCompanyListUnvalidated({ unvalidated_user: 1 }),
       ],
-      []
+      [toggleRefreshPage]
     );
   };
   const sortData = (key) => {
@@ -88,6 +146,12 @@ const UserControlsTable = ({ isFetching, tableData, tableName }) => {
   return (
     <>
       <div className="tableFixHead">
+        {tableName === "users" && (
+          <DashboardFilters
+            action={getUserList}
+            tableParams={{ unvalidated_user: 0 }}
+          />
+        )}
         <Table hover>
           <thead
             style={{
@@ -95,7 +159,7 @@ const UserControlsTable = ({ isFetching, tableData, tableName }) => {
             }}
           >
             <tr>
-              <th>#</th>
+              {/* <th>#</th> */}
               <th>User ID</th>
               {tableName === "company" && (
                 <>
@@ -107,6 +171,15 @@ const UserControlsTable = ({ isFetching, tableData, tableName }) => {
                     onClick={() => sortData("first_name")}
                   >
                     Company Name
+                  </th>
+                  <th
+                    style={{
+                      width: "10%",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => sortData("email")}
+                  >
+                    Email
                   </th>
                   <th
                     style={{
@@ -131,6 +204,7 @@ const UserControlsTable = ({ isFetching, tableData, tableName }) => {
                   >
                     First Name/Company Name
                   </th>
+
                   <th
                     style={{
                       width: "10%",
@@ -149,11 +223,32 @@ const UserControlsTable = ({ isFetching, tableData, tableName }) => {
                   >
                     Last Name
                   </th>
+                  <th
+                    style={{
+                      width: "10%",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => sortData("email")}
+                  >
+                    Email
+                  </th>
                 </>
               ) : (
                 ""
               )}
 
+              {is_validated && (
+                <th
+                  style={{
+                    width: "20%",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => sortData("full_address")}
+                >
+                  Address
+                </th>
+              )}
+              <th>Contact Number</th>
               <th
                 style={{
                   width: "20%",
@@ -194,73 +289,250 @@ const UserControlsTable = ({ isFetching, tableData, tableName }) => {
               ) : (
                 sortedData?.map((items, index) => {
                   return (
-                    <tr key={items?.id}>
-                      <td className="fw-bold">{index + 1}</td>
-                      <td>{items?.id}</td>
-                      <td>{items?.first_name}</td>
-                      {tableName === "users" && (
-                        <>
-                          <td>{`${items?.middle_name || ""}`}</td>
-                          <td>{items?.last_name || ""}</td>
-                        </>
-                      )}
-                      {tableName === "company" && (
-                        <td>{items?.user_address_morph?.[0]?.full_address}</td>
-                      )}
-                      <td>
-                        <Badge
-                          color={
-                            items?.account_type === "individual"
-                              ? "success"
-                              : "primary"
-                          }
-                        >
-                          {items?.account_type}
-                        </Badge>
-                      </td>
-                      <td>
-                        {items?.user_roles?.length === 0 ? (
-                          <h5>
-                            {" "}
-                            <Badge color="success">Special Permit User</Badge>
-                          </h5>
-                        ) : (
-                          items?.user_roles?.map((role, index) => (
-                            <span key={index}>
-                              <h5>
-                                <Badge color="success">
-                                  {role.role_name === "special_permit_admin"
-                                    ? "Special Permit Admin"
-                                    : null}
-                                  {role.role_name === "special_permit_user"
-                                    ? "Special Permit user"
-                                    : null}
-                                </Badge>{" "}
-                              </h5>
-                            </span>
-                          ))
-                        )}
-                      </td>
-                      <td>
-                        <div className="d-flex  gap-2">
-                          <i
-                            className="mdi mdi-trash-can text-danger fs-2"
-                            style={{ cursor: "pointer" }}
-                            onClick={() => handleDelete(items?.id)}
-                          />
-                          {items?.is_validated === 0 &&
-                          items?.account_type === "company" ? (
-                            <i
-                              className="mdi mdi-account-multiple-check fs-2 text-success"
-                              style={{ cursor: "pointer" }}
-                              onClick={() => validationHandle(items.id)}
-                            ></i>
+                    <React.Fragment key={items.id}>
+                      {items?.id === selectedUser?.id ? (
+                        <tr>
+                          <td>{items?.id}</td>
+                          <td>
+                            <BasicInputField
+                              name={"fname"}
+                              validation={validation}
+                              type="text"
+                              value={validation.values.fname}
+                              touched={validation.touched.fname}
+                              errors={validation.errors.fname}
+                              col="12"
+                            />
+                          </td>
+                          {is_validated &&
+                          selectedUser?.account_type === "individual" ? (
+                            <>
+                              <td>
+                                <BasicInputField
+                                  name={"mname"}
+                                  validation={validation}
+                                  type="text"
+                                  value={validation.values.mname}
+                                  touched={validation.touched.mname}
+                                  errors={validation.errors.mname}
+                                  col="12"
+                                />
+                              </td>
+                              <td>
+                                <BasicInputField
+                                  name={"lname"}
+                                  validation={validation}
+                                  type="text"
+                                  value={validation.values.lname}
+                                  touched={validation.touched.lname}
+                                  errors={validation.errors.lname}
+                                  col="12"
+                                />
+                              </td>
+                            </>
                           ) : (
-                            ""
+                            tableName === "users" && (
+                              <>
+                                <td></td>
+                                <td></td>{" "}
+                              </>
+                            )
                           )}
-                        </div>
-                      </td>
-                    </tr>
+
+                          <td>
+                            <BasicInputField
+                              name={"email"}
+                              validation={validation}
+                              type="text"
+                              value={validation.values.email}
+                              touched={validation.touched.email}
+                              errors={validation.errors.email}
+                              col="12"
+                            />
+                          </td>
+                          <td>
+                            <BasicInputField
+                              name={"address_line"}
+                              validation={validation}
+                              type="text"
+                              value={validation.values.address_line}
+                              touched={validation.touched.address_line}
+                              errors={validation.errors.address_line}
+                              col="12"
+                            />
+                            <BasicInputField
+                              name={"barangay"}
+                              validation={validation}
+                              type="text"
+                              value={validation.values.barangay}
+                              touched={validation.touched.barangay}
+                              errors={validation.errors.barangay}
+                              col="12"
+                            />
+                            <BasicInputField
+                              name={"city"}
+                              validation={validation}
+                              type="text"
+                              value={validation.values.city}
+                              touched={validation.touched.city}
+                              errors={validation.errors.city}
+                              col="12"
+                            />
+                            <BasicInputField
+                              name={"province"}
+                              validation={validation}
+                              type="text"
+                              value={validation.values.province}
+                              touched={validation.touched.province}
+                              errors={validation.errors.province}
+                              col="12"
+                            />
+                          </td>
+                          <td>
+                            <Badge
+                              color={
+                                items?.account_type === "individual"
+                                  ? "success"
+                                  : "primary"
+                              }
+                            >
+                              {items?.account_type}
+                            </Badge>
+                          </td>
+                          <td>
+                            {items?.user_roles?.length === 0 ? (
+                              <h5>
+                                {" "}
+                                <Badge color="success">
+                                  Special Permit User
+                                </Badge>
+                              </h5>
+                            ) : (
+                              items?.user_roles?.map((role, index) => (
+                                <span key={index}>
+                                  <h5>
+                                    <Badge color="success">
+                                      {role.role_name === "special_permit_admin"
+                                        ? "Special Permit Admin"
+                                        : null}
+                                      {role.role_name === "special_permit_user"
+                                        ? "Special Permit user"
+                                        : null}
+                                    </Badge>{" "}
+                                  </h5>
+                                </span>
+                              ))
+                            )}
+                          </td>
+                          <td>
+                            {
+                              <div className="d-flex gap-1">
+                                <Button
+                                  color="primary"
+                                  onClick={() => {
+                                    validation.handleSubmit();
+                                    setSelectedUser(null);
+                                  }}
+                                >
+                                  Save
+                                </Button>
+                                <Button
+                                  color="danger"
+                                  onClick={() => setSelectedUser(null)}
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            }
+                          </td>
+                        </tr>
+                      ) : (
+                        <tr>
+                          <td>{items?.id}</td>
+                          <td>{items?.first_name}</td>
+                          {tableName === "users" && (
+                            <>
+                              <td>{`${items?.middle_name || ""}`}</td>
+                              <td>{items?.last_name || ""}</td>
+                            </>
+                          )}
+                          <td>{items?.email}</td>
+                          {tableName === "company" ? (
+                            <td>
+                              {items?.user_address_morph?.[0]?.full_address}
+                            </td>
+                          ) : (
+                            <td>{items?.user_addresses?.[0]?.full_address}</td>
+                          )}
+                          <td>
+                            {items?.user_phone_numbers?.[0]?.phone_number}
+                          </td>
+                          <td>
+                            <Badge
+                              color={
+                                items?.account_type === "individual"
+                                  ? "success"
+                                  : "primary"
+                              }
+                            >
+                              {items?.account_type}
+                            </Badge>
+                          </td>
+                          <td>
+                            {items?.user_roles?.length === 0 ? (
+                              <h5>
+                                {" "}
+                                <Badge color="success">
+                                  Special Permit User
+                                </Badge>
+                              </h5>
+                            ) : (
+                              items?.user_roles?.map((role, index) => (
+                                <span key={index}>
+                                  <h5>
+                                    <Badge color="success">
+                                      {role.role_name === "special_permit_admin"
+                                        ? "Special Permit Admin"
+                                        : null}
+                                      {role.role_name === "special_permit_user"
+                                        ? "Special Permit user"
+                                        : null}
+                                    </Badge>{" "}
+                                  </h5>
+                                </span>
+                              ))
+                            )}
+                          </td>
+                          <td>
+                            <div className="d-flex  gap-2">
+                              <i
+                                className="mdi mdi-trash-can text-danger fs-2"
+                                style={{ cursor: "pointer" }}
+                                onClick={() => handleDelete(items?.id)}
+                              />
+                              <i
+                                className="mdi mdi-account-edit fs-2 text-warning"
+                                style={{ cursor: "pointer" }}
+                                onClick={() => {
+                                  setIsEditing((prev) => !prev);
+                                  setSelectedUser(items);
+                                }}
+                              ></i>
+                              {items?.is_validated === 0 &&
+                              items?.account_type === "company" ? (
+                                <i
+                                  className="mdi mdi-account-multiple-check fs-2 text-success"
+                                  style={{ cursor: "pointer" }}
+                                  onClick={() => validationHandle(items.id)}
+                                ></i>
+                              ) : (
+                                ""
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   );
                 })
               ))

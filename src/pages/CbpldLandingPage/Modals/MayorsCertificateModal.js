@@ -24,72 +24,120 @@ import { USER_PRIVACY } from "assets/data/data";
 import useGetImage from "hooks/Common/useGetImage";
 import ImageViewer from "react-simple-image-viewer";
 import * as Yup from "yup";
-import E from "react-script";
+import BasicInputField from "components/Forms/BasicInputField";
+import useImageCompressor from "hooks/Common/useImageCompressor";
+
 export const createMayorsCertificateSchema = (isUpdate) =>
   Yup.object().shape({
-    // Only validate when NOT updating
-    ...(isUpdate
-      ? {}
-      : {
-          purpose: Yup.object().nullable().required("Purpose is required"),
+    purpose: Yup.object().nullable().required("Purpose is required"),
 
-          other_purpose: Yup.string().when("purpose", {
-            is: (purpose) => purpose?.label === "Others",
-            then: Yup.string().trim().required("Other purpose is required"),
-            otherwise: Yup.string().nullable(),
-          }),
+    other_purpose: Yup.string().when("purpose", {
+      is: (purpose) => purpose?.label === "Others",
+      then: Yup.string().trim().required("Other purpose is required"),
+      otherwise: Yup.string().nullable(),
+    }),
 
-          police_clearance: Yup.mixed()
-            .required("Police clearance is required")
-            .test(
-              "fileType",
-              "Only image files are allowed",
-              (value) =>
-                value &&
-                ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
-            ),
+    police_clearance: isUpdate
+      ? Yup.mixed()
+          .nullable()
+          .test(
+            "fileType",
+            "Only image files are allowed",
+            (value) =>
+              !value ||
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+          )
+      : Yup.mixed()
+          .required("Police clearance is required")
+          .test(
+            "fileType",
+            "Only image files are allowed",
+            (value) =>
+              value &&
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+          ),
 
-          community_tax_certificate: Yup.mixed()
-            .required("Community tax certificate is required")
-            .test(
-              "fileType",
-              "Only image files are allowed",
-              (value) =>
-                value &&
-                ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
-            ),
+    community_tax_certificate: isUpdate
+      ? Yup.mixed()
+          .nullable()
+          .test(
+            "fileType",
+            "Only image files are allowed",
+            (value) =>
+              !value ||
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+          )
+      : Yup.mixed()
+          .required("Community tax certificate is required")
+          .test(
+            "fileType",
+            "Only image files are allowed",
+            (value) =>
+              value &&
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+          ),
 
-          barangay_clearance: Yup.mixed()
-            .required("Barangay clearance is required")
-            .test(
-              "fileType",
-              "Only image files are allowed",
-              (value) =>
-                value &&
-                ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
-            ),
+    barangay_clearance: isUpdate
+      ? Yup.mixed()
+          .nullable()
+          .test(
+            "fileType",
+            "Only image files are allowed",
+            (value) =>
+              !value ||
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+          )
+      : Yup.mixed()
+          .required("Barangay clearance is required")
+          .test(
+            "fileType",
+            "Only image files are allowed",
+            (value) =>
+              value &&
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+          ),
 
-          fiscal_clearance: Yup.mixed()
-            .required("Fiscal clearance is required")
-            .test(
-              "fileType",
-              "Only image files are allowed",
-              (value) =>
-                value &&
-                ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
-            ),
+    fiscal_clearance: isUpdate
+      ? Yup.mixed()
+          .nullable()
+          .test(
+            "fileType",
+            "Only image files are allowed",
+            (value) =>
+              !value ||
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+          )
+      : Yup.mixed()
+          .required("Fiscal clearance is required")
+          .test(
+            "fileType",
+            "Only image files are allowed",
+            (value) =>
+              value &&
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+          ),
 
-          court_clearance: Yup.mixed()
-            .required("Court clearance is required")
-            .test(
-              "fileType",
-              "Only image files are allowed",
-              (value) =>
-                value &&
-                ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
-            ),
-        }),
+    court_clearance: isUpdate
+      ? Yup.mixed()
+          .nullable()
+          .test(
+            "fileType",
+            "Only image files are allowed",
+            (value) =>
+              !value ||
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+          )
+      : Yup.mixed()
+          .required("Court clearance is required")
+          .test(
+            "fileType",
+            "Only image files are allowed",
+            (value) =>
+              value &&
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+          ),
   });
+
 function MayorsCertificateModal({
   openModal,
   toggleModal,
@@ -107,12 +155,24 @@ function MayorsCertificateModal({
   const [isViewingOpen, setIsViewingOpen] = useState(false);
   const { currentImage, getImageHandle, isFetching } = useGetImage();
 
+  const {
+    compressedFiles,
+    isCompressing,
+    errors: compressionErrors,
+    handleImageChange,
+  } = useImageCompressor({
+    maxSizeMB: 2,
+    maxWidthOrHeight: 1920,
+  });
+
   const toggleIsViewerOpen = () => {
     setIsViewingOpen((prev) => !prev);
   };
+
   useEffect(() => {
     setotherPurpose(Boolean(existingData?.other_purpose));
   }, [existingData]);
+
   useEffect(() => {
     if (openModal) {
       axios
@@ -126,7 +186,6 @@ function MayorsCertificateModal({
               label: options.name,
             }));
             const updatedOptions = [{ value: 0, label: "Others" }, ...options];
-
             setpurposeOptions(updatedOptions);
           },
           (error) => {
@@ -173,12 +232,12 @@ function MayorsCertificateModal({
         );
     }
   }, [openModal, isUpdate, specialPermitApplicationId, purposeOptions]);
-  console.log(existingData);
+
   const getFormData = (object) => {
     const formData = new FormData();
     Object.keys(object).forEach((key) => {
       if (object[key] instanceof File || object[key] instanceof Blob) {
-        formData.append(key, object[key]); // Directly append files
+        formData.append(key, object[key]);
       } else if (Array.isArray(object[key])) {
         object[key].forEach((item) => formData.append(`${key}[]`, item));
       } else if (typeof object[key] === "object" && object[key] !== null) {
@@ -188,6 +247,16 @@ function MayorsCertificateModal({
       }
     });
     return formData;
+  };
+
+  const handleFileChange = async (e, fieldName, index, props) => {
+    const file = e.currentTarget.files[0];
+    if (!file) return;
+    const compressed = await handleImageChange(e, index);
+    if (compressed) {
+      props.setFieldValue(fieldName, compressed);
+      props.setFieldTouched(fieldName, true, true);
+    }
   };
 
   return (
@@ -207,23 +276,15 @@ function MayorsCertificateModal({
       )}
       <Modal
         isOpen={openModal}
-        toggle={() => {
-          toggleModal();
-        }}
+        toggle={toggleModal}
         fade={true}
         backdrop="static"
         size="m"
         className="modal-dialog-centered"
-        style={{
-          overflowY: "auto",
-        }}
+        style={{ overflowY: "auto" }}
         unmountOnClose
       >
-        <ModalHeader
-          toggle={() => {
-            toggleModal();
-          }}
-        >
+        <ModalHeader toggle={toggleModal}>
           <p
             style={{
               fontWeight: "bold",
@@ -241,16 +302,18 @@ function MayorsCertificateModal({
           <Formik
             innerRef={formikRef}
             enableReinitialize
+            validateOnChange={true}
+            validateOnBlur={true}
             validationSchema={createMayorsCertificateSchema(isUpdate)}
             initialValues={{
               type: "mayors_permit",
-              purpose: existingData?.purpose || "",
+              purpose: existingData?.purpose || null,
               other_purpose: existingData?.other_purpose || "",
-              police_clearance: "",
-              community_tax_certificate: "",
-              barangay_clearance: "",
-              fiscal_clearance: "",
-              court_clearance: "",
+              police_clearance: null,
+              community_tax_certificate: null,
+              barangay_clearance: null,
+              fiscal_clearance: null,
+              court_clearance: null,
             }}
             onSubmit={handleSubmit}
           >
@@ -264,7 +327,6 @@ function MayorsCertificateModal({
                           <Label>
                             Purpose <span className="text-danger">*</span>
                           </Label>
-
                           <div
                             className={
                               props.touched.purpose && props.errors.purpose
@@ -281,7 +343,7 @@ function MayorsCertificateModal({
                                 setotherPurpose(label === "Others");
                                 props.setFieldValue(
                                   "purpose",
-                                  selectedOption ?? ""
+                                  selectedOption || null
                                 );
                               }}
                               onBlur={() =>
@@ -291,7 +353,6 @@ function MayorsCertificateModal({
                               placeholder="Select Purpose"
                             />
                           </div>
-
                           {props.touched.purpose && props.errors.purpose && (
                             <FormFeedback className="d-block">
                               {props.errors.purpose}
@@ -300,193 +361,386 @@ function MayorsCertificateModal({
                         </FormGroup>
                       </Col>
                     </Row>
+
                     {otherPurpose && (
-                      <Col md={12}>
-                        <FormGroup>
-                          <Label>
-                            Specify Other Purpose{" "}
-                            <span className="text-danger">*</span>
-                          </Label>
-                          <Input
-                            type="text"
-                            name="other_purpose"
-                            value={props.values.other_purpose}
-                            onChange={props.handleChange}
-                            onBlur={props.handleBlur}
-                            invalid={
-                              props.touched.other_purpose &&
-                              Boolean(props.errors.other_purpose)
-                            }
-                          />
-                          <FormFeedback>
-                            {props.errors.other_purpose}
-                          </FormFeedback>
-                        </FormGroup>
-                      </Col>
+                      <Row>
+                        <BasicInputField
+                          col={12}
+                          label="Specify Other Purpose"
+                          name="other_purpose"
+                          type="text"
+                          placeholder="Enter other purpose"
+                          validation={props}
+                          value={props.values.other_purpose}
+                          touched={props.touched.other_purpose}
+                          errors={props.errors.other_purpose}
+                          required={true}
+                        />
+                      </Row>
                     )}
+
+                    {/* Police Clearance */}
                     <Row>
                       <Col>
                         <FormGroup>
                           <Label>
                             Police Clearance{" "}
-                            <span className="text-danger">*</span>
+                            {!isUpdate && (
+                              <span className="text-danger">*</span>
+                            )}
                           </Label>
-
-                          <Input
-                            type="file"
-                            name="police_clearance"
-                            accept="image/*"
-                            onChange={(e) =>
-                              props.setFieldValue(
-                                "police_clearance",
-                                e.currentTarget.files[0]
-                              )
-                            }
-                            onBlur={() =>
-                              props.setFieldTouched("police_clearance", true)
-                            }
-                            invalid={
-                              props.touched.police_clearance &&
-                              Boolean(props.errors.police_clearance)
-                            }
-                          />
-
-                          <FormFeedback>
-                            {props.errors.police_clearance}
-                          </FormFeedback>
+                          <div className="d-flex gap-2 align-items-start">
+                            <div className="flex-grow-1">
+                              <Input
+                                type="file"
+                                name="police_clearance"
+                                accept="image/*"
+                                onChange={(e) =>
+                                  handleFileChange(
+                                    e,
+                                    "police_clearance",
+                                    0,
+                                    props
+                                  )
+                                }
+                                onBlur={() =>
+                                  props.setFieldTouched(
+                                    "police_clearance",
+                                    true,
+                                    true
+                                  )
+                                }
+                                disabled={isCompressing}
+                              />
+                              {compressionErrors[0] && (
+                                <div
+                                  className="text-warning mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  Compression error: {compressionErrors[0]}
+                                </div>
+                              )}
+                              {props.touched.police_clearance &&
+                              props.errors.police_clearance ? (
+                                <div
+                                  className="text-danger mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  {props.errors.police_clearance}
+                                </div>
+                              ) : null}
+                            </div>
+                            {isUpdate && uploadedFiles?.police_clearance && (
+                              <Button
+                                color="primary"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  getImageHandle({
+                                    path: uploadedFiles?.police_clearance,
+                                    url: "api/client/attachment",
+                                    showLoader: true,
+                                  });
+                                  toggleIsViewerOpen();
+                                }}
+                              >
+                                <i className="mdi mdi-eye"></i>
+                              </Button>
+                            )}
+                          </div>
                         </FormGroup>
                       </Col>
                     </Row>
+
+                    {/* Community Tax Certificate */}
                     <Row>
                       <Col>
                         <FormGroup>
                           <Label>
                             Community Tax Certificate{" "}
-                            <span className="text-danger">*</span>
+                            {!isUpdate && (
+                              <span className="text-danger">*</span>
+                            )}
                           </Label>
-
-                          <Input
-                            type="file"
-                            name="community_tax_certificate"
-                            accept="image/*"
-                            onChange={(e) =>
-                              props.setFieldValue(
-                                "community_tax_certificate",
-                                e.currentTarget.files[0]
-                              )
-                            }
-                            onBlur={() =>
-                              props.setFieldTouched(
-                                "community_tax_certificate",
-                                true
-                              )
-                            }
-                            invalid={
-                              props.touched.community_tax_certificate &&
-                              Boolean(props.errors.community_tax_certificate)
-                            }
-                          />
-
-                          <FormFeedback>
-                            {props.errors.community_tax_certificate}
-                          </FormFeedback>
+                          <div className="d-flex gap-2 align-items-start">
+                            <div className="flex-grow-1">
+                              <Input
+                                type="file"
+                                name="community_tax_certificate"
+                                accept="image/*"
+                                onChange={(e) =>
+                                  handleFileChange(
+                                    e,
+                                    "community_tax_certificate",
+                                    1,
+                                    props
+                                  )
+                                }
+                                onBlur={() =>
+                                  props.setFieldTouched(
+                                    "community_tax_certificate",
+                                    true,
+                                    true
+                                  )
+                                }
+                                disabled={isCompressing}
+                              />
+                              {compressionErrors[1] && (
+                                <div
+                                  className="text-warning mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  Compression error: {compressionErrors[1]}
+                                </div>
+                              )}
+                              {props.touched.community_tax_certificate &&
+                              props.errors.community_tax_certificate ? (
+                                <div
+                                  className="text-danger mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  {props.errors.community_tax_certificate}
+                                </div>
+                              ) : null}
+                            </div>
+                            {isUpdate &&
+                              uploadedFiles?.community_tax_certificate && (
+                                <Button
+                                  color="primary"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    getImageHandle({
+                                      path: uploadedFiles?.community_tax_certificate,
+                                      url: "api/client/attachment",
+                                      showLoader: true,
+                                    });
+                                    toggleIsViewerOpen();
+                                  }}
+                                >
+                                  <i className="mdi mdi-eye"></i>
+                                </Button>
+                              )}
+                          </div>
                         </FormGroup>
                       </Col>
                     </Row>
+
+                    {/* Barangay Clearance */}
                     <Row>
                       <Col>
                         <FormGroup>
                           <Label>
                             Barangay Clearance{" "}
-                            <span className="text-danger">*</span>
+                            {!isUpdate && (
+                              <span className="text-danger">*</span>
+                            )}
                           </Label>
-
-                          <Input
-                            type="file"
-                            name="barangay_clearance"
-                            accept="image/*"
-                            onChange={(e) =>
-                              props.setFieldValue(
-                                "barangay_clearance",
-                                e.currentTarget.files[0]
-                              )
-                            }
-                            onBlur={() =>
-                              props.setFieldTouched("barangay_clearance", true)
-                            }
-                            invalid={
-                              props.touched.barangay_clearance &&
-                              Boolean(props.errors.barangay_clearance)
-                            }
-                          />
-                          <FormFeedback>
-                            {props.errors.barangay_clearance}
-                          </FormFeedback>
+                          <div className="d-flex gap-2 align-items-start">
+                            <div className="flex-grow-1">
+                              <Input
+                                type="file"
+                                name="barangay_clearance"
+                                accept="image/*"
+                                onChange={(e) =>
+                                  handleFileChange(
+                                    e,
+                                    "barangay_clearance",
+                                    2,
+                                    props
+                                  )
+                                }
+                                onBlur={() =>
+                                  props.setFieldTouched(
+                                    "barangay_clearance",
+                                    true,
+                                    true
+                                  )
+                                }
+                                disabled={isCompressing}
+                              />
+                              {compressionErrors[2] && (
+                                <div
+                                  className="text-warning mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  Compression error: {compressionErrors[2]}
+                                </div>
+                              )}
+                              {props.touched.barangay_clearance &&
+                              props.errors.barangay_clearance ? (
+                                <div
+                                  className="text-danger mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  {props.errors.barangay_clearance}
+                                </div>
+                              ) : null}
+                            </div>
+                            {isUpdate && uploadedFiles?.barangay_clearance && (
+                              <Button
+                                color="primary"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  getImageHandle({
+                                    path: uploadedFiles?.barangay_clearance,
+                                    url: "api/client/attachment",
+                                    showLoader: true,
+                                  });
+                                  toggleIsViewerOpen();
+                                }}
+                              >
+                                <i className="mdi mdi-eye"></i>
+                              </Button>
+                            )}
+                          </div>
                         </FormGroup>
                       </Col>
                     </Row>
+
+                    {/* Fiscal Clearance */}
                     <Row>
                       <Col>
                         <FormGroup>
                           <Label>
                             Fiscal Clearance{" "}
-                            <span className="text-danger">*</span>
+                            {!isUpdate && (
+                              <span className="text-danger">*</span>
+                            )}
                           </Label>
-
-                          <Input
-                            type="file"
-                            name="fiscal_clearance"
-                            accept="image/*"
-                            onChange={(e) =>
-                              props.setFieldValue(
-                                "fiscal_clearance",
-                                e.currentTarget.files[0]
-                              )
-                            }
-                            onBlur={() =>
-                              props.setFieldTouched("fiscal_clearance", true)
-                            }
-                            invalid={
-                              props.touched.fiscal_clearance &&
-                              Boolean(props.errors.fiscal_clearance)
-                            }
-                          />
-                          <FormFeedback>
-                            {props.errors.fiscal_clearance}
-                          </FormFeedback>
+                          <div className="d-flex gap-2 align-items-start">
+                            <div className="flex-grow-1">
+                              <Input
+                                type="file"
+                                name="fiscal_clearance"
+                                accept="image/*"
+                                onChange={(e) =>
+                                  handleFileChange(
+                                    e,
+                                    "fiscal_clearance",
+                                    3,
+                                    props
+                                  )
+                                }
+                                onBlur={() =>
+                                  props.setFieldTouched(
+                                    "fiscal_clearance",
+                                    true,
+                                    true
+                                  )
+                                }
+                                disabled={isCompressing}
+                              />
+                              {compressionErrors[3] && (
+                                <div
+                                  className="text-warning mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  Compression error: {compressionErrors[3]}
+                                </div>
+                              )}
+                              {props.touched.fiscal_clearance &&
+                              props.errors.fiscal_clearance ? (
+                                <div
+                                  className="text-danger mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  {props.errors.fiscal_clearance}
+                                </div>
+                              ) : null}
+                            </div>
+                            {isUpdate && uploadedFiles?.fiscal_clearance && (
+                              <Button
+                                color="primary"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  getImageHandle({
+                                    path: uploadedFiles?.fiscal_clearance,
+                                    url: "api/client/attachment",
+                                    showLoader: true,
+                                  });
+                                  toggleIsViewerOpen();
+                                }}
+                              >
+                                <i className="mdi mdi-eye"></i>
+                              </Button>
+                            )}
+                          </div>
                         </FormGroup>
                       </Col>
                     </Row>
+
+                    {/* Court Clearance */}
                     <Row>
                       <Col>
                         <FormGroup>
                           <Label>
                             Court Clearance{" "}
-                            <span className="text-danger">*</span>
+                            {!isUpdate && (
+                              <span className="text-danger">*</span>
+                            )}
                           </Label>
-
-                          <Input
-                            type="file"
-                            name="court_clearance"
-                            accept="image/*"
-                            onChange={(e) =>
-                              props.setFieldValue(
-                                "court_clearance",
-                                e.currentTarget.files[0]
-                              )
-                            }
-                            onBlur={() =>
-                              props.setFieldTouched("court_clearance", true)
-                            }
-                            invalid={
-                              props.touched.court_clearance &&
-                              Boolean(props.errors.court_clearance)
-                            }
-                          />
-
-                          <FormFeedback>
-                            {props.errors.court_clearance}
-                          </FormFeedback>
+                          <div className="d-flex gap-2 align-items-start">
+                            <div className="flex-grow-1">
+                              <Input
+                                type="file"
+                                name="court_clearance"
+                                accept="image/*"
+                                onChange={(e) =>
+                                  handleFileChange(
+                                    e,
+                                    "court_clearance",
+                                    4,
+                                    props
+                                  )
+                                }
+                                onBlur={() =>
+                                  props.setFieldTouched(
+                                    "court_clearance",
+                                    true,
+                                    true
+                                  )
+                                }
+                                disabled={isCompressing}
+                              />
+                              {compressionErrors[4] && (
+                                <div
+                                  className="text-warning mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  Compression error: {compressionErrors[4]}
+                                </div>
+                              )}
+                              {props.touched.court_clearance &&
+                              props.errors.court_clearance ? (
+                                <div
+                                  className="text-danger mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  {props.errors.court_clearance}
+                                </div>
+                              ) : null}
+                            </div>
+                            {isUpdate && uploadedFiles?.court_clearance && (
+                              <Button
+                                color="primary"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  getImageHandle({
+                                    path: uploadedFiles?.court_clearance,
+                                    url: "api/client/attachment",
+                                    showLoader: true,
+                                  });
+                                  toggleIsViewerOpen();
+                                }}
+                              >
+                                <i className="mdi mdi-eye"></i>
+                              </Button>
+                            )}
+                          </div>
                         </FormGroup>
                       </Col>
                     </Row>
@@ -514,13 +768,31 @@ function MayorsCertificateModal({
                 "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
               color: "white",
             }}
-            onClick={() => {
-              const formik = {
-                ...formikRef.current?.values,
-                special_permit_application_id: specialPermitApplicationId,
-              };
-              const formData = getFormData(formik);
+            onClick={async () => {
+              const errors = await formikRef.current?.validateForm();
+
+              formikRef.current?.setTouched({
+                purpose: true,
+                other_purpose: true,
+                police_clearance: true,
+                community_tax_certificate: true,
+                barangay_clearance: true,
+                fiscal_clearance: true,
+                court_clearance: true,
+              });
+
+              if (errors && Object.keys(errors).length > 0) {
+                console.log("Validation errors:", errors);
+                return;
+              }
+
               if (proceed) {
+                const formik = {
+                  ...formikRef.current?.values,
+                  special_permit_application_id: specialPermitApplicationId,
+                };
+                const formData = getFormData(formik);
+
                 handleSubmit(
                   {
                     url: isUpdate
@@ -542,16 +814,11 @@ function MayorsCertificateModal({
                 );
               }
             }}
-            disabled={!proceed}
+            disabled={!proceed || isCompressing}
           >
-            Submit
+            {isCompressing ? "Compressing..." : "Submit"}
           </Button>
-          <Button
-            color="secondary"
-            onClick={() => {
-              toggleModal();
-            }}
-          >
+          <Button color="secondary" onClick={toggleModal}>
             Close
           </Button>
         </ModalFooter>

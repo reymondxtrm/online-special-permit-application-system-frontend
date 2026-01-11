@@ -104,7 +104,7 @@ const App = (props) => {
       connection.unbind("disconnected", handleDisconnected);
     };
   }, []);
-  console.log(isConnected);
+
   return (
     <React.Fragment>
       <Router basename="/">
@@ -132,7 +132,7 @@ const App = (props) => {
             />
           ))}
           {/* <Redirect to="/admin/dashboard" /> */}
-          <Redirect to="/home" />
+          <Redirect to="home" />
         </Switch>
       </Router>
 

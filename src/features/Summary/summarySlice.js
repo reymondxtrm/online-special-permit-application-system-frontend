@@ -11,7 +11,7 @@ export const getSummary = createAsyncThunk(
         params: filters,
       });
       if (response.data) {
-        // console.log(response);
+       
         return response.data;
       } else {
         return thunkAPI.rejectWithValue(response.data);

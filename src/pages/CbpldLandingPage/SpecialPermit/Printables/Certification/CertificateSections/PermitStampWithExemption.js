@@ -6,12 +6,12 @@ export default function PermitStampWithExemption({
   approvedBy,
   ordinance,
 }) {
-  const toPascalCaseWithSpaces = (str) => {
+  const toPascalCaseWithSpaces = (str = "") => {
     return str
-      .replace(/[_\s]+/g, " ") // Replace underscores or multiple spaces with single space
-      .split(" ") // Split string into words
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize first letter
-      .join(" "); // Join words with spaces
+      .replace(/[_\s]+/g, " ")
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
   };
   return (
     <div className="footer-left" style={{ padding: "20px" }}>
@@ -19,17 +19,19 @@ export default function PermitStampWithExemption({
         className="fw-bold"
         style={{
           fontFamily: "Bookman Old Style, serif",
-          fontSize: "13px",
+          fontSize: "10px",
         }}
       >{`EXEMPTED PER ${ordinance ?? ""} `}</p>
       <p
         className="fw-bold"
         style={{
           fontFamily: "Bookman Old Style, serif",
-          fontSize: "13px",
+          fontSize: "10px",
         }}
-      >{`(${toPascalCaseWithSpaces(exemptedCases ?? "")})`}</p>
-      <p className="footer-small" style={{ fontSize: "12px" }}>
+      >
+        {exemptedCases ? `(${toPascalCaseWithSpaces(exemptedCases)})` : ""}
+      </p>
+      <p className="footer-small" style={{ fontSize: "9x" }}>
         {moment(dateIssued).format("MM/DD/YYYY hh:mm A")} by: {approvedBy}
       </p>
     </div>

@@ -156,14 +156,9 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
     setOpenOccupationalPermitModal((prev) => !prev);
   };
   const dateOfEvent = (date, time) => {
-    if (date || time) {
-      return (
-        formateDateIntoString(date) +
-        " " +
-        moment(time, "h:mm A").format("h:mm A")
-      );
-    }
-    return "";
+    const newTime =
+      time !== null ? moment(time, "h:mm A").format("h:mm A") : "";
+    return formateDateIntoString(date) + " " + newTime;
   };
   const handleSelect = (id) => {
     setSelectedRow((prev) => {
@@ -180,7 +175,11 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
     if (selectedRow.length === rows.length) {
       setSelectedRow([]);
     } else {
-      setSelectedRow(rows.map((r) => r.id));
+      const selectedIds = [];
+      rows.forEach((r) => {
+        selectedIds.push(r.id);
+      });
+      setSelectedRow(selectedIds);
     }
   };
 
@@ -413,14 +412,17 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
         isClient
       />
 
-      <OverTheCounterModal
-        toggleModal={toggleOverTheCounterModal}
-        openModal={overTheCounterModal}
-        applicationId={selectedRow}
-        toggleRefresh={toggleRefresh}
-        applicationType={applicationType}
-        paymentDetails={paymentDetails}
-      />
+      {overTheCounterModal && (
+        <OverTheCounterModal
+          toggleModal={toggleOverTheCounterModal}
+          openModal={overTheCounterModal}
+          applicationId={selectedRow}
+          toggleRefresh={toggleRefresh}
+          applicationType={applicationType}
+          paymentDetails={paymentDetails}
+        />
+      )}
+
       <OccupationalPermitModal
         openModal={updateOccupationalPermitModal}
         toggleModal={toggleUpdateOccupationalPermitModal}
@@ -458,6 +460,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
           toggleModal={toggleEventApplicationModal}
           isUpdate
           specialPermitApplicationId={selectedRow[0]}
+          toggleRefresh={toggleRefresh}
         />
       )}
 
@@ -621,9 +624,17 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                 applicationType === "recorrida" ||
                 applicationType === "use_of_government_property") && (
                 <>
+                  <th>Requestor</th>
                   <th>Name of Event</th>
                   <th>Date From</th>
                   <th>Date To</th>
+                  {status === "returned" && (
+                    <>
+                      <th>Remarks</th>
+                      <th>O.R</th>
+                      <th>Action</th>
+                    </>
+                  )}
                 </>
               )}
 
@@ -657,13 +668,17 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                   {status === "returned" && (
                     <>
                       <th>O.R</th>
+                      <th>Action</th>
                     </>
                   )}
                 </>
               )}
               {status === "for_payment" &&
               user?.accountType === "individual" ? (
-                <th>Actions</th>
+                <>
+                  <th>Actions</th>
+                  <th>Payment Status</th>
+                </>
               ) : null}
               {status === "completed" ? <th>Special Permit</th> : null}
               {status === "declined" ? (
@@ -685,6 +700,10 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         status === "for_payment" && (
                           <Input
                             type="checkbox"
+                            disabled={
+                              application?.order_of_payment
+                                ?.payment_on_progress === 1
+                            }
                             checked={selectedRow?.includes(application.id)}
                             onClick={(e) => {
                               handleSelect(application.id);
@@ -694,7 +713,9 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         )}
                     </td>
 
-                    <td>{`${index + 1}.`}</td>
+                    <td>
+                      <div className="d-flex gap-2">{`${index + 1}.`}</div>
+                    </td>
                     {status === "for_signature" && (
                       <td>{application.reference_no}</td>
                     )}
@@ -807,15 +828,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         )}
 
                         {(status === "declined" || status === "returned") && (
-                          <td>
-                            {application.status_histories
-                              ? application.status_histories.map(
-                                  (items, index) => {
-                                    <div key={index}>{items.remarks}</div>;
-                                  }
-                                )
-                              : "N/A"}
-                          </td>
+                          <td>{application?.status_histories?.[0]?.remarks}</td>
                         )}
 
                         {status === "returned" &&
@@ -971,16 +984,45 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         <td>
                           {dateOfEvent(
                             application?.event_date_from,
-                            application?.event_date_to
+                            application?.event_time_from
                           )}
                         </td>
 
                         <td>
                           {dateOfEvent(
-                            application?.event_date_from,
-                            application?.event_date_to
+                            application?.event_date_to,
+                            application?.event_time_to
                           )}
                         </td>
+                        {status === "returned" && (
+                          <>
+                            <td>
+                              {application?.status_histories?.[0]?.remarks}
+                            </td>
+                            <td>
+                              <FileIconFormat
+                                fileType="official_receipt"
+                                path={
+                                  application?.order_of_payment?.payment_detail
+                                    ?.attachment
+                                }
+                                toggleIsViewerOpen={toggleIsViewerOpen}
+                                getImageHandle={getImageHandle}
+                              />
+                            </td>
+                            <td>
+                              <Button
+                                color="primary"
+                                onClick={() => {
+                                  setSelectedRow([application?.id]);
+                                  toggleReUploadModal();
+                                }}
+                              >
+                                Reupload O.R
+                              </Button>
+                            </td>
+                          </>
+                        )}
                       </>
                     ) : null}
                     {status === "for_payment" &&
@@ -989,18 +1031,63 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         <td>
                           <Button
                             color="primary"
-                            onClick={() => {
-                              toggleOverTheCounterModal();
+                            disabled={
+                              application?.order_of_payment
+                                ?.payment_on_progress === 1
+                            }
+                            onClick={(e) => {
+                              e.preventDefault();
+
+                              if (!application?.id) {
+                                console.error("Application data is missing");
+                                return;
+                              }
+
+                              if (
+                                application?.order_of_payment
+                                  ?.payment_on_progress === 1
+                              ) {
+                                Swal.fire({
+                                  icon: "info",
+                                  title: "Processing Payment",
+                                  text: "Your application payment is currently being processed. Please wait for further updates.",
+                                  confirmButtonText: "OK",
+                                });
+                                return;
+                              }
+
                               setSelectedRow([application?.id]);
                               dispatch(
-                                SpecialPermitClientSlice.actions.setApplicationIdsForPayment(
+                                SpecialPermitClientSlice?.actions?.setApplicationIdsForPayment(
                                   [application?.id]
                                 )
                               );
+                              toggleOverTheCounterModal();
                             }}
                           >
                             Pay
                           </Button>
+                        </td>
+                        <td>
+                          <h4>
+                            <Badge
+                              style={{
+                                borderRadius: "20px",
+                                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+                              }}
+                              color={
+                                application?.order_of_payment
+                                  ?.payment_on_progress === 1
+                                  ? "warning"
+                                  : "primary"
+                              }
+                            >
+                              {application?.order_of_payment
+                                ?.payment_on_progress === 1
+                                ? "Paying"
+                                : "Unpaid"}
+                            </Badge>
+                          </h4>
                         </td>
                         {/* <td>
                           <>
@@ -1064,10 +1151,12 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                             display: "flex",
                           }}
                         >
-                          <div style={{ paddingRight: "10px" }}>
+                          <div
+                            style={{ paddingRight: "10px" }}
+                            className="d-flex gap-2"
+                          >
                             <Button
                               color="success"
-                              style={{ width: "95px" }}
                               onClick={() => {
                                 const fileId = application?.id;
 
@@ -1112,7 +1201,19 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                                   });
                               }}
                             >
+                              <i className="mdi mdi-download fs-4 me-2"></i>
                               Download
+                            </Button>
+                            <Button
+                              color="primary"
+                              onClick={() => {
+                                const url = process.env.REACT_APP_FEEDBACK_URL;
+
+                                window.open(url, "_blank");
+                              }}
+                            >
+                              <i className="mdi mdi-star fs-4 me-2 text-warning"></i>
+                              Submit Feedback
                             </Button>
                           </div>
                         </div>
@@ -1120,7 +1221,15 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                     ) : null}
                     {status === "declined" && (
                       <>
-                        <td>{application?.status_histories?.[0]?.remarks}</td>
+                        {(applicationType === "event" ||
+                          applicationType === "parade" ||
+                          applicationType === "recorrida" ||
+                          applicationType === "motorcade" ||
+                          applicationType === "use_of_government_property" ||
+                          applicationType === "occupational_permit") && (
+                          <td>{application?.status_histories?.[0]?.remarks}</td>
+                        )}
+
                         <td>
                           <Button
                             onClick={() => {

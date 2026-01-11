@@ -10,7 +10,7 @@ export const formateDateIntoString = (date) => {
 };
 
 export const updateTabNotification = async (permitType, permit_id, stage) => {
-  console.log(permitType, permit_id, stage);
+ 
   try {
     const response = await axios.post("api/admin/update-tab-notification", {
       permit_type: permitType,

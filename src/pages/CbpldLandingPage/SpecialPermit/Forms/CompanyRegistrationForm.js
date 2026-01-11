@@ -37,42 +37,65 @@ export default function CompanyRegistrationForm({
       username: "",
     },
     onSubmit: async (values, { resetForm }) => {
+      Swal.fire({
+        title: "Processing...",
+        text: "Please wait",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+      let params = { ...values, outside_butuan: outsideButuan ? 1 : 0 };
+      if (!outsideButuan) {
+        params = {
+          ...values,
+          province: "Agusan del Norte",
+          city: "City of Butuan",
+          outside_butuan: outsideButuan ? 1 : 0,
+        };
+      }
       try {
-        Swal.fire({
-          title: "Processing...",
-          text: "Please wait",
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          },
-        });
-        let params = { ...values, outside_butuan: outsideButuan ? 1 : 0 };
-        if (!outsideButuan) {
-          params = {
-            ...values,
-            province: "Agusan del Norte",
-            city: "City of Butuan",
-            outside_butuan: outsideButuan ? 1 : 0,
-          };
-        }
+        await dispatch(
+          specialPermitCompanyRegistration({ params, history })
+        ).unwrap();
 
-        await dispatch(specialPermitCompanyRegistration({ params, history }));
+        Swal.close();
 
-        Swal.fire({
+        await Swal.fire({
           icon: "success",
           title: "Registration Successful!",
-          text: "Your account has been created.",
+          text: "Redirecting to email verification...",
           confirmButtonColor: "#3085d6",
+          timer: 1500,
+          showConfirmButton: false,
         });
+
         resetForm();
       } catch (error) {
-        console.log(error.response.data);
-        Swal.fire({
-          icon: "error",
-          title: "Something went wrong!",
-          text: error.response?.data?.message || "Please try again later.",
-          confirmButtonColor: "#d33",
-        });
+        Swal.close();
+
+        const errors = error?.errors;
+
+        if (errors && Object.keys(errors).length > 0) {
+          validation.setErrors(errors);
+
+          const errorMessages = Object.values(errors).flat().join("<br>");
+
+          Swal.fire({
+            icon: "error",
+            title: "Validation Error",
+            html: errorMessages,
+            confirmButtonColor: "#d33",
+          });
+        } else {
+          // Check for direct message from backend
+          Swal.fire({
+            icon: "error",
+            title: "Registration Failed",
+            text: error?.message || error || "Please try again later.", // Added error fallback
+            confirmButtonColor: "#d33",
+          });
+        }
       }
     },
   });

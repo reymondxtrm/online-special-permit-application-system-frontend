@@ -53,6 +53,7 @@ const Pending = () => {
     parade: 0,
     recorrida: 0,
     use_of_government_property: 0,
+    occupational_permit: 0,
   });
   const handleTabSelect = (key) => {
     setActiveTab(key);
@@ -73,7 +74,7 @@ const Pending = () => {
     const handler = (event) => {
       const { documentType, count } = event;
       // Only update state if value actually changes to avoid extra renders
-      console.log(event);
+
       setNewCounts((prevCounts) => {
         return { ...prevCounts, [documentType]: count };
       });
@@ -93,7 +94,7 @@ const Pending = () => {
       try {
         const response = await axios.get(
           "api/admin/special-permit/all-counts",
-          { params: { permit_type_id: 1 } }
+          { params: { status_id: 1 } }
         );
 
         if (response && response.data) {
@@ -277,9 +278,9 @@ const Pending = () => {
                       title={
                         <>
                           OCCUPATIONAL PERMIT{" "}
-                          {newCounts.use_of_government_property !== 0 && (
+                          {newCounts.occupational_permit !== 0 && (
                             <Badge color="danger" className="ms-1">
-                              {newCounts.use_of_government_property}
+                              {newCounts.occupational_permit}
                             </Badge>
                           )}
                         </>

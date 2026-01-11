@@ -30,7 +30,7 @@ const Navbar = (props) => {
   let TargetId = navItems.map((item) => {
     return item.idnm;
   });
-  console.log(TargetId);
+
 
   const color = props.imglight !== true ? "black" : "white";
 

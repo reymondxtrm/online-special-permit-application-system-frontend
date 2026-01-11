@@ -1,0 +1,880 @@
+// /* eslint-disable padded-blocks */
+
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
+import {
+  Table,
+  Button,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  UncontrolledDropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
+  Badge,
+} from "reactstrap";
+import Swal from "sweetalert2";
+import moment from "moment";
+import axios from "axios";
+import AttachmentModal from "../Modals/AttachmentModal";
+import useSubmit from "hooks/Common/useSubmit";
+import UploadPermitModal from "../Modals/UploadPermitModal";
+import GeneratePermitModal from "../Modals/GeneratePermitModal";
+import ReviewPurposeModal from "../Modals/ReviewPurposeModal";
+import ReviewDiscountModal from "../Modals/ReviewDiscountModal";
+import AmountModal from "../Modals/AmountModal";
+import ReviewExemptionModal from "../Modals/ReviewExemptionModal";
+import ImageViewer from "react-simple-image-viewer";
+import RemarksModal from "../Modals/RemarksModal";
+import ReturnRemarksModal from "../Modals/ReturnRemarksModal";
+import { PhotoView } from "react-photo-view";
+import Viewer from "react-viewer";
+import {
+  formateDateIntoString,
+  updateTabNotification,
+} from "common/utility/utilityFunction";
+import { motion } from "motion/react";
+import RequestForm from "../Printables/RequestForm";
+import MayorsAndGoodMoralRequestForm from "../Printables/MayorsAndGoodMoralRequestForm";
+import Pagination from "components/Pagination";
+import {
+  getTableData,
+  SpecialPermitAdminSlice,
+} from "features/SpecialPermitAdmin";
+import { useDispatch, useSelector } from "react-redux";
+import useGetImage from "hooks/Common/useGetImage";
+import FileViewerModal from "../AdminControls/Modals/FileViewerModal";
+
+const AdminTable = ({ applicationType, status, activeTab }) => {
+  const handleSubmit = useSubmit();
+  const formikRef = useRef(null);
+  const [isModalOpen, setIsModalOpen] = useState(false); // State for image viewer modal
+  const [attachmentModal, setAttachmentModal] = useState(false);
+  const [reviewPurposeModal, setreviewPurposeModal] = useState(false);
+  const [reviewExemptionModal, setreviewExemptionModal] = useState(false);
+  const [amountModal, setamountModal] = useState(false);
+  const [remarksModal, setremarksModal] = useState(false);
+  const [returnRemarksModal, setreturnRemarksModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState(null);
+  const [refreshPage, setrefreshPage] = useState(false);
+  const [generateModal, setgenerateModal] = useState(false);
+  const [uploadModal, setuploadModal] = useState(false);
+  const [specialPermitID, setspecialPermitID] = useState(null);
+  const [purposeData, setpurposeData] = useState({});
+  const [exemptionData, setexemptionData] = useState({});
+  const [purposeOptions, setpurposeOptions] = useState();
+  const [applicationId, setApplicationId] = useState(null);
+  const [orderOfPaymentId, setorderOfPaymentId] = useState(null);
+  const [name, setname] = useState(null);
+  const [purpose, setpurpose] = useState(null);
+  const [referenceNo, setreferenceNo] = useState(null);
+  const [imageViewerScale, setimageViewScale] = useState(1);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [pdfViewer, setPdfViewer] = useState(false);
+  const [selectedRow, setSelectedRow] = useState([]);
+  const [openRequestFormModal, setOpenRequestFormModal] = useState(false);
+  const [completedPermit, setCompletedPermit] = useState(null);
+  const [
+    openMayorsAndGoodMoralRequestForm,
+    setOpenMayorsAndGoodMoralRequestForm,
+  ] = useState(false);
+  const dispatch = useDispatch();
+  const admin = useSelector((state) => state.specialPermitAdmin);
+  const filter = useSelector((state) => state.dateFilter);
+  const params = useMemo(() => {
+    return status === "completed"
+      ? {
+          ...filter.searchParams,
+          status: status,
+          permit_type: applicationType,
+        }
+      : { status: status, permit_type: applicationType };
+  }, [applicationType]);
+  const { isFetching, getImageHandle, currentImage } = useGetImage();
+  const formatName = (name) => {
+    const nameParts = name.split(" ");
+    const firstName = nameParts[0]?.toUpperCase();
+    const middleName = nameParts[1]?.[0]?.toUpperCase() + ".";
+    const lastName = nameParts[2]?.toUpperCase();
+
+    return `${firstName} ${middleName} ${lastName}`;
+  };
+  const toggleGenerateModal = () => {
+    setgenerateModal(!generateModal);
+  };
+
+  const toggleRemarksModal = useCallback(() => {
+    setremarksModal((prev) => !prev);
+  }, []);
+  const toggleImageViewer = useCallback(() => {
+    setIsViewerOpen((prev) => !prev);
+  }, []);
+
+  const toggleRefresh = useCallback(() => {
+    setrefreshPage((prev) => !prev);
+  }, []);
+
+  const toggleAmountModal = () => {
+    setamountModal(!amountModal);
+  };
+
+  const toggleReturnRemarksModal = () => {
+    setreturnRemarksModal(!returnRemarksModal);
+  };
+
+  const toggleMayorsAndGoodMoralRequestModal = () => {
+    setOpenMayorsAndGoodMoralRequestForm((prev) => !prev);
+  };
+  useEffect(() => {
+    if (activeTab === "mayors_permit" || activeTab === "good_moral") {
+      axios
+        .get("api/get-purpose", {
+          params: { permit_type: "good_moral" },
+        })
+        .then(
+          (res) => {
+            const options = res.data.map((options) => ({
+              value: options.id,
+              label: options.name,
+            }));
+
+            setpurposeOptions(options);
+          },
+          (error) => {
+            console.log(error);
+          }
+        );
+    }
+  }, []);
+
+  const togglePurposeModal = () => {
+    setreviewPurposeModal(!reviewPurposeModal);
+  };
+
+  const toggleExemptionModal = () => {
+    setreviewExemptionModal(!reviewExemptionModal);
+  };
+  useEffect(() => {
+    if (applicationType === activeTab) {
+      dispatch(getTableData(params));
+      dispatch(SpecialPermitAdminSlice.actions.setParams(params));
+    }
+  }, [activeTab, refreshPage]);
+
+  const handleViewAttachments = (uploadedFiles) => {
+    setSelectedFiles(uploadedFiles);
+    setAttachmentModal(true);
+  };
+  const togglePdfViewer = () => {
+    setPdfViewer((prev) => !prev);
+  };
+  const toggleAttachmentModal = () => {
+    setAttachmentModal(!attachmentModal);
+  };
+  const toggleUploadModal = () => {
+    setuploadModal(!uploadModal);
+  };
+
+  const dateOfEvent = (date, time) => {
+    const newTime =
+      time !== null ? moment(time, "h:mm A").format("h:mm A") : "";
+    return formateDateIntoString(date) + " " + newTime;
+  };
+  const handleSelectRow = (index) => {
+    if (selectedItem.includes(index)) {
+      const filteritem = selectedItem.filter((id) => id !== index);
+      setSelectedRow(filteritem);
+    } else {
+      setSelectedRow((prevItems) => [...prevItems, index]);
+    }
+  };
+  const toggleRequestFormModal = () => {
+    setOpenRequestFormModal((prev) => !prev);
+  };
+
+  const handleRowOnclick = (permit_id) => {
+    const response = updateTabNotification(applicationType, permit_id, status);
+  };
+  return (
+    <>
+      <AttachmentModal
+        toggleModal={toggleAttachmentModal}
+        openModal={attachmentModal}
+        uploadedFiles={selectedFiles}
+        applicationType={applicationType}
+        mainActiveTab={activeTab}
+      />
+      <RequestForm
+        isOpen={openRequestFormModal}
+        toggle={toggleRequestFormModal}
+        applicationId={applicationId}
+      />
+      <MayorsAndGoodMoralRequestForm
+        isOpen={openMayorsAndGoodMoralRequestForm}
+        toggle={toggleMayorsAndGoodMoralRequestModal}
+        applicationId={applicationId}
+      />
+      {pdfViewer && (
+        <FileViewerModal
+          fileUrl={completedPermit}
+          isOpen={pdfViewer}
+          toggle={togglePdfViewer}
+        />
+      )}
+      {status === "pending" ? (
+        <>
+          <ReviewPurposeModal
+            toggleModal={togglePurposeModal}
+            openModal={reviewPurposeModal}
+            purposeData={purposeData}
+            purposeOptions={purposeOptions}
+            toggleRefresh={toggleRefresh}
+          />
+
+          <ReviewExemptionModal
+            toggleModal={toggleExemptionModal}
+            openModal={reviewExemptionModal}
+            exemptionData={exemptionData}
+            toggleRefresh={toggleRefresh}
+          />
+          <AmountModal
+            toggleModal={toggleAmountModal}
+            openModal={amountModal}
+            applicationId={applicationId}
+            toggleRefresh={toggleRefresh}
+            permitType={applicationType}
+          />
+          <RemarksModal
+            toggleModal={toggleRemarksModal}
+            openModal={remarksModal}
+            applicationId={applicationId}
+            toggleRefresh={toggleRefresh}
+          />
+        </>
+      ) : null}
+
+      {status === "for_payment_approval" ? (
+        <>
+          <ReturnRemarksModal
+            toggleModal={toggleReturnRemarksModal}
+            openModal={returnRemarksModal}
+            orderOfPaymentId={orderOfPaymentId}
+            toggleRefresh={toggleRefresh}
+          />
+        </>
+      ) : null}
+
+      {status === "for_signature" ? (
+        <>
+          <GeneratePermitModal
+            toggleModal={toggleGenerateModal}
+            openModal={generateModal}
+            permitType={applicationType}
+            name={name}
+            purpose={purpose}
+            referenceNo={referenceNo}
+            specialPermitID={specialPermitID}
+          />
+
+          <UploadPermitModal
+            toggleModal={toggleUploadModal}
+            openModal={uploadModal}
+            special_permit_application_id={specialPermitID}
+            activeTab={activeTab}
+            toggleRefresh={toggleRefresh}
+          />
+        </>
+      ) : null}
+
+      <div className="tableFixHead">
+        <div>
+          {isViewerOpen && currentImage && isFetching === false && (
+            <>
+              <Viewer
+                visible={isViewerOpen}
+                onClose={toggleImageViewer}
+                images={[{ src: currentImage, alt: "Attachment" }]}
+                activeIndex={0}
+                rotatable
+                zoomable
+                scalable
+                attribute={false}
+                zIndex={99999}
+              />
+            </>
+          )}
+        </div>
+
+        <div>
+          <Button
+            color="primary"
+            style={{ position: "absolute", right: "20px", top: "14px" }}
+            onClick={toggleRefresh}
+          >
+            <i className="mdi mdi-reload me-2 fs-5" />
+            Reload
+          </Button>
+        </div>
+
+        <Table hover>
+          <thead
+            className="table-light"
+            style={{
+              boxShadow: "0 2px 4px rgb(0,0,0,0.1)",
+              zIndex: "1",
+              position: "relative",
+            }}
+          >
+            <tr>
+              <th>#</th>
+              {status === "for_signature" && <th>Reference No</th>}
+              <th>Name</th>
+              {applicationType === "mayors_permit" ||
+              applicationType === "good_moral" ||
+              applicationType === "occupational_permit" ? (
+                <>
+                  {applicationType === "mayors_permit" ||
+                  applicationType === "good_moral" ? (
+                    <>
+                      <th>Purpose</th>
+                      {applicationType === "good_moral" && (
+                        <>
+                          <th>Exemption</th>
+                          <th>Exemption Status</th>
+                        </>
+                      )}
+                    </>
+                  ) : null}
+                  <th>Sex</th>
+                  <th>Email</th>
+                </>
+              ) : null}
+              {status === "for_payment" ||
+              status === "for_payment_approval" ||
+              status === "returned" ? (
+                <>
+                  <th>Amount</th>
+                </>
+              ) : null}
+
+              {applicationType === "event" ||
+              applicationType === "motorcade" ||
+              applicationType === "parade" ||
+              applicationType === "recorrida" ||
+              applicationType === "use_of_government_property" ? (
+                <>
+                  <th>Name of Requestor/Organization</th>
+                  <th>Name of Event</th>
+                  <th>Date From</th>
+                  <th>Date To</th>
+                </>
+              ) : null}
+
+              {(status !== "for_payment_approval" || status !== "returned") && (
+                <th>Attachment</th>
+              )}
+
+              {status === "returned" ? <th>Remarks</th> : null}
+
+              {status === "pending" ? <th>Actions</th> : null}
+              {status === "for_signature" ? <th>Actions</th> : null}
+              {status === "for_payment_approval" ? <th>Actions</th> : null}
+            </tr>
+          </thead>
+
+          <tbody>
+            {admin.getTableDataIsFetching ? (
+              <tr>
+                <td colSpan="7" style={{ textAlign: "center" }}>
+                  Loading...
+                </td>
+              </tr>
+            ) : admin?.tableData?.data?.length > 0 ? (
+              admin?.tableData?.data?.map((application, index) => (
+                <React.Fragment key={application.id}>
+                  <tr
+                    onClick={() => {
+                      application?.mark_as_read
+                        ? null
+                        : handleRowOnclick(application.id);
+                    }}
+                  >
+                    <td>{`${index + 1}`}</td>
+                    {status === "for_signature" && (
+                      <td>{application.reference_no}</td>
+                    )}
+                    <td>
+                      {application.user?.fullname}{" "}
+                      {application?.mark_as_read ? (
+                        ""
+                      ) : (
+                        <Badge color="primary"> Unread</Badge>
+                      )}
+                    </td>
+                    {applicationType === "mayors_permit" ||
+                    applicationType === "good_moral" ||
+                    applicationType === "occupational_permit" ? (
+                      <>
+                        {applicationType === "mayors_permit" ||
+                        applicationType === "good_moral" ? (
+                          <td>{application?.application_purpose?.name} </td>
+                        ) : null}
+
+                        {/* {applicationType === "good_moral" && (
+                        <th>Name of Employer</th>
+                      )} */}
+
+                        {applicationType === "good_moral" && (
+                          <>
+                            <td>
+                              {application.permit_application_exemption
+                                ?.exempted_case_name
+                                ? application.permit_application_exemption
+                                    .exempted_case_name
+                                : "N/A"}
+                            </td>
+                            <td>
+                              {application.permit_application_exemption?.status
+                                ? application.permit_application_exemption
+                                    .status
+                                : "N/A"}
+                            </td>
+                          </>
+                        )}
+                        <td>{application.user?.gender}</td>
+                        <td>{application.user?.email}</td>
+                        {/* <td>
+                          {
+                            application.user?.user_phone_numbers[0]
+                              ?.phone_number
+                          }
+                        </td> */}
+                      </>
+                    ) : null}
+                    {status === "for_payment" ||
+                    status === "for_payment_approval" ||
+                    status === "returned" ? (
+                      <>
+                        <td>{application.order_of_payment?.total_amount}</td>
+                      </>
+                    ) : null}
+                    {applicationType === "event" ||
+                    applicationType === "motorcade" ||
+                    applicationType === "parade" ||
+                    applicationType === "recorrida" ||
+                    applicationType === "use_of_government_property" ? (
+                      <>
+                        {/* <td>
+                          {
+                            application.user?.user_phone_numbers[0]
+                              ?.phone_number
+                          }
+                        </td> */}
+                        <td>
+                          {application?.requestor_name}{" "}
+                          {application?.mark_as_read ? (
+                            ""
+                          ) : (
+                            <Badge color="primary"> Unread</Badge>
+                          )}
+                        </td>
+                        <td>{application?.event_name}</td>
+                        <td>
+                          {dateOfEvent(
+                            application?.event_date_from,
+                            application?.event_time_from
+                          )}
+                        </td>
+
+                        <td>
+                          {dateOfEvent(
+                            application?.event_date_to,
+                            application?.event_time_to
+                          )}
+                        </td>
+                      </>
+                    ) : null}
+                    {applicationType === "occupational_permit" ? (
+                      <>
+                        <td>{application.application_purpose?.name}</td>
+
+                        {/* {applicationType === "good_moral" && (
+                        <th>Name of Employer</th>
+                      )} */}
+                        <td>{application.user?.gender}</td>
+                        <td>{application.user?.email}</td>
+                        {/* <td>
+                          {
+                            application.user?.user_phone_numbers[0]
+                              ?.phone_number
+                          }
+                        </td> */}
+                        <td>{application.user?.email}</td>
+                      </>
+                    ) : null}
+
+                    <td>
+                      {status === "for_payment_approval" ||
+                      status === "returned" ? (
+                        application?.order_of_payment?.payment_detail
+                          ?.payment_type === "online" ? (
+                          <>
+                            <Button
+                              color="success"
+                              className="me-2"
+                              onClick={() => {
+                                window.open(
+                                  application?.order_of_payment?.payment_detail
+                                    ?.attachment,
+                                  "_blank"
+                                );
+                              }}
+                            >
+                              Official Receipt
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button
+                              color="success"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                getImageHandle({
+                                  url: "api/admin/attachment",
+                                  path: application?.order_of_payment
+                                    ?.payment_detail?.attachment,
+                                  showLoader: true,
+                                });
+                                toggleImageViewer();
+                              }}
+                            >
+                              Attachment
+                            </Button>
+                            {/* <img
+                              src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`}
+                              alt={`Thumbnail`}
+                              style={{
+                                width: "100px",
+                                height: "50px",
+                                margin: "5px",
+                                cursor: "pointer",
+                              }}
+                              onClick={() =>
+                                openImageViewer(
+                                  `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`
+                                )
+                              }
+                            /> */}
+                          </>
+                        )
+                      ) : (
+                        <div className="d-flex gap-2">
+                          <Button
+                            color="success"
+                            onClick={() =>
+                              handleViewAttachments(application.uploaded_file)
+                            }
+                          >
+                            Attachments
+                          </Button>
+                          {status === "completed" && (
+                            <Button
+                              color="success"
+                              onClick={() => {
+                                togglePdfViewer();
+                                setCompletedPermit(
+                                  application?.complete_special_permit?.file
+                                );
+                              }}
+                            >
+                              Permit
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </td>
+
+                    {/* {(status === "for_payment_approval" ||
+                      status === "returned") &&
+                      (applicationType === "good_moral" ||
+                        applicationType === "mayors_permit" ||
+                        applicationType === "occupational_permit") && (
+                        <td>
+                          <Button
+                            color="primary"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              getImageHandle({
+                                url: "api/admin/attachment",
+                                path: application?.uploaded_file
+                                  ?.community_tax_certificate,
+                                showLoader: true,
+                              });
+                              toggleImageViewer();
+                            }}
+                          >
+                            Cedula
+                          </Button>
+                        </td>
+                      )} */}
+
+                    {status === "returned" ? (
+                      <td>
+                        {application.status_histories
+                          ? application.status_histories?.[0].remarks
+                          : "N/A"}
+                      </td>
+                    ) : null}
+                    {status === "pending" ? (
+                      <td>
+                        <div
+                          style={{
+                            display: "flex",
+                            // justifyContent: "space-between",
+                          }}
+                        >
+                          <UncontrolledDropdown
+                            className="me-2"
+                            direction="end"
+                          >
+                            <DropdownToggle caret color="primary">
+                              Actions
+                            </DropdownToggle>
+                            <DropdownMenu
+                              style={{
+                                maxHeight: "200px",
+                                overflowY: "auto",
+                                zIndex: 1050, // High z-index to appear above
+                                position: "absolute", // Ensure it's detached from parent
+                              }}
+                            >
+                              <DropdownItem
+                                onClick={() => {
+                                  if (
+                                    application.permit_application_exemption &&
+                                    application.permit_application_exemption
+                                      ?.status === "pending"
+                                  ) {
+                                    Swal.fire({
+                                      title: "Review Discount",
+                                      text: "Please review exemption before proceeding.",
+                                      icon: "warning",
+                                      confirmButtonText: "Okay",
+                                    });
+                                    return;
+                                  }
+                                  if (
+                                    application.application_purpose?.type ===
+                                    "temporary"
+                                  ) {
+                                    Swal.fire({
+                                      title: "Review Purpose",
+                                      text: "Please review purpose before proceeding.",
+                                      icon: "warning",
+                                      confirmButtonText: "Okay",
+                                    });
+                                    return;
+                                  }
+
+                                  setApplicationId(application?.id);
+                                  toggleAmountModal();
+                                }}
+                              >
+                                Proceed To Order of Payment
+                              </DropdownItem>
+
+                              {application.application_purpose?.type ===
+                              "temporary" ? (
+                                <DropdownItem
+                                  onClick={() => {
+                                    togglePurposeModal();
+                                    setpurposeData(
+                                      application.application_purpose
+                                    );
+
+                                    setpurposeData((prevState) => {
+                                      return {
+                                        ...prevState,
+                                        ...application.application_purpose,
+                                        application_id: application.id,
+                                      };
+                                    });
+                                  }}
+                                >
+                                  Review Purpose
+                                </DropdownItem>
+                              ) : null}
+
+                              {application.permit_application_exemption &&
+                                (application.permit_application_exemption
+                                  ?.status === "pending" ? (
+                                  <DropdownItem
+                                    onClick={() => {
+                                      toggleExemptionModal();
+                                      setexemptionData(
+                                        application.permit_application_exemption
+                                      );
+                                    }}
+                                  >
+                                    Review Exemption
+                                  </DropdownItem>
+                                ) : null)}
+
+                              <DropdownItem
+                                onClick={() => {
+                                  toggleRemarksModal();
+                                  setApplicationId(application?.id);
+                                }}
+                              >
+                                Return
+                              </DropdownItem>
+                              <DropdownItem
+                                onClick={() => {
+                                  if (
+                                    applicationType === "good_moral" ||
+                                    applicationType === "mayors_permit"
+                                  ) {
+                                    toggleMayorsAndGoodMoralRequestModal();
+                                    setApplicationId(application.id);
+                                  } else {
+                                    toggleRequestFormModal();
+                                    setApplicationId(application.id);
+                                  }
+                                }}
+                              >
+                                View Request Form
+                              </DropdownItem>
+                            </DropdownMenu>
+                          </UncontrolledDropdown>
+                        </div>
+                      </td>
+                    ) : null}
+                    {status === "for_signature" ? (
+                      <td>
+                        <div
+                          style={{
+                            display: "flex",
+                            // justifyContent: "space-between",
+                          }}
+                        >
+                          <div style={{ paddingRight: "10px" }}>
+                            <Button
+                              color="warning"
+                              style={{ width: "90px" }}
+                              onClick={() => {
+                                toggleGenerateModal();
+                                setname(
+                                  formatName(application?.user?.fullname)
+                                );
+                                setpurpose(
+                                  application?.application_purpose?.name?.toUpperCase()
+                                );
+                                setreferenceNo(application?.reference_no);
+
+                                setspecialPermitID(application?.id);
+                              }}
+                            >
+                              Generate
+                            </Button>
+                          </div>
+                          <div>
+                            <Button
+                              color="primary"
+                              style={{ width: "90px" }}
+                              onClick={() => {
+                                toggleUploadModal();
+                                setspecialPermitID(application?.id);
+                              }}
+                            >
+                              Upload
+                            </Button>
+                          </div>
+                        </div>
+                      </td>
+                    ) : null}
+                    {status === "for_payment_approval" ? (
+                      <td>
+                        <UncontrolledDropdown className="me-2" direction="end">
+                          <DropdownToggle caret color="primary">
+                            Actions
+                          </DropdownToggle>
+                          <DropdownMenu
+                            style={{
+                              maxHeight: "200px",
+                              overflowY: "auto",
+                              zIndex: 1050, // High z-index to appear above
+                              position: "absolute", // Ensure it's detached from parent
+                            }}
+                          >
+                            <DropdownItem
+                              onClick={() => {
+                                handleSubmit(
+                                  {
+                                    url: "api/admin/approve-payment",
+
+                                    message: {
+                                      title:
+                                        "Are you sure you want to Proceed?",
+                                      failedTitle: "FAILED",
+                                      success: "Success!",
+                                      error: "unknown error occured",
+                                    },
+                                    params: {
+                                      order_of_payment_id:
+                                        application?.order_of_payment?.id,
+                                    },
+                                  },
+                                  [],
+                                  [toggleRefresh]
+                                );
+                              }}
+                            >
+                              Approve
+                            </DropdownItem>
+
+                            <DropdownItem
+                              onClick={() => {
+                                toggleReturnRemarksModal();
+                                setorderOfPaymentId(
+                                  application?.order_of_payment?.id
+                                );
+                              }}
+                            >
+                              Return
+                            </DropdownItem>
+                          </DropdownMenu>
+                        </UncontrolledDropdown>
+                      </td>
+                    ) : null}
+                  </tr>
+                </React.Fragment>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" style={{ textAlign: "center" }}>
+                  No applications found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </Table>
+        <Pagination
+          dataProps={admin.tableData}
+          setDataProps={SpecialPermitAdminSlice.actions.setDataProps}
+          setShowLoading={SpecialPermitAdminSlice.actions.setShowLoading}
+          isLoading={admin.getTableDataIsFetching}
+          params={params}
+        />
+      </div>
+    </>
+  );
+};
+
+export default AdminTable;

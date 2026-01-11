@@ -74,10 +74,10 @@ const Dashboard = () => {
             <Col xs="12">
               <Card>
                 <CardBody>
-                  <DashboardFilters
+                  {/* <DashboardFilters
                     action={getTableData}
                     tableParams={specialPermitAdmin.params}
-                  />
+                  /> */}
                   <hr />
                   <Tabs
                     // defaultActiveKey="mayorsCertificate"

@@ -21,9 +21,12 @@ import { useFormik } from "formik";
 // import images
 import profile from "../../assets/images/profile-img.png";
 import logo from "../../assets/images/logo.svg";
+import axios from "axios";
+import useSubmit from "hooks/Common/useSubmit";
 
 const ForgetPasswordPage = () => {
   document.title = "Forget Password|BPLD";
+  const handleSubmit = useSubmit();
   const validation = useFormik({
     enableReinitialize: true,
 
@@ -34,7 +37,22 @@ const ForgetPasswordPage = () => {
       email: Yup.string().required("Please Enter Your Email"),
     }),
     onSubmit: (values) => {
-      console.log(values);
+      handleSubmit(
+        {
+          url: "api/forget-password",
+          params: { ...values },
+        },
+        [],
+        []
+      );
+      // try {
+      //   const response = await axios("api/forgot-password", {
+      //     params: { email: values.email },
+      //   });
+
+      // } catch (error) {
+      //   console.log(error);
+      // }
     },
   });
   return (

@@ -27,9 +27,9 @@ function AttachmentModal({
   uploadedFiles,
   applicationType,
   mainActiveTab = "individual_permit",
-  occupational = false,
   isClient = false,
 }) {
+  console.log(uploadedFiles);
   const getActiveTabInitialState = (applicationType) => {
     if (applicationType == "mayors_permit" || applicationType == "good_moral") {
       return "Police Clearance";
@@ -198,7 +198,7 @@ function AttachmentModal({
                     {Object.keys(fileMapping[applicationType]).map(
                       (tabId, index) => {
                         return (
-                          <>
+                          <React.Fragment key={index}>
                             <NavLink
                               key={tabId}
                               className={classnames({
@@ -217,7 +217,7 @@ function AttachmentModal({
                                 {tabId}
                               </p>
                             </NavLink>
-                          </>
+                          </React.Fragment>
                         );
                       }
                     )}

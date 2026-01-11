@@ -1,12 +1,22 @@
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
+import useImageCompressor from "./useImageCompressor";
 
 export default function useGetImage() {
   const [currentImage, setCurrentImage] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState(null);
   const lastUrlRef = useRef(null);
+  const {
+    compressedFiles,
+    isCompressing,
+    errors: compressionErrors,
+    handleImageChange,
+  } = useImageCompressor({
+    maxSizeMB: 2,
+    maxWidthOrHeight: 1920,
+  });
 
   useEffect(() => {
     return () => {

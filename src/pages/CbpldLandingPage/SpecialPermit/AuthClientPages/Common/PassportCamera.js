@@ -17,7 +17,6 @@ const PassportCamera = ({ onCapture, isOpen, toggle, image }) => {
   const [isCapturing, setIsCapturing] = useState(false);
   const [fadeIn, setFadeIn] = useState(false);
 
-  /** Detect when webcam is ready */
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => setCamReady(true), 800); // give camera time to initialize
@@ -26,7 +25,6 @@ const PassportCamera = ({ onCapture, isOpen, toggle, image }) => {
     }
   }, [isOpen]);
 
-  /** Main capture handler */
   const capture = () => {
     if (!camReady) return;
 
@@ -74,10 +72,7 @@ const PassportCamera = ({ onCapture, isOpen, toggle, image }) => {
         cropWidth,
         cropHeight
       );
-
       const croppedImage = canvas.toDataURL("image/jpeg", 1.0);
-
-      // Smooth fade-in animation for preview
       setFadeIn(false);
       setTimeout(() => {
         onCapture(croppedImage);

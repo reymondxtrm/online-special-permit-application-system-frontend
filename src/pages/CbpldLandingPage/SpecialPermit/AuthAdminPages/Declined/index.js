@@ -24,6 +24,7 @@ import {
   NavbarBrand,
   NavbarToggler,
   Collapse,
+  Badge,
 } from "reactstrap";
 import Breadcrumbs from "components/Common/Breadcrumb";
 import Select from "react-select";
@@ -40,6 +41,16 @@ const Declined = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("good_moral");
+  const [newCounts, setNewCounts] = useState({
+    mayors_permit: 0,
+    good_moral: 0,
+    event: 0,
+    motorcade: 0,
+    parade: 0,
+    recorrida: 0,
+    use_of_government_property: 0,
+    occupational_permit: 0,
+  });
 
   const handleTabSelect = (key) => {
     setActiveTab(key);
@@ -60,19 +71,73 @@ const Declined = () => {
     setIsUpdateModalOpen(!isUpdateModalOpen);
   };
 
-  const [newMfoModal, setNewMfoModal] = useState(false);
-  const toggleNewMfoModal = () => {
-    setNewMfoModal(!newMfoModal);
-  };
+  useEffect(() => {
+    const channel = echo.channel("special-permit-declined");
+    const handler = (event) => {
+      const { documentType, count } = event;
+      setNewCounts((prevCounts) => {
+        return { ...prevCounts, [documentType]: count };
+      });
+    };
+    channel.listen(".document.stage_moved", handler);
+
+    return () => {
+      try {
+        channel.stopListening(".document.stage_moved", handler);
+        echo.leaveChannel("special-permit-declined");
+      } catch (err) {}
+    };
+  }, []);
+  useEffect(() => {
+    const fetchInitialCounts = async () => {
+      try {
+        const response = await axios.get(
+          "api/admin/special-permit/all-counts",
+          { params: { status_id: 7 } }
+        );
+
+        if (response && response.data) {
+          setNewCounts((prev) => {
+            const updatedCounts = { ...prev };
+
+            response?.data?.forEach((item) => {
+              updatedCounts[item.code] = item.total;
+            });
+
+            return updatedCounts;
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching initial counts:", error);
+      }
+    };
+    fetchInitialCounts();
+  }, []);
   return (
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
           <Breadcrumbs
             title="Special Permit"
-            breadcrumbItem="Pending Applications"
+            breadcrumbItem="For Signature Applications"
           />
-
+          {/*
+          <Row>
+            <Col>
+              <Card>
+                <CardBody>
+                  <Col md="3">
+                    <Label className="form-label">Select Year:</Label>
+                    <Select
+                      style={{ zIndex: "1" }}
+                      options={options}
+                      placeholder="Select Year"
+                    />
+                  </Col>
+                </CardBody>
+              </Card>
+            </Col>
+          </Row> */}
           <Row>
             <Col xs="12">
               <Card>
@@ -84,16 +149,40 @@ const Declined = () => {
                     activeKey={activeTab}
                     onSelect={handleTabSelect}
                   >
-                    <Tab eventKey="mayors_permit" title="MAYORS CERTIFICATE">
+                    <Tab
+                      eventKey="mayors_permit"
+                      title={
+                        <>
+                          MAYORS CERTIFICATE{" "}
+                          {newCounts.mayors_permit !== 0 && (
+                            <Badge color="danger" className="ms-1">
+                              {newCounts.mayors_permit}
+                            </Badge>
+                          )}
+                        </>
+                      }
+                    >
                       {activeTab === "mayors_permit" ? (
                         <AdminTable
-                          status={"pending"}
+                          status={"declined"}
                           activeTab={activeTab}
                           applicationType={"mayors_permit"}
                         />
                       ) : null}
                     </Tab>
-                    <Tab eventKey="good_moral" title="GOOD MORAL">
+                    <Tab
+                      eventKey="good_moral"
+                      title={
+                        <>
+                          GOOD MORAL{" "}
+                          {newCounts.good_moral !== 0 && (
+                            <Badge color="danger" className="ms-1">
+                              {newCounts.good_moral}
+                            </Badge>
+                          )}
+                        </>
+                      }
+                    >
                       {activeTab === "good_moral" ? (
                         <AdminTable
                           status={"declined"}
@@ -102,37 +191,86 @@ const Declined = () => {
                         />
                       ) : null}
                     </Tab>
-                    <Tab eventKey="event" title="EVENT">
+                    <Tab
+                      eventKey="event"
+                      title={
+                        <>
+                          EVENT{" "}
+                          {newCounts.event !== 0 && (
+                            <Badge color="danger" className="ms-1">
+                              {newCounts.event}
+                            </Badge>
+                          )}
+                        </>
+                      }
+                    >
                       {activeTab === "event" ? (
                         <AdminTable
-                          status={"pending"}
+                          status={"declined"}
                           activeTab={activeTab}
                           applicationType={"event"}
                         />
                       ) : null}
                     </Tab>
-                    <Tab eventKey="motorcade" title="MOTORCADE">
+                    <Tab
+                      eventKey="motorcade"
+                      title={
+                        <>
+                          MOTORCADE{" "}
+                          {newCounts.motorcade !== 0 && (
+                            <Badge color="danger" className="ms-1">
+                              {newCounts.motorcade}
+                            </Badge>
+                          )}
+                        </>
+                      }
+                    >
                       {activeTab === "motorcade" ? (
                         <AdminTable
-                          status={"pending"}
+                          status={"declined"}
                           activeTab={activeTab}
                           applicationType={"motorcade"}
                         />
                       ) : null}
                     </Tab>
-                    <Tab eventKey="parade" title="PARADE">
+                    <Tab
+                      eventKey="parade"
+                      title={
+                        <>
+                          PARADE{" "}
+                          {newCounts.parade !== 0 && (
+                            <Badge color="danger" className="ms-1">
+                              {newCounts.parade}
+                            </Badge>
+                          )}
+                        </>
+                      }
+                    >
                       {activeTab === "parade" ? (
                         <AdminTable
-                          status={"pending"}
+                          status={"declined"}
                           activeTab={activeTab}
                           applicationType={"parade"}
                         />
                       ) : null}
                     </Tab>
-                    <Tab eventKey="recorrida" title="RECORRIDA">
+
+                    <Tab
+                      eventKey="recorrida"
+                      title={
+                        <>
+                          RECORRIDA{" "}
+                          {newCounts.recorrida !== 0 && (
+                            <Badge color="danger" className="ms-1">
+                              {newCounts.recorrida}
+                            </Badge>
+                          )}
+                        </>
+                      }
+                    >
                       {activeTab === "recorrida" ? (
                         <AdminTable
-                          status={"pending"}
+                          status={"declined"}
                           activeTab={activeTab}
                           applicationType={"recorrida"}
                         />
@@ -140,11 +278,20 @@ const Declined = () => {
                     </Tab>
                     <Tab
                       eventKey="use_of_government_property"
-                      title="USE OF GOVERNMENT PROPERTY"
+                      title={
+                        <>
+                          USE OF GOVERNMENT PROPERTY{" "}
+                          {newCounts.use_of_government_property !== 0 && (
+                            <Badge color="danger" className="ms-1">
+                              {newCounts.use_of_government_property}
+                            </Badge>
+                          )}
+                        </>
+                      }
                     >
                       {activeTab === "use_of_government_property" ? (
                         <AdminTable
-                          status={"pending"}
+                          status={"declined"}
                           activeTab={activeTab}
                           applicationType={"use_of_government_property"}
                         />
@@ -152,10 +299,19 @@ const Declined = () => {
                     </Tab>
                     <Tab
                       eventKey="occupational"
-                      title={<>OCCUPATIONAL PERMIT </>}
+                      title={
+                        <>
+                          OCCUPATIONAL PERMIT{" "}
+                          {newCounts.occupational_permit !== 0 && (
+                            <Badge color="danger" className="ms-1">
+                              {newCounts.occupational_permit}
+                            </Badge>
+                          )}
+                        </>
+                      }
                     >
                       <OccupationalTables
-                        status={"returned"}
+                        status={"declined"}
                         motherTab={activeTab}
                       />
                     </Tab>
