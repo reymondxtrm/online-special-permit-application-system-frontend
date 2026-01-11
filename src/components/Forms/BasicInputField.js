@@ -25,7 +25,7 @@ const BasicInputField = ({
         <Input
           disabled={disable}
           name={name}
-        A  type={type}
+          type={type}
           placeholder={placeholder}
           onChange={validation.handleChange}
           onBlur={validation.handleBlur}

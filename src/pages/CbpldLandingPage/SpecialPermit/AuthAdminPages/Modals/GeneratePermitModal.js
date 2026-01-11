@@ -464,127 +464,128 @@ function GeneratePermitModal({
                 </div>
               </Row>
             )}
-            <Row>
-              <div>
-                <Card
-                  style={{
-                    borderRadius: "10px",
-                    boxShadow: "5px 5px 15px ",
-                    height: "auto",
-                  }}
-                >
-                  <CardHeader
+            {isCase && (
+              <Row>
+                <div>
+                  <Card
                     style={{
-                      backgroundColor: "#0d6dfc",
-                      color: "white",
-                      fontWeight: "bold",
-                      fontSize: "12pt",
-                      letterSpacing: ".2rem",
-                      minHeight: "60px",
-                      display: "flex",
-                      alignItems: "center",
-                      borderTopLeftRadius: "10px",
-                      borderTopRightRadius: "10px",
+                      borderRadius: "10px",
+                      boxShadow: "5px 5px 15px ",
+                      height: "auto",
                     }}
                   >
-                    Additional Paragraph For With Cases
-                  </CardHeader>
-                  <CardBody>
-                    <textarea
-                      id="additionalParagraphForWithCase"
-                      value={additionalParagraphForWithCaseTextArea}
-                      onChange={(e) => {
-                        const plainText = e.target.value;
-                        setAdditionalParagraphForWithCaseTextArea(plainText);
-
-                        const applicantName = data?.applicant_name?.trim();
-                        const requestorName = data?.requestor_name?.trim();
-                        const propertyName = data?.name_of_property?.trim();
-                        const eventDate = concatEventDate;
-                        let styledHTML = plainText;
-                        if (applicantName) {
-                          styledHTML = styledHTML.replace(
-                            new RegExp(applicantName, "g"),
-                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${applicantName}</span>`
-                          );
-                        }
-                        if (representativeName) {
-                          styledHTML = styledHTML.replace(
-                            new RegExp(representativeName, "g"),
-                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${representativeName}</span>`
-                          );
-                        }
-
-                        if (requestorName) {
-                          styledHTML = styledHTML.replace(
-                            new RegExp(requestorName, "g"),
-                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${requestorName}</span>`
-                          );
-                        }
-                        if (propertyName) {
-                          styledHTML = styledHTML.replace(
-                            new RegExp(propertyName, "g"),
-                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${propertyName}</span>`
-                          );
-                        }
-
-                        if (eventDate) {
-                          const safeEventDate = escapeRegex(eventDate);
-                          styledHTML = styledHTML.replace(
-                            new RegExp(safeEventDate, "g"),
-                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${eventDate}</span>`
-                          );
-                        }
-
-                        setAdditionalParagraphForWithCase(styledHTML);
-                      }}
-                      onFocus={() => handleFocus("additionalForWithCase")}
-                      placeholder="Start typing..."
+                    <CardHeader
                       style={{
-                        width: "100%",
-                        height: "100px",
-                        padding: "8px",
-                        borderRadius: "4px",
-                        border: "1px solid #ccc",
-                        fontFamily: "Cambria, serif",
-                        fontWeight: "bold",
-                        fontSize: "13pt",
-                      }}
-                    />
-
-                    <Button
-                      // color="primary"
-                      onClick={addNameToActiveParagraph}
-                      style={{
-                        marginTop: "10px",
-                        marginBottom: "15px",
-                        padding: "10px",
-                        fontSize: "14px",
                         backgroundColor: "#0d6dfc",
-                        // backgroundColor: "#144071",
+                        color: "white",
+                        fontWeight: "bold",
+                        fontSize: "12pt",
+                        letterSpacing: ".2rem",
+                        minHeight: "60px",
+                        display: "flex",
+                        alignItems: "center",
+                        borderTopLeftRadius: "10px",
+                        borderTopRightRadius: "10px",
                       }}
                     >
-                      Add Name
-                    </Button>
-                    {(permitType === "mayors_permit" ||
-                      permitType === "good_moral") && (
+                      Additional Paragraph For With Cases
+                    </CardHeader>
+                    <CardBody>
+                      <textarea
+                        id="additionalParagraphForWithCase"
+                        value={additionalParagraphForWithCaseTextArea}
+                        onChange={(e) => {
+                          const plainText = e.target.value;
+                          setAdditionalParagraphForWithCaseTextArea(plainText);
+
+                          const applicantName = data?.applicant_name?.trim();
+                          const requestorName = data?.requestor_name?.trim();
+                          const propertyName = data?.name_of_property?.trim();
+                          const eventDate = concatEventDate;
+                          let styledHTML = plainText;
+                          if (applicantName) {
+                            styledHTML = styledHTML.replace(
+                              new RegExp(applicantName, "g"),
+                              `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${applicantName}</span>`
+                            );
+                          }
+                          if (representativeName) {
+                            styledHTML = styledHTML.replace(
+                              new RegExp(representativeName, "g"),
+                              `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${representativeName}</span>`
+                            );
+                          }
+
+                          if (requestorName) {
+                            styledHTML = styledHTML.replace(
+                              new RegExp(requestorName, "g"),
+                              `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${requestorName}</span>`
+                            );
+                          }
+                          if (propertyName) {
+                            styledHTML = styledHTML.replace(
+                              new RegExp(propertyName, "g"),
+                              `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${propertyName}</span>`
+                            );
+                          }
+
+                          if (eventDate) {
+                            const safeEventDate = escapeRegex(eventDate);
+                            styledHTML = styledHTML.replace(
+                              new RegExp(safeEventDate, "g"),
+                              `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${eventDate}</span>`
+                            );
+                          }
+
+                          setAdditionalParagraphForWithCase(styledHTML);
+                        }}
+                        onFocus={() => handleFocus("additionalForWithCase")}
+                        placeholder="Start typing..."
+                        style={{
+                          width: "100%",
+                          height: "100px",
+                          padding: "8px",
+                          borderRadius: "4px",
+                          border: "1px solid #ccc",
+                          fontFamily: "Cambria, serif",
+                          fontWeight: "bold",
+                          fontSize: "13pt",
+                        }}
+                      />
+
                       <Button
-                        onClick={addAddressToActiveParagraph}
+                        // color="primary"
+                        onClick={addNameToActiveParagraph}
                         style={{
                           marginTop: "10px",
                           marginBottom: "15px",
                           padding: "10px",
                           fontSize: "14px",
-                          // backgroundColor: "#144071",
                           backgroundColor: "#0d6dfc",
-
-                          marginLeft: "10px",
+                          // backgroundColor: "#144071",
                         }}
                       >
-                        Add Address
+                        Add Name
                       </Button>
-                    )}
-                    {/* {(permitType === "event" ||
+                      {(permitType === "mayors_permit" ||
+                        permitType === "good_moral") && (
+                        <Button
+                          onClick={addAddressToActiveParagraph}
+                          style={{
+                            marginTop: "10px",
+                            marginBottom: "15px",
+                            padding: "10px",
+                            fontSize: "14px",
+                            // backgroundColor: "#144071",
+                            backgroundColor: "#0d6dfc",
+
+                            marginLeft: "10px",
+                          }}
+                        >
+                          Add Address
+                        </Button>
+                      )}
+                      {/* {(permitType === "event" ||
                       permitType === "motorcade" ||
                       permitType === "parade" ||
                       permitType === "recorrida" ||
@@ -664,10 +665,12 @@ function GeneratePermitModal({
                         </div>
                       </>
                     )} */}
-                  </CardBody>
-                </Card>
-              </div>
-            </Row>
+                    </CardBody>
+                  </Card>
+                </div>
+              </Row>
+            )}
+
             <Row>
               <div>
                 <Card
