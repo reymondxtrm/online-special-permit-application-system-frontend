@@ -8,10 +8,12 @@ import axios from "axios";
 import QrCodeGenerator from "../Certification/CertificateSections/QrCodeGenerator";
 
 const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
-  const now = new Date();
-  const endOfYear = new Date(now.getFullYear(), 11, 31);
+  const endOfYear = new Date();
+
+  const oneYearLater = new Date(endOfYear);
+  oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
   const options = { year: "numeric", month: "long", day: "numeric" };
-  const formatted = endOfYear.toLocaleDateString("en-US", options);
+  const formatted = oneYearLater.toLocaleDateString("en-US", options);
   const [currentImage, setCurrentImage] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
 
@@ -21,6 +23,28 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
       return `${fname} ${mname} ${lname}`.toUpperCase();
     } else {
       return `${fname} ${mname} ${lname}`;
+    }
+  };
+  const name = useMemo(() => {
+    const val = isCompany
+      ? concatString("toUpper", {
+          fname: applicationDetails?.corporation_member?.fname,
+          mname: applicationDetails?.corporation_member?.mname || "",
+          lname: applicationDetails?.corporation_member?.lname,
+        })
+      : concatString("toUpper", {
+          fname: applicationDetails?.user?.fname,
+          mname: applicationDetails?.user?.mname || "",
+          lname: applicationDetails?.user?.lname,
+        }) || "";
+    return val;
+  }, [applicationDetails]);
+
+  const getNameFontSize = (name) => {
+    if (name?.length > 23) {
+      return 13;
+    } else {
+      return 18;
     }
   };
   const calculateAge = (birthDate) => {
@@ -53,7 +77,10 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
       today.getFullYear();
     return formatted;
   }, [applicationDetails]);
-
+  const dateFormat = (timeStamp) => {
+    const date = new Date(timeStamp);
+    return date.toLocaleDateString("en-US");
+  };
   useEffect(() => {
     if (applicationDetails) {
       const fetchImage = async () => {
@@ -62,7 +89,9 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
           const response = await axios({
             url: "/api/admin/attachment",
             method: "GET",
-            params: { filepath: applicationDetails?.uploaded_file?.id_picture },
+            params: {
+              filepath: applicationDetails?.uploaded_file?.id_picture,
+            },
             responseType: "blob",
           });
 
@@ -191,18 +220,13 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
       <div className="top">
         <p className="fw-bold text-center name-container">
           <span>NAME: </span>
-          <span className="name">
-            {isCompany
-              ? concatString("toUpper", {
-                  fname: applicationDetails?.corporation_member?.fname,
-                  mname: applicationDetails?.corporation_member?.mname || "",
-                  lname: applicationDetails?.corporation_member?.lname,
-                })
-              : concatString("toUpper", {
-                  fname: applicationDetails?.user?.fname,
-                  mname: applicationDetails?.user?.mname || "",
-                  lname: applicationDetails?.user?.lname,
-                }) || ""}
+          <span
+            className="name"
+            style={{
+              fontSize: `${getNameFontSize(name)}px`,
+            }}
+          >
+            {name}
           </span>
         </p>
 
@@ -227,7 +251,7 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
       </div>
       <div className="permit-footer">
         <div className="permit-footer-upper">
-          {/* <div className="or-section">
+          <div className="or-section stamp">
             <div>
               <span>O.R. No:</span>
               <span>
@@ -239,13 +263,13 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
               <span>Date Issued: </span>
               <span>
                 {" "}
-                {
+                {dateFormat(
                   applicationDetails?.order_of_payment?.payment_detail
-                    ?.date_of_payment
-                }
+                    ?.created_at
+                )}
               </span>
             </div>
-          </div> */}
+          </div>
           <div className="logo-section">
             <img src={butuanOnLogo} className="butuan-on-logo" />
             <span className="fw-bold rev-code">CBPLD.BPLD.P.013.REV03</span>

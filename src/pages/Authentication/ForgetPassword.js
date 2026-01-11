@@ -35,13 +35,11 @@ import { postForgetPassword, userSlice } from "features/user/userSlice";
 import UserDetails from "components/Modals/UserDetails";
 
 const ForgetPasswordPage = (props) => {
-  //meta title
   document.title = "Forget Password | Skote - React Admin & Dashboard Template";
 
   const dispatch = useDispatch();
 
   const validation = useFormik({
-    // enableReinitialize : use this flag when initial values needs to be changed
     enableReinitialize: true,
 
     initialValues: {
@@ -51,8 +49,8 @@ const ForgetPasswordPage = (props) => {
       email: Yup.string().required("Please Enter Your Email"),
     }),
     onSubmit: (values) => {
-      dispatch(userSlice.actions.clearForgetPasswordState());
       dispatch(postForgetPassword({ email: values.email }));
+      dispatch(userSlice.actions.clearForgetPasswordState());
     },
   });
 
@@ -64,7 +62,6 @@ const ForgetPasswordPage = (props) => {
     })
   );
 
-  
   return (
     <React.Fragment>
       <div className="home-btn d-none d-sm-block">

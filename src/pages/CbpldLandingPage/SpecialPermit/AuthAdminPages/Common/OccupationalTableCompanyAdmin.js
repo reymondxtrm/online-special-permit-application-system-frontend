@@ -31,6 +31,7 @@ import {
   formateDateIntoString,
   updateTabNotification,
 } from "common/utility/utilityFunction";
+import FileViewerModal from "../AdminControls/Modals/FileViewerModal";
 
 export default function OccupationalTableCompanyAdmin({ status }) {
   const dispatch = useDispatch();
@@ -53,6 +54,8 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   const [uploadImageModal, setUpdloadImageModal] = useState(false);
   const [occupationalRequestModal, setOccupationalRequestModal] =
     useState(false);
+  const [pdfViewer, setPdfViewer] = useState(false);
+  const [completedPermit, setCompletedPermit] = useState(null);
 
   useEffect(() => {
     dispatch(getCompanyOccupatinalData({ type: "company", status: status }));
@@ -70,6 +73,9 @@ export default function OccupationalTableCompanyAdmin({ status }) {
       permit_id,
       status
     );
+  };
+  const togglePdfViewer = () => {
+    setPdfViewer((prev) => !prev);
   };
   const toggleAttachmentModal = () => {
     setShowAttachmentModal((prev) => !prev);
@@ -115,6 +121,13 @@ export default function OccupationalTableCompanyAdmin({ status }) {
             zIndex={2000}
           />
         </>
+      )}
+      {pdfViewer && (
+        <FileViewerModal
+          fileUrl={completedPermit}
+          isOpen={pdfViewer}
+          toggle={togglePdfViewer}
+        />
       )}
       <AmountModal
         openModal={amountModal}
@@ -327,15 +340,30 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                     Official Receipt
                                   </Button>
                                 ) : (
-                                  <Button
-                                    color="success"
-                                    onClick={() => {
-                                      setUploadedFiles(item?.uploaded_file);
-                                      toggleAttachmentModal();
-                                    }}
-                                  >
-                                    Attachment
-                                  </Button>
+                                  <div className="d-flex gap-2">
+                                    <Button
+                                      color="success"
+                                      onClick={() => {
+                                        setUploadedFiles(item?.uploaded_file);
+                                        toggleAttachmentModal();
+                                      }}
+                                    >
+                                      Attachment
+                                    </Button>
+                                    {status === "completed" && (
+                                      <Button
+                                        color="success"
+                                        onClick={() => {
+                                          togglePdfViewer();
+                                          setCompletedPermit(
+                                            item?.complete_special_permit?.file
+                                          );
+                                        }}
+                                      >
+                                        Permit
+                                      </Button>
+                                    )}
+                                  </div>
                                 )}
                               </td>
                               {status === "pending" && (

@@ -81,7 +81,8 @@ const SpecialPermitEmailVerication = (props) => {
                       <div className="p-2 mt-4">
                         <h4>Verify your email</h4>
                         <p>
-                          We have sent you verification email, Please check it
+                          We have sent you verification email at{" "}
+                          <strong>{email}</strong>, Please check it
                         </p>
                         <button
                           className="btn btn-primary mt-3"

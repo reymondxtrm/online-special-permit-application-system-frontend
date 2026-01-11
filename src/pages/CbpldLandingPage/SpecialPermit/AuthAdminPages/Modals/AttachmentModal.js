@@ -27,9 +27,9 @@ function AttachmentModal({
   uploadedFiles,
   applicationType,
   mainActiveTab = "individual_permit",
-  occupational = false,
   isClient = false,
 }) {
+  console.log(uploadedFiles);
   const getActiveTabInitialState = (applicationType) => {
     if (applicationType == "mayors_permit" || applicationType == "good_moral") {
       return "Police Clearance";

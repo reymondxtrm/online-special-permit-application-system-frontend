@@ -156,14 +156,9 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
     setOpenOccupationalPermitModal((prev) => !prev);
   };
   const dateOfEvent = (date, time) => {
-    if (date || time) {
-      return (
-        formateDateIntoString(date) +
-        " " +
-        moment(time, "h:mm A").format("h:mm A")
-      );
-    }
-    return "";
+    const newTime =
+      time !== null ? moment(time, "h:mm A").format("h:mm A") : "";
+    return formateDateIntoString(date) + " " + newTime;
   };
   const handleSelect = (id) => {
     setSelectedRow((prev) => {
@@ -989,14 +984,14 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         <td>
                           {dateOfEvent(
                             application?.event_date_from,
-                            application?.event_date_to
+                            application?.event_time_from
                           )}
                         </td>
 
                         <td>
                           {dateOfEvent(
-                            application?.event_date_from,
-                            application?.event_date_to
+                            application?.event_date_to,
+                            application?.event_time_to
                           )}
                         </td>
                         {status === "returned" && (
@@ -1226,7 +1221,15 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                     ) : null}
                     {status === "declined" && (
                       <>
-                        <td>{application?.status_histories?.[0]?.remarks}</td>
+                        {(applicationType === "event" ||
+                          applicationType === "parade" ||
+                          applicationType === "recorrida" ||
+                          applicationType === "motorcade" ||
+                          applicationType === "use_of_government_property" ||
+                          applicationType === "occupational_permit") && (
+                          <td>{application?.status_histories?.[0]?.remarks}</td>
+                        )}
+
                         <td>
                           <Button
                             onClick={() => {

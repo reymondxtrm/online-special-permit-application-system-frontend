@@ -58,6 +58,9 @@ export default function OccupationalTableIndividualAdmin({
   const { isFetching, getImageHandle, currentImage } = useGetImage();
   const [occupationalRequestModal, setOccupationalRequestModal] =
     useState(false);
+  const [completedPermit, setCompletedPermit] = useState(null);
+  const [pdfViewer, setPdfViewer] = useState(false);
+
   const handleSubmit = useSubmit();
 
   useEffect(() => {
@@ -81,6 +84,9 @@ export default function OccupationalTableIndividualAdmin({
   };
   const toggleOccupationalRequestModal = () => {
     setOccupationalRequestModal((prev) => !prev);
+  };
+  const togglePdfViewer = () => {
+    setPdfViewer((prev) => !prev);
   };
 
   const toggleFileViewerModal = () => {
@@ -129,6 +135,13 @@ export default function OccupationalTableIndividualAdmin({
         isOpen={fileViewerOpen}
         fileUrl={orPath}
       />
+      {pdfViewer && (
+        <FileViewerModal
+          fileUrl={completedPermit}
+          isOpen={pdfViewer}
+          toggle={togglePdfViewer}
+        />
+      )}
       {showAttachmentModal && (
         <AttachmentModal
           openModal={showAttachmentModal}
@@ -183,7 +196,7 @@ export default function OccupationalTableIndividualAdmin({
           />
         </>
       ) : null}
-     
+
       <Table hover>
         <thead>
           <tr>
@@ -240,7 +253,7 @@ export default function OccupationalTableIndividualAdmin({
                   </td>
                   <td>{application?.user?.sex}</td>
                   <td>
-                    {application?.user?.user_address_morph[0]?.full_address}
+                    {application?.user?.user_addresses?.[0]?.full_address}
                   </td>
 
                   {(status === "for_payment_approval" ||
@@ -290,15 +303,30 @@ export default function OccupationalTableIndividualAdmin({
                         Official Receipt
                       </Button>
                     ) : (
-                      <Button
-                        color="success"
-                        onClick={() => {
-                          setUploadedFiles(application?.uploaded_file);
-                          toggleAttachmentModal();
-                        }}
-                      >
-                        Attachment
-                      </Button>
+                      <div className="d-flex gap-2">
+                        <Button
+                          color="success"
+                          onClick={() => {
+                            setUploadedFiles(application?.uploaded_file);
+                            toggleAttachmentModal();
+                          }}
+                        >
+                          Attachment
+                        </Button>
+                        {status === "completed" && (
+                          <Button
+                            color="success"
+                            onClick={() => {
+                              togglePdfViewer();
+                              setCompletedPermit(
+                                application?.complete_special_permit?.file
+                              );
+                            }}
+                          >
+                            Permit
+                          </Button>
+                        )}
+                      </div>
                     )}
                   </td>
 

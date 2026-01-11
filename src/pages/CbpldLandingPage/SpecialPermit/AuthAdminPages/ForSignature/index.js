@@ -98,7 +98,7 @@ const ForSignature = () => {
       try {
         const response = await axios.get(
           "api/admin/special-permit/all-counts",
-          { params: { permit_type_id: 3 } }
+          { params: { status_id: 3 } }
         );
 
         if (response && response.data) {

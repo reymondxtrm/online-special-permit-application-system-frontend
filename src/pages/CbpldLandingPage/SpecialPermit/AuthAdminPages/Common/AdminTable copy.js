@@ -27,11 +27,13 @@ import useSubmit from "hooks/Common/useSubmit";
 import UploadPermitModal from "../Modals/UploadPermitModal";
 import GeneratePermitModal from "../Modals/GeneratePermitModal";
 import ReviewPurposeModal from "../Modals/ReviewPurposeModal";
+import ReviewDiscountModal from "../Modals/ReviewDiscountModal";
 import AmountModal from "../Modals/AmountModal";
 import ReviewExemptionModal from "../Modals/ReviewExemptionModal";
 import ImageViewer from "react-simple-image-viewer";
 import RemarksModal from "../Modals/RemarksModal";
 import ReturnRemarksModal from "../Modals/ReturnRemarksModal";
+import { PhotoView } from "react-photo-view";
 import Viewer from "react-viewer";
 import {
   formateDateIntoString,
@@ -185,9 +187,18 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
       time !== null ? moment(time, "h:mm A").format("h:mm A") : "";
     return formateDateIntoString(date) + " " + newTime;
   };
+  const handleSelectRow = (index) => {
+    if (selectedItem.includes(index)) {
+      const filteritem = selectedItem.filter((id) => id !== index);
+      setSelectedRow(filteritem);
+    } else {
+      setSelectedRow((prevItems) => [...prevItems, index]);
+    }
+  };
   const toggleRequestFormModal = () => {
     setOpenRequestFormModal((prev) => !prev);
   };
+
   const handleRowOnclick = (permit_id) => {
     const response = updateTabNotification(applicationType, permit_id, status);
   };
@@ -370,9 +381,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                 <th>Attachment</th>
               )}
 
-              {status === "returned" || status === "declined" ? (
-                <th>Remarks</th>
-              ) : null}
+              {status === "returned" ? <th>Remarks</th> : null}
 
               {status === "pending" ? <th>Actions</th> : null}
               {status === "for_signature" ? <th>Actions</th> : null}
@@ -616,10 +625,10 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                         </td>
                       )} */}
 
-                    {status === "returned" || status === "declined" ? (
+                    {status === "returned" ? (
                       <td>
                         {application.status_histories
-                          ? application.status_histories?.[0]?.remarks
+                          ? application.status_histories?.[0].remarks
                           : "N/A"}
                       </td>
                     ) : null}

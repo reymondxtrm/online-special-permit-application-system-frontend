@@ -29,7 +29,6 @@ import Condition from "yup/lib/Condition";
 import { formateDateIntoString } from "common/utility/utilityFunction";
 import moment from "moment";
 import useGetImage from "hooks/Common/useGetImage";
-import RoutePlanViewer from "./Common/RoutePlanViewer";
 let debounce = null;
 function GeneratePermitModal({
   openModal,
@@ -42,14 +41,7 @@ function GeneratePermitModal({
   const componentRef = useRef(null);
   const [firstParagraph, setFirstParagraph] = useState("");
   const [firstParagraphTextArea, setFirstParagraphTextArea] = useState("");
-  const [additionalParagraphForWithCase, setAdditionalParagraphForWithCase] =
-    useState("");
-  const [
-    additionalParagraphForWithCaseTextArea,
-    setAdditionalParagraphForWithCaseTextArea,
-  ] = useState("");
   const [withCase, setwithCase] = useState("");
-  const [isCase, setIsCase] = useState(false);
   const [secondParagraph, setSecondParagraph] = useState("");
   const [secondParagraphTextArea, setSecondParagraphTextArea] = useState("");
   const [thirdParagraph, setthirdParagraph] = useState();
@@ -184,28 +176,16 @@ function GeneratePermitModal({
       });
     }
   }, [data]);
-
   const concatEventDate = useMemo(() => {
     if (!data?.eventFromDate && !data?.eventToDate) return "";
 
     const timeFrom = moment(data.event_time_from, "h:mm A").format("h:mm A");
-    const timeTo =
-      data.event_time_to !== null
-        ? moment(data.event_time_to, "h:mm A").format("h:mm A")
-        : null;
+    const timeTo = moment(data.event_time_to, "h:mm A").format("h:mm A");
 
     if (data.eventFromDate === data.eventToDate) {
-      if (timeTo) {
-        return `${data.eventFromDate} at ${timeFrom} to ${timeTo}`;
-      } else {
-        return `${data.eventFromDate} at ${timeFrom}`;
-      }
+      return `${data.eventFromDate} at ${timeFrom} to ${timeTo}`;
     } else {
-      if (timeTo) {
-        return `${data.eventFromDate} at ${timeFrom} to ${data.eventToDate}  ${timeTo}`;
-      } else {
-        return `${data.eventFromDate} at ${timeFrom} to ${data.eventToDate} `;
-      }
+      return `${data.eventFromDate} at ${timeFrom} to ${data.eventToDate} at ${timeTo}`;
     }
   }, [data]);
 
@@ -237,15 +217,6 @@ function GeneratePermitModal({
         setSecondParagraphTextArea(
           (prevText) => prevText + data?.applicant_name
         );
-      } else if (activeParagraph === "additionalForWithCase") {
-        setAdditionalParagraphForWithCase(
-          (prevText) =>
-            prevText +
-            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.applicant_name?.toUpperCase()}</span>`
-        );
-        setAdditionalParagraphForWithCaseTextArea(
-          (prevText) => prevText + data?.applicant_name
-        );
       }
     }
   };
@@ -270,15 +241,6 @@ function GeneratePermitModal({
         setSecondParagraphTextArea(
           (prevText) => prevText + data?.requestor_name
         );
-      } else if (activeParagraph === "additionalForWithCase") {
-        setAdditionalParagraphForWithCase(
-          (prevText) =>
-            prevText +
-            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.requestor_name.toUpperCase()}</span>`
-        );
-        setAdditionalParagraphForWithCaseTextArea(
-          (prevText) => prevText + data?.requestor_name
-        );
       }
     }
   };
@@ -299,15 +261,6 @@ function GeneratePermitModal({
             ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${concatEventDate}</span>`
         );
         setSecondParagraphTextArea((prevText) => prevText + concatEventDate);
-      } else if (activeParagraph === "addtionalForWithCase") {
-        setAdditionalParagraphForWithCase(
-          (prevText) =>
-            prevText +
-            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${concatEventDate}</span>`
-        );
-        setAdditionalParagraphForWithCaseTextArea(
-          (prevText) => prevText + concatEventDate
-        );
       }
     }
   };
@@ -365,13 +318,6 @@ function GeneratePermitModal({
       } else if (activeParagraph === "second") {
         setSecondParagraph((prevText) => prevText + `${data?.address}`);
         setSecondParagraphTextArea((prevText) => prevText + `${data?.address}`);
-      } else if (activeParagraph === "additionalForWithCase") {
-        setAdditionalParagraphForWithCase(
-          (prevText) => prevText + `${data?.address}`
-        );
-        setAdditionalParagraphForWithCaseTextArea(
-          (prevText) => prevText + `${data?.address}`
-        );
       }
     }
   };
@@ -391,9 +337,6 @@ function GeneratePermitModal({
       className="modal-dialog-centered"
       style={{ maxWidth: !openFirstColumn ? "1400px" : null }}
       unmountOnClose
-      onClosed={() => {
-        setIsCase(false);
-      }}
     >
       <ModalHeader toggle={toggleModal}>
         <p
@@ -411,263 +354,45 @@ function GeneratePermitModal({
       </ModalHeader>
       <ModalBody style={{ overflowX: "auto" }}>
         <Row>
-          {openFirstColumn && <RoutePlanViewer currentImage={currentImage} />}
-
-          <Col md={openFirstColumn ? 3 : 5}>
-            {permitType === "good_moral" && (
-              <Row>
-                <div>
-                  <Card
-                    style={{
-                      borderRadius: "10px",
-                      boxShadow: "5px 5px 15px ",
-                      height: "auto",
-                    }}
-                  >
-                    <CardHeader
-                      style={{
-                        backgroundColor: "#0d6dfc",
-                        color: "white",
-                        fontWeight: "bold",
-                        fontSize: "12pt",
-                        letterSpacing: ".2rem",
-                        minHeight: "60px",
-                        display: "flex",
-                        alignItems: "center",
-                        borderTopLeftRadius: "10px",
-                        borderTopRightRadius: "10px",
-                      }}
-                    >
-                      SPECIAL CONDITIONS
-                    </CardHeader>
-                    <CardBody>
-                      <Row>
-                        <div className="d-flex gap-2 align-items-center">
-                          <Input
-                            type="checkbox"
-                            style={{ width: "30px", height: "30px" }}
-                            onChange={(e) => setIsCase(e.target.checked)}
-                          ></Input>
-                          <Label
-                            style={{
-                              fontSize: "20px",
-                              fontWeight: "bold",
-                              margin: "0px",
-                            }}
-                          >
-                            WITH CASE
-                          </Label>
-                        </div>
-                      </Row>
-                    </CardBody>
-                  </Card>
-                </div>
-              </Row>
-            )}
-            <Row>
-              <div>
-                <Card
+          {openFirstColumn && (
+            <Col md={4}>
+              <Card
+                style={{
+                  borderRadius: "10px",
+                  boxShadow: "3px 3px 15px ",
+                  height: "auto",
+                }}
+              >
+                <CardHeader
                   style={{
-                    borderRadius: "10px",
-                    boxShadow: "5px 5px 15px ",
-                    height: "auto",
+                    backgroundColor: "#0d6dfc",
+                    color: "white",
+                    fontWeight: "bold",
+                    fontSize: "12pt",
+                    letterSpacing: ".2rem",
+                    minHeight: "60px",
+                    display: "flex",
+                    alignItems: "center",
+                    borderTopLeftRadius: "10px",
+                    borderTopRightRadius: "10px",
                   }}
                 >
-                  <CardHeader
-                    style={{
-                      backgroundColor: "#0d6dfc",
-                      color: "white",
-                      fontWeight: "bold",
-                      fontSize: "12pt",
-                      letterSpacing: ".2rem",
-                      minHeight: "60px",
-                      display: "flex",
-                      alignItems: "center",
-                      borderTopLeftRadius: "10px",
-                      borderTopRightRadius: "10px",
-                    }}
-                  >
-                    Additional Paragraph For With Cases
-                  </CardHeader>
-                  <CardBody>
-                    <textarea
-                      id="additionalParagraphForWithCase"
-                      value={additionalParagraphForWithCaseTextArea}
-                      onChange={(e) => {
-                        const plainText = e.target.value;
-                        setAdditionalParagraphForWithCaseTextArea(plainText);
+                  ROUTE PLAN
+                </CardHeader>
+                <CardBody>
+                  {currentImage ? (
+                    <img src={currentImage} className="img-fluid" />
+                  ) : (
+                    <p className="text-center fw-bold">
+                      No Route Plan Available
+                    </p>
+                  )}
+                </CardBody>
+              </Card>
+            </Col>
+          )}
 
-                        const applicantName = data?.applicant_name?.trim();
-                        const requestorName = data?.requestor_name?.trim();
-                        const propertyName = data?.name_of_property?.trim();
-                        const eventDate = concatEventDate;
-                        let styledHTML = plainText;
-                        if (applicantName) {
-                          styledHTML = styledHTML.replace(
-                            new RegExp(applicantName, "g"),
-                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${applicantName}</span>`
-                          );
-                        }
-                        if (representativeName) {
-                          styledHTML = styledHTML.replace(
-                            new RegExp(representativeName, "g"),
-                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${representativeName}</span>`
-                          );
-                        }
-
-                        if (requestorName) {
-                          styledHTML = styledHTML.replace(
-                            new RegExp(requestorName, "g"),
-                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${requestorName}</span>`
-                          );
-                        }
-                        if (propertyName) {
-                          styledHTML = styledHTML.replace(
-                            new RegExp(propertyName, "g"),
-                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${propertyName}</span>`
-                          );
-                        }
-
-                        if (eventDate) {
-                          const safeEventDate = escapeRegex(eventDate);
-                          styledHTML = styledHTML.replace(
-                            new RegExp(safeEventDate, "g"),
-                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${eventDate}</span>`
-                          );
-                        }
-
-                        setAdditionalParagraphForWithCase(styledHTML);
-                      }}
-                      onFocus={() => handleFocus("additionalForWithCase")}
-                      placeholder="Start typing..."
-                      style={{
-                        width: "100%",
-                        height: "100px",
-                        padding: "8px",
-                        borderRadius: "4px",
-                        border: "1px solid #ccc",
-                        fontFamily: "Cambria, serif",
-                        fontWeight: "bold",
-                        fontSize: "13pt",
-                      }}
-                    />
-
-                    <Button
-                      // color="primary"
-                      onClick={addNameToActiveParagraph}
-                      style={{
-                        marginTop: "10px",
-                        marginBottom: "15px",
-                        padding: "10px",
-                        fontSize: "14px",
-                        backgroundColor: "#0d6dfc",
-                        // backgroundColor: "#144071",
-                      }}
-                    >
-                      Add Name
-                    </Button>
-                    {(permitType === "mayors_permit" ||
-                      permitType === "good_moral") && (
-                      <Button
-                        onClick={addAddressToActiveParagraph}
-                        style={{
-                          marginTop: "10px",
-                          marginBottom: "15px",
-                          padding: "10px",
-                          fontSize: "14px",
-                          // backgroundColor: "#144071",
-                          backgroundColor: "#0d6dfc",
-
-                          marginLeft: "10px",
-                        }}
-                      >
-                        Add Address
-                      </Button>
-                    )}
-                    {/* {(permitType === "event" ||
-                      permitType === "motorcade" ||
-                      permitType === "parade" ||
-                      permitType === "recorrida" ||
-                      permitType === "use_of_government_property") && (
-                      <>
-                        <Button
-                          onClick={addOrgaizationToActiveParagraph}
-                          style={{
-                            marginTop: "10px",
-                            marginBottom: "15px",
-                            padding: "10px",
-                            fontSize: "14px",
-                            backgroundColor: "#0d6dfc",
-
-                            marginLeft: "10px",
-                          }}
-                        >
-                          Add Organization
-                        </Button>
-                        <Button
-                          onClick={addDateToActiveParagraph}
-                          style={{
-                            marginTop: "10px",
-                            marginBottom: "15px",
-                            padding: "10px",
-                            fontSize: "14px",
-                            // backgroundColor: "#144071",
-                            backgroundColor: "#0d6dfc",
-
-                            marginLeft: "10px",
-                          }}
-                        >
-                          Add Date
-                        </Button>
-                        {permitType === "use_of_government_property" && (
-                          <Button
-                            onClick={addPropertyToActiveTab}
-                            style={{
-                              marginTop: "10px",
-                              marginBottom: "15px",
-                              padding: "10px",
-                              fontSize: "14px",
-                              // backgroundColor: "#144071",
-                              backgroundColor: "#0d6dfc",
-
-                              marginLeft: "10px",
-                            }}
-                          >
-                            Add Property
-                          </Button>
-                        )}
-                        <div className="d-flex justify-content-start">
-                          <Input
-                            type="text"
-                            onChange={(e) => {
-                              setRepresentativeName(e.target.value);
-                            }}
-                            style={{
-                              height: "57px",
-                              marginTop: "10px",
-                              fontSize: "14px",
-                            }}
-                          />
-                          <Button
-                            onClick={addRepresentativeToActiveParagraph}
-                            style={{
-                              marginTop: "10px",
-                              marginBottom: "15px",
-                              // padding: "10px",
-                              fontSize: "14px",
-                              backgroundColor: "#0d6dfc",
-                              marginLeft: "10px",
-                            }}
-                          >
-                            Add Representative
-                          </Button>
-                        </div>
-                      </>
-                    )} */}
-                  </CardBody>
-                </Card>
-              </div>
-            </Row>
+          <Col md={openFirstColumn ? 3 : 5}>
             <Row>
               <div>
                 <Card
@@ -734,6 +459,7 @@ function GeneratePermitModal({
 
                         if (eventDate) {
                           const safeEventDate = escapeRegex(eventDate);
+
                           styledHTML = styledHTML.replace(
                             new RegExp(safeEventDate, "g"),
                             `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${eventDate}</span>`
@@ -1113,6 +839,7 @@ function GeneratePermitModal({
               </Row>
             )}
           </Col>
+          {console.log(data)}
           <Col md={openFirstColumn ? 5 : 7}>
             <CertificateFormat
               ref={componentRef}
@@ -1134,8 +861,6 @@ function GeneratePermitModal({
               conditions={conditions}
               eventName={data?.event_name}
               specialPermitApplicationId={data?.special_permit_application_id}
-              isCase={isCase}
-              additionalParagraphForWithCase={additionalParagraphForWithCase}
             />
           </Col>
         </Row>

@@ -96,7 +96,7 @@ const ForApproval = () => {
       try {
         const response = await axios.get(
           "api/admin/special-permit/all-counts",
-          { params: { permit_type_id: 5 } }
+          { params: { status_id: 5 } }
         );
 
         if (response && response.data) {

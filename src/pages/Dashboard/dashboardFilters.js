@@ -26,12 +26,12 @@ const DashboardFilters = ({
   const validation = useFormik({
     enableReinitialize: false,
     initialValues: {
-      // keyword: "",
+      keyword: "",
       date_from: "",
       date_to: "",
     },
     validationSchema: Yup.object({
-      // keyword: Yup.string().notRequired(),
+      keyword: Yup.string().notRequired(),
       date_from: Yup.string().notRequired(),
       date_to: Yup.string().notRequired(),
     }),
@@ -41,7 +41,7 @@ const DashboardFilters = ({
         ...tableParams,
         ...values,
       };
-      
+
       setParams(params);
       dispatch(action(params));
       dispatch(dateFilterSlice.actions.setParams(params));
@@ -50,12 +50,7 @@ const DashboardFilters = ({
   const clearFilter = () => {
     validation.resetForm();
     setParams("");
-    dispatch(
-      action({
-        status: tableParams.status,
-        permit_type: tableParams.permit_type,
-      })
-    );
+    dispatch(action(tableParams));
     dispatch(dateFilterSlice.actions.clearState());
   };
 
@@ -106,7 +101,8 @@ const DashboardFilters = ({
           </Col>
         </>
       ) : null}
-      {/* <BasicInputField
+
+      <BasicInputField
         col={"6"}
         type={"text"}
         label={"Keyword"}
@@ -116,8 +112,13 @@ const DashboardFilters = ({
         validation={validation}
         placeholder={"Enter keyword"}
         value={validation.values.keyword}
-      /> */}
-      <BasicInputField
+      />
+      <div className="d-flex align-items-center" style={{ marginTop: "27px" }}>
+        <Button type="submit">
+          <i className="fas fa-search"></i>
+        </Button>
+      </div>
+      {/* <BasicInputField
         col={"6"}
         type={"date"}
         label={"Date From:"}
@@ -127,9 +128,9 @@ const DashboardFilters = ({
         validation={validation}
         placeholder={""}
         value={validation.values.date_from}
-      />
+      /> */}
 
-      <Col xs={12} style={{ width: "208px", paddingRight: "10px" }}>
+      {/* <Col xs={12} style={{ width: "208px", paddingRight: "10px" }}>
         <label
           // className="visually-hidden"
           htmlFor="inlineFormInputGroupUsername"
@@ -150,7 +151,7 @@ const DashboardFilters = ({
             <i className="fas fa-search"></i>
           </Button>
         </InputGroup>
-      </Col>
+      </Col> */}
       <Col>
         <label
           // className="visually-hidden"

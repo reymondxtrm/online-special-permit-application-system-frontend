@@ -146,7 +146,7 @@ function MotorcadeModal({
 
     event_time_from: Yup.string().required("Start time is required"),
 
-    event_time_to: Yup.string().required("End time is required"),
+    event_time_to: Yup.string().notRequired(),
 
     request_letter: isUpdate ? fileValidationOptional : fileValidationRequired,
 

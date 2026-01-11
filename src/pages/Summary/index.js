@@ -13,9 +13,7 @@ import { summarySlice, getSummary } from "features/Summary/summarySlice";
 const Summary = () => {
   const dispatch = useDispatch();
   const filter = useSelector((state) => state.dateFilter.params);
-  // const params = {
-  //   for_action: 1,
-  // };
+
 
   const [statusOptions, setStatusOptions] = useState();
   const summary = useSelector((state) => state.summary);

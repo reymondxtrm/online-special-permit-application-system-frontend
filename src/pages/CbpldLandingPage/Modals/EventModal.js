@@ -134,7 +134,7 @@ function EventModal({
         "End date must be after or equal to start date"
       ),
     event_time_from: Yup.string().required("Start time is required"),
-    event_time_to: Yup.string().required("End time is required"),
+    event_time_to: Yup.string().notRequired(),
     request_letter: isUpdate ? fileValidationOptional : fileValidationRequired,
     route_plan: isUpdate ? fileValidationOptional : fileValidationRequired,
     sworn_statement: fileValidationOptional, // Always optional
@@ -221,8 +221,6 @@ function EventModal({
                       />
                       <FormFeedback>{props.errors.requestor_name}</FormFeedback>
                     </FormGroup>
-
-                    {/* Event Name */}
                     <FormGroup>
                       <Label>
                         Name of Event <span className="text-danger">*</span>
@@ -312,9 +310,7 @@ function EventModal({
 
                       <Col md={6}>
                         <FormGroup>
-                          <Label>
-                            End Time <span className="text-danger">*</span>
-                          </Label>
+                          <Label>End Time</Label>
                           <Input
                             type="time"
                             name="event_time_to"

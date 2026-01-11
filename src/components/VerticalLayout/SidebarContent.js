@@ -356,7 +356,7 @@ const SidebarContent = (props) => {
                     </li>
                     <li>
                       <Link to="/client/returned/dashboard">
-                        {props.t("Returned")}
+                        {props.t("Returned Payment")}
                       </Link>
                     </li>
                   </ul>
@@ -415,10 +415,16 @@ const SidebarContent = (props) => {
                     </li>
                     <li>
                       <Link to="/admin/returned/dashboard">
-                        {props.t("Returned")}
+                        {props.t("Returned Payment")}
                       </Link>
                     </li>
                   </ul>
+                </li>
+                <li>
+                  <Link to="/admin/declined">
+                    <i className="mdi mdi-file-cancel fs-a2"></i>
+                    <span>{props.t("Returned Application")}</span>
+                  </Link>
                 </li>
                 <li>
                   <Link to="/admin/for-signature">
@@ -432,7 +438,6 @@ const SidebarContent = (props) => {
                     {props.t("For Payment")}
                   </Link>
                 </li> */}
-
                 {/* <li>
                   <Link to="/#" className="has-arrow">
                     <i className="fas fa-th-list"></i>

@@ -29,6 +29,7 @@ import { REVISION_CODE } from "assets/data/data";
 import { debounce } from "lodash";
 import QrCodeGenerator from "./CertificateSections/QrCodeGenerator";
 import index from "pages/Dashboard-Blog";
+import AdditionalParagraphForWithCase from "./CertificateSections/AdditionalParagraphForWithCase";
 const CertificateFormat = React.forwardRef((props, ref) => {
   const {
     permitType,
@@ -48,10 +49,12 @@ const CertificateFormat = React.forwardRef((props, ref) => {
     conditions,
     eventName,
     specialPermitApplicationId,
+    isCase,
+    additionalParagraphForWithCase,
   } = props;
   const [scale, setScale] = useState(1);
   const certificateRef = useRef();
- 
+
   const year = new Date();
   const paperSize =
     permitType === "good_moral" || permitType === "mayors_permit"
@@ -117,7 +120,9 @@ const CertificateFormat = React.forwardRef((props, ref) => {
   if (permitType === "mayors_permit") {
     headerTitle = "MAYOR'S CERTIFICATION";
   } else if (permitType === "good_moral") {
-    headerTitle = "MAYOR'S CLEARANCE";
+    if (isCase) {
+      headerTitle = "MAYOR'S CERTIFICATION";
+    } else headerTitle = "MAYOR'S CLEARANCE";
   } else if (
     permitType === "event" ||
     permitType === "motorcade" ||
@@ -137,7 +142,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
     subHeader = "PARADE";
   } else if (permitType === "motorcade") {
     subHeader = "MOTORCADE";
-  } else if (permitType === "good_moral") {
+  } else if (permitType === "good_moral" && !isCase) {
     subHeader = "Certificate of Good Moral Character";
   } else subHeader = "";
 
@@ -170,7 +175,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                         {" "}
                         <p>Republic of the Philippines</p>
                         <p>CITY GOVERNMENT OF BUTUAN</p>
-                        <p>City Business Permits and Licensing Department</p>
+                        <p>CITY BUSINESS PERMITS AND LICENSING DEPARTMENT</p>
                         <p>
                           City Hall Bldg., J.P. Rosales Ave., Doongan, Butuan
                           City
@@ -213,6 +218,18 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                   permitType={permitType}
                   purpose={purpose}
                   subHeader={subHeader}
+                />
+                {isCase && (
+                  <div className="case-additional-text-wrapper">
+                    <p className="case-additional-text">
+                      TO WHOM IT MAY CONCERN:
+                    </p>
+                  </div>
+                )}
+                <AdditionalParagraphForWithCase
+                  additionalParagraphForWithCase={
+                    additionalParagraphForWithCase
+                  }
                 />
                 <FirstParagraph firstParagraph={firstParagraph} />
                 <EventName permitType={permitType} eventName={eventName} />

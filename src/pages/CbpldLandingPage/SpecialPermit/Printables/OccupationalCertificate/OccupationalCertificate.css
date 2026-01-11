@@ -86,7 +86,7 @@
   display: flex;
   justify-content: space-between;
   margin-right: 10px;
-}
+}C
 
 .idpicture-box {
   border: 1px solid black;
@@ -98,12 +98,13 @@
   justify-content: center;
 }
 .name {
-  font-size: 18px;
+  /* font-size: 18px; */
   font-family: "Cambria, serif";
 }
 .name-container {
   line-height: 17px;
   margin-top: 5px;
+  margin-bottom: 10px;
 }
 .picture-section {
   margin: 0 10px;
@@ -149,8 +150,10 @@
   font-size: 8px;
   /* text-align: center; */
   color: #e04136;
-  margin-left: 30px;
+  text-align: center;
   margin-bottom: 0px;
+  padding: 0px;
+  margin: 0px;
 }
 /* .signatories-container {
   width: 100px;
@@ -167,8 +170,9 @@
 
 .permit-footer-upper {
   display: flex;
-  justify-content: flex-end; /* aligns content to the right */
+  justify-content: space-between;
   align-items: center;
+  margin-left: 22px;
 }
 .logo-section {
   display: flex;
@@ -185,5 +189,8 @@
 }
 .permit-footer {
   margin-top: auto;
+}
+.stamp {
+  font-size: 8px;
 }
 /*resusable*/

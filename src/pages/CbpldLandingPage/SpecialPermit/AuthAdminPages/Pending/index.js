@@ -94,7 +94,7 @@ const Pending = () => {
       try {
         const response = await axios.get(
           "api/admin/special-permit/all-counts",
-          { params: { permit_type_id: 1 } }
+          { params: { status_id: 1 } }
         );
 
         if (response && response.data) {

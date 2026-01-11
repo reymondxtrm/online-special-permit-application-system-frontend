@@ -99,7 +99,7 @@ const Returned = () => {
       try {
         const response = await axios.get(
           "api/admin/special-permit/all-counts",
-          { params: { permit_type_id: 6 } }
+          { params: { status_id: 6 } }
         );
 
         if (response && response.data) {

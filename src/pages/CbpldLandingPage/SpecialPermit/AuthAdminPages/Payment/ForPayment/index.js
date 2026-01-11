@@ -100,7 +100,7 @@ const Dashboard = () => {
       try {
         const response = await axios.get(
           "api/admin/special-permit/all-counts",
-          { params: { permit_type_id: 2 } }
+          { params: { status_id: 2 } }
         );
 
         if (response && response.data) {

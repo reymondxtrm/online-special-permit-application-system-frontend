@@ -29,11 +29,13 @@ import {
 } from "features/user/userListSlice";
 import BasicInputField from "components/Forms/BasicInputField";
 import { useFormik } from "formik";
+import { dateFilterSlice } from "features/filters/dateFilterSlice";
 
 const adminUserControl = () => {
   const dispatch = useDispatch();
   const filter = useSelector((state) => state.dateFilter.params);
   const userList = useSelector((state) => state.userList);
+  const searchParams = useSelector((state) => state.dateFilter.searchParams);
   useEffect(() => {
     dispatch(getUserList({ unvalidated_user: 0 }));
     dispatch(getCompanyListUnvalidated({ unvalidated_user: 1 }));
@@ -97,7 +99,7 @@ const adminUserControl = () => {
 
   return (
     <React.Fragment>
-      <div className="page-content" style={{ height: "100vh" }}>
+      <div className="page-content">
         <Container fluid>
           <Breadcrumbs title="User Controls" breadcrumbItem="Users" />
           <Row>
@@ -236,7 +238,7 @@ const adminUserControl = () => {
                       Unvalidated Company Account
                     </p>
                     <UserControlsTable
-                      isFetching={userList?.isFetching}
+                      isFetching={userList?.getCompanyListUnvalidatedIsFetching}
                       tableData={userList?.unvalidatedUser?.data}
                       tableName="company"
                     />
@@ -248,7 +250,8 @@ const adminUserControl = () => {
                       setShowLoading={
                         userListSlice.actions.setShowUnvalidatedIsLoading
                       }
-                      isLoading={userList.isFetching}
+                      isLoading={userList.getCompanyListUnvalidatedIsFetching}
+                      params={{ unvalidated_user: 1 }}
                     />
                   </CardBody>
                 </Card>
@@ -279,6 +282,7 @@ const adminUserControl = () => {
                       setDataProps={userListSlice.actions.setDataProps}
                       setShowLoading={userListSlice.actions.setShowLoading}
                       isLoading={userList.isFetching}
+                      params={{ unvalidated_user: 0, ...searchParams }}
                     />
                   </CardBody>
                 </Card>
