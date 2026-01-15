@@ -191,6 +191,19 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const handleRowOnclick = (permit_id) => {
     const response = updateTabNotification(applicationType, permit_id, status);
   };
+  const handleClickPermitStatus = async (id) => {
+    handleSubmit(
+      {
+        url: "api/admin/disable-enable-permit",
+        params: { special_permit_application_id: id },
+        message: {
+          title: "Are you sure you want change the status?",
+        },
+      },
+      [],
+      [toggleRefresh]
+    );
+  };
   return (
     <>
       <AttachmentModal
@@ -260,7 +273,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
         </>
       ) : null}
 
-      {status === "for_signature" ? (
+      {status === "for_signature" || status === "completed" ? (
         <>
           <GeneratePermitModal
             toggleModal={toggleGenerateModal}
@@ -312,7 +325,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
           </Button>
         </div>
 
-        <Table hover>
+        <Table>
           <thead
             className="table-light"
             style={{
@@ -395,6 +408,10 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                       application?.mark_as_read
                         ? null
                         : handleRowOnclick(application.id);
+                    }}
+                    style={{
+                      backgroundColor: application.disable ? "#ef53502a" : null,
+                      borderColor: application.disable ? "#EF5350" : null,
                     }}
                   >
                     <td>{`${index + 1}`}</td>
@@ -576,17 +593,29 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                             Attachments
                           </Button>
                           {status === "completed" && (
-                            <Button
-                              color="success"
-                              onClick={() => {
-                                togglePdfViewer();
-                                setCompletedPermit(
-                                  application?.complete_special_permit?.file
-                                );
-                              }}
-                            >
-                              Permit
-                            </Button>
+                            <>
+                              <Button
+                                color="success"
+                                onClick={() => {
+                                  togglePdfViewer();
+                                  setCompletedPermit(
+                                    application?.complete_special_permit?.file
+                                  );
+                                }}
+                              >
+                                Permit
+                              </Button>
+                              <Button
+                                color="primary"
+                                style={{ width: "90px" }}
+                                onClick={() => {
+                                  toggleUploadModal();
+                                  setspecialPermitID(application?.id);
+                                }}
+                              >
+                                Re-Upload
+                              </Button>
+                            </>
                           )}
                         </div>
                       )}
@@ -635,7 +664,11 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                             className="me-2"
                             direction="end"
                           >
-                            <DropdownToggle caret color="primary">
+                            <DropdownToggle
+                              caret
+                              color="primary"
+                              disabled={application.disable}
+                            >
                               Actions
                             </DropdownToggle>
                             <DropdownMenu
@@ -744,6 +777,17 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               </DropdownItem>
                             </DropdownMenu>
                           </UncontrolledDropdown>
+                          <Button
+                            color="warning"
+                            onClick={() =>
+                              handleClickPermitStatus(application.id)
+                            }
+                          >
+                            <i
+                              className="mdi mdi-eye fs-5"
+                              style={{ cursor: "pointer" }}
+                            ></i>
+                          </Button>
                         </div>
                       </td>
                     ) : null}

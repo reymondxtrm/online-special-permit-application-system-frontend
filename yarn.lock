@@ -10946,6 +10946,11 @@
     "prop-types" "^15.7.2"
     "react-modal" "^3.11.1"
 
+"react-image-pan-zoom-rotate@^1.6.0":
+  "integrity" "sha512-YpuMjhA9TlcyuC1vcKeTGnECAial0uEsjXUHcCk3GTeznwtnfpgLfMDhejCrilUud/hxueXrr9SJiQiycWjYVA=="
+  "resolved" "https://registry.npmjs.org/react-image-pan-zoom-rotate/-/react-image-pan-zoom-rotate-1.6.0.tgz"
+  "version" "1.6.0"
+
 "react-input-autosize@^3.0.0":
   "integrity" "sha512-nL9uS7jEs/zu8sqwFE5MAPx6pPkNAriACQ2rGLlqmKr2sPGtN7TXTyDdQt4lbNXVx7Uzadb40x8qotIuru6Rhg=="
   "resolved" "https://registry.npmjs.org/react-input-autosize/-/react-input-autosize-3.0.0.tgz"

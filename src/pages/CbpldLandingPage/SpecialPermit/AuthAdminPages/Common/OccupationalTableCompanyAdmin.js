@@ -104,6 +104,19 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   const toggleReturnRemarksModal = () => {
     setOpenReturnRemarksModal((prev) => !prev);
   };
+  const handleClickPermitStatus = async (id) => {
+    handleSubmit(
+      {
+        url: "api/admin/disable-enable-permit",
+        params: { special_permit_application_id: id },
+        message: {
+          title: "Are you sure you want change the status?",
+        },
+      },
+      [],
+      [toggleRefresh]
+    );
+  };
 
   return (
     <React.Fragment>
@@ -268,6 +281,12 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                   ? null
                                   : handleRowOnclick(item.id);
                               }}
+                              style={{
+                                backgroundColor: item.disable
+                                  ? "#ef53502a"
+                                  : null,
+                                borderColor: item.disable ? "#EF5350" : null,
+                              }}
                             >
                               <td></td>
                               {status === "for_signature" && (
@@ -368,37 +387,50 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                               </td>
                               {status === "pending" && (
                                 <td>
-                                  <UncontrolledDropdown>
-                                    <DropdownToggle color="primary">
-                                      Actions
-                                    </DropdownToggle>
-                                    <DropdownMenu>
-                                      <DropdownItem
-                                        onClick={() => {
-                                          setApplicationId(item.id);
-                                          toggleAmountModal();
-                                        }}
-                                      >
-                                        Procced to payment
-                                      </DropdownItem>
-                                      <DropdownItem
-                                        onClick={() => {
-                                          toggleRemarksModal();
-                                          setApplicationId(item?.id);
-                                        }}
-                                      >
-                                        Return
-                                      </DropdownItem>
-                                      <DropdownItem
-                                        onClick={() => {
-                                          toggleOccupationalRequestModal();
-                                          setApplicationId(item?.id);
-                                        }}
-                                      >
-                                        View Request Form
-                                      </DropdownItem>
-                                    </DropdownMenu>
-                                  </UncontrolledDropdown>
+                                  <div className="d-flex gap-1">
+                                    <UncontrolledDropdown>
+                                      <DropdownToggle color="primary">
+                                        Actions
+                                      </DropdownToggle>
+                                      <DropdownMenu>
+                                        <DropdownItem
+                                          onClick={() => {
+                                            setApplicationId(item.id);
+                                            toggleAmountModal();
+                                          }}
+                                        >
+                                          Procced to payment
+                                        </DropdownItem>
+                                        <DropdownItem
+                                          onClick={() => {
+                                            toggleRemarksModal();
+                                            setApplicationId(item?.id);
+                                          }}
+                                        >
+                                          Return
+                                        </DropdownItem>
+                                        <DropdownItem
+                                          onClick={() => {
+                                            toggleOccupationalRequestModal();
+                                            setApplicationId(item?.id);
+                                          }}
+                                        >
+                                          View Request Form
+                                        </DropdownItem>
+                                      </DropdownMenu>
+                                    </UncontrolledDropdown>
+                                    <Button
+                                      color="warning"
+                                      onClick={() =>
+                                        handleClickPermitStatus(item.id)
+                                      }
+                                    >
+                                      <i
+                                        className="mdi mdi-eye fs-5"
+                                        style={{ cursor: "pointer" }}
+                                      ></i>
+                                    </Button>
+                                  </div>
                                 </td>
                               )}
                               {status === "for_payment_approval" ? (
