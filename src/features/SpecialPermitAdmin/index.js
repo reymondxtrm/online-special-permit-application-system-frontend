@@ -18,7 +18,7 @@ export const getTableData = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 export const getCompanyOccupatinalData = createAsyncThunk(
   "specialPermitAdmin/getCompanyOccupatinalData",
@@ -37,7 +37,7 @@ export const getCompanyOccupatinalData = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 export const getIndividualOccupationalApplications = createAsyncThunk(
   "specialPermitAdmin/getIndividualOccupationalApplications",
@@ -56,7 +56,7 @@ export const getIndividualOccupationalApplications = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 export const getOccupationalDetails = createAsyncThunk(
   "specialPermitAdmin/getOccupationalDetails",
@@ -75,7 +75,25 @@ export const getOccupationalDetails = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
+);
+export const getSpecialPermitAnalyticsData = createAsyncThunk(
+  "specialPermitAdmin/getSpecialPermitAnalyticsData",
+  async (params, thunkAPI) => {
+    try {
+      const response = await axios({
+        url: "api/admin/get/analytics",
+        method: "GET",
+        params: { ...params },
+      });
+      if (response) {
+        return response.data;
+      }
+      return thunkAPI.rejectWithValue(response.data);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  },
 );
 
 export const SpecialPermitAdminSlice = createSlice({
@@ -85,8 +103,14 @@ export const SpecialPermitAdminSlice = createSlice({
     getTableDataIsFetching: false,
     companyOccupational: [],
     individualOccupational: [],
+    analyticsData: [],
+    errors: null,
+    getAnalyticsDataIsFetching: false,
     getCompanyOccupationalData: false,
     getIndividualOccupationalData: false,
+    filter_date_from: "",
+    filter_date_to: "",
+    filter_type: "",
     params: {},
   },
   reducers: {
@@ -110,6 +134,11 @@ export const SpecialPermitAdminSlice = createSlice({
     },
     setShowLoadingIndividualOccupational: (state, action) => {
       state.getIndividualOccupationalData = action.payload;
+    },
+    setFilters: (state, { payload }) => {
+      state.filter_date_from = payload.date_from;
+      state.filter_date_to = payload.date_to;
+      state.filete_type = payload.type;
     },
   },
   extraReducers: {
@@ -145,6 +174,17 @@ export const SpecialPermitAdminSlice = createSlice({
     [getIndividualOccupationalApplications.rejected]: (state, action) => {
       state.getIndividualOccupationalData = false;
       state.errors = action.payload;
+    },
+    [getSpecialPermitAnalyticsData.pending]: (state) => {
+      state.getAnalyticsDataIsFetching = true;
+    },
+    [getSpecialPermitAnalyticsData.fulfilled]: (state, { payload }) => {
+      state.getAnalyticsDataIsFetching = false;
+      state.analyticsData = payload;
+    },
+    [getSpecialPermitAnalyticsData.pending]: (state, { payload }) => {
+      state.getAnalyticsDataIsFetching = false;
+      state.errors = payload;
     },
   },
 });

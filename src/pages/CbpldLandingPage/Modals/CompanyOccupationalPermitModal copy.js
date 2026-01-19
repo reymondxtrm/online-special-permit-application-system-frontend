@@ -1,6 +1,6 @@
 import BasicInputField from "components/Forms/BasicInputField";
 import { helper } from "echarts/lib/export";
-import { FieldArray, Form, Formik, FormikProvider, useFormik } from "formik";
+import { FieldArray, Form, Formik, useFormik } from "formik";
 import React, { useCallback, useRef, useState } from "react";
 import {
   Button,
@@ -36,10 +36,10 @@ export default function CompanyOccupationalPermitModal({
   const [activeIndex, setActiveIndex] = useState();
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [inputPicture, setInputPicture] = useState(null);
-  const [uploadImageMode, setUploadImageMode] = useState("camera");
   const [uploadImageModal, setUploadImageModal] = useState(false);
   const { getImageHandle, isFetching, currentImage } = useGetImage();
 
+  // Separate compressor hooks for each file type
   const cedulaCompressor = useImageCompressor({
     maxSizeMB: 2,
     maxWidthOrHeight: 1920,
@@ -64,9 +64,10 @@ export default function CompanyOccupationalPermitModal({
   ];
 
   const setIdPicture = (capturedPicture) => {
-    setInputPicture(capturedPicture);
-    toggleUploadImageModal();
-    togglePasssportCamera();
+    formikRef.current.setFieldValue(
+      `employees[${activeIndex}].id_picture`,
+      capturedPicture
+    );
   };
 
   const user = useSelector((state) => state.user);
@@ -80,7 +81,10 @@ export default function CompanyOccupationalPermitModal({
   }, []);
 
   const onCropDone = (image) => {
-    validation.setFieldValue(`employees[${activeIndex}].id_picture`, image);
+    formikRef.current.setFieldValue(
+      `employees[${activeIndex}].id_picture`,
+      image
+    );
     toggleUploadImageModal();
   };
 
@@ -143,12 +147,12 @@ export default function CompanyOccupationalPermitModal({
     if (compressed) {
       props.setFieldValue(
         `employees[${index}].certificate_of_employment`,
-        compressed,
+        compressed
       );
       props.setFieldTouched(
         `employees[${index}].certificate_of_employment`,
         true,
-        true,
+        true
       );
     }
   };
@@ -161,12 +165,12 @@ export default function CompanyOccupationalPermitModal({
     if (compressed) {
       props.setFieldValue(
         `employees[${index}].training_certificate`,
-        compressed,
+        compressed
       );
       props.setFieldTouched(
         `employees[${index}].training_certificate`,
         true,
-        true,
+        true
       );
     }
   };
@@ -188,7 +192,7 @@ export default function CompanyOccupationalPermitModal({
         const { no_cedula } = this.parent;
         if (no_cedula) return true;
         return value instanceof File || value instanceof Blob;
-      },
+      }
     ),
 
     certificate_of_employment: Yup.mixed().test(
@@ -196,7 +200,7 @@ export default function CompanyOccupationalPermitModal({
       "Certificate of Employment is required",
       function (value) {
         return value instanceof File || value instanceof Blob;
-      },
+      }
     ),
 
     training_certificate: Yup.mixed().test(
@@ -207,7 +211,7 @@ export default function CompanyOccupationalPermitModal({
           return value instanceof File || value instanceof Blob;
         }
         return true;
-      },
+      }
     ),
 
     id_picture: Yup.mixed().test(
@@ -215,7 +219,7 @@ export default function CompanyOccupationalPermitModal({
       "ID picture is required",
       function (value) {
         return value !== null && value !== "";
-      },
+      }
     ),
   });
 
@@ -223,67 +227,6 @@ export default function CompanyOccupationalPermitModal({
     employees: Yup.array()
       .of(employeeSchema)
       .min(1, "At least one employee is required"),
-  });
-  const validation = useFormik({
-    enableReinitialize: true,
-    initialValues: {
-      employees: [
-        {
-          fname: "",
-          mname: "",
-          lname: "",
-          birth_date: "",
-          gender: "",
-          address_line: "",
-          date_hired: "",
-          subdivision: "",
-          barangay: "",
-          city: "",
-          province: "",
-          contact_no: "",
-          id_picture: null,
-          cedula: null,
-          certificate_of_employment: null,
-          training_certificate: null,
-          no_cedula: false,
-          citizenship: "",
-          civil_status: "",
-          place_of_birth: "",
-          blood_type: "",
-          height: "",
-          weight: "",
-          tin: "",
-          occupation: "",
-          monthly_salary: 0.0,
-        },
-      ],
-    },
-    onSubmit: async (values) => {
-      const request = getFormData(values);
-
-      const response = await handleSubmit(
-        {
-          url: "api/client/company-occupational-permit-application",
-          method: "POST",
-          params: request,
-          headers: { "Content-Type": "multipart/form-data" },
-          message: {
-            title: "Are you sure you want to submit?",
-            failedTitle: "FAILED",
-            success: "Success!",
-            error: "Unknown error occurred",
-          },
-        },
-        [],
-        [toggleModal],
-      );
-      if (response) {
-        // formikRef.current.reset();
-        cedulaCompressor.reset();
-        certificateCompressor.reset();
-        trainingCompressor.reset();
-      }
-    },
   });
 
   return (
@@ -336,82 +279,137 @@ export default function CompanyOccupationalPermitModal({
           </p>
         </ModalHeader>
         <ModalBody>
-          <FormikProvider value={validation}>
-            <Form onSubmit={validation.handleSubmit}>
-              <FieldArray name="employees">
-                {(fieldArrayHelper) => (
-                  <>
-                    <Table striped>
-                      <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>NAME</th>
-                          <th>OCCUPATION</th>
-                          <th>DATE BIRTH</th>
-                          <th>GENDER</th>
-                          <th>HOME ADDRESS</th>
-                          <th>CONTACT NO.</th>
-                          <th>ID PICTURE</th>
-                          <th>CEDULA</th>
-                          <th>CERTIFICATE OF EMPLOYMENT</th>
-                          {user?.companyType === "NON-FOOD-MASSEUR" && (
-                            <th>TRAINING CERTIFICATE</th>
-                          )}
-                          <th>ACTIONS</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {validation?.values?.employees?.map(
-                          (employee, index) => (
+          <Formik
+            innerRef={formikRef}
+            validationSchema={validationSchema}
+            initialValues={{
+              employees: [
+                {
+                  fname: "",
+                  mname: "",
+                  lname: "",
+                  birth_date: "",
+                  gender: "",
+                  address_line: "",
+                  date_hired: "",
+                  subdivision: "",
+                  barangay: "",
+                  city: "",
+                  province: "",
+                  contact_no: "",
+                  id_picture: null,
+                  cedula: null,
+                  certificate_of_employment: null,
+                  training_certificate: null,
+                  no_cedula: false,
+                  citizenship: "",
+                  civil_status: "",
+                  place_of_birth: "",
+                  blood_type: "",
+                  height: "",
+                  weight: "",
+                  tin: "",
+                  occupation: "",
+                  monthly_salary: 0.0,
+                },
+              ],
+            }}
+            onSubmit={async (values) => {
+              const request = getFormData(values);
+
+              const response = await handleSubmit(
+                {
+                  url: "api/client/company-occupational-permit-application",
+                  method: "POST",
+                  params: request,
+                  headers: { "Content-Type": "multipart/form-data" },
+                  message: {
+                    title: "Are you sure you want to submit?",
+                    failedTitle: "FAILED",
+                    success: "Success!",
+                    error: "Unknown error occurred",
+                  },
+                },
+                [],
+                [toggleModal]
+              );
+              if (response) {
+                // formikRef.current.reset();
+                cedulaCompressor.reset();
+                certificateCompressor.reset();
+                trainingCompressor.reset();
+              }
+            }}
+          >
+            {(props) => (
+              <Form>
+                <FieldArray name="employees">
+                  {(fieldArrayHelper) => (
+                    <>
+                      <Table striped>
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>NAME</th>
+                            <th>OCCUPATION</th>
+                            <th>DATE BIRTH</th>
+                            <th>GENDER</th>
+                            <th>HOME ADDRESS</th>
+                            <th>CONTACT NO.</th>
+                            <th>ID PICTURE</th>
+                            <th>CEDULA</th>
+                            <th>CERTIFICATE OF EMPLOYMENT</th>
+                            {user?.companyType === "NON-FOOD-MASSEUR" && (
+                              <th>TRAINING CERTIFICATE</th>
+                            )}
+                            <th>ACTIONS</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {props?.values?.employees?.map((employee, index) => (
                             <tr key={index}>
                               <th scope="row">{index + 1}</th>
                               <td style={{ width: "10%" }}>
                                 <div className="d-flex flex-column gap-0">
                                   <BasicInputField
                                     type={"text"}
-                                    validation={validation}
+                                    validation={props}
                                     name={`employees[${index}].fname`}
                                     value={employee?.fname}
                                     touched={
-                                      validation?.touched?.employees?.[index]
-                                        ?.fname
+                                      props?.touched?.employees?.[index]?.fname
                                     }
                                     errors={
-                                      validation?.errors?.employees?.[index]
-                                        ?.fname
+                                      props?.errors?.employees?.[index]?.fname
                                     }
                                     placeholder={"First name"}
                                     col={12}
                                   />
                                   <BasicInputField
                                     type={"text"}
-                                    validation={validation}
+                                    validation={props}
                                     name={`employees[${index}].mname`}
                                     value={employee.mname}
                                     placeholder={"Middle name"}
                                     touched={
-                                      validation?.touched?.employees?.[index]
-                                        ?.mname
+                                      props?.touched?.employees?.[index]?.mname
                                     }
                                     errors={
-                                      validation?.errors?.employees?.[index]
-                                        ?.mname
+                                      props?.errors?.employees?.[index]?.mname
                                     }
                                     col={12}
                                   />
                                   <BasicInputField
                                     type={"text"}
-                                    validation={validation}
+                                    validation={props}
                                     name={`employees[${index}].lname`}
                                     value={employee?.lname}
                                     placeholder={"Last name"}
                                     touched={
-                                      validation?.touched?.employees?.[index]
-                                        ?.lname
+                                      props?.touched?.employees?.[index]?.lname
                                     }
                                     errors={
-                                      validation?.errors?.employees?.[index]
-                                        ?.lname
+                                      props?.errors?.employees?.[index]?.lname
                                     }
                                     col={12}
                                   />
@@ -419,33 +417,33 @@ export default function CompanyOccupationalPermitModal({
                               </td>
                               <td>
                                 <BasicInputField
-                                  validation={validation}
+                                  validation={props}
                                   name={`employees[${index}].occupation`}
                                   value={employee?.occupation}
                                   type={"text"}
                                   touched={
-                                    validation?.touched?.employees?.[index]
+                                    props?.touched?.employees?.[index]
                                       ?.occupation
                                   }
                                   placeholder={"Occupation"}
                                   errors={
-                                    validation?.errors?.employees?.[index]
+                                    props?.errors?.employees?.[index]
                                       ?.occupation
                                   }
                                 />
                               </td>
                               <td>
                                 <BasicInputField
-                                  validation={validation}
+                                  validation={props}
                                   name={`employees[${index}].birth_date`}
                                   value={employee?.birth_date}
                                   type={"date"}
                                   touched={
-                                    validation?.touched?.employees?.[index]
+                                    props?.touched?.employees?.[index]
                                       ?.birth_date
                                   }
                                   errors={
-                                    validation?.errors?.employees?.[index]
+                                    props?.errors?.employees?.[index]
                                       ?.birth_date
                                   }
                                 />
@@ -455,134 +453,126 @@ export default function CompanyOccupationalPermitModal({
                                   placeholder="Gender"
                                   options={genderOptions}
                                   value={genderOptions.find(
-                                    (option) =>
-                                      option.value === employee.gender,
+                                    (option) => option.value === employee.gender
                                   )}
                                   onChange={(selected) => {
-                                    validation.setFieldValue(
+                                    props.setFieldValue(
                                       `employees[${index}].gender`,
-                                      selected.value,
+                                      selected.value
                                     );
                                   }}
                                   onBlur={() =>
-                                    validation.setFieldTouched(
+                                    props.setFieldTouched(
                                       `employees[${index}].gender`,
-                                      true,
+                                      true
                                     )
                                   }
                                   styles={{
                                     control: (base) => ({
                                       ...base,
                                       borderColor:
-                                        validation.touched.employees?.[index]
+                                        props.touched.employees?.[index]
                                           ?.gender &&
-                                        validation.errors.employees?.[index]
-                                          ?.gender
+                                        props.errors.employees?.[index]?.gender
                                           ? "#dc3545"
                                           : base.borderColor,
                                     }),
                                   }}
                                 />
-                                {validation.touched.employees?.[index]
-                                  ?.gender &&
-                                validation.errors.employees?.[index]?.gender ? (
+                                {props.touched.employees?.[index]?.gender &&
+                                props.errors.employees?.[index]?.gender ? (
                                   <div
                                     className="text-danger mt-1"
                                     style={{ fontSize: "11px" }}
                                   >
-                                    {validation.errors.employees[index].gender}
+                                    {props.errors.employees[index].gender}
                                   </div>
                                 ) : null}
                               </td>
 
                               <td>
                                 <BasicInputField
-                                  validation={validation}
+                                  validation={props}
                                   type={"text"}
                                   name={`employees[${index}].address_line`}
                                   value={employee.address_line}
                                   errors={
-                                    validation?.errors?.employees?.[index]
+                                    props?.errors?.employees?.[index]
                                       ?.address_line
                                   }
                                   touched={
-                                    validation?.touched?.employees?.[index]
+                                    props?.touched?.employees?.[index]
                                       ?.address_line
                                   }
                                   placeholder={"Street No./Purok"}
                                 />
                                 <BasicInputField
-                                  validation={validation}
+                                  validation={props}
                                   type={"text"}
                                   name={`employees[${index}].subdivision`}
                                   value={employee.subdivision}
                                   errors={
-                                    validation?.errors?.employees?.[index]
+                                    props?.errors?.employees?.[index]
                                       ?.subdivision
                                   }
                                   touched={
-                                    validation?.touched?.employees?.[index]
+                                    props?.touched?.employees?.[index]
                                       ?.subdivision
                                   }
                                   placeholder={"Subdivision"}
                                 />
                                 <BasicInputField
-                                  validation={validation}
+                                  validation={props}
                                   type={"text"}
                                   name={`employees[${index}].barangay`}
                                   value={employee.barangay}
                                   errors={
-                                    validation?.errors?.employees?.[index]
-                                      ?.barangay
+                                    props?.errors?.employees?.[index]?.barangay
                                   }
                                   touched={
-                                    validation?.touched?.employees?.[index]
-                                      ?.barangay
+                                    props?.touched?.employees?.[index]?.barangay
                                   }
                                   placeholder={"Barangay"}
                                 />
                                 <BasicInputField
-                                  validation={validation}
+                                  validation={props}
                                   type={"text"}
                                   name={`employees[${index}].city`}
                                   value={employee.city}
                                   errors={
-                                    validation?.errors?.employees?.[index]?.city
+                                    props?.errors?.employees?.[index]?.city
                                   }
                                   touched={
-                                    validation?.touched?.employees?.[index]
-                                      ?.city
+                                    props?.touched?.employees?.[index]?.city
                                   }
                                   placeholder={"City/Municipality"}
                                 />
                                 <BasicInputField
-                                  validation={validation}
+                                  validation={props}
                                   type={"text"}
                                   name={`employees[${index}].province`}
                                   value={employee.province}
                                   errors={
-                                    validation?.errors?.employees?.[index]
-                                      ?.province
+                                    props?.errors?.employees?.[index]?.province
                                   }
                                   touched={
-                                    validation?.touched?.employees?.[index]
-                                      ?.province
+                                    props?.touched?.employees?.[index]?.province
                                   }
                                   placeholder={"Province"}
                                 />
                               </td>
                               <td>
                                 <BasicInputField
-                                  validation={validation}
+                                  validation={props}
                                   type={"text"}
                                   name={`employees[${index}].contact_no`}
                                   value={employee.contact_no}
                                   errors={
-                                    validation?.errors?.employees?.[index]
+                                    props?.errors?.employees?.[index]
                                       ?.contact_no
                                   }
                                   touched={
-                                    validation?.touched?.employees?.[index]
+                                    props?.touched?.employees?.[index]
                                       ?.contact_no
                                   }
                                   placeholder={"Phone number"}
@@ -590,12 +580,11 @@ export default function CompanyOccupationalPermitModal({
                               </td>
                               <td>
                                 <div className="d-flex flex-column gap-2">
-                                  {validation.values.employees?.[index]
+                                  {props.values.employees?.[index]
                                     ?.id_picture && (
                                     <img
                                       src={
-                                        validation.values.employees[index]
-                                          .id_picture
+                                        props.values.employees[index].id_picture
                                       }
                                       alt="Captured ID"
                                       className="img-fluid rounded border"
@@ -615,7 +604,6 @@ export default function CompanyOccupationalPermitModal({
                                       e.preventDefault();
                                       togglePasssportCamera();
                                       setActiveIndex(index);
-                                      setUploadImageMode("camera");
                                     }}
                                   >
                                     <i className="mdi mdi-camera fs-5"></i>
@@ -627,7 +615,6 @@ export default function CompanyOccupationalPermitModal({
                                     onClick={() => {
                                       handleClick();
                                       setActiveIndex(index);
-                                      setUploadImageMode("upload");
                                     }}
                                   >
                                     Upload image
@@ -639,16 +626,16 @@ export default function CompanyOccupationalPermitModal({
                                     style={{ display: "none" }}
                                     onChange={handleChange}
                                   />
-                                  {validation.touched?.employees?.[index]
+                                  {props.touched?.employees?.[index]
                                     ?.id_picture &&
-                                    validation.errors?.employees?.[index]
+                                    props.errors?.employees?.[index]
                                       ?.id_picture && (
                                       <div
                                         className="text-danger"
                                         style={{ fontSize: "11px" }}
                                       >
                                         {
-                                          validation.errors.employees[index]
+                                          props.errors.employees[index]
                                             .id_picture
                                         }
                                       </div>
@@ -662,21 +649,19 @@ export default function CompanyOccupationalPermitModal({
                                   name={`employees[${index}].cedula`}
                                   disabled={cedulaCompressor.isCompressing}
                                   onChange={(e) =>
-                                    handleCedulaChange(e, index, validation)
+                                    handleCedulaChange(e, index, props)
                                   }
                                   onBlur={() =>
-                                    validation.setFieldTouched(
+                                    props.setFieldTouched(
                                       `employees[${index}].cedula`,
-                                      true,
+                                      true
                                     )
                                   }
                                   invalid={
                                     !employee.no_cedula &&
-                                    validation.touched.employees?.[index]
-                                      ?.cedula &&
+                                    props.touched.employees?.[index]?.cedula &&
                                     Boolean(
-                                      validation.errors.employees?.[index]
-                                        ?.cedula,
+                                      props.errors.employees?.[index]?.cedula
                                     )
                                   }
                                 />
@@ -699,18 +684,13 @@ export default function CompanyOccupationalPermitModal({
                                 )}
 
                                 {!employee.no_cedula &&
-                                  validation.touched.employees?.[index]
-                                    ?.cedula &&
-                                  validation.errors.employees?.[index]
-                                    ?.cedula && (
+                                  props.touched.employees?.[index]?.cedula &&
+                                  props.errors.employees?.[index]?.cedula && (
                                     <div
                                       className="text-danger mt-1"
                                       style={{ fontSize: "11px" }}
                                     >
-                                      {
-                                        validation.errors.employees[index]
-                                          .cedula
-                                      }
+                                      {props.errors.employees[index].cedula}
                                     </div>
                                   )}
                               </td>
@@ -720,24 +700,20 @@ export default function CompanyOccupationalPermitModal({
                                   accept="image/*"
                                   disabled={certificateCompressor.isCompressing}
                                   onChange={(e) =>
-                                    handleCertificateChange(
-                                      e,
-                                      index,
-                                      validation,
-                                    )
+                                    handleCertificateChange(e, index, props)
                                   }
                                   onBlur={() =>
-                                    validation.setFieldTouched(
+                                    props.setFieldTouched(
                                       `employees[${index}].certificate_of_employment`,
-                                      true,
+                                      true
                                     )
                                   }
                                   invalid={
-                                    validation.touched?.employees?.[index]
+                                    props.touched?.employees?.[index]
                                       ?.certificate_of_employment &&
                                     Boolean(
-                                      validation.errors?.employees?.[index]
-                                        ?.certificate_of_employment,
+                                      props.errors?.employees?.[index]
+                                        ?.certificate_of_employment
                                     )
                                   }
                                 />
@@ -759,16 +735,16 @@ export default function CompanyOccupationalPermitModal({
                                   </div>
                                 )}
 
-                                {validation.touched?.employees?.[index]
+                                {props.touched?.employees?.[index]
                                   ?.certificate_of_employment &&
-                                  validation.errors?.employees?.[index]
+                                  props.errors?.employees?.[index]
                                     ?.certificate_of_employment && (
                                     <div
                                       className="text-danger mt-1"
                                       style={{ fontSize: "11px" }}
                                     >
                                       {
-                                        validation.errors.employees[index]
+                                        props.errors.employees[index]
                                           .certificate_of_employment
                                       }
                                     </div>
@@ -782,20 +758,20 @@ export default function CompanyOccupationalPermitModal({
                                     accept="image/*"
                                     disabled={trainingCompressor.isCompressing}
                                     onChange={(e) =>
-                                      handleTrainingChange(e, index, validation)
+                                      handleTrainingChange(e, index, props)
                                     }
                                     onBlur={() =>
-                                      validation.setFieldTouched(
+                                      props.setFieldTouched(
                                         `employees[${index}].training_certificate`,
-                                        true,
+                                        true
                                       )
                                     }
                                     invalid={
-                                      validation.touched?.employees?.[index]
+                                      props.touched?.employees?.[index]
                                         ?.training_certificate &&
                                       Boolean(
-                                        validation.errors?.employees?.[index]
-                                          ?.training_certificate,
+                                        props.errors?.employees?.[index]
+                                          ?.training_certificate
                                       )
                                     }
                                   />
@@ -817,16 +793,16 @@ export default function CompanyOccupationalPermitModal({
                                     </div>
                                   )}
 
-                                  {validation.touched?.employees?.[index]
+                                  {props.touched?.employees?.[index]
                                     ?.training_certificate &&
-                                    validation.errors?.employees?.[index]
+                                    props.errors?.employees?.[index]
                                       ?.training_certificate && (
                                       <div
                                         className="text-danger mt-1"
                                         style={{ fontSize: "11px" }}
                                       >
                                         {
-                                          validation.errors.employees[index]
+                                          props.errors.employees[index]
                                             .training_certificate
                                         }
                                       </div>
@@ -838,98 +814,96 @@ export default function CompanyOccupationalPermitModal({
                                 <Button
                                   color="danger"
                                   size="sm"
-                                  disabled={
-                                    validation.values.employees.length === 1
-                                  }
+                                  disabled={props.values.employees.length === 1}
                                   onClick={() => fieldArrayHelper.remove(index)}
                                 >
                                   <i className="mdi mdi-trash-can fs-5"></i>
                                 </Button>
                               </td>
                             </tr>
-                          ),
-                        )}
-                      </tbody>
-                    </Table>
-                    <Row>
-                      <Col>
-                        <Button
-                          color="primary"
-                          outline
-                          onClick={() => {
-                            fieldArrayHelper.push({
-                              fname: "",
-                              mname: "",
-                              lname: "",
-                              birth_date: "",
-                              gender: "",
-                              address_line: "",
-                              subdivision: "",
-                              barangay: "",
-                              city: "",
-                              province: "",
-                              contact_no: "",
-                              id_picture: null,
-                              cedula: null,
-                              certificate_of_employment: null,
-                              training_certificate: null,
-                              no_cedula: false,
-                              citizenship: "",
-                              civil_status: "",
-                              place_of_birth: "",
-                              blood_type: "",
-                              height: "",
-                              weight: "",
-                              tin: "",
-                              occupation: "",
-                              monthly_salary: 0.0,
-                            });
-                          }}
-                        >
-                          <i className="mdi mdi-plus"></i> Add Employee
-                        </Button>
-                      </Col>
-                    </Row>
-                  </>
-                )}
-              </FieldArray>
-              <hr />
-              <Row>
-                <div className="d-flex gap-2 justify-content-end">
-                  <Button
-                    color="success"
-                    type="submit"
-                    onClick={async () => {
-                      const errors = await validation.validateForm();
-                      validation.setTouched({
-                        employees: validation.values.employees.map(() => ({
-                          fname: true,
-                          lname: true,
-                          birth_date: true,
-                          gender: true,
-                          address_line: true,
-                          contact_no: true,
-                          cedula: true,
-                          certificate_of_employment: true,
-                          training_certificate: true,
-                          id_picture: true,
-                        })),
-                      });
+                          ))}
+                        </tbody>
+                      </Table>
+                      <Row>
+                        <Col>
+                          <Button
+                            color="primary"
+                            outline
+                            onClick={() => {
+                              fieldArrayHelper.push({
+                                fname: "",
+                                mname: "",
+                                lname: "",
+                                birth_date: "",
+                                gender: "",
+                                address_line: "",
+                                subdivision: "",
+                                barangay: "",
+                                city: "",
+                                province: "",
+                                contact_no: "",
+                                id_picture: null,
+                                cedula: null,
+                                certificate_of_employment: null,
+                                training_certificate: null,
+                                no_cedula: false,
+                                citizenship: "",
+                                civil_status: "",
+                                place_of_birth: "",
+                                blood_type: "",
+                                height: "",
+                                weight: "",
+                                tin: "",
+                                occupation: "",
+                                monthly_salary: 0.0,
+                              });
+                            }}
+                          >
+                            <i className="mdi mdi-plus"></i> Add Employee
+                          </Button>
+                        </Col>
+                      </Row>
+                    </>
+                  )}
+                </FieldArray>
+                <hr />
+                <Row>
+                  <div className="d-flex gap-2 justify-content-end">
+                    <Button
+                      color="success"
+                      type="submit"
+                      onClick={async () => {
+                        const errors = await props.validateForm();
+                        props.setTouched({
+                          employees: props.values.employees.map(() => ({
+                            fname: true,
+                            lname: true,
+                            birth_date: true,
+                            gender: true,
+                            address_line: true,
+                            contact_no: true,
+                            cedula: true,
+                            certificate_of_employment: true,
+                            training_certificate: true,
+                            id_picture: true,
+                          })),
+                        });
 
-                      if (Object.keys(errors).length === 0) {
-                        validation.handleSubmit();
-                      }
-                    }}
-                  >
-                    Submit
-                  </Button>
-                  <Button type="button" onClick={toggleModal}>
-                    Close
-                  </Button>
-                </div>
-              </Row>
-            </Form>
-          </FormikProvider>
+                        if (Object.keys(errors).length === 0) {
+                          props.handleSubmit();
+                        }
+                      }}
+                    >
+                      Submit
+                    </Button>
+                    <Button type="button" onClick={toggleModal}>
+                      Cancel
+                    </Button>
+                  </div>
+                </Row>
+              </Form>
+            )}
+          </Formik>
         </ModalBody>
       </Modal>
     </React.Fragment>

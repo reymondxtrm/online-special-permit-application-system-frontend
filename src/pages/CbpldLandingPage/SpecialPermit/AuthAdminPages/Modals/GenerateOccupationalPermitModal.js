@@ -31,7 +31,19 @@ export default function GenerateOccupationalPermitModal({
       fetchData();
     }
   }, [applicationID]);
-  
+  const handleAfterPrint = () => {
+    if (!applicationDetails) return;
+
+    if (applicationDetails.printed_at !== null) return;
+    try {
+      axios.post("api/admin/permit-printed", {
+        special_permit_application_id: applicationID,
+      });
+    } catch (error) {
+      console.error("Failed to mark permit as printed:", error);
+    }
+  };
+
   const isCompany = applicationDetails?.user?.account_type === "company";
   return (
     <Modal toggle={toggle} isOpen={openModal}>
@@ -61,6 +73,7 @@ export default function GenerateOccupationalPermitModal({
             trigger={() => <Button color="primary">Print</Button>}
             content={() => componentRef.current}
             onBeforePrint={() => (document.title = "Occupational Permit")}
+            onAfterPrint={handleAfterPrint}
           />
           <Button color={"danger"} onClick={() => toggle()}>
             Close

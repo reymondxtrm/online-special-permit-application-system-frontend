@@ -84,6 +84,7 @@ import TwostepVerification2 from "pages/AuthenticationInner/auth-two-step-verifi
 import TwostepVerification from "pages/AuthenticationInner/auth-two-step-verification";
 import SuperAdminControl from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/SuperAdminControl";
 import AdminDeclined from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Declined";
+import SpecialPermitAnalytics from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Analytics/index";
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: Analytics },
@@ -113,6 +114,7 @@ const authProtectedRoutes = [
   },
   { path: "/admin/pending", component: AdminPending },
   { path: "/admin/controls", component: AdminControls },
+  { path: "/admin/analytics", component: SpecialPermitAnalytics },
   {
     path: "/user-control",
     component: Controls,

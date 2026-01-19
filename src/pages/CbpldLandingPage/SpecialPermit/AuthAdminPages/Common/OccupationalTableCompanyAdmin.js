@@ -64,14 +64,14 @@ export default function OccupationalTableCompanyAdmin({ status }) {
     setSelectedRow((prev) =>
       prev.includes(index)
         ? prev.filter((item) => item !== index)
-        : [...prev, index]
+        : [...prev, index],
     );
   };
   const handleRowOnclick = (permit_id) => {
     const response = updateTabNotification(
       "occupational_permit",
       permit_id,
-      status
+      status,
     );
   };
   const togglePdfViewer = () => {
@@ -114,7 +114,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
         },
       },
       [],
-      [toggleRefresh]
+      [toggleRefresh],
     );
   };
 
@@ -209,6 +209,9 @@ export default function OccupationalTableCompanyAdmin({ status }) {
             <th>Gender</th>
             <th>Address</th>
             <th>Contact</th>
+            {(status === "declined" || status === "returned") && (
+              <th>Remarks</th>
+            )}
             {status === "for_payment_approval" && <th> Mode of Payment</th>}
             <th>Attachment</th>
             {status === "for_payment_approval" ||
@@ -330,6 +333,10 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                   </Badge>
                                 </td>
                               )}
+                              {(status === "declined" ||
+                                status === "returned") && (
+                                <td>{item.status_histories?.[0]?.remarks}</td>
+                              )}
                               <td>
                                 {status === "for_payment_approval" ||
                                 status === "returned" ? (
@@ -375,7 +382,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                         onClick={() => {
                                           togglePdfViewer();
                                           setCompletedPermit(
-                                            item?.complete_special_permit?.file
+                                            item?.complete_special_permit?.file,
                                           );
                                         }}
                                       >
@@ -389,7 +396,10 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                 <td>
                                   <div className="d-flex gap-1">
                                     <UncontrolledDropdown>
-                                      <DropdownToggle color="primary">
+                                      <DropdownToggle
+                                        color="primary"
+                                        disabled={item.disable}
+                                      >
                                         Actions
                                       </DropdownToggle>
                                       <DropdownMenu>
@@ -469,7 +479,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                               },
                                             },
                                             [],
-                                            [toggleRefresh]
+                                            [toggleRefresh],
                                           );
                                         }}
                                       >
@@ -481,7 +491,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                           toggleReturnRemarksModal();
 
                                           setOrderOfPaymentId(
-                                            item?.order_of_payment?.id
+                                            item?.order_of_payment?.id,
                                           );
                                         }}
                                       >
@@ -528,12 +538,12 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                 </td>
                               ) : null}
                             </tr>
-                          )
+                          ),
                         )
                       : null
                     : null}
                 </React.Fragment>
-              )
+              ),
             )
           ) : (
             <tr>

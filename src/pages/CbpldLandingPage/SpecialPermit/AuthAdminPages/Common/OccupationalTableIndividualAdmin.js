@@ -69,7 +69,7 @@ export default function OccupationalTableIndividualAdmin({
         getIndividualOccupationalApplications({
           type: "individual",
           status: status,
-        })
+        }),
       );
     }
   }, [refreshPage, activeTab, motherTab]);
@@ -111,7 +111,7 @@ export default function OccupationalTableIndividualAdmin({
     const response = updateTabNotification(
       "occupational_permit",
       permit_id,
-      status
+      status,
     );
   };
   const handleClickPermitStatus = async (id) => {
@@ -124,7 +124,7 @@ export default function OccupationalTableIndividualAdmin({
         },
       },
       [],
-      [toggleRefresh]
+      [toggleRefresh],
     );
   };
   return (
@@ -217,6 +217,9 @@ export default function OccupationalTableIndividualAdmin({
             <th>Name of Requestor / Corporation</th>
             <th>Gender</th>
             <th>Address</th>
+            {(status === "declined" || status === "returned") && (
+              <th>Remarks</th>
+            )}
             {(status === "for_payment_approval" ||
               status === "for_signature" ||
               status === "returned") && <th> Mode of Payment</th>}
@@ -290,6 +293,9 @@ export default function OccupationalTableIndividualAdmin({
                       </Badge>
                     </td>
                   )}
+                  {(status === "declined" || status === "returned") && (
+                    <td>{application?.status_histories?.[0]?.remarks}</td>
+                  )}
                   <td>
                     {status === "for_payment_approval" ||
                     status === "returned" ? (
@@ -334,7 +340,7 @@ export default function OccupationalTableIndividualAdmin({
                             onClick={() => {
                               togglePdfViewer();
                               setCompletedPermit(
-                                application?.complete_special_permit?.file
+                                application?.complete_special_permit?.file,
                               );
                             }}
                           >
@@ -371,7 +377,10 @@ export default function OccupationalTableIndividualAdmin({
                     <td>
                       <div className="d-flex gap-1">
                         <UncontrolledDropdown>
-                          <DropdownToggle color="primary">
+                          <DropdownToggle
+                            color="primary"
+                            disabled={application.disable}
+                          >
                             Actions
                           </DropdownToggle>
                           <DropdownMenu>
@@ -446,7 +455,7 @@ export default function OccupationalTableIndividualAdmin({
                                   },
                                 },
                                 [],
-                                [toggleRefresh]
+                                [toggleRefresh],
                               );
                             }}
                           >
@@ -456,7 +465,7 @@ export default function OccupationalTableIndividualAdmin({
                             onClick={() => {
                               toggleReturnRemarksModal();
                               setOrderOfPaymentId(
-                                application?.order_of_payment?.id
+                                application?.order_of_payment?.id,
                               );
                             }}
                           >
@@ -503,7 +512,7 @@ export default function OccupationalTableIndividualAdmin({
                     </td>
                   ) : null}
                 </tr>
-              )
+              ),
             )
           ) : (
             <tr>

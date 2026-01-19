@@ -386,6 +386,12 @@ const SidebarContent = (props) => {
             {checkUserType(["admin"]) && checkRole(["special_permit_admin"]) && (
               <>
                 <li>
+                  <Link to="/admin/analytics">
+                    <i className="mdi mdi-view-dashboard fs-2"></i>
+                    <span>{props.t("Analytics")}</span>
+                  </Link>
+                </li>
+                <li>
                   <Link to="/admin/dashboard">
                     <i className="mdi mdi-view-dashboard fs-2"></i>
                     <span>{props.t("Dashboard")}</span>

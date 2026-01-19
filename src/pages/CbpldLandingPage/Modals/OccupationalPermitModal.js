@@ -93,11 +93,11 @@ function OccupationalPermitModal({
     position: Yup.string().nullable(),
 
     certificate_of_employment: Yup.mixed().required(
-      "Certificate of employment is required"
+      "Certificate of employment is required",
     ),
 
     community_tax_certificate: Yup.mixed().required(
-      "Community tax certificate is required"
+      "Community tax certificate is required",
     ),
 
     id_picture: Yup.mixed().required("ID picture is required"),
@@ -110,7 +110,7 @@ function OccupationalPermitModal({
         if (isUpdate && uploadedFile?.training_certificate) return true;
 
         return value instanceof File || value instanceof Blob;
-      }
+      },
     ),
   });
   const handleFileChange = async (e, fieldName, index, props) => {
@@ -162,7 +162,9 @@ function OccupationalPermitModal({
   }, [openModal, fetchUrl]);
 
   const setIdPicture = (capturedPicture) => {
-    formikRef.current.setFieldValue("id_picture", capturedPicture);
+    setInputPicture(capturedPicture);
+    toggleUploadImageModal();
+    togglePictureModal();
     handleImageChange(capturedPicture, 1, "base64");
   };
 
@@ -364,7 +366,7 @@ function OccupationalPermitModal({
                                         e,
                                         "certificate_of_employment",
                                         0,
-                                        props
+                                        props,
                                       );
                                     }}
                                     disabled={isCompressing}
@@ -372,7 +374,7 @@ function OccupationalPermitModal({
                                     invalid={
                                       props.touched.certificate_of_employment &&
                                       Boolean(
-                                        props.errors.certificate_of_employment
+                                        props.errors.certificate_of_employment,
                                       )
                                     }
                                   />
@@ -441,14 +443,14 @@ function OccupationalPermitModal({
                                         e,
                                         "community_tax_certificate",
                                         1,
-                                        props
+                                        props,
                                       );
                                     }}
                                     onBlur={props.handleBlur}
                                     invalid={
                                       props.touched.community_tax_certificate &&
                                       Boolean(
-                                        props.errors.community_tax_certificate
+                                        props.errors.community_tax_certificate,
                                       ) &&
                                       !props.values.no_cedula
                                     }
@@ -600,14 +602,14 @@ function OccupationalPermitModal({
                                       onChange={(event) => {
                                         props.setFieldValue(
                                           "training_certificate",
-                                          event.currentTarget.files[0]
+                                          event.currentTarget.files[0],
                                         );
                                       }}
                                       onBlur={props.handleBlur}
                                       invalid={
                                         props.touched.training_certificate &&
                                         Boolean(
-                                          props.errors.training_certificate
+                                          props.errors.training_certificate,
                                         )
                                       }
                                     />
@@ -688,7 +690,7 @@ function OccupationalPermitModal({
                   params: formData,
                 },
                 [],
-                [toggleModal, toggleRefresh]
+                [toggleModal, toggleRefresh],
               );
             }}
           >

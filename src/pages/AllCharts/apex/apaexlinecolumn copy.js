@@ -1,8 +1,8 @@
 import React from "react";
 import ReactApexChart from "react-apexcharts";
 
-const Apaexlinecolumn = ({ purposeSeries, dates }) => {
-  const series = purposeSeries || [
+const Apaexlinecolumn = () => {
+  const series = [
     {
       name: "Net Profit",
       data: [46, 57, 59, 54, 62, 58, 64, 60, 66],
@@ -38,9 +38,9 @@ const Apaexlinecolumn = ({ purposeSeries, dates }) => {
       colors: ["transparent"],
     },
 
-    colors: ["#34c38f", "#556ee6", "#f46a6a", "#1ecbe1", "#f9ea06"],
+    colors: ["#34c38f", "#556ee6", "#f46a6a"],
     xaxis: {
-      categories: dates || [
+      categories: [
         "Feb",
         "Mar",
         "Apr",
@@ -66,7 +66,7 @@ const Apaexlinecolumn = ({ purposeSeries, dates }) => {
     tooltip: {
       y: {
         formatter: function (val) {
-          return val + " Permits";
+          return "$ " + val + " thousands";
         },
       },
     },

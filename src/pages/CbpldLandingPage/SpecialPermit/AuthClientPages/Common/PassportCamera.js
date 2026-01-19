@@ -32,7 +32,6 @@ const PassportCamera = ({ onCapture, isOpen, toggle, image }) => {
 
     let imageSrc = webcamRef.current.getScreenshot();
 
-    // Sometimes webcam returns null on first frame, retry
     if (!imageSrc) {
       setTimeout(() => {
         imageSrc = webcamRef.current.getScreenshot();
@@ -46,43 +45,35 @@ const PassportCamera = ({ onCapture, isOpen, toggle, image }) => {
     setIsCapturing(false);
   };
 
-  /** Cropping + sending image to parent */
   const processImage = (imageSrc) => {
+    let hasCaptured = false;
     const img = new Image();
     img.src = imageSrc;
 
     img.onload = () => {
+      if (hasCaptured) return;
+      hasCaptured = true;
+
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
 
-      const cropWidth = img.width * 0.35;
-      const cropHeight = cropWidth / 0.78;
+      canvas.width = img.width;
+      canvas.height = img.height;
 
-      canvas.width = cropWidth;
-      canvas.height = cropHeight;
+      ctx.drawImage(img, 0, 0, img.width, img.height);
 
-      ctx.drawImage(
-        img,
-        img.width / 2 - cropWidth / 2,
-        img.height / 2 - cropHeight / 2,
-        cropWidth,
-        cropHeight,
-        0,
-        0,
-        cropWidth,
-        cropHeight
-      );
-      const croppedImage = canvas.toDataURL("image/jpeg", 1.0);
+      const capturedImage = canvas.toDataURL("image/jpeg", 1.0);
+
       setFadeIn(false);
       setTimeout(() => {
-        onCapture(croppedImage);
+        onCapture(capturedImage);
         setFadeIn(true);
       }, 80);
     };
   };
 
   return (
-    <Modal size="xl" isOpen={isOpen} toggle={toggle} centered fade>
+    <Modal size="md" isOpen={isOpen} toggle={toggle} centered fade>
       <ModalHeader toggle={toggle}>
         <span className="fw-bold text-primary">Capture ID Picture</span>
       </ModalHeader>
@@ -90,10 +81,7 @@ const PassportCamera = ({ onCapture, isOpen, toggle, image }) => {
       <ModalBody style={{ backgroundColor: "#f7f9fc" }}>
         <Row className="gy-4">
           {/* CAMERA SECTION */}
-          <Col
-            md={7}
-            className="d-flex flex-column align-items-center justify-content-center"
-          >
+          <Col className="d-flex flex-column align-items-center justify-content-center">
             {!camReady ? (
               <p className="mt-3 text-danger fw-semibold">
                 Camera is initializing…
@@ -117,7 +105,7 @@ const PassportCamera = ({ onCapture, isOpen, toggle, image }) => {
                 ></i>
                 <p className="p-0 m-0" style={{ color: "#237088fd" }}>
                   <strong> Reminder: </strong>
-                  Please align your face inside the white frame.
+                  Please align your face inside the Camera.
                 </p>
               </div>
             )}
@@ -140,19 +128,18 @@ const PassportCamera = ({ onCapture, isOpen, toggle, image }) => {
                 videoConstraints={{ facingMode: "user" }}
               />
 
-              {/* CROPPING FRAME */}
               <div
                 className="position-absolute"
-                style={{
-                  border: "3px solid rgba(255,255,255,0.85)",
-                  width: "31.43%",
-                  height: "32.69%",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  borderRadius: "4px",
-                  boxShadow: "0 0 10px rgba(255,255,255,0.4)",
-                }}
+                // style={{
+                //   border: "3px solid rgba(255,255,255,0.85)",
+                //   width: "31.43%",
+                //   height: "32.69%",
+                //   top: "50%",
+                //   left: "50%",
+                //   transform: "translate(-50%, -50%)",
+                //   borderRadius: "4px",
+                //   boxShadow: "0 0 10px rgba(255,255,255,0.4)",
+                // }}
               />
 
               {/* CAPTURE BUTTON */}
@@ -178,7 +165,7 @@ const PassportCamera = ({ onCapture, isOpen, toggle, image }) => {
             </div>
           </Col>
 
-          {/* PREVIEW SECTION */}
+          {/* PREVIEW SECTION
           <Col
             md={5}
             className="d-flex flex-column align-items-center justify-content-center"
@@ -209,7 +196,7 @@ const PassportCamera = ({ onCapture, isOpen, toggle, image }) => {
                 <p className="text-secondary mt-5">No image captured yet.</p>
               )}
             </div>
-          </Col>
+          </Col> */}
         </Row>
       </ModalBody>
     </Modal>

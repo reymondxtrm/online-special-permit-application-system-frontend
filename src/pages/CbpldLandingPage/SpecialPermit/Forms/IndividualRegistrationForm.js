@@ -206,9 +206,13 @@ const IndividualRegistrationForm = ({
           });
           const params = {
             ...values,
-            username: `${values.first_name.toLowerCase()}.${values.surname.toLowerCase()}`,
+            username: `${values.first_name
+              .toLowerCase()
+              .replace(/\s+/g, "")}.${values.surname
+              .toLowerCase()
+              .replace(/\s+/g, "")}`,
           };
-
+          console.log(params);
           try {
             await dispatch(
               specialPermitClientRegister({ params, history })
@@ -265,14 +269,6 @@ const IndividualRegistrationForm = ({
                       errors={props.errors.first_name}
                       validation={props}
                       required
-                      onCustomChange={(e) => {
-                        const firstName = e.target.value.trim().toLowerCase();
-                        const surname =
-                          props.values.surname?.trim().toLowerCase() || "";
-                        const username =
-                          firstName && surname ? `${firstName}.${surname}` : "";
-                        props.setFieldValue("username", username);
-                      }}
                     />
                   </Col>
                   <Col md={3}>
@@ -903,9 +899,11 @@ const IndividualRegistrationForm = ({
                     <Input
                       disabled
                       value={
-                        props.values.first_name.toLowerCase() +
+                        props.values.first_name
+                          .toLowerCase()
+                          .replace(/\s+/g, "") +
                         "." +
-                        props.values.surname.toLowerCase()
+                        props.values.surname.toLowerCase().replace(/\s+/g, "")
                       }
                     />
                   </FormGroup>
