@@ -38,7 +38,15 @@ const Apaexlinecolumn = ({ purposeSeries, dates }) => {
       colors: ["transparent"],
     },
 
-    colors: ["#34c38f", "#556ee6", "#f46a6a", "#1ecbe1", "#f9ea06"],
+    colors: [
+      "#34c38f",
+      "#556ee6",
+      "#f46a6a",
+      "#1ecbe1",
+      "#f9ea06",
+      "#d619e6",
+      "#7bfb04",
+    ],
     xaxis: {
       categories: dates || [
         "Feb",

@@ -84,7 +84,7 @@ export const getSpecialPermitAnalyticsData = createAsyncThunk(
       const response = await axios({
         url: "api/admin/get/analytics",
         method: "GET",
-        params: { ...params },
+        params: { ...params, type: params.type.value },
       });
       if (response) {
         return response.data;
@@ -104,13 +104,15 @@ export const SpecialPermitAdminSlice = createSlice({
     companyOccupational: [],
     individualOccupational: [],
     analyticsData: [],
+
     errors: null,
     getAnalyticsDataIsFetching: false,
     getCompanyOccupationalData: false,
     getIndividualOccupationalData: false,
+
     filter_date_from: "",
     filter_date_to: "",
-    filter_type: "",
+    filter_type: {},
     params: {},
   },
   reducers: {
@@ -138,7 +140,7 @@ export const SpecialPermitAdminSlice = createSlice({
     setFilters: (state, { payload }) => {
       state.filter_date_from = payload.date_from;
       state.filter_date_to = payload.date_to;
-      state.filete_type = payload.type;
+      state.filter_type = payload.type;
     },
   },
   extraReducers: {

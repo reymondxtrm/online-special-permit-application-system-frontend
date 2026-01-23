@@ -24,6 +24,8 @@ import {
   SpecialPermitAdminSlice,
 } from "features/SpecialPermitAdmin";
 import DashedLine from "pages/AllCharts/apex/dashedLine";
+import { getReportByType } from "features/SpecialPermitReport";
+import DownloadButton from "./DownloadButton";
 
 const Analytics = () => {
   const dispatch = useDispatch();
@@ -34,25 +36,22 @@ const Analytics = () => {
   const date_from = startOfMonth.toISOString().split("T")[0];
   const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
   const date_to = endOfMonth.toISOString().split("T")[0];
-  const datesArray = useMemo(() => {
-    const array = [];
-    const start = analyticsData?.filter_date_from
-      ? new Date(analyticsData.filter_date_from)
-      : startOfMonth;
-    const end = analyticsData?.filter_date_to
-      ? new Date(analyticsData.filter_date_to)
-      : endOfMonth;
 
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      const day = String(d.getDate()).padStart(2, "0");
-      const month = d.toLocaleString("default", { month: "short" });
-      array.push(`${day} ${month}`);
-    }
-
-    return array;
-  }, [analyticsData?.filter_date_from, analyticsData?.filter_date_to]);
   useEffect(() => {
-    dispatch(getSpecialPermitAnalyticsData({ type: 2, date_from, date_to }));
+    dispatch(
+      getSpecialPermitAnalyticsData({
+        type: { value: 2, label: "Good Moral" },
+        date_from,
+        date_to,
+      }),
+    );
+    dispatch(
+      SpecialPermitAdminSlice.actions.setFilters({
+        type: { value: 2, label: "Good Moral" },
+        date_from,
+        date_to,
+      }),
+    );
   }, []);
 
   return (
@@ -68,14 +67,7 @@ const Analytics = () => {
                     action={getSpecialPermitAnalyticsData}
                     updateFilter={SpecialPermitAdminSlice.actions.setFilters}
                   />
-                  <Button
-                    className="h4 "
-                    style={{ color: "white", marginTop: "16px" }}
-                    color="primary"
-                    disabled
-                  >
-                    <i className="mdi mdi-file-download "></i> Download Report
-                  </Button>
+                  <DownloadButton />
                 </div>
               </CardBody>
             </Card>

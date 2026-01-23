@@ -510,6 +510,7 @@ export default function CompanyOccupationalPermitModal({
                                       ?.address_line
                                   }
                                   placeholder={"Street No./Purok"}
+                                  label={"House No. / Street / Purok"}
                                 />
                                 <BasicInputField
                                   validation={validation}
@@ -525,6 +526,7 @@ export default function CompanyOccupationalPermitModal({
                                       ?.subdivision
                                   }
                                   placeholder={"Subdivision"}
+                                  label={"Subdivision"}
                                 />
                                 <BasicInputField
                                   validation={validation}
@@ -540,6 +542,7 @@ export default function CompanyOccupationalPermitModal({
                                       ?.barangay
                                   }
                                   placeholder={"Barangay"}
+                                  label={"Barangay"}
                                 />
                                 <BasicInputField
                                   validation={validation}
@@ -554,6 +557,7 @@ export default function CompanyOccupationalPermitModal({
                                       ?.city
                                   }
                                   placeholder={"City/Municipality"}
+                                  label="City/Municipality"
                                 />
                                 <BasicInputField
                                   validation={validation}
@@ -569,6 +573,7 @@ export default function CompanyOccupationalPermitModal({
                                       ?.province
                                   }
                                   placeholder={"Province"}
+                                  label="Province"
                                 />
                               </td>
                               <td>
@@ -602,7 +607,7 @@ export default function CompanyOccupationalPermitModal({
                                       style={{
                                         transition: "0.3s",
                                         opacity: 1,
-                                        maxHeight: "150px",
+                                        maxHeight: "300px",
                                         objectFit: "cover",
                                       }}
                                     />

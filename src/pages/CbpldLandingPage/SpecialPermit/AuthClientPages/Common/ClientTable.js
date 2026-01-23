@@ -198,7 +198,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
             acc.quantity += 1;
             return acc;
           },
-          { billed_amount: 0, total_amount: 0, quantity: 0 }
+          { billed_amount: 0, total_amount: 0, quantity: 0 },
         );
       setPaymentDetails(selectedTotal);
     }
@@ -220,7 +220,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
         condition: () =>
           applicationType === "good_moral" &&
           ["pending", "declined", "for_signature", "completed"].includes(
-            status
+            status,
           ),
       },
       {
@@ -229,7 +229,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
         condition: () =>
           applicationType === "good_moral" &&
           ["pending", "declined", "for_signature", "completed"].includes(
-            status
+            status,
           ),
       },
       {
@@ -361,11 +361,11 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
         condition: () => status === "completed",
       },
     ],
-    [applicationType, status, user?.accountType]
+    [applicationType, status, user?.accountType],
   );
   const getActiveColumnCount = useMemo(
     () => columnConfig.filter((col) => col.condition()).length,
-    [applicationType, status, user?.accountType]
+    [applicationType, status, user?.accountType],
   );
   return (
     <>
@@ -509,8 +509,8 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                 toggleOverTheCounterModal();
                 dispatch(
                   SpecialPermitClientSlice.actions.setApplicationIdsForPayment(
-                    selectedRow
-                  )
+                    selectedRow,
+                  ),
                 );
               }}
               disabled={selectedRow.length <= 0}
@@ -550,7 +550,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                     }
                     onClick={() => {
                       handleSelectAll(
-                        specialPermitClient?.clientTableData?.data
+                        specialPermitClient?.clientTableData?.data,
                       );
                     }}
                     style={{ width: "20px", height: "20px" }}
@@ -921,7 +921,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                                   toggleAttachmentModal();
 
                                   setSelectedUploadedFiles(
-                                    application?.uploaded_file
+                                    application?.uploaded_file,
                                   );
                                 }}
                               >
@@ -984,14 +984,14 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         <td>
                           {dateOfEvent(
                             application?.event_date_from,
-                            application?.event_time_from
+                            application?.event_time_from,
                           )}
                         </td>
 
                         <td>
                           {dateOfEvent(
                             application?.event_date_to,
-                            application?.event_time_to
+                            application?.event_time_to,
                           )}
                         </td>
                         {status === "returned" && (
@@ -1059,8 +1059,8 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                               setSelectedRow([application?.id]);
                               dispatch(
                                 SpecialPermitClientSlice?.actions?.setApplicationIdsForPayment(
-                                  [application?.id]
-                                )
+                                  [application?.id],
+                                ),
                               );
                               toggleOverTheCounterModal();
                             }}
@@ -1156,54 +1156,56 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                             className="d-flex gap-2"
                           >
                             <Button
+                              type="button"
                               color="success"
                               onClick={() => {
                                 const fileId = application?.id;
 
                                 if (!fileId) {
                                   alert(
-                                    "Special Permit ID is required for download."
+                                    "Special Permit ID is required for download.",
                                   );
                                   return;
                                 }
 
-                                axios({
-                                  url: `/api/client/download-permit`, // Backend endpoint
-                                  method: "GET",
-                                  responseType: "blob", // Important for binary data like PDFs
-                                  params: {
-                                    special_permit_id: fileId, // Send the permit ID as a query parameter
-                                  },
-                                })
+                                axios
+                                  .get("/api/client/download-permit", {
+                                    responseType: "blob",
+                                    params: {
+                                      special_permit_id: fileId,
+                                      _t: Date.now(),
+                                    },
+                                  })
                                   .then((response) => {
-                                    // Create a URL for the file and trigger the download
-                                    const url = window.URL.createObjectURL(
-                                      new Blob([response.data])
-                                    );
-                                    const link = document.createElement("a");
-                                    link.href = url;
-                                    link.setAttribute(
-                                      "download",
-                                      `${applicationType}_${fileId}.pdf` // Set a file name
-                                    );
-                                    document.body.appendChild(link);
-                                    link.click();
-                                    link.parentNode.removeChild(link); // Cleanup the link element
+                                    const blob = new Blob([response.data], {
+                                      type:
+                                        response.headers["content-type"] ||
+                                        "application/pdf",
+                                    });
+
+                                    const url =
+                                      window.URL.createObjectURL(blob);
+
+                                    const a = document.createElement("a");
+                                    a.href = url;
+                                    a.download = `${applicationType}_${fileId}.pdf`;
+
+                                    document.body.appendChild(a);
+                                    a.click();
+
+                                    document.body.removeChild(a);
+                                    window.URL.revokeObjectURL(url);
                                   })
                                   .catch((error) => {
-                                    console.error(
-                                      "Error downloading file:",
-                                      error
-                                    );
-                                    alert(
-                                      "Failed to download the file. Please try again."
-                                    );
+                                    console.error("Download error:", error);
+                                    alert("Failed to download the file.");
                                   });
                               }}
                             >
                               <i className="mdi mdi-download fs-4 me-2"></i>
                               Download
                             </Button>
+
                             <Button
                               color="primary"
                               onClick={() => {
@@ -1244,7 +1246,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                       </>
                     )}
                   </tr>
-                )
+                ),
               )
             ) : (
               <tr>

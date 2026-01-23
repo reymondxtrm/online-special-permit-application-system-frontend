@@ -50,10 +50,7 @@ const UserProfile = () => {
       );
   }, [refresh]);
 
-  // const handleSubmit = (values) => {
-  //   console.log("Form values submitted:", values);
-  //   seteditOccupationState(false);
-  // };
+
 
   const initialValues = {
     companyName: userData?.user_occupation_details?.company_name || "",

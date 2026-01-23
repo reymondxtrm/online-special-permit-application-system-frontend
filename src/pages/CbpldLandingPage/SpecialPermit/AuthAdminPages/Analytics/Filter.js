@@ -39,7 +39,7 @@ const Filters = ({ action, updateFilter }) => {
     initialValues: {
       date_from: date_from || "",
       date_to: date_to || "",
-      type: 2,
+      type: permitTypeOptions?.[1] || { value: "", label: "" },
     },
     validationSchema: Yup.object({
       date_from: Yup.string().notRequired(),
@@ -47,15 +47,15 @@ const Filters = ({ action, updateFilter }) => {
     }),
 
     onSubmit: (values) => {
-      const params = values;
+      const params = { ...values, type: values.type };
       dispatch(action(params));
       dispatch(updateFilter(params));
     },
   });
-  const clearFilter = () => {
-    validation.resetForm();
-    dispatch(action());
-  };
+  // const clearFilter = () => {
+  //   validation.resetForm();
+  //   dispatch(action());
+  // };
 
   return (
     <Form
@@ -92,10 +92,8 @@ const Filters = ({ action, updateFilter }) => {
           <Label>Type</Label>
           <Select
             options={permitTypeOptions}
-            onChange={(e) => validation.setFieldValue("type", e.value)}
-            value={permitTypeOptions.find(
-              (item) => item.value === validation.values.type,
-            )}
+            onChange={(e) => validation.setFieldValue("type", e)}
+            value={validation.values.type}
           />
         </InputGroup>
       </div>

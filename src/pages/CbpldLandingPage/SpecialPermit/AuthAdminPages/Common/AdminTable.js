@@ -134,7 +134,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
     if (activeTab === "mayors_permit" || activeTab === "good_moral") {
       axios
         .get("api/get-purpose", {
-          params: { permit_type: "good_moral" },
+          params: { permit_type: activeTab },
         })
         .then(
           (res) => {
@@ -147,7 +147,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
           },
           (error) => {
             console.log(error);
-          }
+          },
         );
     }
   }, []);
@@ -201,7 +201,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
         },
       },
       [],
-      [toggleRefresh]
+      [toggleRefresh],
     );
   };
   return (
@@ -497,14 +497,14 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                         <td>
                           {dateOfEvent(
                             application?.event_date_from,
-                            application?.event_time_from
+                            application?.event_time_from,
                           )}
                         </td>
 
                         <td>
                           {dateOfEvent(
                             application?.event_date_to,
-                            application?.event_time_to
+                            application?.event_time_to,
                           )}
                         </td>
                       </>
@@ -541,7 +541,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                                 window.open(
                                   application?.order_of_payment?.payment_detail
                                     ?.attachment,
-                                  "_blank"
+                                  "_blank",
                                 );
                               }}
                             >
@@ -599,7 +599,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                                 onClick={() => {
                                   togglePdfViewer();
                                   setCompletedPermit(
-                                    application?.complete_special_permit?.file
+                                    application?.complete_special_permit?.file,
                                   );
                                 }}
                               >
@@ -720,7 +720,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                                   onClick={() => {
                                     togglePurposeModal();
                                     setpurposeData(
-                                      application.application_purpose
+                                      application.application_purpose,
                                     );
 
                                     setpurposeData((prevState) => {
@@ -743,7 +743,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                                     onClick={() => {
                                       toggleExemptionModal();
                                       setexemptionData(
-                                        application.permit_application_exemption
+                                        application.permit_application_exemption,
                                       );
                                     }}
                                   >
@@ -806,10 +806,10 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               onClick={() => {
                                 toggleGenerateModal();
                                 setname(
-                                  formatName(application?.user?.fullname)
+                                  formatName(application?.user?.fullname),
                                 );
                                 setpurpose(
-                                  application?.application_purpose?.name?.toUpperCase()
+                                  application?.application_purpose?.name?.toUpperCase(),
                                 );
                                 setreferenceNo(application?.reference_no);
 
@@ -867,7 +867,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                                     },
                                   },
                                   [],
-                                  [toggleRefresh]
+                                  [toggleRefresh],
                                 );
                               }}
                             >
@@ -878,7 +878,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               onClick={() => {
                                 toggleReturnRemarksModal();
                                 setorderOfPaymentId(
-                                  application?.order_of_payment?.id
+                                  application?.order_of_payment?.id,
                                 );
                               }}
                             >

@@ -23,7 +23,7 @@ export default function CompanyRegistrationForm({
     enableReinitialize: true,
     initialValues: {
       first_name: "",
-      surname: "company",
+      // surname: "company",
       address_line: "",
       barangay: "",
       city: "",
@@ -56,7 +56,7 @@ export default function CompanyRegistrationForm({
       }
       try {
         await dispatch(
-          specialPermitCompanyRegistration({ params, history })
+          specialPermitCompanyRegistration({ params, history }),
         ).unwrap();
 
         Swal.close();
@@ -109,14 +109,14 @@ export default function CompanyRegistrationForm({
       province: "",
     });
   }, [outsideButuan]);
-  useEffect(() => {
-    validation.setFieldValue(
-      "username",
-      validation?.values?.first_name.toLowerCase() +
-        "." +
-        validation?.values?.surname.toLowerCase()
-    );
-  }, [validation?.values?.first_name]);
+  // useEffect(() => {
+  //   validation.setFieldValue(
+  //     "username",
+  //     validation?.values?.first_name.toLowerCase() +
+  //       "." +
+  //       validation?.values?.surname.toLowerCase()
+  //   );
+  // }, [validation?.values?.first_name]);
   const companyTypeOptions = [
     { value: "FOOD", label: "Food" },
     { value: "NON-FOOD", label: "Non-Food" },
@@ -283,16 +283,22 @@ export default function CompanyRegistrationForm({
               />
             </Col>
             <Col>
-              <BasicInputField
-                type={"text"}
-                name={"username"}
-                validation={validation}
-                errors={validation?.errors?.username}
-                touched={validation?.touched?.username}
-                label={"Username"}
-                value={validation?.values?.username}
-                disable
-              />
+              <div className="d-flex align-items-end gap-1">
+                <BasicInputField
+                  col={8}
+                  type={"text"}
+                  name={"username"}
+                  validation={validation}
+                  errors={validation?.errors?.username}
+                  touched={validation?.touched?.username}
+                  label={"Username"}
+                  value={`${validation?.values?.username || ""}`}
+                  // disable
+                />
+                <span style={{ marginBottom: "15px", fontSize: "15px" }}>
+                  .company
+                </span>
+              </div>
             </Col>
           </Row>
           <Row>

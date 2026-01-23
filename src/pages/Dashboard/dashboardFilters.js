@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Select, { StylesConfig } from "react-select";
+import Select from "react-select";
 import { Form, Col, Button, Input, InputGroup, Label } from "reactstrap";
 import * as Yup from "yup";
 import { useFormik } from "formik";
@@ -7,6 +7,7 @@ import BasicInputField from "components/Forms/BasicInputField";
 import ExportButton from "../../pages/Summary/common/ExportButton";
 import { dateFilterSlice } from "features/filters/dateFilterSlice";
 import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
 const DashboardFilters = ({
   forAction,
   withStatus,
@@ -18,9 +19,30 @@ const DashboardFilters = ({
   const dispatch = useDispatch();
   const [parameters, setParams] = useState("");
   const [status, setStatus] = useState({ label: "", value: "" });
+  const [permitTypeOptions, setPermitTypeOptions] = useState([]);
 
   useEffect(() => {
     dispatch(dateFilterSlice.actions.clearState());
+  }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios({
+          url: "api/admin/get/permit-types",
+          method: "GET",
+        });
+        if (response) {
+          const options = response.data.map((options) => ({
+            value: options.id,
+            label: options.name,
+          }));
+          setPermitTypeOptions(options);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchData();
   }, []);
 
   const validation = useFormik({
@@ -29,6 +51,7 @@ const DashboardFilters = ({
       keyword: "",
       date_from: "",
       date_to: "",
+      type: "",
     },
     validationSchema: Yup.object({
       keyword: Yup.string().notRequired(),
@@ -113,6 +136,24 @@ const DashboardFilters = ({
         placeholder={"Enter keyword"}
         value={validation.values.keyword}
       />
+      <Col style={{ width: "250px" }}>
+        <InputGroup className="d-flex flex-column">
+          <Label>Permit Type</Label>
+          <Select
+            options={permitTypeOptions}
+            onChange={(selected) => {
+              validation.setFieldValue("type", selected.value);
+            }}
+            value={
+              validation.values.type
+                ? permitTypeOptions.find(
+                    (option) => option.value === validation.values.type,
+                  )
+                : null
+            }
+          />
+        </InputGroup>
+      </Col>
       <div className="d-flex align-items-center" style={{ marginTop: "27px" }}>
         <Button type="submit">
           <i className="fas fa-search"></i>
@@ -152,6 +193,7 @@ const DashboardFilters = ({
           </Button>
         </InputGroup>
       </Col> */}
+
       <Col>
         <label
           // className="visually-hidden"

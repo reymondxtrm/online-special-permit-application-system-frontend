@@ -9,6 +9,7 @@ export const dateFilterSlice = createSlice({
       date_from: "",
       date_to: "",
       status: [],
+      type: "",
     },
     advanceSearchParams: {
       control_no: "",
@@ -31,6 +32,7 @@ export const dateFilterSlice = createSlice({
         date_from: "",
         date_to: "",
         status: [],
+        type: "",
       };
       state.advanceSearchParams = {
         control_no: "",

@@ -34,7 +34,7 @@ export default function UpdateClearanceModal({
           params: { id: selectedClearance.id, ...values },
         },
         [() => dispatch(getClearances())],
-        [toggle]
+        [toggle],
       );
     },
   });

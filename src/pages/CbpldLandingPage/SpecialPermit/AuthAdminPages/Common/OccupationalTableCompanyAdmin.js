@@ -32,6 +32,7 @@ import {
   updateTabNotification,
 } from "common/utility/utilityFunction";
 import FileViewerModal from "../AdminControls/Modals/FileViewerModal";
+import UpdateCorporationMemberDetailsModal from "../AdminControls/Modals/UpdateCorporationMemberDetailsModal";
 
 export default function OccupationalTableCompanyAdmin({ status }) {
   const dispatch = useDispatch();
@@ -51,11 +52,12 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   const handleSubmit = useSubmit();
   const [showAttachmentModal, setShowAttachmentModal] = useState(false);
   const [orderOfPaymentId, setOrderOfPaymentId] = useState();
-  const [uploadImageModal, setUpdloadImageModal] = useState(false);
+  const [corporationMemberDetails, setCorporationMemberDetails] = useState();
   const [occupationalRequestModal, setOccupationalRequestModal] =
     useState(false);
   const [pdfViewer, setPdfViewer] = useState(false);
   const [completedPermit, setCompletedPermit] = useState(null);
+  const [updateDetailsModal, setUpdateDetailsModal] = useState(false);
 
   useEffect(() => {
     dispatch(getCompanyOccupatinalData({ type: "company", status: status }));
@@ -104,6 +106,10 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   const toggleReturnRemarksModal = () => {
     setOpenReturnRemarksModal((prev) => !prev);
   };
+  const toggleUpdateDetailsModal = () => {
+    setUpdateDetailsModal((prev) => !prev);
+  };
+
   const handleClickPermitStatus = async (id) => {
     handleSubmit(
       {
@@ -142,6 +148,15 @@ export default function OccupationalTableCompanyAdmin({ status }) {
           toggle={togglePdfViewer}
         />
       )}
+      {updateDetailsModal && (
+        <UpdateCorporationMemberDetailsModal
+          openModal={updateDetailsModal}
+          toggleModal={toggleUpdateDetailsModal}
+          corporationMemberId={applicationId}
+          userDetails={corporationMemberDetails}
+          toggleRefresh={toggleRefresh}
+        />
+      )}
       <AmountModal
         openModal={amountModal}
         toggleModal={toggleAmountModal}
@@ -155,7 +170,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
         toggleRefresh={toggleRefresh}
       />
 
-      {AttachmentModal && (
+      {showAttachmentModal && (
         <AttachmentModal
           openModal={showAttachmentModal}
           uploadedFiles={uploadedFiles}
@@ -184,7 +199,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
         />
       )}
 
-      {status === "for_signature" ? (
+      {status === "for_signature" || status === "completed" ? (
         <>
           <GenerateOccupationalPermitModal
             toggle={toggleGenerateModal}
@@ -377,17 +392,41 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                       Attachment
                                     </Button>
                                     {status === "completed" && (
-                                      <Button
-                                        color="success"
-                                        onClick={() => {
-                                          togglePdfViewer();
-                                          setCompletedPermit(
-                                            item?.complete_special_permit?.file,
-                                          );
-                                        }}
-                                      >
-                                        Permit
-                                      </Button>
+                                      <>
+                                        <Button
+                                          color="success"
+                                          onClick={() => {
+                                            togglePdfViewer();
+                                            setCompletedPermit(
+                                              item?.complete_special_permit
+                                                ?.file,
+                                            );
+                                          }}
+                                        >
+                                          Permit
+                                        </Button>
+                                        <Button
+                                          color="primary"
+                                          style={{ width: "90px" }}
+                                          onClick={() => {
+                                            toggleUploadPermitModal();
+                                            setApplicationId(item?.id);
+                                          }}
+                                        >
+                                          Re-Upload
+                                        </Button>
+                                        <Button
+                                          onClick={() => {
+                                            toggleUpdateDetailsModal();
+                                            setApplicationId(
+                                              item.corporation_member.id,
+                                            );
+                                            setCorporationMemberDetails(item);
+                                          }}
+                                        >
+                                          Edit Details
+                                        </Button>
+                                      </>
                                     )}
                                   </div>
                                 )}
@@ -426,6 +465,17 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                           }}
                                         >
                                           View Request Form
+                                        </DropdownItem>
+                                        <DropdownItem
+                                          onClick={() => {
+                                            toggleUpdateDetailsModal();
+                                            setApplicationId(
+                                              item.corporation_member.id,
+                                            );
+                                            setCorporationMemberDetails(item);
+                                          }}
+                                        >
+                                          Edit Details
                                         </DropdownItem>
                                       </DropdownMenu>
                                     </UncontrolledDropdown>
@@ -489,13 +539,23 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                       <DropdownItem
                                         onClick={() => {
                                           toggleReturnRemarksModal();
-
                                           setOrderOfPaymentId(
                                             item?.order_of_payment?.id,
                                           );
                                         }}
                                       >
                                         Return
+                                      </DropdownItem>
+                                      <DropdownItem
+                                        onClick={() => {
+                                          toggleUpdateDetailsModal();
+                                          setApplicationId(
+                                            item.corporation_member.id,
+                                          );
+                                          setCorporationMemberDetails(item);
+                                        }}
+                                      >
+                                        Edit Details
                                       </DropdownItem>
                                     </DropdownMenu>
                                   </UncontrolledDropdown>
@@ -522,7 +582,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                         Generate
                                       </Button>
                                     </div>
-                                    <div>
+                                    <div style={{ paddingRight: "10px" }}>
                                       <Button
                                         color="primary"
                                         style={{ width: "90px" }}
@@ -532,6 +592,19 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                         }}
                                       >
                                         Upload
+                                      </Button>
+                                    </div>
+                                    <div>
+                                      <Button
+                                        onClick={() => {
+                                          toggleUpdateDetailsModal();
+                                          setApplicationId(
+                                            item.corporation_member.id,
+                                          );
+                                          setCorporationMemberDetails(item);
+                                        }}
+                                      >
+                                        Edit Details
                                       </Button>
                                     </div>
                                   </div>

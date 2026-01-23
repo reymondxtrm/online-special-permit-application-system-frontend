@@ -33,7 +33,7 @@ const UserControlsTable = ({
   const toggleRefreshPage = () => {
     setRefreshPage((prev) => !prev);
   };
-
+  console.log(selectedUser);
   const validation = useFormik({
     enableReinitialize: true,
     initialValues: {
@@ -41,7 +41,9 @@ const UserControlsTable = ({
       fname: selectedUser?.first_name || "",
       mname: selectedUser?.middle_name || "",
       lname: selectedUser?.last_name || "",
+      username: selectedUser?.username || "",
       email: selectedUser?.email || "",
+      contact_no: selectedUser?.user_phone_numbers?.[0]?.phone_number || "",
       city:
         selectedUser?.account_type === "individual"
           ? selectedUser?.user_addresses?.[0]?.city || ""
@@ -58,6 +60,10 @@ const UserControlsTable = ({
         selectedUser?.account_type === "individual"
           ? selectedUser?.user_addresses?.[0]?.province || ""
           : selectedUser?.user_address_morph?.[0].province || "",
+      subdivision:
+        selectedUser?.account_type === "individual"
+          ? selectedUser?.user_addresses?.[0]?.subdivision || ""
+          : selectedUser?.user_address_morph?.[0].subdivision || "",
     },
     onSubmit: async (values) => {
       handleSubmit(
@@ -72,13 +78,13 @@ const UserControlsTable = ({
           getUserList({ unvalidated_user: 0 }),
           getCompanyListUnvalidated({ unvalidated_user: 1 }),
         ],
-        [toggleRefreshPage]
+        [toggleRefreshPage],
       );
     },
   });
   useEffect(() => {
     setSortedData(
-      _.orderBy(tableData, [sortConfig.key], [sortConfig.direction])
+      _.orderBy(tableData, [sortConfig.key], [sortConfig.direction]),
     );
   }, [tableData, sortConfig]);
   const validationHandle = (id) => {
@@ -92,7 +98,7 @@ const UserControlsTable = ({
         getUserList({ unvalidated_user: 0 }),
         getCompanyListUnvalidated({ unvalidated_user: 1 }),
       ],
-      [toggleRefreshPage]
+      [toggleRefreshPage],
     );
   };
   const sortData = (key) => {
@@ -265,6 +271,15 @@ const UserControlsTable = ({
                 }}
                 onClick={() => sortData("roles")}
               >
+                Username
+              </th>
+              <th
+                style={{
+                  width: "20%",
+                  cursor: "pointer",
+                }}
+                onClick={() => sortData("roles")}
+              >
                 Account Type
               </th>
               <th>Actions</th>
@@ -359,6 +374,17 @@ const UserControlsTable = ({
                               touched={validation.touched.address_line}
                               errors={validation.errors.address_line}
                               col="12"
+                              label={"Purok/Street"}
+                            />
+                            <BasicInputField
+                              name={"subdivision"}
+                              validation={validation}
+                              type="text"
+                              value={validation.values.subdivision}
+                              touched={validation.touched.subdivision}
+                              errors={validation.errors.subdivision}
+                              col="12"
+                              label={"Subdivision"}
                             />
                             <BasicInputField
                               name={"barangay"}
@@ -368,6 +394,7 @@ const UserControlsTable = ({
                               touched={validation.touched.barangay}
                               errors={validation.errors.barangay}
                               col="12"
+                              label={"Barangay"}
                             />
                             <BasicInputField
                               name={"city"}
@@ -377,6 +404,7 @@ const UserControlsTable = ({
                               touched={validation.touched.city}
                               errors={validation.errors.city}
                               col="12"
+                              label={"City"}
                             />
                             <BasicInputField
                               name={"province"}
@@ -386,19 +414,21 @@ const UserControlsTable = ({
                               touched={validation.touched.province}
                               errors={validation.errors.province}
                               col="12"
+                              label={"Province"}
                             />
                           </td>
                           <td>
-                            <Badge
-                              color={
-                                items?.account_type === "individual"
-                                  ? "success"
-                                  : "primary"
-                              }
-                            >
-                              {items?.account_type}
-                            </Badge>
+                            <BasicInputField
+                              name={"contact_no"}
+                              validation={validation}
+                              type="text"
+                              value={validation.values.contact_no}
+                              touched={validation.touched.contact_no}
+                              errors={validation.errors.contact_no}
+                              col="12"
+                            />
                           </td>
+
                           <td>
                             {items?.user_roles?.length === 0 ? (
                               <h5>
@@ -423,6 +453,28 @@ const UserControlsTable = ({
                                 </span>
                               ))
                             )}
+                          </td>
+                          <td>
+                            <BasicInputField
+                              name={"username"}
+                              validation={validation}
+                              type="username"
+                              value={validation.values.username}
+                              touched={validation.touched.username}
+                              errors={validation.errors.username}
+                              col="12"
+                            />
+                          </td>
+                          <td>
+                            <Badge
+                              color={
+                                items?.account_type === "individual"
+                                  ? "success"
+                                  : "primary"
+                              }
+                            >
+                              {items?.account_type}
+                            </Badge>
                           </td>
                           <td>
                             {
@@ -467,17 +519,7 @@ const UserControlsTable = ({
                           <td>
                             {items?.user_phone_numbers?.[0]?.phone_number}
                           </td>
-                          <td>
-                            <Badge
-                              color={
-                                items?.account_type === "individual"
-                                  ? "success"
-                                  : "primary"
-                              }
-                            >
-                              {items?.account_type}
-                            </Badge>
-                          </td>
+
                           <td>
                             {items?.user_roles?.length === 0 ? (
                               <h5>
@@ -502,6 +544,18 @@ const UserControlsTable = ({
                                 </span>
                               ))
                             )}
+                          </td>
+                          <td>{items?.username || "N/A"}</td>
+                          <td>
+                            <Badge
+                              color={
+                                items?.account_type === "individual"
+                                  ? "success"
+                                  : "primary"
+                              }
+                            >
+                              {items?.account_type}
+                            </Badge>
                           </td>
                           <td>
                             <div className="d-flex  gap-2">

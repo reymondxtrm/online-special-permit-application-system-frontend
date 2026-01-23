@@ -33,6 +33,7 @@ import {
   formateDateIntoString,
   updateTabNotification,
 } from "common/utility/utilityFunction";
+import UpdateIndividualOccupationalDetails from "../AdminControls/Modals/UpdateIndividualOccupationalDetails";
 
 export default function OccupationalTableIndividualAdmin({
   status,
@@ -55,11 +56,14 @@ export default function OccupationalTableIndividualAdmin({
   const [generateModal, setOpenGenerateModal] = useState(false);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [fileViewerOpen, setFileViewerOpen] = useState(false);
+  const [uploadModal, setuploadModal] = useState(false);
   const { isFetching, getImageHandle, currentImage } = useGetImage();
   const [occupationalRequestModal, setOccupationalRequestModal] =
     useState(false);
   const [completedPermit, setCompletedPermit] = useState(null);
   const [pdfViewer, setPdfViewer] = useState(false);
+  const [updateDetailsModal, setUpdateDetailsModal] = useState(false);
+  const [userId, setUserId] = useState();
 
   const handleSubmit = useSubmit();
 
@@ -94,6 +98,12 @@ export default function OccupationalTableIndividualAdmin({
   };
   const toggleReturnRemarksModal = () => {
     setOpenReturnRemarksModal((prev) => !prev);
+  };
+  const toggleUploadModal = () => {
+    setuploadModal(!uploadModal);
+  };
+  const toggleUpdateDetailModal = () => {
+    setUpdateDetailsModal((prev) => !prev);
   };
   const toggleRemarksModal = () => {
     setRemarksModal((prev) => !prev);
@@ -154,6 +164,14 @@ export default function OccupationalTableIndividualAdmin({
           toggle={togglePdfViewer}
         />
       )}
+      {updateDetailsModal && (
+        <UpdateIndividualOccupationalDetails
+          userId={userId}
+          toggleModal={toggleUpdateDetailModal}
+          openModal={updateDetailsModal}
+          toggleRefresh={toggleRefresh}
+        />
+      )}
       {showAttachmentModal && (
         <AttachmentModal
           openModal={showAttachmentModal}
@@ -192,7 +210,7 @@ export default function OccupationalTableIndividualAdmin({
         toggleRefresh={toggleRefresh}
       />
 
-      {status === "for_signature" ? (
+      {status === "for_signature" || status === "completed" ? (
         <>
           <GenerateOccupationalPermitModal
             toggle={toggleGenerateModal}
@@ -335,17 +353,37 @@ export default function OccupationalTableIndividualAdmin({
                           Attachment
                         </Button>
                         {status === "completed" && (
-                          <Button
-                            color="success"
-                            onClick={() => {
-                              togglePdfViewer();
-                              setCompletedPermit(
-                                application?.complete_special_permit?.file,
-                              );
-                            }}
-                          >
-                            Permit
-                          </Button>
+                          <>
+                            <Button
+                              color="success"
+                              onClick={() => {
+                                togglePdfViewer();
+                                setCompletedPermit(
+                                  application?.complete_special_permit?.file,
+                                );
+                              }}
+                            >
+                              Permit
+                            </Button>
+                            <Button
+                              color="primary"
+                              style={{ width: "90px" }}
+                              onClick={() => {
+                                toggleUploadPermitModal();
+                                setApplicationId(application?.id);
+                              }}
+                            >
+                              Re-Upload
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                toggleUpdateDetailModal();
+                                setUserId(application.user.id);
+                              }}
+                            >
+                              Edit Details
+                            </Button>
+                          </>
                         )}
                       </div>
                     )}
@@ -407,6 +445,14 @@ export default function OccupationalTableIndividualAdmin({
                               }}
                             >
                               View Request Form
+                            </DropdownItem>
+                            <DropdownItem
+                              onClick={() => {
+                                toggleUpdateDetailModal();
+                                setUserId(application.user.id);
+                              }}
+                            >
+                              Edit Details
                             </DropdownItem>
                           </DropdownMenu>
                         </UncontrolledDropdown>
@@ -471,6 +517,14 @@ export default function OccupationalTableIndividualAdmin({
                           >
                             Returned
                           </DropdownItem>
+                          <DropdownItem
+                            onClick={() => {
+                              toggleUpdateDetailModal();
+                              setUserId(application.user.id);
+                            }}
+                          >
+                            Edit Details
+                          </DropdownItem>
                         </DropdownMenu>
                       </UncontrolledDropdown>
                     </td>
@@ -480,10 +534,10 @@ export default function OccupationalTableIndividualAdmin({
                       <div
                         style={{
                           display: "flex",
-                          // justifyContent: "space-between",
+                          gap: "5px",
                         }}
                       >
-                        <div style={{ paddingRight: "10px" }}>
+                        <div>
                           <Button
                             color="warning"
                             style={{ width: "90px" }}
@@ -506,6 +560,16 @@ export default function OccupationalTableIndividualAdmin({
                             }}
                           >
                             Upload
+                          </Button>
+                        </div>
+                        <div>
+                          <Button
+                            onClick={() => {
+                              toggleUpdateDetailModal();
+                              setUserId(application.user.id);
+                            }}
+                          >
+                            Edit Details
                           </Button>
                         </div>
                       </div>

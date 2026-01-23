@@ -156,6 +156,7 @@ const IndividualRegistrationForm = ({
       then: (schema) => schema.required("Company specific address is required"),
       otherwise: (schema) => schema.notRequired(),
     }),
+    company_subdivision: Yup.string().notRequired(),
   });
 
   return (
@@ -188,6 +189,7 @@ const IndividualRegistrationForm = ({
           company_city: "",
           company_barangay: "",
           company_specific_address: "",
+          company_subdivision: "",
           employment_status: "",
           blood_type: "",
           height: "",
@@ -215,7 +217,7 @@ const IndividualRegistrationForm = ({
           console.log(params);
           try {
             await dispatch(
-              specialPermitClientRegister({ params, history })
+              specialPermitClientRegister({ params, history }),
             ).unwrap();
 
             Swal.close();
@@ -377,13 +379,14 @@ const IndividualRegistrationForm = ({
                         options={bloodTypeOptions}
                         value={
                           bloodTypeOptions?.find(
-                            (option) => option.value === props.values.blood_type
+                            (option) =>
+                              option.value === props.values.blood_type,
                           ) || null
                         }
                         onChange={(selectedOption) =>
                           props.setFieldValue(
                             "blood_type",
-                            selectedOption ? selectedOption.value : ""
+                            selectedOption ? selectedOption.value : "",
                           )
                         }
                         onBlur={() => props.setFieldTouched("blood_type", true)}
@@ -401,13 +404,13 @@ const IndividualRegistrationForm = ({
                         name="sex"
                         value={
                           genderOptions.find(
-                            (option) => option.value === props.values.sex
+                            (option) => option.value === props.values.sex,
                           ) || null
                         } // ← THIS IS CRUCIAL
                         onChange={(selected) =>
                           props.setFieldValue(
                             "sex",
-                            selected ? selected.value : ""
+                            selected ? selected.value : "",
                           )
                         }
                         onBlur={() => props.setFieldTouched("sex", true)}
@@ -438,13 +441,13 @@ const IndividualRegistrationForm = ({
                         value={
                           civilStatusOptions?.find(
                             (option) =>
-                              option.value === props.values.civil_status
+                              option.value === props.values.civil_status,
                           ) || null
                         }
                         onChange={(selectedOption) =>
                           props.setFieldValue(
                             "civil_status",
-                            selectedOption ? selectedOption.value : ""
+                            selectedOption ? selectedOption.value : "",
                           )
                         }
                         onBlur={() =>
@@ -509,7 +512,7 @@ const IndividualRegistrationForm = ({
                         onChange={(selected) =>
                           props.setFieldValue(
                             "educational_attainment",
-                            selected ? selected.value : ""
+                            selected ? selected.value : "",
                           )
                         }
                         placeholder="Select Educational Attainment"
@@ -578,7 +581,7 @@ const IndividualRegistrationForm = ({
                         onChange={(selectedBarangay) =>
                           props.setFieldValue(
                             "barangay",
-                            selectedBarangay.label
+                            selectedBarangay.label,
                           )
                         }
                         className={
@@ -688,13 +691,13 @@ const IndividualRegistrationForm = ({
                         value={
                           employmentStatusOptions.find(
                             (option) =>
-                              option.value === props.values.employment_status
+                              option.value === props.values.employment_status,
                           ) || null
                         }
                         onChange={(selected) =>
                           props.setFieldValue(
                             "employment_status",
-                            selected ? selected.value : ""
+                            selected ? selected.value : "",
                           )
                         }
                         onBlur={() =>
@@ -740,7 +743,7 @@ const IndividualRegistrationForm = ({
                       placeholder="Company name"
                       disable={
                         !needCompanyDetailsEmploymentStatus.includes(
-                          props?.values?.employment_status
+                          props?.values?.employment_status,
                         )
                       }
                     />
@@ -759,7 +762,7 @@ const IndividualRegistrationForm = ({
                       placeholder="Your position in the company"
                       disable={
                         !needCompanyDetailsEmploymentStatus.includes(
-                          props?.values?.employment_status
+                          props?.values?.employment_status,
                         )
                       }
                     />
@@ -778,7 +781,7 @@ const IndividualRegistrationForm = ({
                       placeholder="Date hired"
                       disable={
                         !needCompanyDetailsEmploymentStatus.includes(
-                          props?.values?.employment_status
+                          props?.values?.employment_status,
                         )
                       }
                     />
@@ -808,7 +811,7 @@ const IndividualRegistrationForm = ({
                       placeholder="Building No./Street/Purok"
                       disable={
                         !needCompanyDetailsEmploymentStatus.includes(
-                          props?.values?.employment_status
+                          props?.values?.employment_status,
                         )
                       }
                     />
@@ -826,7 +829,7 @@ const IndividualRegistrationForm = ({
                       placeholder="Province"
                       disable={
                         !needCompanyDetailsEmploymentStatus.includes(
-                          props?.values?.employment_status
+                          props?.values?.employment_status,
                         )
                       }
                     />
@@ -844,7 +847,7 @@ const IndividualRegistrationForm = ({
                       placeholder="City"
                       disable={
                         !needCompanyDetailsEmploymentStatus.includes(
-                          props?.values?.employment_status
+                          props?.values?.employment_status,
                         )
                       }
                     />
@@ -862,7 +865,7 @@ const IndividualRegistrationForm = ({
                       placeholder="Barangay"
                       disable={
                         !needCompanyDetailsEmploymentStatus.includes(
-                          props?.values?.employment_status
+                          props?.values?.employment_status,
                         )
                       }
                     />
