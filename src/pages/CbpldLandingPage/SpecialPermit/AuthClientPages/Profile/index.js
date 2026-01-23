@@ -46,11 +46,9 @@ const UserProfile = () => {
         (error) => {
           setisLoading(false);
           console.log(error);
-        }
+        },
       );
   }, [refresh]);
-
-
 
   const initialValues = {
     companyName: userData?.user_occupation_details?.company_name || "",
@@ -59,6 +57,7 @@ const UserProfile = () => {
     province: userData?.user_occupation_details?.province || "",
     city: userData?.user_occupation_details?.city || "",
     barangay: userData?.user_occupation_details?.barangay || "",
+    subdivision: userData?.user_occupation_details?.subdivision || "",
     addressLine: userData?.user_occupation_details?.address_line || "",
   };
 
@@ -69,6 +68,7 @@ const UserProfile = () => {
     province: Yup.string().required("Province is required"),
     city: Yup.string().required("City is required"),
     barangay: Yup.string().required("Barangay is required"),
+    subdivision: Yup.string().notRequired(),
     addressLine: Yup.string().required("Address Line is required"),
   });
 
@@ -323,6 +323,7 @@ const UserProfile = () => {
                     <tr>
                       <th>City</th>
                       <th>Barangay</th>
+                      <th>Subdivision</th>
                       <th>Specific Location/Address Line</th>
                       <th>Type</th>
                     </tr>
@@ -333,6 +334,9 @@ const UserProfile = () => {
                         <tr key={index}>
                           <td>{isLoading ? "loding ..." : items.city}</td>
                           <td>{isLoading ? "loding ..." : items.barangay}</td>
+                          <td>
+                            {isLoading ? "loding ..." : items.subdivision}
+                          </td>
                           <td>
                             {isLoading ? "loding ..." : items.address_line}
                           </td>
@@ -556,6 +560,29 @@ const UserProfile = () => {
                               </td>
                             </tr>
                             <tr>
+                              <th scope="row">Subdivision:</th>
+                              <td>
+                                {editOccupationState ? (
+                                  <>
+                                    <Field
+                                      as={Input}
+                                      id="subdivision"
+                                      name="subdivision"
+                                      placeholder="Enter Subdivision"
+                                    />
+                                    <ErrorMessage
+                                      name="subdivision"
+                                      component="div"
+                                      className="text-danger"
+                                    />
+                                  </>
+                                ) : (
+                                  userData?.user_occupation_details
+                                    ?.subdivision || ""
+                                )}
+                              </td>
+                            </tr>
+                            <tr>
                               <th scope="row">
                                 Specific Location/Address Line:
                               </th>
@@ -596,16 +623,13 @@ const UserProfile = () => {
                             <Button
                               onClick={() => {
                                 const formik = formikRef.current.values;
-                               
+
                                 // console.log(formik);
                                 // console.log(formik.amountPaid);
                                 // var bodyFormData = getFormData(formik);
                                 handleSubmit(
                                   {
                                     url: "api/client/edit/occupation-details",
-                                    // headers: {
-                                    //   "Content-Type": "multipart/form-data",
-                                    // },
                                     message: {
                                       title:
                                         "Are you sure you want to Proceed?",
@@ -619,7 +643,7 @@ const UserProfile = () => {
                                     () => seteditOccupationState(false),
                                     () => setrefresh(!refresh),
                                   ],
-                                  []
+                                  [],
                                 );
                               }}
                               color="success"
