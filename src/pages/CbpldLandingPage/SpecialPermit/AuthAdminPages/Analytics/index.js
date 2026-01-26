@@ -73,7 +73,9 @@ const Analytics = () => {
             </Card>
             <Card>
               <CardBody>
-                <CardTitle>Good Moral</CardTitle>
+                <CardTitle>
+                  {analyticsData?.analyticsData?.permit_type || "Good Moral"}
+                </CardTitle>
 
                 <DashedLine
                   countSeries={analyticsData?.analyticsData?.total_applications}

@@ -22,13 +22,10 @@ const DownloadButton = () => {
   const dateFilter = useSelector((state) => state.specialPermitAdmin);
 
   const [isLoading, setIsLoading] = useState(false);
-  console.log(dateFilter?.filter_type);
 
-  const exportDocument = (data) => {
+  const exportDocument = (initialData) => {
+    const data = initialData?.permits || [];
     const ws_data = [];
-
-    // TITLE
-    // if (dateFilter.filter_type === "")
 
     ws_data.push([`SPECIAL PERMIT REPORT (${dateFilter.filter_type.label})`]);
     const dateRange = `${dateFilter.filter_date_from || ""} - ${
@@ -44,32 +41,45 @@ const DownloadButton = () => {
     ) {
       ws_data.push([
         "No of permits issued per day ",
+        "Date Received",
+        "Time Received",
         "Date Issued",
+        "Time Issued",
         "Control No",
         "Name",
         "Gender",
         "Address",
         "Purpose",
+        "Duration  (in minutes)",
       ]);
     } else if (dateFilter.filter_type.label === "Occupational Permit") {
       ws_data.push([
         "No of permits issued per day ",
+        "Date Received",
+        "Time Received",
         "Date Issued",
+        "Time Issued",
         "Control No",
         "Requestor Name",
+        "Duration  (in minutes)",
       ]);
     } else {
       ws_data.push([
         "No of permits issued per day ",
+        "Date Received",
+        "Time Received",
         "Date Issued",
+        "Time Issued",
         "Control No",
         "Name of Organization",
         "Name of Representative",
         "Name of Event",
         "Date of Event",
         "Time of Event",
+        "Duration (in minutes)",
       ]);
     }
+
     if (
       dateFilter.filter_type.label === "Good Moral" ||
       dateFilter.filter_type.label === "Mayors Permit"
@@ -77,140 +87,90 @@ const DownloadButton = () => {
       data.forEach((item) => {
         ws_data.push([
           item.sequence,
-          item.ended_at,
+          item.start_at_date,
+          item.start_at_time,
+          item.ended_at_date,
+          item.ended_at_time,
           item.control_number,
           item.name_of_requestor,
           item.gender,
           item.address,
           item.purpose,
+          item.parsed_duration,
         ]);
       });
+      ws_data.push([
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "Average Turn Around Time:",
+        initialData.average_duration,
+      ]);
     } else if (dateFilter.filter_type.label === "Occupational Permit") {
       data.forEach((item) => {
         ws_data.push([
           item.sequence,
-          item.ended_at,
+          item.start_at_date,
+          item.start_at_time,
+          item.ended_at_date,
+          item.ended_at_time,
           item.control_number,
           item.name_of_requestor,
+          item.parsed_duration,
         ]);
       });
+      ws_data.push([
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "Average Turn Around Time:",
+        initialData.average_duration,
+      ]);
     } else {
       data.forEach((item) => {
         ws_data.push([
           item.sequence,
-          item.ended_at,
+          item.start_at_date,
+          item.start_at_time,
+          item.ended_at_date,
+          item.ended_at_time,
           item.control_number,
           item.name_of_organization,
           item.name_of_requestor,
           item.name_of_event,
           item.date_of_event,
           item.time_of_event,
+          item.parsed_duration,
         ]);
       });
+      ws_data.push([
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "Average Turn Around Time:",
+        initialData.average_duration,
+      ]);
     }
-    // let totalDur1to3 = 0;
-    // let totalDur4to5 = 0;
-    // let totalDur1to5 = 0;
-    // let validDur1to3 = 0;
-    // let validDur4to5 = 0;
-    // let validDur1to5 = 0;
-
-    // // DATA ROWS
-    // data.forEach((item) => {
-    //   const getDateTime = (dt) =>
-    //     dt
-    //       ? [moment(dt).format("MMMM D, YYYY"), moment(dt).format("h:mm:ss a")]
-    //       : ["NONE", "NONE"];
-
-    //   const stage1 = getDateTime(item.business_stages[0]?.created_at);
-    //   const stage2 = getDateTime(item.business_stages[1]?.created_at);
-    //   const stage3 = getDateTime(item.business_stages[2]?.created_at);
-    //   const stage4 = getDateTime(item.business_stages[3]?.created_at);
-    //   const stage5 = getDateTime(item.business_stages[4]?.created_at);
-    //   const stage6 = getDateTime(item.business_stages[5]?.created_at);
-
-    //   ws_data.push([
-    //     item.business_code,
-    //     item.business_name,
-    //     item.owner,
-    //     item.type,
-    //     item.status,
-    //     ...stage1,
-    //     ...stage2,
-    //     ...stage3,
-    //     ...stage4,
-    //     ...stage6,
-    //     ...stage5,
-    //     item.durationStage1to3,
-    //     item.durationStage3to4,
-    //     item.durationStage4to6,
-    //     item.durationStage1to5,
-    //     item.avgDurationStage1to5,
-    //   ]);
-
-    //   const dur1to3Hours = timeStringToHours(item.durationStage1to3);
-    //   if (!isNaN(dur1to3Hours)) {
-    //     totalDur1to3 += dur1to3Hours;
-    //     validDur1to3++;
-    //   }
-
-    //   const dur4to5Hours = timeStringToHours(item.durationStage4to5);
-    //   if (!isNaN(dur4to5Hours)) {
-    //     totalDur4to5 += dur4to5Hours;
-    //     validDur4to5++;
-    //   }
-
-    //   const dur1to5Hours = timeStringToHours(item.durationStage1to5);
-    //   if (!isNaN(dur1to5Hours)) {
-    //     totalDur1to5 += dur1to5Hours;
-    //     validDur1to5++;
-    //   }
-    // });
-
-    // // FOOTER: TOTAL AVERAGE (in time format)
-    // const formatDuration = (hours) => {
-    //   if (!isFinite(hours) || isNaN(hours)) return "0:00:00";
-    //   const totalSeconds = Math.round(hours * 3600);
-    //   const h = Math.floor(totalSeconds / 3600);
-    //   const m = Math.floor((totalSeconds % 3600) / 60);
-    //   const s = totalSeconds % 60;
-    //   return `${h}:${m.toString().padStart(2, "0")}:${s
-    //     .toString()
-    //     .padStart(2, "0")}`;
-    // };
-
-    // ws_data.push([
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   "",
-    //   // formatDuration(calculateAverage(totalDur1to3, validDur1to3)),
-    //   // formatDuration(calculateAverage(totalDur4to5, validDur4to5)),
-    //   // formatDuration(calculateAverage(totalDur1to5, validDur1to5)),
-    // ]);
 
     const worksheet = XLSX.utils.aoa_to_sheet(ws_data);
 
     worksheet["!merges"] = [
       { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } },
-
       { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } },
     ];
 

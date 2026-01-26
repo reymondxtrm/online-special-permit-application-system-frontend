@@ -11,14 +11,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { specialPermitClientRegister } from "features/user/userSlice";
 import Swal from "sweetalert2";
 import { useHistory } from "react-router-dom/cjs/react-router-dom";
+import location from "../../../../assets/data/address.json";
 import {
   Button,
-  Modal,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Table,
-  Badge,
   Form,
   Row,
   Col,
@@ -38,7 +33,10 @@ const IndividualRegistrationForm = ({
 }) => {
   const formikRef = useRef(null);
   const user = useSelector((state) => state.user);
-
+  const [provinces, setProvinces] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [barangays, setBarangays] = useState([]);
+  const [regions, setRegions] = useState([]);
   const dispatch = useDispatch();
   const history = useHistory();
   const genderOptions = [
@@ -87,6 +85,14 @@ const IndividualRegistrationForm = ({
     "mixed_income_earner",
   ];
 
+  useEffect(() => {
+    const regionOptions = Object.entries(location)?.map((item) => ({
+      value: item[0],
+      label: item[1].region_name,
+    }));
+    setRegions(regionOptions);
+  }, []);
+
   const validationSchema = Yup.object().shape({
     surname: Yup.string().required("Surname is required"),
     first_name: Yup.string().required("First name is required"),
@@ -98,8 +104,13 @@ const IndividualRegistrationForm = ({
       .email("Invalid email format")
       .required("Email is required"),
     contact_no: Yup.string().required("Contact number is required"),
-    barangay: Yup.string().required("Barangay is required").nullable(),
-    additional_address: Yup.string().nullable(),
+    barangay: Yup.object().required("Barangay is required").nullable(),
+    city: Yup.object().required("City is required").nullable(),
+    region: Yup.object().required("Region is required").nullable(),
+    province: Yup.object().required("Province is required").nullable(),
+    additional_address: Yup.string()
+      .required("Additional address is required")
+      .nullable(),
     date_of_birth: Yup.date()
       .required("Date of birth is required")
       .max(new Date(), "Date of birth cannot be in the future"),
@@ -172,8 +183,9 @@ const IndividualRegistrationForm = ({
           sex: "",
           email: "",
           contact_no: "",
-          province: "Agusan del Norte",
-          city: "Butuan City",
+          region: "",
+          province: "",
+          city: "",
           barangay: null,
           date_of_birth: "",
           place_of_birth: "",
@@ -213,8 +225,12 @@ const IndividualRegistrationForm = ({
               .replace(/\s+/g, "")}.${values.surname
               .toLowerCase()
               .replace(/\s+/g, "")}`,
+            barangay: values.barangay.label,
+            province:
+              values.city.label === "BUTUAN CITY" ? "" : values.province.label,
+            city: values.city.label,
           };
-          console.log(params);
+
           try {
             await dispatch(
               specialPermitClientRegister({ params, history }),
@@ -469,7 +485,6 @@ const IndividualRegistrationForm = ({
                     </FormGroup>
                   </Col>
                 </Row>
-
                 <Row>
                   <Col md={4}>
                     <BasicInputField
@@ -535,55 +550,137 @@ const IndividualRegistrationForm = ({
                   </Col>
                 </Row>
                 <Row>
+                  {/* <span className="fw-bold fs-5">Address</span> */}
                   <Col>
                     <FormGroup>
                       <Label>
-                        Address <span style={{ color: "red" }}>&nbsp;*</span>
-                      </Label>
-                      <BasicInputField
-                        type={"text"}
-                        col="12"
-                        placeholder="House no./Street/Purok"
-                        value={props?.values?.additional_address}
-                        touched={props?.touched?.additional_address}
-                        validation={props}
-                        name="additional_address"
-                      />
-                    </FormGroup>
-                  </Col>
-                  <Col style={{ marginTop: "27px" }}>
-                    <BasicInputField
-                      type={"text"}
-                      validation={props}
-                      value={props.values.subdivision}
-                      errors={props?.errors?.subdivision}
-                      col="12"
-                      touched={props.touched.subdivision}
-                      placeholder="Subdivision"
-                      name="subdivision"
-                    />
-                    {/* <Input
-                          value={subDivision}
-                          onChange={(e) => setSubDivision(e.target.value)}
-                          placeholder="Subdivision"
-                        /> */}
-                  </Col>
-                  <Col md={4}>
-                    <FormGroup>
-                      <Label for="barangay">
-                        Barangay <span style={{ color: "red" }}>*</span>
+                        Region
+                        <span style={{ color: "red" }}>&nbsp;*</span>
                       </Label>
                       <Select
-                        id="barangay"
-                        name="barangay"
-                        options={brangaysOptions}
-                        placeholder="Select Barangay"
-                        onChange={(selectedBarangay) =>
-                          props.setFieldValue(
-                            "barangay",
-                            selectedBarangay.label,
-                          )
+                        value={props.values.region}
+                        placeholder="Select Region"
+                        onChange={(e) => {
+                          const regionId = e.value;
+                          props.setFieldValue("region", e);
+                          const province = Object.entries(
+                            location?.[regionId]?.province_list,
+                          ).map((item, index) => ({
+                            label: item[0],
+                            value: index,
+                          }));
+                          setProvinces(province);
+                          setBarangays([]);
+                          setCities([]);
+                          props.setFieldValue("province", "");
+                          props.setFieldValue("city", "");
+                          props.setFieldValue("barangay", "");
+                        }}
+                        options={regions}
+                        className={
+                          props.errors.region && props.touched.region
+                            ? "is-invalid"
+                            : ""
                         }
+                      />
+
+                      {props.errors.region && props.touched.region && (
+                        <div className="invalid-feedback d-block">
+                          {props.errors.region}
+                        </div>
+                      )}
+                    </FormGroup>
+                  </Col>
+                  <Col>
+                    <FormGroup>
+                      <Label>
+                        Province <span style={{ color: "red" }}>&nbsp;*</span>
+                      </Label>
+                      <Select
+                        value={props.values.province}
+                        placeholder="Select Province"
+                        onChange={(e) => {
+                          const prov = e;
+                          props.setFieldValue("province", prov);
+                          const cities = Object.entries(
+                            location?.[props.values.region.value]
+                              ?.province_list?.[e.label]?.municipality_list,
+                          ).map((item, index) => ({
+                            label: item[0],
+                            value: index,
+                          }));
+                          setCities(cities);
+                          setBarangays([]);
+                          props.setFieldValue("city", "");
+                          props.setFieldValue("barangay", "");
+                        }}
+                        isDisabled={props.values.region === ""}
+                        options={provinces}
+                        className={
+                          props.errors.province && props.touched.province
+                            ? "is-invalid"
+                            : ""
+                        }
+                      />
+
+                      {props.errors.province && props.touched.province && (
+                        <div className="invalid-feedback d-block">
+                          {props.errors.province}
+                        </div>
+                      )}
+                    </FormGroup>
+                  </Col>
+                  <Col>
+                    <FormGroup>
+                      <Label>
+                        City<span style={{ color: "red" }}>&nbsp;*</span>
+                      </Label>
+                      <Select
+                        value={props.values.city}
+                        placeholder="Select City"
+                        onChange={(e) => {
+                          const city = e;
+                          props.setFieldValue("city", city);
+                          const barangays = Object.entries(
+                            location?.[props.values.region.value]
+                              ?.province_list?.[props.values.province.label]
+                              ?.municipality_list?.[e.label].barangay_list,
+                          ).map((item, index) => ({
+                            value: item[0],
+                            label: item[1],
+                          }));
+                          setBarangays(barangays);
+                        }}
+                        isDisabled={props.values.province === ""}
+                        options={cities}
+                        className={
+                          props.errors.city && props.touched.city
+                            ? "is-invalid"
+                            : ""
+                        }
+                      />
+
+                      {props.errors.city && props.touched.city && (
+                        <div className="invalid-feedback d-block">
+                          {props.errors.city}
+                        </div>
+                      )}
+                    </FormGroup>
+                  </Col>
+                  <Col>
+                    <FormGroup>
+                      <Label>
+                        Barangay <span style={{ color: "red" }}>&nbsp;*</span>
+                      </Label>
+                      <Select
+                        value={props.values.barangay}
+                        placeholder="Select Barangay"
+                        onChange={(e) => {
+                          const barangay = e;
+                          props.setFieldValue("barangay", barangay);
+                        }}
+                        isDisabled={props.values.city === ""}
+                        options={barangays}
                         className={
                           props.errors.barangay && props.touched.barangay
                             ? "is-invalid"
@@ -599,7 +696,45 @@ const IndividualRegistrationForm = ({
                     </FormGroup>
                   </Col>
                 </Row>
+                <Row>
+                  <Col>
+                    <FormGroup>
+                      <Label>Subdivision</Label>
+                      <BasicInputField
+                        type={"text"}
+                        validation={props}
+                        value={props.values.subdivision}
+                        errors={props?.errors?.subdivision}
+                        col="12"
+                        touched={props.touched.subdivision}
+                        placeholder="Subdivision"
+                        name="subdivision"
+                      />
+                    </FormGroup>
+                  </Col>
+                  <Col>
+                    <FormGroup>
+                      <Label>
+                        Additional Address{" "}
+                        <span style={{ color: "red" }}>&nbsp;*</span>
+                      </Label>
+
+                      <BasicInputField
+                        name="additional_address"
+                        type={"text"}
+                        col="12"
+                        placeholder="House no./Street/Purok"
+                        value={props.values.additional_address}
+                        touched={props.touched.additional_address}
+                        error={props.errors.additional_address}
+                        validation={props}
+                        required
+                      />
+                    </FormGroup>
+                  </Col>
+                </Row>
               </Row>
+
               <Row
                 style={{
                   border: "3px solid #32b3c4ff",
@@ -957,6 +1092,7 @@ const IndividualRegistrationForm = ({
                         color: "white",
                       }}
                       onClick={() => {
+                        console.log(formikRef.current.errors);
                         formikRef.current.handleSubmit();
                       }}
                     >

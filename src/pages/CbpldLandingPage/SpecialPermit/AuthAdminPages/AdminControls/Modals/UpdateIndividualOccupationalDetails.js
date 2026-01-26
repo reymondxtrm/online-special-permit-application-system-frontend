@@ -37,7 +37,7 @@ const UpdateIndividualOccupationalDetails = ({
     address_line: Yup.string().required("Address Line is required"),
     barangay: Yup.string().required("Barangay is required"),
     city: Yup.string().required("City is required"),
-    province: Yup.string().required("Province is required"),
+    province: Yup.string().notRequired(),
     subdivision: Yup.string().notRequired(),
     company_name: Yup.string().required("First Name is required"),
     position: Yup.string().notRequired(),
