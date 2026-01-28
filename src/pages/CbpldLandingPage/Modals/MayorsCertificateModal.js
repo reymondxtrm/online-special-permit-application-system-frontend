@@ -45,7 +45,7 @@ export const createMayorsCertificateSchema = (isUpdate) =>
             "Only image files are allowed",
             (value) =>
               !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
           )
       : Yup.mixed()
           .required("Police clearance is required")
@@ -54,7 +54,7 @@ export const createMayorsCertificateSchema = (isUpdate) =>
             "Only image files are allowed",
             (value) =>
               value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
           ),
 
     community_tax_certificate: isUpdate
@@ -65,7 +65,7 @@ export const createMayorsCertificateSchema = (isUpdate) =>
             "Only image files are allowed",
             (value) =>
               !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
           )
       : Yup.mixed()
           .required("Community tax certificate is required")
@@ -74,7 +74,7 @@ export const createMayorsCertificateSchema = (isUpdate) =>
             "Only image files are allowed",
             (value) =>
               value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
           ),
 
     barangay_clearance: isUpdate
@@ -85,7 +85,7 @@ export const createMayorsCertificateSchema = (isUpdate) =>
             "Only image files are allowed",
             (value) =>
               !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
           )
       : Yup.mixed()
           .required("Barangay clearance is required")
@@ -94,7 +94,7 @@ export const createMayorsCertificateSchema = (isUpdate) =>
             "Only image files are allowed",
             (value) =>
               value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
           ),
 
     fiscal_clearance: isUpdate
@@ -105,7 +105,7 @@ export const createMayorsCertificateSchema = (isUpdate) =>
             "Only image files are allowed",
             (value) =>
               !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
           )
       : Yup.mixed()
           .required("Fiscal clearance is required")
@@ -114,7 +114,7 @@ export const createMayorsCertificateSchema = (isUpdate) =>
             "Only image files are allowed",
             (value) =>
               value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
           ),
 
     court_clearance: isUpdate
@@ -125,7 +125,7 @@ export const createMayorsCertificateSchema = (isUpdate) =>
             "Only image files are allowed",
             (value) =>
               !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
           )
       : Yup.mixed()
           .required("Court clearance is required")
@@ -134,7 +134,7 @@ export const createMayorsCertificateSchema = (isUpdate) =>
             "Only image files are allowed",
             (value) =>
               value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
           ),
   });
 
@@ -177,7 +177,7 @@ function MayorsCertificateModal({
     if (openModal) {
       axios
         .get("api/get-purpose", {
-          params: { permit_type: "mayors_certificate" },
+          params: { permit_type: "mayors_permit" },
         })
         .then(
           (res) => {
@@ -190,7 +190,7 @@ function MayorsCertificateModal({
           },
           (error) => {
             console.log(error);
-          }
+          },
         );
     }
   }, [openModal]);
@@ -216,7 +216,7 @@ function MayorsCertificateModal({
                 data = {
                   ...data,
                   purpose: purposeOptions?.find(
-                    (item) => item.value === data?.application?.purpose
+                    (item) => item.value === data?.application?.purpose,
                   ),
                 };
               }
@@ -228,7 +228,7 @@ function MayorsCertificateModal({
 
             setUploadedFiles(data?.uploaded_files || []);
           },
-          (error) => console.log(error)
+          (error) => console.log(error),
         );
     }
   }, [openModal, isUpdate, specialPermitApplicationId, purposeOptions]);
@@ -343,7 +343,7 @@ function MayorsCertificateModal({
                                 setotherPurpose(label === "Others");
                                 props.setFieldValue(
                                   "purpose",
-                                  selectedOption || null
+                                  selectedOption || null,
                                 );
                               }}
                               onBlur={() =>
@@ -400,14 +400,14 @@ function MayorsCertificateModal({
                                     e,
                                     "police_clearance",
                                     0,
-                                    props
+                                    props,
                                   )
                                 }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "police_clearance",
                                     true,
-                                    true
+                                    true,
                                   )
                                 }
                                 disabled={isCompressing}
@@ -473,14 +473,14 @@ function MayorsCertificateModal({
                                     e,
                                     "community_tax_certificate",
                                     1,
-                                    props
+                                    props,
                                   )
                                 }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "community_tax_certificate",
                                     true,
-                                    true
+                                    true,
                                   )
                                 }
                                 disabled={isCompressing}
@@ -547,14 +547,14 @@ function MayorsCertificateModal({
                                     e,
                                     "barangay_clearance",
                                     2,
-                                    props
+                                    props,
                                   )
                                 }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "barangay_clearance",
                                     true,
-                                    true
+                                    true,
                                   )
                                 }
                                 disabled={isCompressing}
@@ -620,14 +620,14 @@ function MayorsCertificateModal({
                                     e,
                                     "fiscal_clearance",
                                     3,
-                                    props
+                                    props,
                                   )
                                 }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "fiscal_clearance",
                                     true,
-                                    true
+                                    true,
                                   )
                                 }
                                 disabled={isCompressing}
@@ -693,14 +693,14 @@ function MayorsCertificateModal({
                                     e,
                                     "court_clearance",
                                     4,
-                                    props
+                                    props,
                                   )
                                 }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "court_clearance",
                                     true,
-                                    true
+                                    true,
                                   )
                                 }
                                 disabled={isCompressing}
@@ -810,7 +810,7 @@ function MayorsCertificateModal({
                     params: formData,
                   },
                   [],
-                  [toggleModal, toggleRefresh]
+                  [toggleModal, toggleRefresh],
                 );
               }
             }}

@@ -34,6 +34,7 @@ import {
   updateTabNotification,
 } from "common/utility/utilityFunction";
 import UpdateIndividualOccupationalDetails from "../AdminControls/Modals/UpdateIndividualOccupationalDetails";
+import EditDurationModal from "../Dashboard/Modal/EditDurationModal";
 
 export default function OccupationalTableIndividualAdmin({
   status,
@@ -64,6 +65,7 @@ export default function OccupationalTableIndividualAdmin({
   const [pdfViewer, setPdfViewer] = useState(false);
   const [updateDetailsModal, setUpdateDetailsModal] = useState(false);
   const [userId, setUserId] = useState();
+  const [updateDurationModal, setUpdateDurationModal] = useState(false);
 
   const handleSubmit = useSubmit();
 
@@ -123,6 +125,9 @@ export default function OccupationalTableIndividualAdmin({
       permit_id,
       status,
     );
+  };
+  const toggleUpdateModal = () => {
+    setUpdateDurationModal(!updateDurationModal);
   };
   const handleClickPermitStatus = async (id) => {
     handleSubmit(
@@ -209,6 +214,13 @@ export default function OccupationalTableIndividualAdmin({
         applicationId={applicationId}
         toggleRefresh={toggleRefresh}
       />
+      {updateDurationModal && (
+        <EditDurationModal
+          openModal={updateDurationModal}
+          toggleModal={toggleUpdateModal}
+          specialPermitId={applicationId}
+        />
+      )}
 
       {status === "for_signature" || status === "completed" ? (
         <>
@@ -231,7 +243,8 @@ export default function OccupationalTableIndividualAdmin({
         <thead>
           <tr>
             <th>#</th>
-            {status === "for_signature" && <th>Reference No</th>}
+            {status === "for_signature" ||
+              (status === "completed" && <th>Reference No</th>)}
             <th>Name of Requestor / Corporation</th>
             <th>Gender</th>
             <th>Address</th>
@@ -250,7 +263,8 @@ export default function OccupationalTableIndividualAdmin({
             )}
             {status === "pending" ||
             status === "for_payment_approval" ||
-            status === "for_signature" ? (
+            status === "for_signature" ||
+            status === "completed" ? (
               <th>Actions</th>
             ) : null}
           </tr>
@@ -274,9 +288,10 @@ export default function OccupationalTableIndividualAdmin({
                   }}
                 >
                   <td className="fw-bold">{index + 1}</td>
-                  {status === "for_signature" && (
-                    <td>{application?.reference_no}</td>
-                  )}
+                  {status === "for_signature" ||
+                    (status === "completed" && (
+                      <td>{application?.reference_no}</td>
+                    ))}
                   <td className="fw-bold">
                     {`${application?.user?.fname} ${
                       application?.user?.mname || ""
@@ -352,42 +367,55 @@ export default function OccupationalTableIndividualAdmin({
                         >
                           Attachment
                         </Button>
-                        {status === "completed" && (
-                          <>
-                            <Button
-                              color="success"
-                              onClick={() => {
-                                togglePdfViewer();
-                                setCompletedPermit(
-                                  application?.complete_special_permit?.file,
-                                );
-                              }}
-                            >
-                              Permit
-                            </Button>
-                            <Button
-                              color="primary"
-                              style={{ width: "90px" }}
-                              onClick={() => {
-                                toggleUploadPermitModal();
-                                setApplicationId(application?.id);
-                              }}
-                            >
-                              Re-Upload
-                            </Button>
-                            <Button
-                              onClick={() => {
-                                toggleUpdateDetailModal();
-                                setUserId(application.user.id);
-                              }}
-                            >
-                              Edit Details
-                            </Button>
-                          </>
-                        )}
                       </div>
                     )}
                   </td>
+                  {status === "completed" && (
+                    <td>
+                      <UncontrolledDropdown>
+                        <DropdownToggle color="primary">Actions</DropdownToggle>
+                        <DropdownMenu>
+                          <DropdownItem
+                            onClick={() => {
+                              togglePdfViewer();
+                              setCompletedPermit(
+                                application?.complete_special_permit?.file,
+                              );
+                            }}
+                          >
+                            {" "}
+                            Generated Permit
+                          </DropdownItem>
+                          <DropdownItem
+                            onClick={() => {
+                              toggleUploadPermitModal();
+                              setApplicationId(application?.id);
+                            }}
+                          >
+                            {" "}
+                            Re-Upload
+                          </DropdownItem>
+                          <DropdownItem
+                            onClick={() => {
+                              toggleUpdateDetailModal();
+                              setUserId(application.user.id);
+                            }}
+                          >
+                            {" "}
+                            Edit Details
+                          </DropdownItem>
+                          <DropdownItem
+                            onClick={() => {
+                              toggleUpdateModal();
+                              setApplicationId(application?.id);
+                            }}
+                          >
+                            Update Permit Duration
+                          </DropdownItem>
+                        </DropdownMenu>
+                      </UncontrolledDropdown>
+                    </td>
+                  )}
 
                   {/* {status === "for_payment_approval" ||
                   status === "returned" ||

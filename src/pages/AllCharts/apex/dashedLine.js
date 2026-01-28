@@ -27,7 +27,7 @@ const DashedLine = ({ countSeries, days, applicationType }) => {
     chart: { zoom: { enabled: !1 }, toolbar: { show: !1 } },
     colors: ["#556ee6", "#f46a6a", "#34c38f"],
     dataLabels: { enabled: !1 },
-    stroke: { width: [3, 4, 3], curve: "straight", dashArray: [0, 8, 5] },
+    stroke: { width: [3, 4, 3], curve: "smooth", dashArray: [0, 8, 5] },
     // title: { text: applicationType || "Good Moral", align: "left" },
     markers: { size: 0, hover: { sizeOffset: 6 } },
     xaxis: {

@@ -128,7 +128,7 @@ export default function CompanyRegistrationForm({
       <Row>
         <Col>
           <Row>
-            <Col>
+            <Col md={6}>
               <BasicInputField
                 type="text"
                 validation={validation}
@@ -140,7 +140,7 @@ export default function CompanyRegistrationForm({
                 placeholder="Enter Company Name.."
               />
             </Col>
-            <Col>
+            <Col md={6}>
               <InputGroup className="flex-column">
                 <Label>Company Type</Label>
                 <Select
@@ -189,7 +189,10 @@ export default function CompanyRegistrationForm({
                       className="mdi mdi-information-outline fs-2"
                       style={{ color: "#00c3fffd", margin: "5px" }}
                     ></i>
-                    <p className="p-0 m-0" style={{ color: "#237088fd" }}>
+                    <p
+                      className="p-0 m-0"
+                      style={{ color: "#237088fd", fontSize: "10px" }}
+                    >
                       Please provide your full address details only if your
                       business is located <strong>outside Butuan City</strong>.
                       If your business is within Butuan City, kindly uncheck
@@ -207,8 +210,8 @@ export default function CompanyRegistrationForm({
                   />
                 </React.Fragment>
               ) : (
-                <div className="d-flex gap-2">
-                  <Col>
+                <Row>
+                  <Col md={4}>
                     <BasicInputField
                       type="text"
                       validation={validation}
@@ -219,7 +222,7 @@ export default function CompanyRegistrationForm({
                       placeholder="Building No./Street/Purok"
                     />
                   </Col>
-                  <Col>
+                  <Col md={4}>
                     <BasicInputField
                       type="text"
                       validation={validation}
@@ -230,7 +233,7 @@ export default function CompanyRegistrationForm({
                       placeholder="Subdivision"
                     />
                   </Col>
-                  <Col>
+                  <Col md={4}>
                     <Select
                       options={brangaysOptions}
                       placeholder="Barangay"
@@ -239,12 +242,12 @@ export default function CompanyRegistrationForm({
                       }}
                     />
                   </Col>
-                </div>
+                </Row>
               )}
             </Col>
           </Row>
           <Row>
-            <Col>
+            <Col md={6}>
               <BasicInputField
                 type={"text"}
                 validation={validation}
@@ -256,7 +259,7 @@ export default function CompanyRegistrationForm({
                 value={validation?.values?.email}
               />
             </Col>
-            <Col>
+            <Col md={6}>
               <BasicInputField
                 type={"text"}
                 name={"contact_no"}
@@ -270,7 +273,7 @@ export default function CompanyRegistrationForm({
             </Col>
           </Row>
           <Row>
-            <Col>
+            <Col md={6}>
               <BasicInputField
                 type={"text"}
                 name={"tin"}
@@ -282,7 +285,7 @@ export default function CompanyRegistrationForm({
                 value={validation?.values?.tin}
               />
             </Col>
-            <Col>
+            <Col md={6}>
               <div className="d-flex align-items-end gap-1">
                 <BasicInputField
                   col={8}
@@ -302,7 +305,7 @@ export default function CompanyRegistrationForm({
             </Col>
           </Row>
           <Row>
-            <Col>
+            <Col md={6}>
               <BasicInputField
                 type={"password"}
                 name={"password"}
@@ -314,7 +317,7 @@ export default function CompanyRegistrationForm({
                 value={validation?.values?.password}
               />
             </Col>
-            <Col>
+            <Col md={6}>
               <BasicInputField
                 type={"password"}
                 name={"password_confirmation"}

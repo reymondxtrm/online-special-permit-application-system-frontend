@@ -549,15 +549,16 @@ const IndividualRegistrationForm = ({
                     </FormGroup>
                   </Col>
                 </Row>
+
                 <Row>
-                  {/* <span className="fw-bold fs-5">Address</span> */}
-                  <Col>
+                  <Col md={3}>
                     <FormGroup>
                       <Label>
                         Region
                         <span style={{ color: "red" }}>&nbsp;*</span>
                       </Label>
                       <Select
+                        style={{ width: "300px" }}
                         value={props.values.region}
                         placeholder="Select Region"
                         onChange={(e) => {
@@ -591,7 +592,7 @@ const IndividualRegistrationForm = ({
                       )}
                     </FormGroup>
                   </Col>
-                  <Col>
+                  <Col md={3}>
                     <FormGroup>
                       <Label>
                         Province <span style={{ color: "red" }}>&nbsp;*</span>
@@ -622,7 +623,6 @@ const IndividualRegistrationForm = ({
                             : ""
                         }
                       />
-
                       {props.errors.province && props.touched.province && (
                         <div className="invalid-feedback d-block">
                           {props.errors.province}
@@ -630,7 +630,7 @@ const IndividualRegistrationForm = ({
                       )}
                     </FormGroup>
                   </Col>
-                  <Col>
+                  <Col md={3}>
                     <FormGroup>
                       <Label>
                         City<span style={{ color: "red" }}>&nbsp;*</span>
@@ -667,7 +667,8 @@ const IndividualRegistrationForm = ({
                       )}
                     </FormGroup>
                   </Col>
-                  <Col>
+
+                  <Col md={3}>
                     <FormGroup>
                       <Label>
                         Barangay <span style={{ color: "red" }}>&nbsp;*</span>
@@ -933,7 +934,7 @@ const IndividualRegistrationForm = ({
                   >
                     Company Address <span style={{ color: "red" }}>*</span>
                   </p>
-                  <Col>
+                  <Col md={3}>
                     <BasicInputField
                       col={12}
                       type={"text"}
@@ -951,7 +952,7 @@ const IndividualRegistrationForm = ({
                       }
                     />
                   </Col>
-                  <Col>
+                  <Col md={3}>
                     <BasicInputField
                       col={12}
                       type={"text"}
@@ -969,7 +970,7 @@ const IndividualRegistrationForm = ({
                       }
                     />
                   </Col>
-                  <Col>
+                  <Col md={3}>
                     <BasicInputField
                       col={12}
                       type={"text"}
@@ -987,7 +988,7 @@ const IndividualRegistrationForm = ({
                       }
                     />
                   </Col>
-                  <Col>
+                  <Col md={3}>
                     <BasicInputField
                       col={12}
                       type={"text"}

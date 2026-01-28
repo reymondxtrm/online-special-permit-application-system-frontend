@@ -14,35 +14,37 @@ const DashboardFilters = ({
   statuses,
   withExport = false,
   tableParams,
+  withPermitType = false,
   action,
 }) => {
   const dispatch = useDispatch();
   const [parameters, setParams] = useState("");
-  const [status, setStatus] = useState({ label: "", value: "" });
   const [permitTypeOptions, setPermitTypeOptions] = useState([]);
-
+  console.log(tableParams);
   useEffect(() => {
     dispatch(dateFilterSlice.actions.clearState());
   }, []);
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios({
-          url: "api/admin/get/permit-types",
-          method: "GET",
-        });
-        if (response) {
-          const options = response.data.map((options) => ({
-            value: options.id,
-            label: options.name,
-          }));
-          setPermitTypeOptions(options);
+    if (withPermitType) {
+      const fetchData = async () => {
+        try {
+          const response = await axios({
+            url: "api/admin/get/permit-types",
+            method: "GET",
+          });
+          if (response) {
+            const options = response.data.map((options) => ({
+              value: options.id,
+              label: options.name,
+            }));
+            setPermitTypeOptions(options);
+          }
+        } catch (error) {
+          console.log(error);
         }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchData();
+      };
+      fetchData();
+    }
   }, []);
 
   const validation = useFormik({
@@ -61,8 +63,8 @@ const DashboardFilters = ({
 
     onSubmit: (values) => {
       const params = {
-        ...tableParams,
         ...values,
+        ...tableParams,
       };
 
       setParams(params);
@@ -136,71 +138,34 @@ const DashboardFilters = ({
         placeholder={"Enter keyword"}
         value={validation.values.keyword}
       />
-      <Col style={{ width: "250px" }}>
-        <InputGroup className="d-flex flex-column">
-          <Label>Permit Type</Label>
-          <Select
-            options={permitTypeOptions}
-            onChange={(selected) => {
-              validation.setFieldValue("type", selected.value);
-            }}
-            value={
-              validation.values.type
-                ? permitTypeOptions.find(
-                    (option) => option.value === validation.values.type,
-                  )
-                : null
-            }
-          />
-        </InputGroup>
-      </Col>
+      {withPermitType && (
+        <Col style={{ width: "250px" }}>
+          <InputGroup className="d-flex flex-column">
+            <Label>Permit Type</Label>
+            <Select
+              options={permitTypeOptions}
+              onChange={(selected) => {
+                validation.setFieldValue("type", selected.value);
+              }}
+              value={
+                validation.values.type
+                  ? permitTypeOptions.find(
+                      (option) => option.value === validation.values.type,
+                    )
+                  : null
+              }
+            />
+          </InputGroup>
+        </Col>
+      )}
       <div className="d-flex align-items-center" style={{ marginTop: "27px" }}>
         <Button type="submit">
           <i className="fas fa-search"></i>
         </Button>
       </div>
-      {/* <BasicInputField
-        col={"6"}
-        type={"date"}
-        label={"Date From:"}
-        touched={validation.touched.date_from}
-        errors={validation.errors.date_from}
-        name={"date_from"}
-        validation={validation}
-        placeholder={""}
-        value={validation.values.date_from}
-      /> */}
-
-      {/* <Col xs={12} style={{ width: "208px", paddingRight: "10px" }}>
-        <label
-          // className="visually-hidden"
-          htmlFor="inlineFormInputGroupUsername"
-        >
-          Date To:
-        </label>
-        <InputGroup>
-          <Input
-            id="date_to"
-            name="date_to"
-            className="form-control"
-            placeholder="Enter Date To"
-            type="date"
-            onChange={validation.handleChange}
-            value={validation.values.date_to || ""}
-          />
-          <Button type="submit">
-            <i className="fas fa-search"></i>
-          </Button>
-        </InputGroup>
-      </Col> */}
 
       <Col>
-        <label
-          // className="visually-hidden"
-          style={{ color: "#f8f8fb" }}
-        >
-          *
-        </label>
+        <label style={{ color: "#f8f8fb" }}>*</label>
         <br />
         <Button
           outline

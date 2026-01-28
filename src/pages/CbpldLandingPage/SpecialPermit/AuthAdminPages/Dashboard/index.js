@@ -1,72 +1,45 @@
 /* eslint-disable padded-blocks */
-import React, { useEffect, useState } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  CardBody,
-  CardHeader,
-  Button,
-  Label,
-  Nav,
-  NavItem,
-  Dropdown,
-  DropdownItem,
-  DropdownToggle,
-  DropdownMenu,
-  NavLink,
-  TabContent,
-  TabPane,
-  CardTitle,
-  CardText,
-  Navbar,
-  NavbarBrand,
-  NavbarToggler,
-  Collapse,
-  Badge,
-} from "reactstrap";
+import React, { useMemo, useState } from "react";
+import { Container, Row, Col, Card, CardBody } from "reactstrap";
 import Breadcrumbs from "components/Common/Breadcrumb";
 
-import { useDispatch, useSelector } from "react-redux";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
 
 import AdminTable from "../Common/AdminTable";
 import DashboardFilters from "pages/Dashboard/dashboardFilters";
-import { getTableData } from "features/SpecialPermitAdmin";
+import {
+  getCompanyOccupatinalData,
+  getIndividualOccupationalApplications,
+  getTableData,
+} from "features/SpecialPermitAdmin";
 import OccupationalTables from "../Common/OccupationalTables";
+import EditDurationModal from "./Modal/EditDurationModal";
 const Dashboard = () => {
-  const dispatch = useDispatch();
-  const [isModalOpen, setIsModalOpen] = useState(false);
   document.title = "BPLD | SPECIAL PERMIT";
+  const [childTab, setChildTab] = useState("individual");
+  
+  const handleSelectChildTab = (key) => {
+    setChildTab(key);
+  };
   const [activeTab, setActiveTab] = useState("good_moral");
-  const specialPermitAdmin = useSelector((state) => state.specialPermitAdmin);
   const handleTabSelect = (key) => {
     setActiveTab(key);
   };
-  const options = [
-    { value: 1, label: "2023" },
-    { value: 2, label: "2024" },
-  ];
-  const opcr = useSelector((state) => state.opcr);
-
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
-  };
-
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-
-  const toggleupdateModal = () => {
-    setIsUpdateModalOpen(!isUpdateModalOpen);
-  };
-
-  const [newMfoModal, setNewMfoModal] = useState(false);
-  const toggleNewMfoModal = () => {
-    setNewMfoModal(!newMfoModal);
-  };
+  console.log(activeTab, childTab);
+  const action = useMemo(() => {
+    if (activeTab === "occupational" && childTab === "company") {
+      return getCompanyOccupatinalData;
+    } else if (activeTab === "occupational" && childTab === "individual") {
+      return getIndividualOccupationalApplications;
+    } else {
+      return getTableData;
+    }
+  }, [activeTab, childTab]);
+ 
   return (
     <React.Fragment>
+   
       <div className="page-content">
         <Container fluid>
           <Breadcrumbs title="Special Permit" breadcrumbItem="Dashboard" />
@@ -74,14 +47,25 @@ const Dashboard = () => {
             <Col xs="12">
               <Card>
                 <CardBody>
-                  {/* <DashboardFilters
-                    action={getTableData}
-                    tableParams={specialPermitAdmin.params}
-                  /> */}
+                  <DashboardFilters
+                    action={action}
+                    tableParams={{
+                      permit_type: activeTab,
+                      status: "completed",
+                      type: childTab || "",
+                    }}
+                  />
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+          <Row>
+            <Col xs="12">
+              <Card>
+                <CardBody>
                   <hr />
                   <Tabs
-                    // defaultActiveKey="mayorsCertificate"
-
+                    xs={12}
                     className="mb-3"
                     activeKey={activeTab}
                     onSelect={handleTabSelect}
@@ -159,6 +143,8 @@ const Dashboard = () => {
                       <OccupationalTables
                         status={"completed"}
                         motherTab={activeTab}
+                        childTab={childTab}
+                        handleSelectChildTab={handleSelectChildTab}
                       />
                     </Tab>
                   </Tabs>

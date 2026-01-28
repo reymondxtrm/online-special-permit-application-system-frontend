@@ -33,6 +33,7 @@ import {
 } from "common/utility/utilityFunction";
 import FileViewerModal from "../AdminControls/Modals/FileViewerModal";
 import UpdateCorporationMemberDetailsModal from "../AdminControls/Modals/UpdateCorporationMemberDetailsModal";
+import EditDurationModal from "../Dashboard/Modal/EditDurationModal";
 
 export default function OccupationalTableCompanyAdmin({ status }) {
   const dispatch = useDispatch();
@@ -58,6 +59,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   const [pdfViewer, setPdfViewer] = useState(false);
   const [completedPermit, setCompletedPermit] = useState(null);
   const [updateDetailsModal, setUpdateDetailsModal] = useState(false);
+  const [updateDurationModal, setUpdateDurationModal] = useState(false);
 
   useEffect(() => {
     dispatch(getCompanyOccupatinalData({ type: "company", status: status }));
@@ -109,7 +111,9 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   const toggleUpdateDetailsModal = () => {
     setUpdateDetailsModal((prev) => !prev);
   };
-
+  const toggleUpdateModal = () => {
+    setUpdateDurationModal(!updateDurationModal);
+  };
   const handleClickPermitStatus = async (id) => {
     handleSubmit(
       {
@@ -126,6 +130,13 @@ export default function OccupationalTableCompanyAdmin({ status }) {
 
   return (
     <React.Fragment>
+      {updateDurationModal && (
+        <EditDurationModal
+          openModal={updateDurationModal}
+          toggleModal={toggleUpdateModal}
+          specialPermitId={applicationId}
+        />
+      )}
       {isViewerOpen && currentImage && !isFetching && (
         <>
           <Viewer
@@ -191,6 +202,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
           />
         </>
       ) : null}
+
       {occupationalRequestModal && (
         <OccupationalRequestForm
           isOpen={occupationalRequestModal}
@@ -219,7 +231,8 @@ export default function OccupationalTableCompanyAdmin({ status }) {
         <thead>
           <tr>
             <th>#</th>
-            {status === "for_signature" && <th>Reference No</th>}
+            {status === "for_signature" ||
+              (status === "completed" && <th>Reference No</th>)}
             <th>Name of Requestor / Corporation</th>
             <th>Gender</th>
             <th>Address</th>
@@ -231,7 +244,8 @@ export default function OccupationalTableCompanyAdmin({ status }) {
             <th>Attachment</th>
             {status === "for_payment_approval" ||
             status === "pending" ||
-            status === "for_signature" ? (
+            status === "for_signature" ||
+            status === "completed" ? (
               <th className="text-center">Actions</th>
             ) : null}
           </tr>
@@ -307,9 +321,10 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                               }}
                             >
                               <td></td>
-                              {status === "for_signature" && (
-                                <td>{item?.reference_no}</td>
-                              )}
+                              {status === "for_signature" ||
+                                (status === "completed" && (
+                                  <td>{item?.reference_no}</td>
+                                ))}
                               <td>
                                 {`${item?.corporation_member?.fname}  ${item?.corporation_member?.mname} ${item?.corporation_member?.lname}`}{" "}
                                 {item?.mark_as_read ? (
@@ -391,46 +406,55 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                     >
                                       Attachment
                                     </Button>
-                                    {status === "completed" && (
-                                      <>
-                                        <Button
-                                          color="success"
-                                          onClick={() => {
-                                            togglePdfViewer();
-                                            setCompletedPermit(
-                                              item?.complete_special_permit
-                                                ?.file,
-                                            );
-                                          }}
-                                        >
-                                          Permit
-                                        </Button>
-                                        <Button
-                                          color="primary"
-                                          style={{ width: "90px" }}
-                                          onClick={() => {
-                                            toggleUploadPermitModal();
-                                            setApplicationId(item?.id);
-                                          }}
-                                        >
-                                          Re-Upload
-                                        </Button>
-                                        <Button
-                                          onClick={() => {
-                                            toggleUpdateDetailsModal();
-                                            setApplicationId(
-                                              item.corporation_member.id,
-                                            );
-                                            setCorporationMemberDetails(item);
-                                          }}
-                                        >
-                                          Edit Details
-                                        </Button>
-                                      </>
-                                    )}
                                   </div>
                                 )}
                               </td>
+                              {status === "completed" && (
+                                <UncontrolledDropdown>
+                                  <DropdownToggle color="primary">
+                                    Actions
+                                  </DropdownToggle>
+                                  <DropdownMenu>
+                                    <DropdownItem
+                                      onClick={() => {
+                                        togglePdfViewer();
+                                        setCompletedPermit(
+                                          item?.complete_special_permit?.file,
+                                        );
+                                      }}
+                                    >
+                                      Generated Permit
+                                    </DropdownItem>
+                                    <DropdownItem
+                                      onClick={() => {
+                                        toggleUploadPermitModal();
+                                        setApplicationId(item?.id);
+                                      }}
+                                    >
+                                      Re-Upload
+                                    </DropdownItem>
+                                    <DropdownItem
+                                      onClick={() => {
+                                        toggleUpdateDetailsModal();
+                                        setApplicationId(
+                                          item.corporation_member.id,
+                                        );
+                                        setCorporationMemberDetails(item);
+                                      }}
+                                    >
+                                      Edit Details
+                                    </DropdownItem>
+                                    <DropdownItem
+                                      onClick={() => {
+                                        toggleUpdateModal();
+                                        setApplicationId(item?.id);
+                                      }}
+                                    >
+                                      Update Permit Duration
+                                    </DropdownItem>
+                                  </DropdownMenu>
+                                </UncontrolledDropdown>
+                              )}
                               {status === "pending" && (
                                 <td>
                                   <div className="d-flex gap-1">

@@ -48,6 +48,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import useGetImage from "hooks/Common/useGetImage";
 import FileViewerModal from "../AdminControls/Modals/FileViewerModal";
+import EditDurationModal from "../Dashboard/Modal/EditDurationModal";
 
 const AdminTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
@@ -59,7 +60,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const [amountModal, setamountModal] = useState(false);
   const [remarksModal, setremarksModal] = useState(false);
   const [returnRemarksModal, setreturnRemarksModal] = useState(false);
-  const [selectedImage, setSelectedImage] = useState("");
   const [selectedFiles, setSelectedFiles] = useState(null);
   const [refreshPage, setrefreshPage] = useState(false);
   const [generateModal, setgenerateModal] = useState(false);
@@ -73,12 +73,11 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const [name, setname] = useState(null);
   const [purpose, setpurpose] = useState(null);
   const [referenceNo, setreferenceNo] = useState(null);
-  const [imageViewerScale, setimageViewScale] = useState(1);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [pdfViewer, setPdfViewer] = useState(false);
-  const [selectedRow, setSelectedRow] = useState([]);
   const [openRequestFormModal, setOpenRequestFormModal] = useState(false);
   const [completedPermit, setCompletedPermit] = useState(null);
+  const [updateDurationModal, setUpdateDurationModal] = useState(false);
   const [
     openMayorsAndGoodMoralRequestForm,
     setOpenMayorsAndGoodMoralRequestForm,
@@ -121,6 +120,9 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
 
   const toggleAmountModal = () => {
     setamountModal(!amountModal);
+  };
+  const toggleUpdateModal = () => {
+    setUpdateDurationModal(!updateDurationModal);
   };
 
   const toggleReturnRemarksModal = () => {
@@ -206,6 +208,14 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   };
   return (
     <>
+      {updateDurationModal && (
+        <EditDurationModal
+          openModal={updateDurationModal}
+          toggleModal={toggleUpdateModal}
+          specialPermitId={applicationId}
+        />
+      )}
+
       <AttachmentModal
         toggleModal={toggleAttachmentModal}
         openModal={attachmentModal}
@@ -336,7 +346,9 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
           >
             <tr>
               <th>#</th>
-              {status === "for_signature" && <th>Reference No</th>}
+              {(status === "for_signature" || status === "completed") && (
+                <th>Reference No</th>
+              )}
               <th>Name</th>
               {applicationType === "mayors_permit" ||
               applicationType === "good_moral" ||
@@ -387,9 +399,14 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                 <th>Remarks</th>
               ) : null}
 
-              {status === "pending" ? <th>Actions</th> : null}
-              {status === "for_signature" ? <th>Actions</th> : null}
-              {status === "for_payment_approval" ? <th>Actions</th> : null}
+              {status === "pending" ||
+              status === "for_signature" ||
+              status === "for_payment_approval" ||
+              status === "completed" ? (
+                <th>Actions</th>
+              ) : null}
+              {/* { ? <th>Actions</th> : null}
+              { ? <th>Actions</th> : null} */}
             </tr>
           </thead>
 
@@ -415,7 +432,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                     }}
                   >
                     <td>{`${index + 1}`}</td>
-                    {status === "for_signature" && (
+                    {(status === "for_signature" || status === "completed") && (
                       <td>{application.reference_no}</td>
                     )}
                     <td>
@@ -500,7 +517,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                             application?.event_time_from,
                           )}
                         </td>
-
                         <td>
                           {dateOfEvent(
                             application?.event_date_to,
@@ -592,58 +608,62 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                           >
                             Attachments
                           </Button>
-                          {status === "completed" && (
-                            <>
-                              <Button
-                                color="success"
-                                onClick={() => {
-                                  togglePdfViewer();
-                                  setCompletedPermit(
-                                    application?.complete_special_permit?.file,
-                                  );
-                                }}
-                              >
-                                Permit
-                              </Button>
-                              <Button
-                                color="primary"
-                                style={{ width: "90px" }}
-                                onClick={() => {
-                                  toggleUploadModal();
-                                  setspecialPermitID(application?.id);
-                                }}
-                              >
-                                Re-Upload
-                              </Button>
-                            </>
-                          )}
                         </div>
                       )}
                     </td>
 
-                    {/* {(status === "for_payment_approval" ||
-                      status === "returned") &&
-                      (applicationType === "good_moral" ||
-                        applicationType === "mayors_permit" ||
-                        applicationType === "occupational_permit") && (
+                    {applicationType !== "occupational_permit" && (
+                      <>
                         <td>
-                          <Button
-                            color="primary"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              getImageHandle({
-                                url: "api/admin/attachment",
-                                path: application?.uploaded_file
-                                  ?.community_tax_certificate,
-                                showLoader: true,
-                              });
-                              toggleImageViewer();
-                            }}
-                          >
-                            Cedula
-                          </Button>
+                          <div className="flex">
+                            <UncontrolledDropdown
+                              className="me-2"
+                              direction="end"
+                            >
+                              <DropdownToggle caret color="primary">
+                                Actions
+                              </DropdownToggle>
+                              <DropdownMenu
+                                style={{
+                                  maxHeight: "200px",
+                                  overflowY: "auto",
+                                  zIndex: 1050, // High z-index to appear above
+                                  position: "absolute", // Ensure it's detached from parent
+                                }}
+                              >
+                                <DropdownItem
+                                  onClick={() => {
+                                    togglePdfViewer();
+                                    setCompletedPermit(
+                                      application?.complete_special_permit
+                                        ?.file,
+                                    );
+                                  }}
+                                >
+                                  Generated Permit
+                                </DropdownItem>
+                                <DropdownItem
+                                  onClick={() => {
+                                    toggleUploadModal();
+                                    setspecialPermitID(application?.id);
+                                  }}
+                                >
+                                  Re-Upload
+                                </DropdownItem>
+                                <DropdownItem
+                                  onClick={() => {
+                                    toggleUpdateModal();
+                                    setApplicationId(application?.id);
+                                  }}
+                                >
+                                  Update Permit Duration
+                                </DropdownItem>
+                              </DropdownMenu>
+                            </UncontrolledDropdown>
+                          </div>
                         </td>
-                      )} */}
+                      </>
+                    )}
 
                     {status === "returned" || status === "declined" ? (
                       <td>

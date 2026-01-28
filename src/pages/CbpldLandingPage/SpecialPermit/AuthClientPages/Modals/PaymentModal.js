@@ -102,7 +102,7 @@ function PaymentModal({
         (error) => {
           setisLoading(false);
           console.log(error);
-        }
+        },
       );
     }
   }, [openModal]);
@@ -725,7 +725,7 @@ function PaymentModal({
                                               onChange={(event) => {
                                                 props.setFieldValue(
                                                   "attachment",
-                                                  event.currentTarget.files[0]
+                                                  event.currentTarget.files[0],
                                                 );
                                               }}
                                               type="file"
@@ -848,7 +848,7 @@ function PaymentModal({
                                         const jsonString = JSON.stringify(obj);
                                         const encrypted = CryptoJS.AES.encrypt(
                                           jsonString,
-                                          secretKey
+                                          secretKey,
                                         ).toString();
                                         const encoded =
                                           encodeURIComponent(encrypted);
@@ -898,9 +898,10 @@ function PaymentModal({
                                         applicationId.forEach((id) => {
                                           formData.append(
                                             "special_permit_application_id[]",
-                                            id
+                                            id,
                                           );
                                         });
+
                                         handleSubmit(
                                           {
                                             url: "api/client/pay-permit",
@@ -914,7 +915,7 @@ function PaymentModal({
                                             params: formData,
                                           },
                                           [],
-                                          [toggleRefresh, toggleModal]
+                                          [toggleRefresh, toggleModal],
                                         );
                                       }
                                     }}

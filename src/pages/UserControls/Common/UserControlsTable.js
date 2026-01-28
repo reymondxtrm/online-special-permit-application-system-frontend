@@ -156,6 +156,7 @@ const UserControlsTable = ({
           <DashboardFilters
             action={getUserList}
             tableParams={{ unvalidated_user: 0 }}
+            withPermitType
           />
         )}
         <Table hover>
