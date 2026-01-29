@@ -18,7 +18,7 @@ import EditDurationModal from "./Modal/EditDurationModal";
 const Dashboard = () => {
   document.title = "BPLD | SPECIAL PERMIT";
   const [childTab, setChildTab] = useState("individual");
-  
+
   const handleSelectChildTab = (key) => {
     setChildTab(key);
   };
@@ -36,10 +36,9 @@ const Dashboard = () => {
       return getTableData;
     }
   }, [activeTab, childTab]);
- 
+
   return (
     <React.Fragment>
-   
       <div className="page-content">
         <Container fluid>
           <Breadcrumbs title="Special Permit" breadcrumbItem="Dashboard" />

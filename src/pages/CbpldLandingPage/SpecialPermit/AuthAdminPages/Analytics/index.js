@@ -58,7 +58,10 @@ const Analytics = () => {
     <div className="page-content">
       <Container fluid>
         <Row>
-          <Breadcrumb title="Analytics"></Breadcrumb>
+          <Breadcrumb
+            title="Special Permit"
+            breadcrumbItem="Analytics"
+          ></Breadcrumb>
           <Col md="9">
             <Card>
               <CardBody>
@@ -83,15 +86,21 @@ const Analytics = () => {
                 />
               </CardBody>
             </Card>
-            <Card>
-              <CardBody>
-                <CardTitle>Count By Purpose</CardTitle>
-                <Apaexlinecolumn
-                  purposeSeries={analyticsData?.analyticsData?.count_by_purpose}
-                  dates={analyticsData?.analyticsData?.purpose_date}
-                />
-              </CardBody>
-            </Card>
+            {(analyticsData?.analyticsData?.permit_type === "Good Moral" ||
+              analyticsData?.analyticsData?.permit_type ===
+                "Mayors Permit") && (
+              <Card>
+                <CardBody>
+                  <CardTitle>Count By Purpose</CardTitle>
+                  <Apaexlinecolumn
+                    purposeSeries={
+                      analyticsData?.analyticsData?.count_by_purpose
+                    }
+                    dates={analyticsData?.analyticsData?.purpose_date}
+                  />
+                </CardBody>
+              </Card>
+            )}
           </Col>
           <Col md="3">
             <Card>
