@@ -110,7 +110,6 @@ function AttachmentModal({
           if (blobUrlRef.current) {
             URL.revokeObjectURL(blobUrlRef.current);
           }
-
           const newBlobUrl = URL.createObjectURL(response.data);
           blobUrlRef.current = newBlobUrl;
           setCurrentImage(newBlobUrl);
@@ -219,7 +218,7 @@ function AttachmentModal({
                             </NavLink>
                           </React.Fragment>
                         );
-                      }
+                      },
                     )}
                   </Nav>
                 </Col>
@@ -287,7 +286,7 @@ function AttachmentModal({
                                 <p>No file uploaded for this category.</p>
                               )}
                             </TabPane>
-                          )
+                          ),
                         )}
                       </TabContent>
                     </CardBody>

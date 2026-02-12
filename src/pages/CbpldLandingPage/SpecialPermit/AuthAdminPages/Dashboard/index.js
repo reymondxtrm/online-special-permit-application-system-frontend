@@ -26,7 +26,7 @@ const Dashboard = () => {
   const handleTabSelect = (key) => {
     setActiveTab(key);
   };
-  console.log(activeTab, childTab);
+
   const action = useMemo(() => {
     if (activeTab === "occupational" && childTab === "company") {
       return getCompanyOccupatinalData;

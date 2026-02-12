@@ -226,6 +226,7 @@ export default function CompanyOccupationalPermitModal({
   });
   const validation = useFormik({
     enableReinitialize: true,
+    validationSchema: validationSchema,
     initialValues: {
       employees: [
         {

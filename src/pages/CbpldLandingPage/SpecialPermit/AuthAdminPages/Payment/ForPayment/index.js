@@ -41,6 +41,7 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("good_moral");
+  const [childTab, setChildTab] = useState("individual");
   const [newCounts, setNewCounts] = useState({
     mayors_permit: 0,
     good_moral: 0,
@@ -75,6 +76,9 @@ const Dashboard = () => {
   const toggleNewMfoModal = () => {
     setNewMfoModal(!newMfoModal);
   };
+  const handleSelectChildTab = (key) => {
+    setChildTab(key);
+  };
   useEffect(() => {
     const channel = echo.channel("special-permit-for_payment");
     const handler = (event) => {
@@ -100,7 +104,7 @@ const Dashboard = () => {
       try {
         const response = await axios.get(
           "api/admin/special-permit/all-counts",
-          { params: { status_id: 2 } }
+          { params: { status_id: 2 } },
         );
 
         if (response && response.data) {
@@ -319,6 +323,8 @@ const Dashboard = () => {
                       <OccupationalTables
                         status={"for_payment"}
                         motherTab={activeTab}
+                        childTab={childTab}
+                        handleSelectChildTab={handleSelectChildTab}
                       />
                     </Tab>
                   </Tabs>

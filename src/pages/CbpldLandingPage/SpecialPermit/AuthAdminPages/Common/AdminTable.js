@@ -612,58 +612,59 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                       )}
                     </td>
 
-                    {applicationType !== "occupational_permit" && (
-                      <>
-                        <td>
-                          <div className="flex">
-                            <UncontrolledDropdown
-                              className="me-2"
-                              direction="end"
-                            >
-                              <DropdownToggle caret color="primary">
-                                Actions
-                              </DropdownToggle>
-                              <DropdownMenu
-                                style={{
-                                  maxHeight: "200px",
-                                  overflowY: "auto",
-                                  zIndex: 1050, // High z-index to appear above
-                                  position: "absolute", // Ensure it's detached from parent
-                                }}
+                    {applicationType !== "occupational_permit" &&
+                      status === "completed" && (
+                        <>
+                          <td>
+                            <div className="flex">
+                              <UncontrolledDropdown
+                                className="me-2"
+                                direction="end"
                               >
-                                <DropdownItem
-                                  onClick={() => {
-                                    togglePdfViewer();
-                                    setCompletedPermit(
-                                      application?.complete_special_permit
-                                        ?.file,
-                                    );
+                                <DropdownToggle caret color="primary">
+                                  Actions
+                                </DropdownToggle>
+                                <DropdownMenu
+                                  style={{
+                                    maxHeight: "200px",
+                                    overflowY: "auto",
+                                    zIndex: 1050, // High z-index to appear above
+                                    position: "absolute", // Ensure it's detached from parent
                                   }}
                                 >
-                                  Generated Permit
-                                </DropdownItem>
-                                <DropdownItem
-                                  onClick={() => {
-                                    toggleUploadModal();
-                                    setspecialPermitID(application?.id);
-                                  }}
-                                >
-                                  Re-Upload
-                                </DropdownItem>
-                                <DropdownItem
-                                  onClick={() => {
-                                    toggleUpdateModal();
-                                    setApplicationId(application?.id);
-                                  }}
-                                >
-                                  Update Permit Duration
-                                </DropdownItem>
-                              </DropdownMenu>
-                            </UncontrolledDropdown>
-                          </div>
-                        </td>
-                      </>
-                    )}
+                                  <DropdownItem
+                                    onClick={() => {
+                                      togglePdfViewer();
+                                      setCompletedPermit(
+                                        application?.complete_special_permit
+                                          ?.file,
+                                      );
+                                    }}
+                                  >
+                                    Generated Permit
+                                  </DropdownItem>
+                                  <DropdownItem
+                                    onClick={() => {
+                                      toggleUploadModal();
+                                      setspecialPermitID(application?.id);
+                                    }}
+                                  >
+                                    Re-Upload
+                                  </DropdownItem>
+                                  <DropdownItem
+                                    onClick={() => {
+                                      toggleUpdateModal();
+                                      setApplicationId(application?.id);
+                                    }}
+                                  >
+                                    Update Permit Duration
+                                  </DropdownItem>
+                                </DropdownMenu>
+                              </UncontrolledDropdown>
+                            </div>
+                          </td>
+                        </>
+                      )}
 
                     {status === "returned" || status === "declined" ? (
                       <td>

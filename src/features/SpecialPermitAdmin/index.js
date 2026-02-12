@@ -104,15 +104,15 @@ export const SpecialPermitAdminSlice = createSlice({
     companyOccupational: [],
     individualOccupational: [],
     analyticsData: [],
-
     errors: null,
     getAnalyticsDataIsFetching: false,
     getCompanyOccupationalData: false,
     getIndividualOccupationalData: false,
-
     filter_date_from: "",
     filter_date_to: "",
     filter_type: {},
+    status: "",
+    permit_type: "",
     params: {},
   },
   reducers: {

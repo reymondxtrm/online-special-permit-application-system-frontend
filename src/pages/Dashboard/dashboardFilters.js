@@ -66,7 +66,6 @@ const DashboardFilters = ({
         ...values,
         ...tableParams,
       };
-
       setParams(params);
       dispatch(action(params));
       dispatch(dateFilterSlice.actions.setParams(params));

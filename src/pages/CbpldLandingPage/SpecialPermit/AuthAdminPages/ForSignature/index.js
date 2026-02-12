@@ -41,6 +41,8 @@ const ForSignature = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("good_moral");
+  const [childTab, setChildTab] = useState("individual");
+
   const [newCounts, setNewCounts] = useState({
     mayors_permit: 0,
     good_moral: 0,
@@ -75,6 +77,9 @@ const ForSignature = () => {
   const toggleNewMfoModal = () => {
     setNewMfoModal(!newMfoModal);
   };
+  const handleSelectChildTab = (key) => {
+    setChildTab(key);
+  };
   useEffect(() => {
     const channel = echo.channel("special-permit-for_signature");
     const handler = (event) => {
@@ -98,7 +103,7 @@ const ForSignature = () => {
       try {
         const response = await axios.get(
           "api/admin/special-permit/all-counts",
-          { params: { status_id: 3 } }
+          { params: { status_id: 3 } },
         );
 
         if (response && response.data) {
@@ -318,6 +323,8 @@ const ForSignature = () => {
                       <OccupationalTables
                         status={"for_signature"}
                         motherTab={activeTab}
+                        childTab={childTab}
+                        handleSelectChildTab={handleSelectChildTab}
                       />
                     </Tab>
                   </Tabs>

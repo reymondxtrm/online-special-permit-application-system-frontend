@@ -24,16 +24,19 @@ const UpdateCorporationMemberDetailsModal = ({
   const user = userDetails?.corporation_member || null;
   const address =
     userDetails?.corporation_member?.user_addresses_morph?.[0] || null;
+  const occupation =
+    userDetails?.corporation_member?.user_occupation_details_morph || null;
 
   const validationSchema = Yup.object({
     address_line: Yup.string().required("Address Line is required"),
     barangay: Yup.string().required("Barangay is required"),
     city: Yup.string().required("City is required"),
-    province: Yup.string().required("Province is required"),
+    province: Yup.string().notRequired(),
     subdivision: Yup.string().notRequired(),
     fname: Yup.string().required("First Name is required"),
     mname: Yup.string().notRequired(),
     lname: Yup.string().required("Last Name is required"),
+    position: Yup.string().required("Position is required"),
   });
 
   const validation = useFormik({
@@ -48,6 +51,7 @@ const UpdateCorporationMemberDetailsModal = ({
       fname: user.fname || "",
       mname: user.mname || "",
       lname: user.lname || "",
+      position: occupation?.position || "",
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
@@ -170,6 +174,16 @@ const UpdateCorporationMemberDetailsModal = ({
             errors={validation.errors.province}
             value={validation.values.province}
             label={"Province:"}
+          />
+          <BasicInputField
+            col={12}
+            validation={validation}
+            name={"position"}
+            type={"text"}
+            touched={validation.touched.position}
+            errors={validation.errors.position}
+            value={validation.values.position}
+            label={"Occupation:"}
           />
         </form>
       </ModalBody>

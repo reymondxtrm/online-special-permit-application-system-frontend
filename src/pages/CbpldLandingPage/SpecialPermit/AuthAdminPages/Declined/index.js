@@ -41,6 +41,8 @@ const Declined = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("good_moral");
+  const [childTab, setChildTab] = useState("individual");
+
   const [newCounts, setNewCounts] = useState({
     mayors_permit: 0,
     good_moral: 0,
@@ -70,6 +72,9 @@ const Declined = () => {
   const toggleupdateModal = () => {
     setIsUpdateModalOpen(!isUpdateModalOpen);
   };
+  const handleSelectChildTab = (key) => {
+    setChildTab(key);
+  };
 
   useEffect(() => {
     const channel = echo.channel("special-permit-declined");
@@ -93,7 +98,7 @@ const Declined = () => {
       try {
         const response = await axios.get(
           "api/admin/special-permit/all-counts",
-          { params: { status_id: 7 } }
+          { params: { status_id: 7 } },
         );
 
         if (response && response.data) {
@@ -313,6 +318,8 @@ const Declined = () => {
                       <OccupationalTables
                         status={"declined"}
                         motherTab={activeTab}
+                        childTab={childTab}
+                        handleSelectChildTab={handleSelectChildTab}
                       />
                     </Tab>
                   </Tabs>

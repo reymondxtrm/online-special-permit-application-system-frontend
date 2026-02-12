@@ -4,7 +4,7 @@ import {
   SpecialPermitAdminSlice,
 } from "features/SpecialPermitAdmin";
 import { iteratee } from "lodash";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AttachmentModal from "../Modals/AttachmentModal";
 import Pagination from "components/Pagination";
@@ -78,11 +78,19 @@ export default function OccupationalTableIndividualAdmin({
         }),
       );
     }
-  }, [refreshPage, activeTab, motherTab]);
+  }, [refreshPage, activeTab, motherTab, status, dispatch]);
+
   const toggleAttachmentModal = () => {
     setShowAttachmentModal((prev) => !prev);
   };
   const toggleAmountModal = () => {
+    /*************  ✨ Windsurf Command ⭐  *************/
+    /**
+     * Toggle the amount modal.
+     *
+     * @returns {void}
+     */
+    /*******  720a17cd-7be9-41d1-9746-f9612b2e5412  *******/
     setAmountModal((prev) => !prev);
   };
   const toggleRefresh = () => {
@@ -243,8 +251,9 @@ export default function OccupationalTableIndividualAdmin({
         <thead>
           <tr>
             <th>#</th>
-            {status === "for_signature" ||
-              (status === "completed" && <th>Reference No</th>)}
+            {(status === "for_signature" || status === "completed") && (
+              <th>Reference No</th>
+            )}
             <th>Name of Requestor / Corporation</th>
             <th>Gender</th>
             <th>Address</th>
@@ -288,10 +297,9 @@ export default function OccupationalTableIndividualAdmin({
                   }}
                 >
                   <td className="fw-bold">{index + 1}</td>
-                  {status === "for_signature" ||
-                    (status === "completed" && (
-                      <td>{application?.reference_no}</td>
-                    ))}
+                  {(status === "for_signature" || status === "completed") && (
+                    <td>{application?.reference_no}</td>
+                  )}
                   <td className="fw-bold">
                     {`${application?.user?.fname} ${
                       application?.user?.mname || ""
@@ -443,10 +451,7 @@ export default function OccupationalTableIndividualAdmin({
                     <td>
                       <div className="d-flex gap-1">
                         <UncontrolledDropdown>
-                          <DropdownToggle
-                            color="primary"
-                            disabled={application.disable}
-                          >
+                          <DropdownToggle color="primary">
                             Actions
                           </DropdownToggle>
                           <DropdownMenu>

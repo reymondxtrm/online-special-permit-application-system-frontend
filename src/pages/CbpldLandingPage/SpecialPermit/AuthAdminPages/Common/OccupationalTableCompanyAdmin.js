@@ -231,8 +231,9 @@ export default function OccupationalTableCompanyAdmin({ status }) {
         <thead>
           <tr>
             <th>#</th>
-            {status === "for_signature" ||
-              (status === "completed" && <th>Reference No</th>)}
+            {(status === "for_signature" || status === "completed") && (
+              <th>Reference No</th>
+            )}
             <th>Name of Requestor / Corporation</th>
             <th>Gender</th>
             <th>Address</th>
@@ -296,10 +297,21 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                     </td>
 
                     <td colSpan={2} className="fw-bold">
-                      {company.fname}
+                      <Badge
+                        color="info"
+                        style={{
+                          padding: "5px",
+                          marginRight: "5px",
+                          minWidth: "20px",
+                        }}
+                      >
+                        {company?.special_permit_applications?.length || 0}
+                      </Badge>
+                      {company.fname}{" "}
                     </td>
                     <td>{company?.user_addresses[0]?.company_fulladdress}</td>
-                    <td colSpan={4}></td>
+                    <td colSpan={3}></td>
+                    <td></td>
                   </tr>
 
                   {selectedRow?.includes(companyIndex)
@@ -321,10 +333,10 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                               }}
                             >
                               <td></td>
-                              {status === "for_signature" ||
-                                (status === "completed" && (
-                                  <td>{item?.reference_no}</td>
-                                ))}
+                              {(status === "for_signature" ||
+                                status === "completed") && (
+                                <td>{item?.reference_no}</td>
+                              )}
                               <td>
                                 {`${item?.corporation_member?.fname}  ${item?.corporation_member?.mname} ${item?.corporation_member?.lname}`}{" "}
                                 {item?.mark_as_read ? (
