@@ -269,7 +269,7 @@ function AmountModal({
                   toggleRefresh,
                   () => {
                     toggleModal();
-                    toggleResetExemption();
+                    setExempted(false);
                     // if (
                     //   formikRef.current &&
                     //   typeof formikRef.current.resetForm === "function"
