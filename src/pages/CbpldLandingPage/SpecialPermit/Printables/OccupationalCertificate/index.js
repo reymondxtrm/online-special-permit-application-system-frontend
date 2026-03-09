@@ -8,6 +8,7 @@ import axios from "axios";
 import QrCodeGenerator from "../Certification/CertificateSections/QrCodeGenerator";
 
 const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
+  console.log(applicationDetails);
   const endOfYear = new Date();
 
   const oneYearLater = new Date(endOfYear);
@@ -18,11 +19,11 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
   const [isFetching, setIsFetching] = useState(false);
 
   const isCompany = applicationDetails?.user?.account_type === "company";
-  const concatString = (convert, { fname, mname, lname }) => {
+  const concatString = (convert, { fname, mname, lname, suffix }) => {
     if (convert === "toUpper") {
-      return `${fname} ${mname} ${lname}`.toUpperCase();
+      return `${fname} ${mname} ${lname} ${suffix ?? ""}`.toUpperCase();
     } else {
-      return `${fname} ${mname} ${lname}`;
+      return `${fname} ${mname} ${lname} ${suffix ?? ""}`;
     }
   };
   const name = useMemo(() => {
@@ -31,11 +32,13 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
           fname: applicationDetails?.corporation_member?.fname,
           mname: applicationDetails?.corporation_member?.mname || "",
           lname: applicationDetails?.corporation_member?.lname,
+          suffix: applicationDetails?.corporation_member?.suffix || "",
         })
       : concatString("toUpper", {
           fname: applicationDetails?.user?.fname,
           mname: applicationDetails?.user?.mname || "",
           lname: applicationDetails?.user?.lname,
+          suffix: applicationDetails?.user?.suffix,
         }) || "";
     return val;
   }, [applicationDetails]);
@@ -170,7 +173,7 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
                     isCompany
                       ? applicationDetails?.corporation_member
                           ?.user_details_morph?.birthdate
-                      : applicationDetails?.user?.user_details?.birthdate || 0
+                      : applicationDetails?.user?.user_details?.birthdate || 0,
                   )}
                 </span>{" "}
                 <span>SEX: </span>
@@ -265,7 +268,7 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
                 {" "}
                 {dateFormat(
                   applicationDetails?.order_of_payment?.payment_detail
-                    ?.created_at
+                    ?.created_at,
                 )}
               </span>
             </div>

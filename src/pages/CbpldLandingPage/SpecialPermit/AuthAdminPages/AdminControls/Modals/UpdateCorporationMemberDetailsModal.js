@@ -35,6 +35,7 @@ const UpdateCorporationMemberDetailsModal = ({
     subdivision: Yup.string().notRequired(),
     fname: Yup.string().required("First Name is required"),
     mname: Yup.string().notRequired(),
+    suffix: Yup.string().notRequired(),
     lname: Yup.string().required("Last Name is required"),
     position: Yup.string().required("Position is required"),
   });
@@ -49,6 +50,7 @@ const UpdateCorporationMemberDetailsModal = ({
       subdivision: address.subdivision || "",
       corporation_member_id: corporationMemberId,
       fname: user.fname || "",
+      suffix: user.suffix || "",
       mname: user.mname || "",
       lname: user.lname || "",
       position: occupation?.position || "",
@@ -122,7 +124,17 @@ const UpdateCorporationMemberDetailsModal = ({
             touched={validation.touched.lname}
             errors={validation.errors.lname}
             value={validation.values.lname}
-            label={"Surname:"}
+            label={"Last Name:"}
+          />
+          <BasicInputField
+            col={12}
+            validation={validation}
+            name={"suffix"}
+            type={"text"}
+            touched={validation.touched.suffix}
+            errors={validation.errors.suffix}
+            value={validation.values.suffix}
+            label={"Suffix:"}
           />
           <hr></hr>
           <BasicInputField

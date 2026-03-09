@@ -42,19 +42,29 @@ export const createMayorsCertificateSchema = (isUpdate) =>
           .nullable()
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           )
       : Yup.mixed()
           .required("Police clearance is required")
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           ),
 
     community_tax_certificate: isUpdate
@@ -62,19 +72,29 @@ export const createMayorsCertificateSchema = (isUpdate) =>
           .nullable()
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           )
       : Yup.mixed()
           .required("Community tax certificate is required")
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           ),
 
     barangay_clearance: isUpdate
@@ -82,19 +102,29 @@ export const createMayorsCertificateSchema = (isUpdate) =>
           .nullable()
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           )
       : Yup.mixed()
           .required("Barangay clearance is required")
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           ),
 
     fiscal_clearance: isUpdate
@@ -102,19 +132,29 @@ export const createMayorsCertificateSchema = (isUpdate) =>
           .nullable()
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           )
       : Yup.mixed()
           .required("Fiscal clearance is required")
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           ),
 
     court_clearance: isUpdate
@@ -122,19 +162,29 @@ export const createMayorsCertificateSchema = (isUpdate) =>
           .nullable()
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           )
       : Yup.mixed()
           .required("Court clearance is required")
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type),
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           ),
   });
 
@@ -244,6 +294,7 @@ function MayorsCertificateModal({
         formData.append(key, JSON.stringify(object[key]));
       } else {
         formData.append(key, object[key]);
+        2;
       }
     });
     return formData;
@@ -252,9 +303,14 @@ function MayorsCertificateModal({
   const handleFileChange = async (e, fieldName, index, props) => {
     const file = e.currentTarget.files[0];
     if (!file) return;
-    const compressed = await handleImageChange(e, index);
-    if (compressed) {
-      props.setFieldValue(fieldName, compressed);
+    if (file.type.startsWith("image")) {
+      const compressed = await handleImageChange(e, index);
+      if (compressed) {
+        props.setFieldValue(fieldName, compressed);
+        props.setFieldTouched(fieldName, true, true);
+      }
+    } else {
+      props.setFieldValue(fieldName, file);
       props.setFieldTouched(fieldName, true, true);
     }
   };
@@ -394,7 +450,7 @@ function MayorsCertificateModal({
                               <Input
                                 type="file"
                                 name="police_clearance"
-                                accept="image/*"
+                                accept="image/*, application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,
@@ -467,7 +523,7 @@ function MayorsCertificateModal({
                               <Input
                                 type="file"
                                 name="community_tax_certificate"
-                                accept="image/*"
+                                accept="image/*,application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,
@@ -541,7 +597,7 @@ function MayorsCertificateModal({
                               <Input
                                 type="file"
                                 name="barangay_clearance"
-                                accept="image/*"
+                                accept="image/*,application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,
@@ -614,7 +670,7 @@ function MayorsCertificateModal({
                               <Input
                                 type="file"
                                 name="fiscal_clearance"
-                                accept="image/*"
+                                accept="image/*, application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,
@@ -687,7 +743,7 @@ function MayorsCertificateModal({
                               <Input
                                 type="file"
                                 name="court_clearance"
-                                accept="image/*"
+                                accept="image/*,application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,

@@ -84,10 +84,17 @@ function EventModal({
   }, [openModal]);
   const handleFileChange = async (e, fieldName, index, props) => {
     const file = e.currentTarget.files[0];
+
     if (!file) return;
-    const compressed = await handleImageChange(e, index);
-    if (compressed) {
-      props.setFieldValue(fieldName, compressed);
+
+    if (file.type.startsWith("image")) {
+      const compressed = await handleImageChange(e, index);
+      if (compressed) {
+        props.setFieldValue(fieldName, compressed);
+        props.setFieldTouched(fieldName, true, true);
+      }
+    } else {
+      props.setFieldValue(fieldName, file);
       props.setFieldTouched(fieldName, true, true);
     }
   };
@@ -105,22 +112,27 @@ function EventModal({
   };
 
   const IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
-  const SUPPORTED_FORMATS = ["image/jpeg", "image/png", "image/jpg"];
+  const SUPPORTED_FORMATS = [
+    "image/jpeg",
+    "image/png",
+    "image/jpg",
+    "application/pdf",
+  ];
 
   const fileValidationRequired = Yup.mixed()
     .required("This file is required")
     .test(
       "fileFormat",
-      "Only JPG and PNG images are allowed",
-      (value) => !value || SUPPORTED_FORMATS.includes(value.type)
+      "Only images and PDF files are allowed",
+      (value) => !value || SUPPORTED_FORMATS.includes(value.type),
     );
 
   const fileValidationOptional = Yup.mixed()
     .nullable()
     .test(
       "fileFormat",
-      "Only JPG and PNG images are allowed",
-      (value) => !value || SUPPORTED_FORMATS.includes(value.type)
+      "Only images and PDF files are allowed",
+      (value) => !value || SUPPORTED_FORMATS.includes(value.type),
     );
 
   const validationSchema = Yup.object().shape({
@@ -131,7 +143,7 @@ function EventModal({
       .required("End date is required")
       .min(
         Yup.ref("event_date_from"),
-        "End date must be after or equal to start date"
+        "End date must be after or equal to start date",
       ),
     event_time_from: Yup.string().required("Start time is required"),
     event_time_to: Yup.string().notRequired(),
@@ -358,7 +370,7 @@ function EventModal({
                             <Input
                               type="file"
                               name={file.key}
-                              accept="image/*"
+                              accept="image/*,application/pdf"
                               onChange={(e) => {
                                 handleFileChange(e, file.key, index, props);
                               }}
@@ -474,7 +486,7 @@ function EventModal({
                     params: formData,
                   },
                   [],
-                  [toggleModal, toggleRefresh]
+                  [toggleModal, toggleRefresh],
                 );
               }
             }}

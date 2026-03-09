@@ -29,6 +29,7 @@ import ReactSimpleImageViewer from "react-simple-image-viewer";
 import useGetImage from "hooks/Common/useGetImage";
 import UploadWithCropperModal from "./UploadWithCropperModal";
 import useImageCompressor from "hooks/Common/useImageCompressor";
+import { Link } from "react-router-dom/cjs/react-router-dom.min";
 
 function OccupationalPermitModal({
   openModal,
@@ -101,24 +102,19 @@ function OccupationalPermitModal({
     ),
 
     id_picture: Yup.mixed().required("ID picture is required"),
-    training_certificate: Yup.mixed().test(
-      "training_cert_required",
-      "Training certificate is required",
-      function (value) {
-        if (tableData?.company_type !== "NON-FOOD-MASSEUR") return true;
-
-        if (isUpdate && uploadedFile?.training_certificate) return true;
-
-        return value instanceof File || value instanceof Blob;
-      },
-    ),
+    training_certificate: Yup.mixed().notRequired(),
   });
   const handleFileChange = async (e, fieldName, index, props) => {
     const file = e.currentTarget.files[0];
     if (!file) return;
-    const compressed = await handleImageChange(e, index);
-    if (compressed) {
-      props.setFieldValue(fieldName, compressed);
+    if (file.type.startsWith("image")) {
+      const compressed = await handleImageChange(e, index);
+      if (compressed) {
+        props.setFieldValue(fieldName, compressed);
+        props.setFieldTouched(fieldName, true, true);
+      }
+    } else {
+      props.setFieldValue(fieldName, file);
       props.setFieldTouched(fieldName, true, true);
     }
   };
@@ -275,317 +271,370 @@ function OccupationalPermitModal({
                     <Spinner color="primary">Loading ...</Spinner>
                   </div>
                 ) : (
-                  <Row>
-                    <Col>
-                      <Table borderless>
-                        <tbody>
-                          <tr>
-                            <td className="text-end">
-                              <Label>
-                                Company Name:
-                                <span style={{ color: "red" }}>&nbsp;*</span>
-                              </Label>
-                            </td>
-                            <td colSpan={2}>
-                              <BasicInputField
-                                col={12}
-                                label={null}
-                                name="company_name"
-                                type="text"
-                                value={props.values.company_name}
-                                touched={props.touched.company_name}
-                                errors={props.errors.company_name}
-                                validation={props}
-                                disable={true}
-                              />
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="text-end">
-                              <Label>
-                                Company Address:
-                                <span style={{ color: "red" }}>&nbsp;*</span>
-                              </Label>
-                            </td>
-                            <td colSpan={2}>
-                              <BasicInputField
-                                col={12}
-                                label={null}
-                                name="company_address"
-                                type="text"
-                                value={props.values.company_address}
-                                touched={props.touched.company_address}
-                                errors={props.errors.company_address}
-                                validation={props}
-                                disable={true}
-                              />
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="text-end">
-                              <Label>
-                                Occupation:
-                                <span style={{ color: "red" }}>&nbsp;*</span>
-                              </Label>
-                            </td>
-                            <td colSpan={2}>
-                              <BasicInputField
-                                col={12}
-                                label={null}
-                                name="position"
-                                type="text"
-                                value={props.values.position}
-                                touched={props.touched.position}
-                                errors={props.errors.position}
-                                validation={props}
-                                disable={true}
-                              />
-                            </td>
-                          </tr>
-
-                          <tr>
-                            <td className="text-end">
-                              <Label>
-                                Certificate of Employment:
-                                <span style={{ color: "red" }}>&nbsp;*</span>
-                              </Label>
-                            </td>
-                            <td colSpan={2}>
-                              <div className="d-flex gap-2">
-                                <div
-                                  className="flex-grow-1"
-                                  style={{ maxWidth: "400px" }}
-                                >
-                                  <Input
-                                    accept="image/*"
-                                    id="certificateOfEmployment"
-                                    name="certificate_of_employment"
-                                    type="file"
-                                    onChange={(e) => {
-                                      handleFileChange(
-                                        e,
-                                        "certificate_of_employment",
-                                        0,
-                                        props,
-                                      );
-                                    }}
-                                    disabled={isCompressing}
-                                    onBlur={props.handleBlur}
-                                    invalid={
-                                      props.touched.certificate_of_employment &&
-                                      Boolean(
-                                        props.errors.certificate_of_employment,
-                                      )
-                                    }
-                                  />
-                                  {compressionErrors[0] && (
-                                    <div
-                                      className="text-warning mt-1"
-                                      style={{ fontSize: "0.875rem" }}
-                                    >
-                                      Compression error: {compressionErrors[0]}
-                                    </div>
-                                  )}
-                                  {props.touched.certificate_of_employment &&
-                                    props.errors.certificate_of_employment && (
-                                      <div
-                                        className="text-danger mt-1"
-                                        style={{ fontSize: "80%" }}
-                                      >
-                                        {props.errors.certificate_of_employment}
-                                      </div>
-                                    )}
-                                </div>
-
-                                {isUpdate &&
-                                  uploadedFile?.certificate_of_employment && (
-                                    <Button
-                                      color="primary"
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        getImageHandle({
-                                          path: uploadedFile?.certificate_of_employment,
-                                          url: "api/client/attachment",
-                                          showLoader: true,
-                                        });
-                                        toggleIsViewerOpen();
-                                      }}
-                                    >
-                                      <i className="mdi mdi-eye"></i>
-                                    </Button>
-                                  )}
-                              </div>
-                            </td>
-                          </tr>
-
-                          <tr>
-                            <td className="text-end">
-                              <Label>
-                                Community Tax Certificate:
-                                <span style={{ color: "red" }}>&nbsp;*</span>
-                              </Label>
-                            </td>
-
-                            <td colSpan={2}>
-                              <div className="d-flex gap-2">
-                                <div
-                                  className="flex-grow-1"
-                                  style={{ maxWidth: "400px" }}
-                                >
-                                  <Input
-                                    accept="image/*"
-                                    id="communityTaxCertificate"
-                                    name="community_tax_certificate"
-                                    type="file"
-                                    disabled={isCompressing}
-                                    onChange={(e) => {
-                                      handleFileChange(
-                                        e,
-                                        "community_tax_certificate",
-                                        1,
-                                        props,
-                                      );
-                                    }}
-                                    onBlur={props.handleBlur}
-                                    invalid={
-                                      props.touched.community_tax_certificate &&
-                                      Boolean(
-                                        props.errors.community_tax_certificate,
-                                      ) &&
-                                      !props.values.no_cedula
-                                    }
-                                  />
-                                  {compressionErrors[1] && (
-                                    <div
-                                      className="text-warning mt-1"
-                                      style={{ fontSize: "0.875rem" }}
-                                    >
-                                      Compression error: {compressionErrors[1]}
-                                    </div>
-                                  )}
-                                  {props.touched.community_tax_certificate &&
-                                    props.errors.community_tax_certificate &&
-                                    !props.values.no_cedula && (
-                                      <div
-                                        className="text-danger mt-1"
-                                        style={{ fontSize: "80%" }}
-                                      >
-                                        {props.errors.community_tax_certificate}
-                                      </div>
-                                    )}
-                                </div>
-
-                                {isUpdate &&
-                                  uploadedFile?.community_tax_certificate && (
-                                    <Button
-                                      color="primary"
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        getImageHandle({
-                                          path: uploadedFile?.community_tax_certificate,
-                                          url: "api/client/attachment",
-                                          showLoader: true,
-                                        });
-                                        toggleIsViewerOpen();
-                                      }}
-                                    >
-                                      <i className="mdi mdi-eye"></i>
-                                    </Button>
-                                  )}
-                              </div>
-                            </td>
-                          </tr>
-
-                          <tr>
-                            <td className="text-end">
-                              <Label>
-                                ID Picture:
-                                <span style={{ color: "red" }}>&nbsp;*</span>
-                              </Label>
-                            </td>
-                            <td colSpan={2}>
-                              <div className="d-flex align-items-center gap-2">
-                                {props.values?.id_picture && (
-                                  <img
-                                    src={props.values.id_picture}
-                                    alt="Captured ID"
-                                    className="img-fluid rounded border"
-                                    style={{
-                                      transition: "0.3s",
-                                      opacity: 1,
-                                      maxHeight: "150px",
-                                      objectFit: "cover",
-                                    }}
-                                  />
-                                )}
-                                <div className="d-flex flex-column gap-2">
-                                  <Button
-                                    color="primary"
-                                    outline
-                                    className="d-flex align-items-center gap-2"
-                                    style={{
-                                      borderRadius: "6px",
-                                      padding: "10px 14px",
-                                      fontWeight: 500,
-                                    }}
-                                    onClick={togglePictureModal}
-                                  >
-                                    <i className="mdi mdi-camera fs-4"></i>
-                                    Take Picture
-                                  </Button>
-                                  <Button
-                                    color="primary"
-                                    onClick={() => {
-                                      handleClick();
-                                    }}
-                                  >
-                                    Upload image
-                                  </Button>
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    ref={fileInputRef}
-                                    style={{ display: "none" }}
-                                    onChange={handleChange}
-                                  />
-                                </div>
-
-                                {isUpdate && uploadedFile?.id_picture && (
-                                  <Button
-                                    color="primary"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      getImageHandle({
-                                        path: uploadedFile?.id_picture,
-                                        url: "api/client/attachment",
-                                        showLoader: true,
-                                      });
-                                      toggleIsViewerOpen();
-                                    }}
-                                  >
-                                    <i className="mdi mdi-eye"></i>
-                                  </Button>
-                                )}
-                              </div>
-                              {props.touched.id_picture &&
-                                props.errors.id_picture && (
-                                  <div
-                                    className="text-danger mt-1"
-                                    style={{ fontSize: "80%" }}
-                                  >
-                                    {props.errors.id_picture}
-                                  </div>
-                                )}
-                            </td>
-                          </tr>
-
-                          {tableData?.company_type === "NON-FOOD-MASSEUR" && (
+                  <>
+                    <Row>
+                      {!tableData.company_name && (
+                        <Col>
+                          <div
+                            style={{
+                              backgroundColor: "#c01e341c",
+                              width: "100%",
+                              height: "60px",
+                              borderRadius: "10px",
+                              border: "2px solid #c01e34fd",
+                              marginBottom: "10px",
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
+                            <i
+                              className="mdi mdi-information-outline fs-2"
+                              style={{
+                                color: "#eb1834fd",
+                                margin: "5px",
+                              }}
+                            ></i>
+                            <p
+                              className="p-0 m-0"
+                              style={{ color: "#eb1834fd" }}
+                            >
+                              Please update your occupational details in your
+                              profile.{" "}
+                              <Link
+                                to="/client/profile"
+                                style={{
+                                  textDecoration: "underline",
+                                  color: "#1838ebfd",
+                                }}
+                              >
+                                click here
+                              </Link>
+                            </p>
+                          </div>
+                        </Col>
+                      )}
+                    </Row>
+                    <Row>
+                      <Col>
+                        <Table borderless>
+                          <tbody>
                             <tr>
                               <td className="text-end">
                                 <Label>
-                                  Training Certificate:
+                                  Company Name:
                                   <span style={{ color: "red" }}>&nbsp;*</span>
                                 </Label>
+                              </td>
+                              <td colSpan={2}>
+                                <BasicInputField
+                                  col={12}
+                                  label={null}
+                                  name="company_name"
+                                  type="text"
+                                  value={props.values.company_name}
+                                  touched={props.touched.company_name}
+                                  errors={props.errors.company_name}
+                                  validation={props}
+                                  disable={true}
+                                />
+                              </td>
+                            </tr>
+                            <tr>
+                              <td className="text-end">
+                                <Label>
+                                  Company Address:
+                                  <span style={{ color: "red" }}>&nbsp;*</span>
+                                </Label>
+                              </td>
+                              <td colSpan={2}>
+                                <BasicInputField
+                                  col={12}
+                                  label={null}
+                                  name="company_address"
+                                  type="text"
+                                  value={props.values.company_address}
+                                  touched={props.touched.company_address}
+                                  errors={props.errors.company_address}
+                                  validation={props}
+                                  disable={true}
+                                />
+                              </td>
+                            </tr>
+                            <tr>
+                              <td className="text-end">
+                                <Label>
+                                  Occupation:
+                                  <span style={{ color: "red" }}>&nbsp;*</span>
+                                </Label>
+                              </td>
+                              <td colSpan={2}>
+                                <BasicInputField
+                                  col={12}
+                                  label={null}
+                                  name="position"
+                                  type="text"
+                                  value={props.values.position}
+                                  touched={props.touched.position}
+                                  errors={props.errors.position}
+                                  validation={props}
+                                  disable={true}
+                                />
+                              </td>
+                            </tr>
+
+                            <tr>
+                              <td className="text-end">
+                                <Label>
+                                  Certificate of Employment:
+                                  <span style={{ color: "red" }}>&nbsp;*</span>
+                                </Label>
+                              </td>
+                              <td colSpan={2}>
+                                <div className="d-flex gap-2">
+                                  <div
+                                    className="flex-grow-1"
+                                    style={{ maxWidth: "400px" }}
+                                  >
+                                    <Input
+                                      accept="image/*,application/pdf"
+                                      id="certificateOfEmployment"
+                                      name="certificate_of_employment"
+                                      type="file"
+                                      onChange={(e) => {
+                                        handleFileChange(
+                                          e,
+                                          "certificate_of_employment",
+                                          0,
+                                          props,
+                                        );
+                                      }}
+                                      disabled={isCompressing}
+                                      onBlur={props.handleBlur}
+                                      invalid={
+                                        props.touched
+                                          .certificate_of_employment &&
+                                        Boolean(
+                                          props.errors
+                                            .certificate_of_employment,
+                                        )
+                                      }
+                                    />
+                                    {compressionErrors[0] && (
+                                      <div
+                                        className="text-warning mt-1"
+                                        style={{ fontSize: "0.875rem" }}
+                                      >
+                                        Compression error:{" "}
+                                        {compressionErrors[0]}
+                                      </div>
+                                    )}
+                                    {props.touched.certificate_of_employment &&
+                                      props.errors
+                                        .certificate_of_employment && (
+                                        <div
+                                          className="text-danger mt-1"
+                                          style={{ fontSize: "80%" }}
+                                        >
+                                          {
+                                            props.errors
+                                              .certificate_of_employment
+                                          }
+                                        </div>
+                                      )}
+                                  </div>
+
+                                  {isUpdate &&
+                                    uploadedFile?.certificate_of_employment && (
+                                      <Button
+                                        color="primary"
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          getImageHandle({
+                                            path: uploadedFile?.certificate_of_employment,
+                                            url: "api/client/attachment",
+                                            showLoader: true,
+                                          });
+                                          toggleIsViewerOpen();
+                                        }}
+                                      >
+                                        <i className="mdi mdi-eye"></i>
+                                      </Button>
+                                    )}
+                                </div>
+                              </td>
+                            </tr>
+
+                            <tr>
+                              <td className="text-end">
+                                <Label>
+                                  Community Tax Certificate:
+                                  <span style={{ color: "red" }}>&nbsp;*</span>
+                                </Label>
+                              </td>
+
+                              <td colSpan={2}>
+                                <div className="d-flex gap-2">
+                                  <div
+                                    className="flex-grow-1"
+                                    style={{ maxWidth: "400px" }}
+                                  >
+                                    <Input
+                                      accept="image/*,application/pdf"
+                                      id="communityTaxCertificate"
+                                      name="community_tax_certificate"
+                                      type="file"
+                                      disabled={isCompressing}
+                                      onChange={(e) => {
+                                        handleFileChange(
+                                          e,
+                                          "community_tax_certificate",
+                                          1,
+                                          props,
+                                        );
+                                      }}
+                                      onBlur={props.handleBlur}
+                                      invalid={
+                                        props.touched
+                                          .community_tax_certificate &&
+                                        Boolean(
+                                          props.errors
+                                            .community_tax_certificate,
+                                        ) &&
+                                        !props.values.no_cedula
+                                      }
+                                    />
+                                    {compressionErrors[1] && (
+                                      <div
+                                        className="text-warning mt-1"
+                                        style={{ fontSize: "0.875rem" }}
+                                      >
+                                        Compression error:{" "}
+                                        {compressionErrors[1]}
+                                      </div>
+                                    )}
+                                    {props.touched.community_tax_certificate &&
+                                      props.errors.community_tax_certificate &&
+                                      !props.values.no_cedula && (
+                                        <div
+                                          className="text-danger mt-1"
+                                          style={{ fontSize: "80%" }}
+                                        >
+                                          {
+                                            props.errors
+                                              .community_tax_certificate
+                                          }
+                                        </div>
+                                      )}
+                                  </div>
+
+                                  {isUpdate &&
+                                    uploadedFile?.community_tax_certificate && (
+                                      <Button
+                                        color="primary"
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          getImageHandle({
+                                            path: uploadedFile?.community_tax_certificate,
+                                            url: "api/client/attachment",
+                                            showLoader: true,
+                                          });
+                                          toggleIsViewerOpen();
+                                        }}
+                                      >
+                                        <i className="mdi mdi-eye"></i>
+                                      </Button>
+                                    )}
+                                </div>
+                              </td>
+                            </tr>
+
+                            <tr>
+                              <td className="text-end">
+                                <Label>
+                                  ID Picture:
+                                  <span style={{ color: "red" }}>&nbsp;*</span>
+                                </Label>
+                              </td>
+                              <td colSpan={2}>
+                                <div className="d-flex align-items-center gap-2">
+                                  {props.values?.id_picture && (
+                                    <img
+                                      src={props.values.id_picture}
+                                      alt="Captured ID"
+                                      className="img-fluid rounded border"
+                                      style={{
+                                        transition: "0.3s",
+                                        opacity: 1,
+                                        maxHeight: "150px",
+                                        objectFit: "cover",
+                                      }}
+                                    />
+                                  )}
+                                  <div className="d-flex flex-column gap-2">
+                                    <Button
+                                      color="primary"
+                                      outline
+                                      className="d-flex align-items-center gap-2"
+                                      style={{
+                                        borderRadius: "6px",
+                                        padding: "10px 14px",
+                                        fontWeight: 500,
+                                      }}
+                                      onClick={togglePictureModal}
+                                    >
+                                      <i className="mdi mdi-camera fs-4"></i>
+                                      Take Picture
+                                    </Button>
+                                    <Button
+                                      color="primary"
+                                      onClick={() => {
+                                        handleClick();
+                                      }}
+                                    >
+                                      Upload image
+                                    </Button>
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      ref={fileInputRef}
+                                      style={{ display: "none" }}
+                                      onChange={handleChange}
+                                    />
+                                  </div>
+
+                                  {isUpdate && uploadedFile?.id_picture && (
+                                    <Button
+                                      color="primary"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        getImageHandle({
+                                          path: uploadedFile?.id_picture,
+                                          url: "api/client/attachment",
+                                          showLoader: true,
+                                        });
+                                        toggleIsViewerOpen();
+                                      }}
+                                    >
+                                      <i className="mdi mdi-eye"></i>
+                                    </Button>
+                                  )}
+                                </div>
+                                {props.touched.id_picture &&
+                                  props.errors.id_picture && (
+                                    <div
+                                      className="text-danger mt-1"
+                                      style={{ fontSize: "80%" }}
+                                    >
+                                      {props.errors.id_picture}
+                                    </div>
+                                  )}
+                              </td>
+                            </tr>
+
+                            {/* {tableData?.company_type === "NON-FOOD-MASSEUR" && ( */}
+                            <tr>
+                              <td className="text-end">
+                                <Label>Training Certificate:</Label>
                               </td>
 
                               <td colSpan={2}>
@@ -644,11 +693,14 @@ function OccupationalPermitModal({
                                 </div>
                               </td>
                             </tr>
-                          )}
-                        </tbody>
-                      </Table>
-                    </Col>
-                  </Row>
+                            {/* )
+                            
+                            } */}
+                          </tbody>
+                        </Table>
+                      </Col>
+                    </Row>
+                  </>
                 )}
               </Form>
             )}

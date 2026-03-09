@@ -98,9 +98,14 @@ function MotorcadeModal({
   const handleFileChange = async (e, fieldName, index, props) => {
     const file = e.currentTarget.files[0];
     if (!file) return;
-    const compressed = await handleImageChange(e, index);
-    if (compressed) {
-      props.setFieldValue(fieldName, compressed);
+    if (file.type.startsWith("image")) {
+      const compressed = await handleImageChange(e, index);
+      if (compressed) {
+        props.setFieldValue(fieldName, compressed);
+        props.setFieldTouched(fieldName, true, true);
+      }
+    } else {
+      props.setFieldValue(fieldName, file);
       props.setFieldTouched(fieldName, true, true);
     }
   };
@@ -111,16 +116,16 @@ function MotorcadeModal({
     .required("This file is required")
     .test(
       "fileFormat",
-      "Only JPG and PNG images are allowed",
-      (value) => !value || SUPPORTED_FORMATS.includes(value.type)
+      "Only image and PDF files are allowed",
+      (value) => !value || SUPPORTED_FORMATS.includes(value.type),
     );
 
   const fileValidationOptional = Yup.mixed()
     .nullable()
     .test(
       "fileFormat",
-      "Only JPG and PNG images are allowed",
-      (value) => !value || SUPPORTED_FORMATS.includes(value.type)
+      "Only image and PDF files are allowed",
+      (value) => !value || SUPPORTED_FORMATS.includes(value.type),
     );
 
   const MotorcadeSchema = Yup.object().shape({
@@ -141,7 +146,7 @@ function MotorcadeModal({
       .required("End date is required")
       .min(
         Yup.ref("event_date_from"),
-        "End date must be after or equal to start date"
+        "End date must be after or equal to start date",
       ),
 
     event_time_from: Yup.string().required("Start time is required"),
@@ -539,7 +544,7 @@ function MotorcadeModal({
                     params: formData,
                   },
                   [],
-                  [toggleModal, toggleRefresh]
+                  [toggleModal, toggleRefresh],
                 );
               }
             }}

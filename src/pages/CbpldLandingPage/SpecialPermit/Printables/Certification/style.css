@@ -253,7 +253,6 @@
   text-align: justify;
   /* line-height: 1.5; */
   margin-bottom: calc(5px * var(--scale));
-  text-indent: 10px;
 }
 
 /* ===== MAYOR SIGNATORY SECTION ===== */
@@ -329,7 +328,10 @@
   text-align: center;
   line-height: 1.5;
   margin-top: 0;
-  padding: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-right: 60px;
+  padding-left: 60px;
 }
 
 /* ===== FIRST PARAGRAPH SECTION ===== */

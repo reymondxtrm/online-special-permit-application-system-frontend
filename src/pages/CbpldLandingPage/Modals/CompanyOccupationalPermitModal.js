@@ -127,10 +127,14 @@ export default function CompanyOccupationalPermitModal({
   const handleCedulaChange = async (e, index, props) => {
     const file = e.currentTarget.files[0];
     if (!file) return;
-
-    const compressed = await cedulaCompressor.handleImageChange(e, index);
-    if (compressed) {
-      props.setFieldValue(`employees[${index}].cedula`, compressed);
+    if (file.type.startsWith("image")) {
+      const compressed = await cedulaCompressor.handleImageChange(e, index);
+      if (compressed) {
+        props.setFieldValue(`employees[${index}].cedula`, compressed);
+        props.setFieldTouched(`employees[${index}].cedula`, true, true);
+      }
+    } else {
+      props.setFieldValue(`employees[${index}].cedula`, file);
       props.setFieldTouched(`employees[${index}].cedula`, true, true);
     }
   };
@@ -138,12 +142,26 @@ export default function CompanyOccupationalPermitModal({
   const handleCertificateChange = async (e, index, props) => {
     const file = e.currentTarget.files[0];
     if (!file) return;
-
-    const compressed = await certificateCompressor.handleImageChange(e, index);
-    if (compressed) {
+    if (file.type.startsWith("image")) {
+      const compressed = await certificateCompressor.handleImageChange(
+        e,
+        index,
+      );
+      if (compressed) {
+        props.setFieldValue(
+          `employees[${index}].certificate_of_employment`,
+          compressed,
+        );
+        props.setFieldTouched(
+          `employees[${index}].certificate_of_employment`,
+          true,
+          true,
+        );
+      }
+    } else {
       props.setFieldValue(
         `employees[${index}].certificate_of_employment`,
-        compressed,
+        file,
       );
       props.setFieldTouched(
         `employees[${index}].certificate_of_employment`,
@@ -154,15 +172,22 @@ export default function CompanyOccupationalPermitModal({
   };
 
   const handleTrainingChange = async (e, index, props) => {
-    const file = e.currentTarget.files[0];
     if (!file) return;
-
-    const compressed = await trainingCompressor.handleImageChange(e, index);
-    if (compressed) {
-      props.setFieldValue(
-        `employees[${index}].training_certificate`,
-        compressed,
-      );
+    if (file.type.startsWith("image")) {
+      const compressed = await trainingCompressor.handleImageChange(e, index);
+      if (compressed) {
+        props.setFieldValue(
+          `employees[${index}].training_certificate`,
+          compressed,
+        );
+        props.setFieldTouched(
+          `employees[${index}].training_certificate`,
+          true,
+          true,
+        );
+      }
+    } else {
+      props.setFieldValue(`employees[${index}].training_certificate`, file);
       props.setFieldTouched(
         `employees[${index}].training_certificate`,
         true,
@@ -233,6 +258,7 @@ export default function CompanyOccupationalPermitModal({
           fname: "",
           mname: "",
           lname: "",
+          suffix: "",
           birth_date: "",
           gender: "",
           address_line: "",
@@ -260,29 +286,32 @@ export default function CompanyOccupationalPermitModal({
       ],
     },
     onSubmit: async (values) => {
-      const request = getFormData(values);
-
-      const response = await handleSubmit(
-        {
-          url: "api/client/company-occupational-permit-application",
-          method: "POST",
-          params: request,
-          headers: { "Content-Type": "multipart/form-data" },
-          message: {
-            title: "Are you sure you want to submit?",
-            failedTitle: "FAILED",
-            success: "Success!",
-            error: "Unknown error occurred",
+      try {
+        const request = getFormData(values);
+        const response = await handleSubmit(
+          {
+            url: "api/client/company-occupational-permit-application",
+            method: "POST",
+            params: request,
+            headers: { "Content-Type": "multipart/form-data" },
+            message: {
+              title: "Are you sure you want to submit?",
+              failedTitle: "FAILED",
+              success: "Success!",
+              error: "Unknown error occurred",
+            },
           },
-        },
-        [],
-        [toggleModal],
-      );
-      if (response) {
-        // formikRef.current.reset();
-        cedulaCompressor.reset();
-        certificateCompressor.reset();
-        trainingCompressor.reset();
+          [],
+          [toggleModal],
+        );
+        if (response) {
+          // formikRef.current.reset();
+          cedulaCompressor.reset();
+          certificateCompressor.reset();
+          trainingCompressor.reset();
+        }
+      } catch (error) {
+        console.log(error);
       }
     },
   });
@@ -413,6 +442,22 @@ export default function CompanyOccupationalPermitModal({
                                     errors={
                                       validation?.errors?.employees?.[index]
                                         ?.lname
+                                    }
+                                    col={12}
+                                  />
+                                  <BasicInputField
+                                    type={"text"}
+                                    validation={validation}
+                                    name={`employees[${index}].suffix`}
+                                    value={employee?.suffix}
+                                    placeholder={"Suffix"}
+                                    touched={
+                                      validation?.touched?.employees?.[index]
+                                        ?.suffix
+                                    }
+                                    errors={
+                                      validation?.errors?.employees?.[index]
+                                        ?.suffix
                                     }
                                     col={12}
                                   />
@@ -664,7 +709,7 @@ export default function CompanyOccupationalPermitModal({
                               <td style={{ width: "10%" }}>
                                 <Input
                                   type="file"
-                                  accept="image/*"
+                                  accept="image/*,application/pdf"
                                   name={`employees[${index}].cedula`}
                                   disabled={cedulaCompressor.isCompressing}
                                   onChange={(e) =>
@@ -723,7 +768,7 @@ export default function CompanyOccupationalPermitModal({
                               <td style={{ width: "10%" }}>
                                 <Input
                                   type="file"
-                                  accept="image/*"
+                                  accept="image/*,application/pdf"
                                   disabled={certificateCompressor.isCompressing}
                                   onChange={(e) =>
                                     handleCertificateChange(
@@ -785,7 +830,7 @@ export default function CompanyOccupationalPermitModal({
                                 <td style={{ width: "10%" }}>
                                   <Input
                                     type="file"
-                                    accept="image/*"
+                                    accept="image/*,application/pdf"
                                     disabled={trainingCompressor.isCompressing}
                                     onChange={(e) =>
                                       handleTrainingChange(e, index, validation)

@@ -61,6 +61,13 @@ const DownloadButton = () => {
         "Time Issued",
         "Control No",
         "Requestor Name",
+        "Date of Birth",
+        "Age",
+        "Gender",
+        "Home Address",
+        "Company Name",
+        "Company Address",
+        "Occupation",
         "Duration  (in minutes)",
       ]);
     } else {
@@ -122,10 +129,24 @@ const DownloadButton = () => {
           item.ended_at_time,
           item.control_number,
           item.name_of_requestor,
+          item.date_of_birth,
+          item.age,
+          item.gender,
+          item.address,
+          item.company_name,
+          item.company_address,
+          item.occupation,
           item.parsed_duration,
         ]);
       });
       ws_data.push([
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
         "",
         "",
         "",

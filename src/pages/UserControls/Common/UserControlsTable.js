@@ -41,6 +41,7 @@ const UserControlsTable = ({
       fname: selectedUser?.first_name || "",
       mname: selectedUser?.middle_name || "",
       lname: selectedUser?.last_name || "",
+      suffix: selectedUser?.suffix || "",
       username: selectedUser?.username || "",
       email: selectedUser?.email || "",
       contact_no: selectedUser?.user_phone_numbers?.[0]?.phone_number || "",
@@ -235,6 +236,15 @@ const UserControlsTable = ({
                       width: "10%",
                       cursor: "pointer",
                     }}
+                    onClick={() => sortData("last_name")}
+                  >
+                    Suffix
+                  </th>
+                  <th
+                    style={{
+                      width: "10%",
+                      cursor: "pointer",
+                    }}
                     onClick={() => sortData("email")}
                   >
                     Email
@@ -342,6 +352,17 @@ const UserControlsTable = ({
                                   value={validation.values.lname}
                                   touched={validation.touched.lname}
                                   errors={validation.errors.lname}
+                                  col="12"
+                                />
+                              </td>
+                              <td>
+                                <BasicInputField
+                                  name={"suffix"}
+                                  validation={validation}
+                                  type="text"
+                                  value={validation.values.suffix}
+                                  touched={validation.touched.suffix}
+                                  errors={validation.errors.suffix}
                                   col="12"
                                 />
                               </td>
@@ -507,6 +528,7 @@ const UserControlsTable = ({
                             <>
                               <td>{`${items?.middle_name || ""}`}</td>
                               <td>{items?.last_name || ""}</td>
+                              <td>{items?.suffix || ""}</td>
                             </>
                           )}
                           <td>{items?.email}</td>

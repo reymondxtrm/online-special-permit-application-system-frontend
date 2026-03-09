@@ -265,6 +265,7 @@ export default function OccupationalTableIndividualAdmin({
               status === "returned") && <th> Mode of Payment</th>}
             {status === "for_payment_approval" || status === "returned" ? (
               <>
+                <th>OR No.</th>
                 <th>Official Receipt</th>
               </>
             ) : (
@@ -302,8 +303,9 @@ export default function OccupationalTableIndividualAdmin({
                   )}
                   <td className="fw-bold">
                     {`${application?.user?.fname} ${
-                      application?.user?.mname || ""
-                    } ${application?.user?.lname}`}{" "}
+                      application?.user?.mname ?? " "
+                    } ${application?.user?.lname}`}
+                    {`${application?.user?.suffix ?? ""}`}
                     {application?.mark_as_read ? (
                       ""
                     ) : (
@@ -336,6 +338,12 @@ export default function OccupationalTableIndividualAdmin({
                   )}
                   {(status === "declined" || status === "returned") && (
                     <td>{application?.status_histories?.[0]?.remarks}</td>
+                  )}
+                  {(status === "for_payment_approval" ||
+                    status === "returned") && (
+                    <td>
+                      {application?.order_of_payment?.payment_detail?.or_no}
+                    </td>
                   )}
                   <td>
                     {status === "for_payment_approval" ||
@@ -419,6 +427,14 @@ export default function OccupationalTableIndividualAdmin({
                             }}
                           >
                             Update Permit Duration
+                          </DropdownItem>
+                          <DropdownItem
+                            onClick={() => {
+                              toggleOccupationalRequestModal();
+                              setApplicationId(application?.id);
+                            }}
+                          >
+                            View Request Form
                           </DropdownItem>
                         </DropdownMenu>
                       </UncontrolledDropdown>

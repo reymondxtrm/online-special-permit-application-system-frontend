@@ -49,47 +49,7 @@ function MayorsCertificate() {
                       <Select
                         isMulti
                         isClearable={true}
-                        // name={`ppaDetails.${index}.sector`}
                         placeholder="Select Purpose"
-                        // onChange={(selectedOptions) => {
-                        //   if (selectedOptions.length === 0) {
-                        //     props.setFieldValue("sector", null);
-                        //     selectedSectorHandler([]);
-                        //     // Clear all offices when sector is changed
-                        //     props.setFieldValue("ppaDetails", [
-                        //       {
-                        //         ppaName: "",
-                        //         officeDetails: [],
-                        //       },
-                        //     ]);
-                        //     officeStateHandler();
-                        //   } else {
-                        //     props.setFieldValue(
-                        //       `ppaDetails.${index}.sector`,
-                        //       selectedOptions
-                        //     );
-                        //     selectedSectorHandler(selectedOptions); // Update selected sectors
-                        //     officeStateHandler();
-                        //   }
-                        // }}
-                        // onBlur={() => {
-                        //   props.handleBlur({
-                        //     target: {
-                        //       name: " `ppaDetails.${index}.sector`",
-                        //     },
-                        //   });
-                        // }}
-                        // options={sectorOptions}
-                        // value={props.values.ppaDetails.sector || []}
-                        // classNamePrefix="select2-selection"
-                        // invalid={
-                        //   props.touched.ppaDetails &&
-                        //   props.touched.ppaDetails[index] &&
-                        //   props.touched.ppaDetails[index].sector &&
-                        //   !!props.errors.ppaDetails &&
-                        //   !!props.errors.ppaDetails[index] &&
-                        //   !!props.errors.ppaDetails[index].sector
-                        // }
                       />
                     </FormGroup>
                   </Col>

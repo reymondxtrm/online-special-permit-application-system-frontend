@@ -17,6 +17,7 @@ import {
 } from "reactstrap";
 import classnames from "classnames";
 import ReactSimpleImageViewer from "react-simple-image-viewer";
+import { Document, Page, pdfjs } from "react-pdf";
 
 import axios from "axios";
 import Viewer from "react-viewer";
@@ -29,7 +30,6 @@ function AttachmentModal({
   mainActiveTab = "individual_permit",
   isClient = false,
 }) {
-  console.log(uploadedFiles);
   const getActiveTabInitialState = (applicationType) => {
     if (applicationType == "mayors_permit" || applicationType == "good_moral") {
       return "Police Clearance";
@@ -47,8 +47,11 @@ function AttachmentModal({
 
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
+  const [fileType, setFileType] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
+  const [numPages, setNumPages] = useState(null);
   const blobUrlRef = useRef(null);
+
   const fileMapping = {
     mayors_permit: {
       "Police Clearance": uploadedFiles?.police_clearance,
@@ -91,6 +94,9 @@ function AttachmentModal({
       "Training Certificate": uploadedFiles?.training_certificate,
     },
   };
+  function onDocumentLoadSuccess({ numPages }) {
+    setNumPages(numPages);
+  }
   useEffect(() => {
     const filePath = fileMapping?.[applicationType]?.[activeTab];
 
@@ -107,12 +113,18 @@ function AttachmentModal({
         });
 
         if (response?.data) {
-          if (blobUrlRef.current) {
-            URL.revokeObjectURL(blobUrlRef.current);
+          if (response.data.type.startsWith("image")) {
+            if (blobUrlRef.current) {
+              URL.revokeObjectURL(blobUrlRef.current);
+            }
+            const newBlobUrl = URL.createObjectURL(response.data);
+            blobUrlRef.current = newBlobUrl;
+            setCurrentImage(newBlobUrl);
+            setFileType("image");
+          } else {
+            setCurrentImage(response.data);
+            setFileType("file");
           }
-          const newBlobUrl = URL.createObjectURL(response.data);
-          blobUrlRef.current = newBlobUrl;
-          setCurrentImage(newBlobUrl);
         }
         setIsFetching(false);
       } catch (error) {
@@ -150,7 +162,11 @@ function AttachmentModal({
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement("a");
         link.href = url;
-        link.setAttribute("download", "PoliceClearance-71.jpg"); // filename
+        if (response.data.type.startsWith("application")) {
+          link.setAttribute("download", "attachment.pdf"); // filename
+        } else {
+          link.setAttribute("download", "attachment.png"); // filename
+        }
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -268,19 +284,41 @@ function AttachmentModal({
                                     </Spinner>
                                   </div>
                                 ) : (
-                                  <img
-                                    src={currentImage}
-                                    alt={activeTab}
-                                    style={{
-                                      cursor: "pointer",
-                                      maxWidth: "100%",
-                                    }}
-                                    onClick={
-                                      !isFetching && currentImage
-                                        ? toggleIsViewerOpen
-                                        : undefined
-                                    }
-                                  />
+                                  <>
+                                    {fileType === "image" ? (
+                                      <img
+                                        src={currentImage}
+                                        alt={activeTab}
+                                        style={{
+                                          cursor: "pointer",
+                                          maxWidth: "100%",
+                                        }}
+                                        onClick={
+                                          !isFetching && currentImage
+                                            ? toggleIsViewerOpen
+                                            : undefined
+                                        }
+                                      />
+                                    ) : (
+                                      <Document
+                                        file={currentImage}
+                                        onLoadSuccess={onDocumentLoadSuccess}
+                                      >
+                                        {Array.from(
+                                          new Array(numPages),
+                                          (_, index) => (
+                                            <Page
+                                              key={index}
+                                              pageNumber={index + 1}
+                                              renderTextLayer={false}
+                                              renderAnnotationLayer={false}
+                                              scale={1.3}
+                                            />
+                                          ),
+                                        )}
+                                      </Document>
+                                    )}
+                                  </>
                                 )
                               ) : (
                                 <p>No file uploaded for this category.</p>

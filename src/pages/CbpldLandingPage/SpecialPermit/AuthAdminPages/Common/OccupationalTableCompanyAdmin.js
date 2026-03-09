@@ -241,7 +241,11 @@ export default function OccupationalTableCompanyAdmin({ status }) {
             {(status === "declined" || status === "returned") && (
               <th>Remarks</th>
             )}
-            {status === "for_payment_approval" && <th> Mode of Payment</th>}
+            {status === "for_payment_approval" && (
+              <>
+                <th> Mode of Payment</th> <th>OR No.</th>
+              </>
+            )}
             <th>Attachment</th>
             {status === "for_payment_approval" ||
             status === "pending" ||
@@ -312,6 +316,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                     <td>{company?.user_addresses[0]?.company_fulladdress}</td>
                     <td colSpan={3}></td>
                     <td></td>
+                    <td></td>
                   </tr>
 
                   {selectedRow?.includes(companyIndex)
@@ -332,13 +337,17 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                 borderColor: item.disable ? "#EF5350" : null,
                               }}
                             >
-                              <td></td>
+                              <td>{index + 1}</td>
                               {(status === "for_signature" ||
                                 status === "completed") && (
                                 <td>{item?.reference_no}</td>
                               )}
                               <td>
-                                {`${item?.corporation_member?.fname}  ${item?.corporation_member?.mname} ${item?.corporation_member?.lname}`}{" "}
+                                {`${item?.corporation_member?.fname}  ${
+                                  item?.corporation_member?.mname ?? ""
+                                } ${item?.corporation_member?.lname} ${
+                                  item?.corporation_member?.suffix ?? ""
+                                }`}{" "}
                                 {item?.mark_as_read ? (
                                   ""
                                 ) : (
@@ -359,21 +368,29 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                 }
                               </td>
                               {status === "for_payment_approval" && (
-                                <td>
-                                  <Badge
-                                    color={
-                                      item?.order_of_payment?.payment_detail
-                                        ?.payment_type === "online"
-                                        ? "info"
-                                        : "warning"
-                                    }
-                                  >
+                                <>
+                                  <td>
+                                    <Badge
+                                      color={
+                                        item?.order_of_payment?.payment_detail
+                                          ?.payment_type === "online"
+                                          ? "info"
+                                          : "warning"
+                                      }
+                                    >
+                                      {
+                                        item?.order_of_payment?.payment_detail
+                                          ?.payment_type
+                                      }
+                                    </Badge>
+                                  </td>
+                                  <td>
                                     {
-                                      item?.order_of_payment?.payment_detail
-                                        ?.payment_type
+                                      item.order_of_payment?.payment_detail
+                                        ?.or_no
                                     }
-                                  </Badge>
-                                </td>
+                                  </td>
+                                </>
                               )}
                               {(status === "declined" ||
                                 status === "returned") && (
@@ -463,6 +480,14 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                       }}
                                     >
                                       Update Permit Duration
+                                    </DropdownItem>
+                                    <DropdownItem
+                                      onClick={() => {
+                                        toggleOccupationalRequestModal();
+                                        setApplicationId(item?.id);
+                                      }}
+                                    >
+                                      View Request Form
                                     </DropdownItem>
                                   </DropdownMenu>
                                 </UncontrolledDropdown>

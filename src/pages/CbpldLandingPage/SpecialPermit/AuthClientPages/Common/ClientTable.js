@@ -42,12 +42,13 @@ import RecorridaModal from "pages/CbpldLandingPage/Modals/RecorridaModal";
 import UseOfGovernmentPropertyModal from "pages/CbpldLandingPage/Modals/UseOfGovernmentPropertyModal";
 import ReuploadCedulaModal from "../Modals/ReuploadCedulaModal";
 import TableLoaders from "components/Loaders/TableLoaders";
+import FileViewerModal2 from "../../AuthAdminPages/AdminControls/Modals/FileViewerModal2";
 const ClientTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
 
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
-  const { getImageHandle, currentImage, isFetching } = useGetImage();
+  const { getImageHandle, currentImage, isFetching, fileType } = useGetImage();
   const [refreshPage, setrefreshPage] = useState(false);
   const [overTheCounterModal, setoverTheCounterModal] = useState(false); // State for selected application's uploaded files
   const [selectedRow, setSelectedRow] = useState([]);
@@ -92,6 +93,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
     setShowAttachmentModal((prev) => !prev);
   };
   const toggleIsViewerOpen = () => {
+    console.log(currentImage);
     setIsViewerOpen((prev) => !prev);
   };
   const toggleCedulaApplicationForm = () => {
@@ -369,19 +371,28 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
   );
   return (
     <>
-      {isViewerOpen && currentImage && isFetching === false && (
-        <ImageViewer
-          src={[currentImage]}
-          currentIndex={0}
-          onClose={toggleIsViewerOpen}
-          backgroundStyle={{
-            backgroundColor: "rgba(0,0,0,0.8)",
-            zIndex: 9999,
-          }}
-          closeOnClickOutside={true}
-          disableZoom={false} // ✔ enables zoom
-        />
-      )}
+      {isViewerOpen &&
+        currentImage &&
+        isFetching === false &&
+        (fileType === "image" ? (
+          <ImageViewer
+            src={[currentImage]}
+            currentIndex={0}
+            onClose={toggleIsViewerOpen}
+            backgroundStyle={{
+              backgroundColor: "rgba(0,0,0,0.8)",
+              zIndex: 9999,
+            }}
+            closeOnClickOutside={true}
+            disableZoom={false} // ✔ enables zoom
+          />
+        ) : (
+          <FileViewerModal2
+            file={currentImage}
+            toggle={toggleIsViewerOpen}
+            isOpen={isViewerOpen}
+          />
+        ))}
       {status === "returned" ? (
         <ReuploadModal
           toggleModal={toggleReUploadModal}
@@ -558,6 +569,9 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                 ) : null}
               </th>
               <th>#</th>
+              {(status === "for_signature" || status === "completed") && (
+                <th>Reference No.</th>
+              )}
 
               {(applicationType === "mayors_permit" ||
                 applicationType === "good_moral") && (
@@ -716,7 +730,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                     <td>
                       <div className="d-flex gap-2">{`${index + 1}.`}</div>
                     </td>
-                    {status === "for_signature" && (
+                    {(status === "for_signature" || status === "completed") && (
                       <td>{application.reference_no}</td>
                     )}
 
@@ -930,10 +944,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                             </td>
                           </>
                         )}
-                        {status === "for_payment_approval" ||
-                          (status === "for_signature" && (
-                            <td>{application?.reference_no || ""}</td>
-                          ))}
+
                         {(status === "for_payment" ||
                           status === "for_payment_approval") && (
                           <td>{`₱ ${application?.order_of_payment?.total_amount}`}</td>

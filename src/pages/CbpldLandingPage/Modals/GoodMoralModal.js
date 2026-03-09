@@ -161,9 +161,14 @@ function GoodMoralModal({
   const handleFileChange = async (e, fieldName, index, props) => {
     const file = e.currentTarget.files[0];
     if (!file) return;
-    const compressed = await handleImageChange(e, index);
-    if (compressed) {
-      props.setFieldValue(fieldName, compressed);
+    if (file.type.startsWith("image")) {
+      const compressed = await handleImageChange(e, index);
+      if (compressed) {
+        props.setFieldValue(fieldName, compressed);
+        props.setFieldTouched(fieldName, true, true);
+      }
+    } else {
+      props.setFieldValue(fieldName, file);
       props.setFieldTouched(fieldName, true, true);
     }
   };
@@ -185,13 +190,18 @@ function GoodMoralModal({
   };
 
   const IMAGE_SIZE = 2 * 1024 * 1024;
-  const SUPPORTED_IMAGE_FORMATS = ["image/jpeg", "image/png", "image/jpg"];
+  const SUPPORTED_IMAGE_FORMATS = [
+    "image/jpeg",
+    "image/png",
+    "image/jpg",
+    "application/pdf",
+  ];
 
   const fileValidationOptional = Yup.mixed()
     .nullable()
     .test(
       "fileFormat",
-      "Only JPG and PNG images are allowed",
+      "Only image and Pdf files are allowed",
       (value) => !value || SUPPORTED_IMAGE_FORMATS.includes(value.type),
     );
 
@@ -199,7 +209,7 @@ function GoodMoralModal({
     .required("File is required")
     .test(
       "fileFormat",
-      "Only JPG and PNG images are allowed",
+      "Only image and Pdf files are allowed",
       (value) => value && SUPPORTED_IMAGE_FORMATS.includes(value.type),
     );
 
@@ -505,7 +515,7 @@ function GoodMoralModal({
                               <Input
                                 type="file"
                                 name="police_clearance"
-                                accept="image/*"
+                                accept="image/*,application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,
@@ -578,7 +588,7 @@ function GoodMoralModal({
                               <Input
                                 type="file"
                                 name="community_tax_certificate"
-                                accept="image/*"
+                                accept="image/*,application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,
@@ -652,7 +662,7 @@ function GoodMoralModal({
                               <Input
                                 type="file"
                                 name="barangay_clearance"
-                                accept="image/*"
+                                accept="image/*,application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,
@@ -725,7 +735,7 @@ function GoodMoralModal({
                               <Input
                                 type="file"
                                 name="fiscal_clearance"
-                                accept="image/*"
+                                accept="image/*,application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,
@@ -798,7 +808,7 @@ function GoodMoralModal({
                               <Input
                                 type="file"
                                 name="court_clearance"
-                                accept="image/*"
+                                accept="image/*,application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,

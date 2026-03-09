@@ -138,7 +138,6 @@ const publicRoutes = [
   { path: "/pages-500", component: Pages500 },
   { path: "/crypto-ico-landing", component: CryptoIcoLanding },
   { path: "/not-found", component: Pages404 },
-
   {
     path: "/email-verification",
     component: SpecialPermitEmailVerication,

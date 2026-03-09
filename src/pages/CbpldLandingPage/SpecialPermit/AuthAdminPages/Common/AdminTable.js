@@ -390,9 +390,11 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                   <th>Date To</th>
                 </>
               ) : null}
-
+              {status === "for_payment_approval" && <th>OR No.</th>}
               {(status !== "for_payment_approval" || status !== "returned") && (
-                <th>Attachment</th>
+                <>
+                  <th>Attachment</th>
+                </>
               )}
 
               {status === "returned" || status === "declined" ? (
@@ -543,7 +545,13 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                         <td>{application.user?.email}</td>
                       </>
                     ) : null}
-
+                    {(status === "for_payment_approval" ||
+                      status === "returned") && (
+                      <td>
+                        {application?.order_of_payment?.payment_detail?.or_no ||
+                          "N/A"}
+                      </td>
+                    )}
                     <td>
                       {status === "for_payment_approval" ||
                       status === "returned" ? (
@@ -581,21 +589,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                             >
                               Attachment
                             </Button>
-                            {/* <img
-                              src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`}
-                              alt={`Thumbnail`}
-                              style={{
-                                width: "100px",
-                                height: "50px",
-                                margin: "5px",
-                                cursor: "pointer",
-                              }}
-                              onClick={() =>
-                                openImageViewer(
-                                  `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`
-                                )
-                              }
-                            /> */}
                           </>
                         )
                       ) : (
@@ -658,6 +651,22 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                                     }}
                                   >
                                     Update Permit Duration
+                                  </DropdownItem>
+                                  <DropdownItem
+                                    onClick={() => {
+                                      if (
+                                        applicationType === "good_moral" ||
+                                        applicationType === "mayors_permit"
+                                      ) {
+                                        toggleMayorsAndGoodMoralRequestModal();
+                                        setApplicationId(application.id);
+                                      } else {
+                                        toggleRequestFormModal();
+                                        setApplicationId(application.id);
+                                      }
+                                    }}
+                                  >
+                                    View Request Form
                                   </DropdownItem>
                                 </DropdownMenu>
                               </UncontrolledDropdown>

@@ -6,6 +6,7 @@ import useImageCompressor from "./useImageCompressor";
 export default function useGetImage() {
   const [currentImage, setCurrentImage] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
+  const [fileType, setFileType] = useState("image");
   const [error, setError] = useState(null);
   const lastUrlRef = useRef(null);
   const {
@@ -50,6 +51,7 @@ export default function useGetImage() {
       });
 
       if (response?.data) {
+        setFileType(response.data.type.startsWith("image") ? "image" : "file");
         if (lastUrlRef.current) {
           try {
             URL.revokeObjectURL(lastUrlRef.current);
@@ -108,5 +110,6 @@ export default function useGetImage() {
     isFetching,
     error,
     cleanup,
+    fileType,
   };
 }

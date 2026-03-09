@@ -30,7 +30,7 @@ export default function GenerateOccupationalPermitModal({
       };
       fetchData();
     }
-  }, [applicationID]);
+  }, [applicationID, openModal]);
   const handleAfterPrint = () => {
     if (!applicationDetails) return;
 
