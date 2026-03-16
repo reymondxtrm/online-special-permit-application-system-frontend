@@ -1,5 +1,5 @@
 /* eslint-disable padded-blocks */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Container,
   Row,
@@ -37,6 +37,12 @@ import classnames from "classnames";
 import Pagination from "components/Pagination";
 import AdminTable from "../../Common/AdminTable";
 import OccupationalTables from "../../Common/OccupationalTables";
+import DashboardFilters from "pages/Dashboard/dashboardFilters";
+import {
+  getCompanyOccupatinalData,
+  getIndividualOccupationalApplications,
+  getTableData,
+} from "features/SpecialPermitAdmin";
 const ForApproval = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -122,6 +128,15 @@ const ForApproval = () => {
     fetchInitialCounts();
   }, []);
 
+  const action = useMemo(() => {
+    if (activeTab === "occupational" && childTab === "company") {
+      return getCompanyOccupatinalData;
+    } else if (activeTab === "occupational" && childTab === "individual") {
+      return getIndividualOccupationalApplications;
+    } else {
+      return getTableData;
+    }
+  }, [activeTab, childTab]);
   return (
     <React.Fragment>
       <div className="page-content">
@@ -130,6 +145,23 @@ const ForApproval = () => {
             title="Special Permit"
             breadcrumbItem="For Payment Applications"
           />
+          <Row>
+            <Col xs="12">
+              <Card>
+                <CardBody>
+                  <DashboardFilters
+                    action={action}
+                    tableParams={{
+                      permit_type: activeTab,
+                      status: "for_payment_approval",
+                      type: childTab || "",
+                    }}
+                  />
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+          <Row></Row>
 
           <Row>
             <Col xs="12">

@@ -1,5 +1,5 @@
 /* eslint-disable padded-blocks */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Container,
   Row,
@@ -37,6 +37,12 @@ import classnames from "classnames";
 import Pagination from "components/Pagination";
 import AdminTable from "../Common/AdminTable";
 import OccupationalTables from "../Common/OccupationalTables";
+import DashboardFilters from "pages/Dashboard/dashboardFilters";
+import {
+  getCompanyOccupatinalData,
+  getIndividualOccupationalApplications,
+  getTableData,
+} from "features/SpecialPermitAdmin";
 const Declined = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,7 +59,15 @@ const Declined = () => {
     use_of_government_property: 0,
     occupational_permit: 0,
   });
-
+  const action = useMemo(() => {
+    if (activeTab === "occupational" && childTab === "company") {
+      return getCompanyOccupatinalData;
+    } else if (activeTab === "occupational" && childTab === "individual") {
+      return getIndividualOccupationalApplications;
+    } else {
+      return getTableData;
+    }
+  }, [activeTab, childTab]);
   const handleTabSelect = (key) => {
     setActiveTab(key);
   };
@@ -126,6 +140,22 @@ const Declined = () => {
             title="Special Permit"
             breadcrumbItem="For Signature Applications"
           />
+          <Row>
+            <Col xs="12">
+              <Card>
+                <CardBody>
+                  <DashboardFilters
+                    action={action}
+                    tableParams={{
+                      permit_type: activeTab,
+                      status: "declined",
+                      type: childTab || "",
+                    }}
+                  />
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
           {/*
           <Row>
             <Col>

@@ -162,7 +162,7 @@ export default function MayorsAndGoodMoralRequestForm({
                                 borderColor: "red",
                                 width: "30px",
                                 height: "30px",
-                                // backgroundColor: column1 ? "black" : "",
+                                backgroundColor: column1 ? "black" : "",
                               }}
                             >
                               {" "}
@@ -183,7 +183,7 @@ export default function MayorsAndGoodMoralRequestForm({
                                 borderColor: "red",
                                 width: "30px",
                                 height: "30px",
-                                // backgroundColor: !column1 ? "black" : "",
+                                backgroundColor: !column1 ? "black" : "",
                               }}
                             ></div>
                             <div style={{ marginLeft: "120px" }}>
@@ -755,6 +755,17 @@ export default function MayorsAndGoodMoralRequestForm({
                     paddingTop: "40px",
                   }}
                 >
+                  <p
+                    className="p-0 m-0 fw-bold"
+                    style={{
+                      fontStyle: "italic",
+                      fontSize: "13px",
+                      paddingRight: "10px",
+                    }}
+                  >
+                    &quot; Note. This is system generated. No signature is
+                    required.&quot;
+                  </p>
                   <img src={butuanOnLogo} style={{ width: "180px" }} />
                   <p
                     className="p-0 m-0 fw-bold"

@@ -1,5 +1,5 @@
 /* eslint-disable padded-blocks */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Container,
   Row,
@@ -37,6 +37,12 @@ import classnames from "classnames";
 import Pagination from "components/Pagination";
 import AdminTable from "../../Common/AdminTable";
 import OccupationalTables from "../../Common/OccupationalTables";
+import {
+  getCompanyOccupatinalData,
+  getIndividualOccupationalApplications,
+  getTableData,
+} from "features/SpecialPermitAdmin";
+import DashboardFilters from "pages/Dashboard/dashboardFilters";
 const Returned = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -123,6 +129,15 @@ const Returned = () => {
     };
     fetchInitialCounts();
   }, []);
+  const action = useMemo(() => {
+    if (activeTab === "occupational" && childTab === "company") {
+      return getCompanyOccupatinalData;
+    } else if (activeTab === "occupational" && childTab === "individual") {
+      return getIndividualOccupationalApplications;
+    } else {
+      return getTableData;
+    }
+  }, [activeTab, childTab]);
   return (
     <React.Fragment>
       <div className="page-content">
@@ -131,7 +146,22 @@ const Returned = () => {
             title="Special Permit"
             breadcrumbItem="For Payment Applications"
           />
-
+          <Row>
+            <Col xs="12">
+              <Card>
+                <CardBody>
+                  <DashboardFilters
+                    action={action}
+                    tableParams={{
+                      permit_type: activeTab,
+                      status: "returned",
+                      type: childTab || "",
+                    }}
+                  />
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
           <Row>
             <Col xs="12">
               <Card>

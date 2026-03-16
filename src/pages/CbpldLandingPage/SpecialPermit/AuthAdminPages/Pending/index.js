@@ -1,5 +1,5 @@
 /* eslint-disable padded-blocks */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Container,
   Row,
@@ -38,6 +38,12 @@ import Pagination from "components/Pagination";
 import AdminTable from "../Common/AdminTable";
 import { set } from "lodash";
 import OccupationalTables from "../Common/OccupationalTables.js";
+import DashboardFilters from "pages/Dashboard/dashboardFilters";
+import {
+  getCompanyOccupatinalData,
+  getIndividualOccupationalApplications,
+  getTableData,
+} from "features/SpecialPermitAdmin";
 
 const Pending = () => {
   const dispatch = useDispatch();
@@ -121,6 +127,15 @@ const Pending = () => {
     };
     fetchInitialCounts();
   }, []);
+  const action = useMemo(() => {
+    if (activeTab === "occupational" && childTab === "company") {
+      return getCompanyOccupatinalData;
+    } else if (activeTab === "occupational" && childTab === "individual") {
+      return getIndividualOccupationalApplications;
+    } else {
+      return getTableData;
+    }
+  }, [activeTab, childTab]);
   return (
     <React.Fragment>
       <div className="page-content">
@@ -129,7 +144,22 @@ const Pending = () => {
             title="Special Permit"
             breadcrumbItem="Pending Applications"
           />
-
+          <Row>
+            <Col xs="12">
+              <Card>
+                <CardBody>
+                  <DashboardFilters
+                    action={action}
+                    tableParams={{
+                      permit_type: activeTab,
+                      status: "pending",
+                      type: childTab || "",
+                    }}
+                  />
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
           <Row>
             <Col xs="12">
               <Card>
