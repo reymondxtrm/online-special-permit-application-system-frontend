@@ -66,7 +66,6 @@ const SidebarContent = (props) => {
         parent2.classList.add("mm-show"); // ul tag
 
         const parent3 = parent2.parentElement; // li tag
-
         if (parent3) {
           parent3.classList.add("mm-active"); // li
           parent3.childNodes[0].classList.add("mm-active"); //a

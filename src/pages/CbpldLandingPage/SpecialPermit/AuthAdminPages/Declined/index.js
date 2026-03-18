@@ -138,7 +138,7 @@ const Declined = () => {
         <Container fluid>
           <Breadcrumbs
             title="Special Permit"
-            breadcrumbItem="For Signature Applications"
+            breadcrumbItem="Returned Applications"
           />
           <Row>
             <Col xs="12">
@@ -156,30 +156,12 @@ const Declined = () => {
               </Card>
             </Col>
           </Row>
-          {/*
-          <Row>
-            <Col>
-              <Card>
-                <CardBody>
-                  <Col md="3">
-                    <Label className="form-label">Select Year:</Label>
-                    <Select
-                      style={{ zIndex: "1" }}
-                      options={options}
-                      placeholder="Select Year"
-                    />
-                  </Col>
-                </CardBody>
-              </Card>
-            </Col>
-          </Row> */}
+
           <Row>
             <Col xs="12">
               <Card>
                 <CardBody>
                   <Tabs
-                    // defaultActiveKey="mayorsCertificate"
-
                     className="mb-3"
                     activeKey={activeTab}
                     onSelect={handleTabSelect}

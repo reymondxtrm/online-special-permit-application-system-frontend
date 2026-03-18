@@ -394,7 +394,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                               )}
                               {(status === "declined" ||
                                 status === "returned") && (
-                                <td>{item.status_histories?.[0]?.remarks}</td>
+                                <td>{item.latest_status_history?.remarks}</td>
                               )}
                               <td>
                                 {status === "for_payment_approval" ||

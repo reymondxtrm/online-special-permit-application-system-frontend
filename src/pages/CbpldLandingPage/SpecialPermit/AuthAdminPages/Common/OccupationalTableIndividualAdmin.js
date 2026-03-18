@@ -337,7 +337,7 @@ export default function OccupationalTableIndividualAdmin({
                     </td>
                   )}
                   {(status === "declined" || status === "returned") && (
-                    <td>{application?.status_histories?.[0]?.remarks}</td>
+                    <td>{application?.latest_status_history?.remarks}</td>
                   )}
                   {(status === "for_payment_approval" ||
                     status === "returned") && (
