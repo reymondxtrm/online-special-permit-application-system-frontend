@@ -43,6 +43,7 @@ import UseOfGovernmentPropertyModal from "pages/CbpldLandingPage/Modals/UseOfGov
 import ReuploadCedulaModal from "../Modals/ReuploadCedulaModal";
 import TableLoaders from "components/Loaders/TableLoaders";
 import FileViewerModal2 from "../../AuthAdminPages/AdminControls/Modals/FileViewerModal2";
+import { useSelectedPaymentDetails } from "hooks/Common/useSelectedPaymentDetails";
 const ClientTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
 
@@ -54,7 +55,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
   const [selectedRow, setSelectedRow] = useState([]);
 
   const [reuploadModal, setreuploadModal] = useState(false);
-  const [paymentDetails, setPaymentDetails] = useState([]);
+  // const [paymentDetails, setPaymentDetails] = useState([]);
   const [cedulaApplicationModal, setCedulaApplicationModal] = useState(false);
   const [attachmentModal, setShowAttachmentModal] = useState(false);
   const [selectedUploadedFiles, setSelectedUploadedFiles] = useState([]);
@@ -81,7 +82,10 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
     setrefreshPage(!refreshPage);
   };
   const specialPermitClient = useSelector((state) => state.specialPermitClient);
-
+  const paymentDetails = useSelectedPaymentDetails(
+    selectedRow,
+    specialPermitClient?.clientTableData?.data,
+  );
   const toggleReUploadModal = () => {
     setreuploadModal(!reuploadModal);
   };
@@ -184,27 +188,26 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
       setSelectedRow(selectedIds);
     }
   };
-
-  useEffect(() => {
-    if (selectedRow && specialPermitClient?.clientTableData?.data?.length > 0) {
-      const selectedTotal = specialPermitClient?.clientTableData?.data
-        ?.filter((app) => selectedRow.includes(app.id))
-        ?.reduce(
-          (acc, app) => {
-            const billed = app.order_of_payment?.billed_amount || 0;
-            const total = app.order_of_payment?.total_amount || 0;
-            acc.billed_amount += billed;
-            acc.total_amount += total;
-            acc.fullname = app.order_of_payment?.fullname || "";
-            acc.created_at = app.order_of_payment?.created_at || "";
-            acc.quantity += 1;
-            return acc;
-          },
-          { billed_amount: 0, total_amount: 0, quantity: 0 },
-        );
-      setPaymentDetails(selectedTotal);
-    }
-  }, [selectedRow, specialPermitClient?.clientTableData?.data?.length]);
+  // useEffect(() => {
+  //   if (selectedRow && specialPermitClient?.clientTableData?.data?.length > 0) {
+  //     const selectedTotal = specialPermitClient?.clientTableData?.data
+  //       ?.filter((app) => selectedRow.includes(app.id))
+  //       ?.reduce(
+  //         (acc, app) => {
+  //           const billed = app.order_of_payment?.billed_amount || 0;
+  //           const total = app.order_of_payment?.total_amount || 0;
+  //           acc.billed_amount += billed;
+  //           acc.total_amount += total;
+  //           acc.fullname = app.order_of_payment?.fullname || "";
+  //           acc.created_at = app.order_of_payment?.created_at || "";
+  //           acc.quantity += 1;
+  //           return acc;
+  //         },
+  //         { billed_amount: 0, total_amount: 0, quantity: 0 },
+  //       );
+  //     setPaymentDetails(selectedTotal);
+  //   }
+  // }, [selectedRow, specialPermitClient?.clientTableData?.data?.length]);
 
   const columnConfig = useMemo(
     () => [

@@ -66,6 +66,7 @@ function PaymentModal({
   const toggleGenerateModal = () => {
     setgenerateModal(!generateModal);
   };
+
   function getTransactionDate() {
     const d = new Date();
     return (
@@ -80,6 +81,7 @@ function PaymentModal({
     setTermsAndConditionsModal((prev) => !prev);
   };
   const user = useSelector((state) => state.user);
+
   const formatDate = (dateString) => {
     if (!dateString) return "No Date Provided"; // Handle missing date
     const date = new Date(dateString);
@@ -94,7 +96,7 @@ function PaymentModal({
   useEffect(() => {
     if (openModal) {
       setisLoading(true);
-      axios.get("api/client/user-details").then(
+      axios.get("api/user-details", { params: { applicationId } }).then(
         (res) => {
           setisLoading(false);
           setuserData(res.data);
@@ -156,7 +158,7 @@ function PaymentModal({
   const eor_collection = useMemo(() => {
     // If modal is not open, return empty immediately
     if (!openModal) return [];
-
+    console.log(paymentDetails);
     const quantity = paymentDetails?.quantity ?? 0;
     const totalAmount = paymentDetails?.total_amount ?? 0;
     const typeLabel = type?.label ?? "";
@@ -904,7 +906,7 @@ function PaymentModal({
 
                                         handleSubmit(
                                           {
-                                            url: "api/client/pay-permit",
+                                            url: "api/pay-permit",
                                             message: {
                                               title:
                                                 "Are you sure you want to Proceed?",

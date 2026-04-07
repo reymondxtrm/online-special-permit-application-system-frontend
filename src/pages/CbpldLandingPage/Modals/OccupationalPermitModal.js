@@ -393,7 +393,7 @@ function OccupationalPermitModal({
                                 <div className="d-flex gap-2">
                                   <div
                                     className="flex-grow-1"
-                                    style={{ maxWidth: "400px" }}
+                                    style={{ maxWidth: "100%" }}
                                   >
                                     <Input
                                       accept="image/*,application/pdf"
@@ -476,7 +476,7 @@ function OccupationalPermitModal({
                                 <div className="d-flex gap-2">
                                   <div
                                     className="flex-grow-1"
-                                    style={{ maxWidth: "400px" }}
+                                    style={{ maxWidth: "100%" }}
                                   >
                                     <Input
                                       accept="image/*,application/pdf"
@@ -630,7 +630,40 @@ function OccupationalPermitModal({
                                   )}
                               </td>
                             </tr>
-
+                            <tr>
+                              <td className="py-0"></td>
+                              <td className="pb-0">
+                                <div
+                                  style={{
+                                    backgroundColor: "#00c3ff11",
+                                    width: "100%",
+                                    height: "40px",
+                                    borderRadius: "10px",
+                                    border: "2px solid #00c3fff8",
+                                    // marginBottom: "10px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  <i
+                                    className="mdi mdi-information-outline fs-2"
+                                    style={{
+                                      color: "#00c3fffd",
+                                      margin: "5px",
+                                    }}
+                                  ></i>
+                                  <p
+                                    className="p-0 m-0"
+                                    style={{
+                                      color: "#237088fd",
+                                      fontSize: "10px",
+                                    }}
+                                  >
+                                    For Massage Therapists.
+                                  </p>
+                                </div>
+                              </td>
+                            </tr>
                             {/* {tableData?.company_type === "NON-FOOD-MASSEUR" && ( */}
                             <tr>
                               <td className="text-end">
@@ -641,7 +674,7 @@ function OccupationalPermitModal({
                                 <div className="d-flex gap-2">
                                   <div
                                     className="flex-grow-1"
-                                    style={{ maxWidth: "400px" }}
+                                    style={{ maxWidth: "100%" }}
                                   >
                                     <Input
                                       accept="image/*"
@@ -662,6 +695,7 @@ function OccupationalPermitModal({
                                         )
                                       }
                                     />
+
                                     {props.touched.training_certificate &&
                                       props.errors.training_certificate && (
                                         <div

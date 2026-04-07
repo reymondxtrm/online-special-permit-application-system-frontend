@@ -26,7 +26,6 @@ import { FieldArray, Formik } from "formik";
 import useSubmit from "hooks/Common/useSubmit";
 import { loginUser } from "../../../features/user/userSlice";
 import { userSlice } from "../../../features/user/userSlice";
-
 import { useHistory } from "react-router-dom";
 function SpecialPermit({ props }) {
   const [loginModalState, setloginModalState] = useState(false);
@@ -41,7 +40,7 @@ function SpecialPermit({ props }) {
     dispatch(userSlice.actions.clearState());
   }, []);
   const loginStatus = useSelector((state) => state.user);
- 
+
   const formikRef = useRef(null);
   const handleSubmit = useSubmit();
   const history = useHistory(); // Initialize useHistory
@@ -55,6 +54,7 @@ function SpecialPermit({ props }) {
   const handleForgotPassword = () => {
     props.history.push("/forgot-password");
   };
+
   return (
     <React.Fragment>
       <LoginModal
@@ -104,7 +104,7 @@ function SpecialPermit({ props }) {
                     }}
                     onSubmit={(values) => {
                       dispatch(
-                        loginUser({ data: values, history: props.history })
+                        loginUser({ data: values, history: props.history }),
                       );
                     }}
                   >

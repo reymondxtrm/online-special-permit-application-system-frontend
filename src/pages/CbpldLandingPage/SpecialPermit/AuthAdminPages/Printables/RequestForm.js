@@ -52,7 +52,6 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
       document.title = originalTitle;
     }, 5000);
   };
-  console.log(application);
   const formater = (date) => {
     const newDate = new Date(date);
     const formatedDate = newDate.toLocaleDateString("en-US");

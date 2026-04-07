@@ -49,6 +49,8 @@ import { useDispatch, useSelector } from "react-redux";
 import useGetImage from "hooks/Common/useGetImage";
 import FileViewerModal from "../AdminControls/Modals/FileViewerModal";
 import EditDurationModal from "../Dashboard/Modal/EditDurationModal";
+import PaymentModal from "../../AuthClientPages/Modals/PaymentModal";
+import { useSelectedPaymentDetails } from "hooks/Common/useSelectedPaymentDetails";
 
 const AdminTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
@@ -78,12 +80,19 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const [openRequestFormModal, setOpenRequestFormModal] = useState(false);
   const [completedPermit, setCompletedPermit] = useState(null);
   const [updateDurationModal, setUpdateDurationModal] = useState(false);
+  const [overTheCounterModal, setOverTheCounterModal] = useState(false);
+  const [selectedRow, setSelectedRow] = useState([]);
+  // const [paymentDetails, setPaymentDetails] = useState([]);
   const [
     openMayorsAndGoodMoralRequestForm,
     setOpenMayorsAndGoodMoralRequestForm,
   ] = useState(false);
   const dispatch = useDispatch();
   const admin = useSelector((state) => state.specialPermitAdmin);
+  const paymentDetails = useSelectedPaymentDetails(
+    selectedRow,
+    admin?.tableData?.data,
+  );
   const filter = useSelector((state) => state.dateFilter);
   const params = useMemo(() => {
     return status === "completed"
@@ -103,10 +112,18 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
 
     return `${firstName} ${middleName} ${lastName}`;
   };
+  /*************  ✨ Windsurf Command ⭐  *************/
+  /**
+   * Toggle the generate modal
+   * @return {void}
+   */
+  /*******  7c2d4c4a-dffb-4dbd-bcce-be0cce0c8777  *******/
   const toggleGenerateModal = () => {
     setgenerateModal(!generateModal);
   };
-
+  const toggleOverTheCounterModal = () => {
+    setOverTheCounterModal((prev) => !prev);
+  };
   const toggleRemarksModal = useCallback(() => {
     setremarksModal((prev) => !prev);
   }, []);
@@ -238,6 +255,16 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
           fileUrl={completedPermit}
           isOpen={pdfViewer}
           toggle={togglePdfViewer}
+        />
+      )}
+      {overTheCounterModal && (
+        <PaymentModal
+          toggleModal={toggleOverTheCounterModal}
+          openModal={overTheCounterModal}
+          applicationId={selectedRow}
+          toggleRefresh={toggleRefresh}
+          applicationType={applicationType}
+          paymentDetails={paymentDetails}
         />
       )}
       {status === "pending" ? (
@@ -391,11 +418,14 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                 </>
               ) : null}
               {status === "for_payment_approval" && <th>OR No.</th>}
-              {(status !== "for_payment_approval" || status !== "returned") && (
-                <>
-                  <th>Attachment</th>
-                </>
-              )}
+
+              {status !== "for_payment_approval" &&
+                status !== "returned" &&
+                status !== "for_payment" && (
+                  <>
+                    <th>Attachment </th>
+                  </>
+                )}
 
               {status === "returned" || status === "declined" ? (
                 <th>Remarks</th>
@@ -404,7 +434,8 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
               {status === "pending" ||
               status === "for_signature" ||
               status === "for_payment_approval" ||
-              status === "completed" ? (
+              status === "completed" ||
+              status === "for_payment" ? (
                 <th>Actions</th>
               ) : null}
               {/* { ? <th>Actions</th> : null}
@@ -498,12 +529,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                     applicationType === "recorrida" ||
                     applicationType === "use_of_government_property" ? (
                       <>
-                        {/* <td>
-                          {
-                            application.user?.user_phone_numbers[0]
-                              ?.phone_number
-                          }
-                        </td> */}
                         <td>
                           {application?.requestor_name}{" "}
                           {application?.mark_as_read ? (
@@ -531,17 +556,9 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                       <>
                         <td>{application.application_purpose?.name}</td>
 
-                        {/* {applicationType === "good_moral" && (
-                        <th>Name of Employer</th>
-                      )} */}
                         <td>{application.user?.gender}</td>
                         <td>{application.user?.email}</td>
-                        {/* <td>
-                          {
-                            application.user?.user_phone_numbers[0]
-                              ?.phone_number
-                          }
-                        </td> */}
+
                         <td>{application.user?.email}</td>
                       </>
                     ) : null}
@@ -552,10 +569,10 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                           "N/A"}
                       </td>
                     )}
-                    <td>
-                      {status === "for_payment_approval" ||
-                      status === "returned" ? (
-                        application?.order_of_payment?.payment_detail
+                    {(status === "for_payment_approval" ||
+                      status === "returned") && (
+                      <td>
+                        {application?.order_of_payment?.payment_detail
                           ?.payment_type === "online" ? (
                           <>
                             <Button
@@ -590,9 +607,14 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               Attachment
                             </Button>
                           </>
-                        )
-                      ) : (
-                        <div className="d-flex gap-2">
+                        )}
+                      </td>
+                    )}
+
+                    {status !== "for_payment_approval" &&
+                      status !== "returned" &&
+                      status !== "for_payment" && (
+                        <td>
                           <Button
                             color="success"
                             onClick={() =>
@@ -601,10 +623,77 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                           >
                             Attachments
                           </Button>
-                        </div>
+                        </td>
                       )}
-                    </td>
 
+                    {status === "for_payment" && (
+                      <td>
+                        <div className="flex">
+                          <UncontrolledDropdown
+                            className="me-2"
+                            direction="end"
+                          >
+                            <DropdownToggle caret color="primary">
+                              Actions
+                            </DropdownToggle>
+                            <DropdownMenu
+                              style={{
+                                maxHeight: "200px",
+                                overflowY: "auto",
+                                zIndex: 1050, // High z-index to appear above
+                                position: "absolute", // Ensure it's detached from parent
+                              }}
+                            >
+                              <DropdownItem
+                                color="success"
+                                onClick={() =>
+                                  handleViewAttachments(
+                                    application.uploaded_file,
+                                  )
+                                }
+                              >
+                                Attachments
+                              </DropdownItem>
+                              <DropdownItem
+                                color="success"
+                                disabled={
+                                  application?.order_of_payment
+                                    ?.payment_on_progress === 1
+                                }
+                                onClick={(e) => {
+                                  e.preventDefault();
+
+                                  if (!application?.id) {
+                                    console.error(
+                                      "Application data is missing",
+                                    );
+                                    return;
+                                  }
+
+                                  if (
+                                    application?.order_of_payment
+                                      ?.payment_on_progress === 1
+                                  ) {
+                                    Swal.fire({
+                                      icon: "info",
+                                      title: "Processing Payment",
+                                      text: "Your application payment is currently being processed. Please wait for further updates.",
+                                      confirmButtonText: "OK",
+                                    });
+                                    return;
+                                  }
+
+                                  setSelectedRow([application?.id]);
+                                  toggleOverTheCounterModal();
+                                }}
+                              >
+                                Upload Payment
+                              </DropdownItem>
+                            </DropdownMenu>
+                          </UncontrolledDropdown>
+                        </div>
+                      </td>
+                    )}
                     {applicationType !== "occupational_permit" &&
                       status === "completed" && (
                         <>
@@ -674,7 +763,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                           </td>
                         </>
                       )}
-
                     {status === "returned" || status === "declined" ? (
                       <td>
                         {application.status_histories
