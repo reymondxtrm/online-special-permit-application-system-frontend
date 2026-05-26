@@ -105,28 +105,12 @@ const SidebarContent = (props) => {
     return allowAccess;
   };
 
-  // const checkRole = (roles = [], userType) => {
-  //   if (userDetails.user_type === userType) {
-  //     if (roles.length === 0) {
-  //       return true;
-  //     } else {
-  //       roles.map((role) => {
-  //         if (userDetails.roles.includes(role)) {
-  //           return true;
-  //         }
-  //       });
-  //     }
-  //   }
-
-  //   return false;
-  // };
-
   return (
     <React.Fragment>
       <SimpleBar className="h-100" ref={ref}>
         <div id="sidebar-menu">
-          {checkUserType(["client"]) && (
-            <ul className="metismenu list-unstyled" id="side-menu">
+          <ul className="metismenu list-unstyled" id="side-menu">
+            {checkUserType(["client"]) && (
               <>
                 <li>
                   <Link to="/client/services">
@@ -189,22 +173,11 @@ const SidebarContent = (props) => {
                   </Link>
                 </li>
               </>
-            </ul>
-          )}
-          {checkUserType(["admin"]) && checkRole(["special_permit_admin"]) && (
-            <>
-              <ul className="metismenu list-unstyled" id="side-menu">
-                <li>
-                  <p
-                    style={{
-                      color: "white",
-                      marginTop: "20px",
-                      marginLeft: "10px",
-                    }}
-                  >
-                    {props.t("ONLINE TRANSACTION")}
-                  </p>
-                </li>
+            )}
+
+            {checkUserType(["admin"]) && checkRole(["special_permit_admin"]) && (
+              <>
+
                 <li>
                   <Link to="/admin/analytics">
                     <i className="mdi mdi-view-dashboard fs-2"></i>
@@ -280,32 +253,14 @@ const SidebarContent = (props) => {
                   </li>
                 )}
                 <li>
-                  <p
-                    style={{
-                      color: "white",
-                      marginTop: "20px",
-                      marginLeft: "10px",
-                    }}
-                  >
-                    {props.t("OFFLINE TRANSACTION")}
-                  </p>
-                </li>
-                <li>
-                  <Link to="/offline-transaction/dashboard">
+                  <Link to="/offline-transaction">
                     <i className="bx bxs-user-detail fs-2"></i>
-                    <span>{props.t("Dashboard")}</span>
+                    <span>{props.t("Offline Transaction")}</span>
                   </Link>
                 </li>
-
-                <li>
-                  <Link to="/offline-transaction/release">
-                    <i className="bx bxs-user-detail fs-2"></i>
-                    <span>{props.t("For Releasing")}</span>
-                  </Link>
-                </li>
-              </ul>
-            </>
-          )}
+              </>
+            )}
+          </ul>
         </div>
       </SimpleBar>
     </React.Fragment>

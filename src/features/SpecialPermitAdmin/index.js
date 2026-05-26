@@ -95,6 +95,41 @@ export const getSpecialPermitAnalyticsData = createAsyncThunk(
     }
   },
 );
+export const getOfflineTransaction = createAsyncThunk(
+  "specialPermitAdmin/getOfflineTransaction",
+  async (params, thunkAPI) => {
+    try {
+      const response = await axios({
+        url: "api/admin/get/offline-transactions",
+        method: "GET",
+        params: { ...params },
+      });
+      if (response) {
+        return response.data;
+      }
+      return thunkAPI.rejectWithValue(response.data);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  },
+);
+export const getOfflineTransactionDetails = createAsyncThunk(
+  "specialPermitAdmin/getOfflineTransactionDetails",
+  async (params, thunkAPI) => {
+    try {
+      const response = await axios({
+        url: `api/admin/get-single-offline-transaction/${params.id}`,
+        method: "GET",
+      });
+      if (response) {
+        return response.data;
+      }
+      return thunkAPI.rejectWithValue(response.data);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  },
+);
 
 export const SpecialPermitAdminSlice = createSlice({
   name: "specialPermitAdmin",
@@ -103,17 +138,22 @@ export const SpecialPermitAdminSlice = createSlice({
     getTableDataIsFetching: false,
     companyOccupational: [],
     individualOccupational: [],
+    offlineTransaction: [],
+    singleOfflineTransaction: [],
     analyticsData: [],
     errors: null,
     getAnalyticsDataIsFetching: false,
     getCompanyOccupationalData: false,
+    getOfflineTransactionDetails: false,
     getIndividualOccupationalData: false,
+    getOfflineTransaction: false,
     filter_date_from: "",
     filter_date_to: "",
     filter_type: {},
     status: "",
     permit_type: "",
     params: {},
+    selectedApplicationId: [],
   },
   reducers: {
     setDataProps: (state, action) => {
@@ -141,6 +181,9 @@ export const SpecialPermitAdminSlice = createSlice({
       state.filter_date_from = payload.date_from;
       state.filter_date_to = payload.date_to;
       state.filter_type = payload.type;
+    },
+    setApplicationIdsForPayment: (state, action) => {
+      state.selectedApplicationId = action.payload;
     },
   },
   extraReducers: {
@@ -186,6 +229,28 @@ export const SpecialPermitAdminSlice = createSlice({
     },
     [getSpecialPermitAnalyticsData.pending]: (state, { payload }) => {
       state.getAnalyticsDataIsFetching = false;
+      state.errors = payload;
+    },
+    [getOfflineTransaction.pending]: (state) => {
+      state.getOfflineTransaction = true;
+    },
+    [getOfflineTransaction.fulfilled]: (state, { payload }) => {
+      state.getOfflineTransaction = false;
+      state.offlineTransaction = payload;
+    },
+    [getOfflineTransaction.pending]: (state, { payload }) => {
+      state.getOfflineTransaction = false;
+      state.errors = payload;
+    },
+    [getOfflineTransactionDetails.pending]: (state) => {
+      state.getOfflineTransactionDetails = true;
+    },
+    [getOfflineTransactionDetails.fulfilled]: (state, { payload }) => {
+      state.getOfflineTransactionDetails = false;
+      state.singleOfflineTransaction = payload;
+    },
+    [getOfflineTransactionDetails.pending]: (state, { payload }) => {
+      state.getOfflineTransactionDetails = false;
       state.errors = payload;
     },
   },

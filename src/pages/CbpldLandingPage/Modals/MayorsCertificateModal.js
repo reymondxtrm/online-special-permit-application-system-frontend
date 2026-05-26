@@ -370,6 +370,8 @@ function MayorsCertificateModal({
               barangay_clearance: null,
               fiscal_clearance: null,
               court_clearance: null,
+              certificate_of_ordinance: null,
+              s_e_c_certificate: null,
             }}
             onSubmit={handleSubmit}
           >
@@ -787,6 +789,143 @@ function MayorsCertificateModal({
                                   e.preventDefault();
                                   getImageHandle({
                                     path: uploadedFiles?.court_clearance,
+                                    url: "api/client/attachment",
+                                    showLoader: true,
+                                  });
+                                  toggleIsViewerOpen();
+                                }}
+                              >
+                                <i className="mdi mdi-eye"></i>
+                              </Button>
+                            )}
+                          </div>
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                    {/* Certificate of Ordinance */}
+                    <Row>
+                      <Col>
+                        <FormGroup>
+                          <Label>Certificate of Ordinance </Label>
+                          <div className="d-flex gap-2 align-items-start">
+                            <div className="flex-grow-1">
+                              <Input
+                                type="file"
+                                name="certificate_of_ordinance"
+                                accept="image/*,application/pdf"
+                                onChange={(e) =>
+                                  handleFileChange(
+                                    e,
+                                    "certificate_of_ordinance",
+                                    4,
+                                    props,
+                                  )
+                                }
+                                onBlur={() =>
+                                  props.setFieldTouched(
+                                    "certificate_of_ordinance",
+                                    true,
+                                    true,
+                                  )
+                                }
+                                disabled={isCompressing}
+                              />
+                              {compressionErrors[4] && (
+                                <div
+                                  className="text-warning mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  Compression error: {compressionErrors[4]}
+                                </div>
+                              )}
+                              {props.touched.certificate_of_ordinance &&
+                              props.errors.certificate_of_ordinance ? (
+                                <div
+                                  className="text-danger mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  {props.errors.certificate_of_ordinance}
+                                </div>
+                              ) : null}
+                            </div>
+                            {isUpdate &&
+                              uploadedFiles?.certificate_of_ordinance && (
+                                <Button
+                                  color="primary"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    getImageHandle({
+                                      path: uploadedFiles?.certificate_of_ordinance,
+                                      url: "api/client/attachment",
+                                      showLoader: true,
+                                    });
+                                    toggleIsViewerOpen();
+                                  }}
+                                >
+                                  <i className="mdi mdi-eye"></i>
+                                </Button>
+                              )}
+                          </div>
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                    {/* SEC Cetificate */}
+                    <Row>
+                      <Col>
+                        <FormGroup>
+                          <Label>
+                            Securities and Exchange Commission (SEC) Certificate{" "}
+                          </Label>
+                          <div className="d-flex gap-2 align-items-start">
+                            <div className="flex-grow-1">
+                              <Input
+                                type="file"
+                                name="s_e_c_certificate"
+                                accept="image/*,application/pdf"
+                                onChange={(e) =>
+                                  handleFileChange(
+                                    e,
+                                    "s_e_c_certificate",
+                                    4,
+                                    props,
+                                  )
+                                }
+                                onBlur={() =>
+                                  props.setFieldTouched(
+                                    "s_e_c_certificate",
+                                    true,
+                                    true,
+                                  )
+                                }
+                                disabled={isCompressing}
+                              />
+                              {compressionErrors[4] && (
+                                <div
+                                  className="text-warning mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  Compression error: {compressionErrors[4]}
+                                </div>
+                              )}
+                              {props.touched.s_e_c_certificate &&
+                              props.errors.s_e_c_certificate ? (
+                                <div
+                                  className="text-danger mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  {props.errors.s_e_c_certificate}
+                                </div>
+                              ) : null}
+                            </div>
+                            {isUpdate && uploadedFiles?.s_e_c_certificate && (
+                              <Button
+                                color="primary"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  getImageHandle({
+                                    path: uploadedFiles?.s_e_c_certificate,
                                     url: "api/client/attachment",
                                     showLoader: true,
                                   });

@@ -239,7 +239,7 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
         </div>
         <div className="signatories-container text-center">
           <span className="authority">
-            For and by the authority of the City Mayor
+            For and by authority of the City Mayor:
           </span>
         </div>
 

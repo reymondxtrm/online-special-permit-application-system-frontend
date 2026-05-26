@@ -55,7 +55,7 @@ export default function CompanyOccupationalPermitModal({
     maxWidthOrHeight: 1920,
   });
 
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef([]);
   const handleSubmit = useSubmit();
   const genderOptions = [
     { value: "MALE", label: "Male" },
@@ -88,12 +88,13 @@ export default function CompanyOccupationalPermitModal({
     setUploadImageModal((prev) => !prev);
   };
 
-  const handleClick = () => {
-    fileInputRef.current.click();
+  const handleClick = (index) => {
+    fileInputRef.current[index]?.click();
   };
 
   const handleChange = (e) => {
     const file = e.target.files[0];
+    if (!file) return;
     const url = URL.createObjectURL(file);
     setInputPicture(url);
     toggleUploadImageModal();
@@ -172,6 +173,7 @@ export default function CompanyOccupationalPermitModal({
   };
 
   const handleTrainingChange = async (e, index, props) => {
+    const file = e.currentTarget.files[0];
     if (!file) return;
     if (file.type.startsWith("image")) {
       const compressed = await trainingCompressor.handleImageChange(e, index);
@@ -676,7 +678,7 @@ export default function CompanyOccupationalPermitModal({
                                     outline
                                     size="sm"
                                     onClick={() => {
-                                      handleClick();
+                                      handleClick(index);
                                       setActiveIndex(index);
                                       setUploadImageMode("upload");
                                     }}
@@ -686,9 +688,11 @@ export default function CompanyOccupationalPermitModal({
                                   <input
                                     type="file"
                                     accept="image/*"
-                                    ref={fileInputRef}
+                                    ref={(el) =>
+                                      (fileInputRef.current[index] = el)
+                                    }
                                     style={{ display: "none" }}
-                                    onChange={handleChange}
+                                    onChange={(e) => handleChange(e)}
                                   />
                                   {validation.touched?.employees?.[index]
                                     ?.id_picture &&

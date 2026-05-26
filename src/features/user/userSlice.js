@@ -34,7 +34,7 @@ export const loginUser = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 export const sendOtp = createAsyncThunk(
   "users/sendOtp",
@@ -58,7 +58,7 @@ export const sendOtp = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const signupUser = createAsyncThunk(
@@ -76,7 +76,7 @@ export const signupUser = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 export const specialPermitClientRegister = createAsyncThunk(
   "user/specialPermitClientRegister",
@@ -96,7 +96,7 @@ export const specialPermitClientRegister = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 export const specialPermitCompanyRegistration = createAsyncThunk(
   "user/specialPermitCompanyRegistration",
@@ -118,7 +118,7 @@ export const specialPermitCompanyRegistration = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const logoutUser = createAsyncThunk(
@@ -138,7 +138,7 @@ export const logoutUser = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const updatePassword = createAsyncThunk(
@@ -154,7 +154,7 @@ export const updatePassword = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const postForgetPassword = createAsyncThunk(
@@ -170,7 +170,7 @@ export const postForgetPassword = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const userSlice = createSlice({

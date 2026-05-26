@@ -34,6 +34,9 @@ import {
 import FileViewerModal from "../AdminControls/Modals/FileViewerModal";
 import UpdateCorporationMemberDetailsModal from "../AdminControls/Modals/UpdateCorporationMemberDetailsModal";
 import EditDurationModal from "../Dashboard/Modal/EditDurationModal";
+import PaymentModal from "../../AuthClientPages/Modals/PaymentModal";
+import { SpecialPermitClientSlice } from "features/SpecialPermitClient";
+import { useSelectedPaymentDetails } from "hooks/Common/useSelectedPaymentDetails";
 
 export default function OccupationalTableCompanyAdmin({ status }) {
   const dispatch = useDispatch();
@@ -60,7 +63,8 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   const [completedPermit, setCompletedPermit] = useState(null);
   const [updateDetailsModal, setUpdateDetailsModal] = useState(false);
   const [updateDurationModal, setUpdateDurationModal] = useState(false);
-
+  const [overTheCounterModal, setOverTheCounterModal] = useState(false);
+  const [selectedPermit, setSelectedPermit] = useState([]);
   useEffect(() => {
     dispatch(getCompanyOccupatinalData({ type: "company", status: status }));
   }, [refreshPage]);
@@ -113,6 +117,26 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   };
   const toggleUpdateModal = () => {
     setUpdateDurationModal(!updateDurationModal);
+  };
+  const toggleOverTheCounterModal = () => {
+    setOverTheCounterModal((prev) => !prev);
+  };
+  console.log(specialPermitAdmin?.companyOccupational?.data);
+  const allPermit = useMemo(() => {
+    return specialPermitAdmin?.companyOccupational?.data?.flatMap(
+      (item) => item.special_permit_applications || [],
+    );
+  }, [specialPermitAdmin]);
+  const paymentDetails = useSelectedPaymentDetails(selectedPermit, allPermit);
+  const handleSelect = (id) => {
+    setSelectedPermit((prev) => {
+      const rows = Array.isArray(prev) ? [...prev] : [];
+      if (rows.includes(id)) {
+        return rows.filter((item) => item !== id);
+      } else {
+        return [...rows, id];
+      }
+    });
   };
   const handleClickPermitStatus = async (id) => {
     handleSubmit(
@@ -210,7 +234,16 @@ export default function OccupationalTableCompanyAdmin({ status }) {
           applicationId={applicationId}
         />
       )}
-
+      {overTheCounterModal && (
+        <PaymentModal
+          toggleModal={toggleOverTheCounterModal}
+          openModal={overTheCounterModal}
+          applicationId={selectedPermit}
+          toggleRefresh={toggleRefresh}
+          applicationType={"occupational_permit"}
+          paymentDetails={paymentDetails}
+        />
+      )}
       {status === "for_signature" || status === "completed" ? (
         <>
           <GenerateOccupationalPermitModal
@@ -227,9 +260,31 @@ export default function OccupationalTableCompanyAdmin({ status }) {
           />
         </>
       ) : null}
+      <div className="d-flex gap-2">
+        <div>
+          {status === "for_payment" ? (
+            <Button
+              color="primary"
+              onClick={() => {
+                toggleOverTheCounterModal();
+                dispatch(
+                  specialPermitAdmin.actions.setApplicationIdsForPayment(
+                    selectedPermit,
+                  ),
+                );
+              }}
+              disabled={selectedPermit.length <= 0}
+            >
+              <i className="fa fas fa-money-bill-wave"></i>
+              <span>Upload</span>
+            </Button>
+          ) : null}
+        </div>
+      </div>
       <Table>
         <thead>
           <tr>
+            {status === "for_payment" && <th></th>}
             <th>#</th>
             {(status === "for_signature" || status === "completed") && (
               <th>Reference No</th>
@@ -337,6 +392,22 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                 borderColor: item.disable ? "#EF5350" : null,
                               }}
                             >
+                              <td>
+                                {status === "for_payment" && (
+                                  <Input
+                                    type="checkbox"
+                                    disabled={
+                                      item?.order_of_payment
+                                        ?.payment_on_progress === 1
+                                    }
+                                    checked={selectedPermit?.includes(item.id)}
+                                    onClick={(e) => {
+                                      handleSelect(item.id);
+                                    }}
+                                    style={{ width: "20px", height: "20px" }}
+                                  />
+                                )}
+                              </td>
                               <td>{index + 1}</td>
                               {(status === "for_signature" ||
                                 status === "completed") && (

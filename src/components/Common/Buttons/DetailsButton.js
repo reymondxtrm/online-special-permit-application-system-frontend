@@ -47,7 +47,7 @@ const DetailsButton = ({ business_id, forAction = 0 }) => {
           success: "Time updated successfully",
         },
       },
-      [getBusinessStageData({ business_id: business_id })]
+      [getBusinessStageData({ business_id: business_id })],
     );
 
     setIsEditing(null);
@@ -59,7 +59,6 @@ const DetailsButton = ({ business_id, forAction = 0 }) => {
       setIsEditing(index);
     }
   };
-  console.log(batsAdmin?.businessStagesData);
   return (
     <>
       <Modal

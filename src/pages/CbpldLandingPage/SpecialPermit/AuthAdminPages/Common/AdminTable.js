@@ -51,6 +51,7 @@ import FileViewerModal from "../AdminControls/Modals/FileViewerModal";
 import EditDurationModal from "../Dashboard/Modal/EditDurationModal";
 import PaymentModal from "../../AuthClientPages/Modals/PaymentModal";
 import { useSelectedPaymentDetails } from "hooks/Common/useSelectedPaymentDetails";
+import UpdateEventModal from "../Modals/UpdateEventModal";
 
 const AdminTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
@@ -82,7 +83,9 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const [updateDurationModal, setUpdateDurationModal] = useState(false);
   const [overTheCounterModal, setOverTheCounterModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState([]);
-  // const [paymentDetails, setPaymentDetails] = useState([]);
+  const [updateEventModal, setUpdateEventModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+
   const [
     openMayorsAndGoodMoralRequestForm,
     setOpenMayorsAndGoodMoralRequestForm,
@@ -112,12 +115,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
 
     return `${firstName} ${middleName} ${lastName}`;
   };
-  /*************  ✨ Windsurf Command ⭐  *************/
-  /**
-   * Toggle the generate modal
-   * @return {void}
-   */
-  /*******  7c2d4c4a-dffb-4dbd-bcce-be0cce0c8777  *******/
+
   const toggleGenerateModal = () => {
     setgenerateModal(!generateModal);
   };
@@ -144,6 +142,9 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
 
   const toggleReturnRemarksModal = () => {
     setreturnRemarksModal(!returnRemarksModal);
+  };
+  const toggleUpdateEventModal = () => {
+    setUpdateEventModal((prev) => !prev);
   };
 
   const toggleMayorsAndGoodMoralRequestModal = () => {
@@ -232,6 +233,14 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
           specialPermitId={applicationId}
         />
       )}
+      {updateEventModal && (
+        <UpdateEventModal
+          toggleModal={toggleUpdateEventModal}
+          openModal={updateEventModal}
+          initialData={selectedEvent}
+          toggleRefresh={toggleRefresh}
+        />
+      )}
 
       <AttachmentModal
         toggleModal={toggleAttachmentModal}
@@ -245,6 +254,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
         toggle={toggleRequestFormModal}
         applicationId={applicationId}
       />
+
       <MayorsAndGoodMoralRequestForm
         isOpen={openMayorsAndGoodMoralRequestForm}
         toggle={toggleMayorsAndGoodMoralRequestModal}
@@ -937,7 +947,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               Generate
                             </Button>
                           </div>
-                          <div>
+                          <div style={{ paddingRight: "10px" }}>
                             <Button
                               color="primary"
                               style={{ width: "90px" }}
@@ -949,6 +959,26 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               Upload
                             </Button>
                           </div>
+                          {(applicationType === "event" ||
+                            applicationType === "motorcade" ||
+                            applicationType === "motorcade" ||
+                            applicationType === "parade" ||
+                            applicationType === "recorrida" ||
+                            applicationType ===
+                              "use_of_government_property") && (
+                            <div>
+                              <Button
+                                color="warning"
+                                outline
+                                onClick={() => {
+                                  setSelectedEvent(application);
+                                  toggleUpdateEventModal();
+                                }}
+                              >
+                                <i className="fas fa-pen-nib"></i>
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       </td>
                     ) : null}

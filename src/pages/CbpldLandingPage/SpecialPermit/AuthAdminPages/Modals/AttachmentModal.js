@@ -59,6 +59,8 @@ function AttachmentModal({
       "Barangay Clearance": uploadedFiles?.barangay_clearance,
       "Fiscal Clearance": uploadedFiles?.fiscal_clearance,
       "Court Clearance": uploadedFiles?.court_clearance,
+      "Certificate of Ordinance": uploadedFiles?.certificate_of_ordinance,
+      "SEC Certificate": uploadedFiles?.s_e_c_certificate,
     },
     good_moral: {
       "Police Clearance": uploadedFiles?.police_clearance,

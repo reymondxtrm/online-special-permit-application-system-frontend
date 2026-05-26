@@ -16,6 +16,8 @@ const FILE_LABELS = {
   sworn_statement: "Sworn Statement",
   official_receipt: "Official Receipt",
   exemption_proof: "Froof of Exemption",
+  certificate_of_ordinance: "Cetificate of Ordinance",
+  s_e_c_certificate: "SEC Certificate",
 };
 
 export default function FileIconFormat({

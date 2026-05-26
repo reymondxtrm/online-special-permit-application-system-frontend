@@ -52,10 +52,8 @@ export default function SuperAdminControl() {
         null,
         {
           params: { special_permit_application_id: id },
-        }
+        },
       );
-
-      console.log(response);
 
       // Show success message
       Swal.fire({
@@ -126,7 +124,7 @@ export default function SuperAdminControl() {
                                   <Button
                                     onClick={() =>
                                       handleChangePaymentState(
-                                        detail.special_permit_application_id
+                                        detail.special_permit_application_id,
                                       )
                                     }
                                   >

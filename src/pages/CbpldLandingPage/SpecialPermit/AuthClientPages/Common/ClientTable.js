@@ -97,7 +97,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
     setShowAttachmentModal((prev) => !prev);
   };
   const toggleIsViewerOpen = () => {
-    console.log(currentImage);
     setIsViewerOpen((prev) => !prev);
   };
   const toggleCedulaApplicationForm = () => {
@@ -188,26 +187,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
       setSelectedRow(selectedIds);
     }
   };
-  // useEffect(() => {
-  //   if (selectedRow && specialPermitClient?.clientTableData?.data?.length > 0) {
-  //     const selectedTotal = specialPermitClient?.clientTableData?.data
-  //       ?.filter((app) => selectedRow.includes(app.id))
-  //       ?.reduce(
-  //         (acc, app) => {
-  //           const billed = app.order_of_payment?.billed_amount || 0;
-  //           const total = app.order_of_payment?.total_amount || 0;
-  //           acc.billed_amount += billed;
-  //           acc.total_amount += total;
-  //           acc.fullname = app.order_of_payment?.fullname || "";
-  //           acc.created_at = app.order_of_payment?.created_at || "";
-  //           acc.quantity += 1;
-  //           return acc;
-  //         },
-  //         { billed_amount: 0, total_amount: 0, quantity: 0 },
-  //       );
-  //     setPaymentDetails(selectedTotal);
-  //   }
-  // }, [selectedRow, specialPermitClient?.clientTableData?.data?.length]);
 
   const columnConfig = useMemo(
     () => [
@@ -266,8 +245,15 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
           ["pending", "declined"].includes(status),
       },
       {
-        key: "courtClearance",
-        label: "Court Clearance",
+        key: "certificateOfOrdinance",
+        label: "Certificate of Ordinance",
+        condition: () =>
+          ["mayors_permit", "good_moral"].includes(applicationType) &&
+          ["pending", "declined"].includes(status),
+      },
+      {
+        key: "SECCertificate",
+        label: "SEC Certificate",
         condition: () =>
           ["mayors_permit", "good_moral"].includes(applicationType) &&
           ["pending", "declined"].includes(status),
@@ -534,12 +520,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
             </Button>
           ) : null}
         </div>
-        {/* <div>
-          <Button color="success">
-            <i className="mdi mdi-printer "></i>{" "}
-            <span> Reprint Cedula Application Form</span>{" "}
-          </Button>
-        </div> */}
       </div>
 
       <div className="tableFixHead">
@@ -593,6 +573,8 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                       <th>Community Tax Certificate</th>
                       <th>Fiscal Clearance</th>
                       <th>Court Clearance</th>
+                      <th>Certificate of Ordinance</th>
+                      <th>SEC Certificate</th>
                     </>
                   )}
 
@@ -833,6 +815,39 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                                   fileType="court_clearance"
                                   path={
                                     application.uploaded_file?.court_clearance
+                                  }
+                                  toggleIsViewerOpen={toggleIsViewerOpen}
+                                  getImageHandle={getImageHandle}
+                                />
+                              ) : (
+                                "N/A"
+                              )}
+                            </td>
+                            <td>
+                              {application.uploaded_file
+                                ?.certificate_of_ordinance &&
+                              status !== "for_payment" ? (
+                                <FileIconFormat
+                                  fileType="certificate_of_ordinance"
+                                  path={
+                                    application.uploaded_file
+                                      ?.certificate_of_ordinance
+                                  }
+                                  toggleIsViewerOpen={toggleIsViewerOpen}
+                                  getImageHandle={getImageHandle}
+                                />
+                              ) : (
+                                "N/A"
+                              )}
+                            </td>
+                            <td>
+                              {application?.uploaded_file?.s_e_c_certificate &&
+                              status !== "for_payment" ? (
+                                <FileIconFormat
+                                  fileType="s_e_c_certificate"
+                                  path={
+                                    application?.uploaded_file
+                                      ?.s_e_c_certificate
                                   }
                                   toggleIsViewerOpen={toggleIsViewerOpen}
                                   getImageHandle={getImageHandle}

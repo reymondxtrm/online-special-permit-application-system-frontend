@@ -35,6 +35,8 @@ import {
 } from "common/utility/utilityFunction";
 import UpdateIndividualOccupationalDetails from "../AdminControls/Modals/UpdateIndividualOccupationalDetails";
 import EditDurationModal from "../Dashboard/Modal/EditDurationModal";
+import PaymentModal from "../../AuthClientPages/Modals/PaymentModal";
+import { useSelectedPaymentDetails } from "hooks/Common/useSelectedPaymentDetails";
 
 export default function OccupationalTableIndividualAdmin({
   status,
@@ -66,6 +68,8 @@ export default function OccupationalTableIndividualAdmin({
   const [updateDetailsModal, setUpdateDetailsModal] = useState(false);
   const [userId, setUserId] = useState();
   const [updateDurationModal, setUpdateDurationModal] = useState(false);
+  const [overTheCounterModal, setOverTheCounterModal] = useState(false);
+  const [selectedPermit, setSelectedPermit] = useState([]);
 
   const handleSubmit = useSubmit();
 
@@ -80,17 +84,14 @@ export default function OccupationalTableIndividualAdmin({
     }
   }, [refreshPage, activeTab, motherTab, status, dispatch]);
 
+  const paymentDetails = useSelectedPaymentDetails(
+    selectedPermit,
+    specialPermitAdmin?.individualOccupational?.data,
+  );
   const toggleAttachmentModal = () => {
     setShowAttachmentModal((prev) => !prev);
   };
   const toggleAmountModal = () => {
-    /*************  ✨ Windsurf Command ⭐  *************/
-    /**
-     * Toggle the amount modal.
-     *
-     * @returns {void}
-     */
-    /*******  720a17cd-7be9-41d1-9746-f9612b2e5412  *******/
     setAmountModal((prev) => !prev);
   };
   const toggleRefresh = () => {
@@ -149,6 +150,9 @@ export default function OccupationalTableIndividualAdmin({
       [],
       [toggleRefresh],
     );
+  };
+  const toggleOverTheCounterModal = () => {
+    setOverTheCounterModal((prev) => !prev);
   };
   return (
     <React.Fragment>
@@ -246,6 +250,16 @@ export default function OccupationalTableIndividualAdmin({
           />
         </>
       ) : null}
+      {overTheCounterModal && (
+        <PaymentModal
+          toggleModal={toggleOverTheCounterModal}
+          openModal={overTheCounterModal}
+          applicationId={selectedPermit}
+          toggleRefresh={toggleRefresh}
+          applicationType={"occupational_permit"}
+          paymentDetails={paymentDetails}
+        />
+      )}
 
       <Table>
         <thead>
@@ -372,6 +386,73 @@ export default function OccupationalTableIndividualAdmin({
                       >
                         Official Receipt
                       </Button>
+                    ) : status === "for_payment" ? (
+                      <td>
+                        <div className="flex">
+                          <UncontrolledDropdown
+                            className="me-2"
+                            direction="end"
+                          >
+                            <DropdownToggle caret color="primary">
+                              Actions
+                            </DropdownToggle>
+                            <DropdownMenu
+                              style={{
+                                maxHeight: "200px",
+                                overflowY: "auto",
+                                zIndex: 1050,
+                                position: "absolute",
+                              }}
+                            >
+                              <DropdownItem
+                                color="success"
+                                onClick={() =>
+                                  handleViewAttachments(
+                                    application.uploaded_file,
+                                  )
+                                }
+                              >
+                                Attachments
+                              </DropdownItem>
+                              <DropdownItem
+                                color="success"
+                                disabled={
+                                  application?.order_of_payment
+                                    ?.payment_on_progress === 1
+                                }
+                                onClick={(e) => {
+                                  e.preventDefault();
+
+                                  if (!application?.id) {
+                                    console.error(
+                                      "Application data is missing",
+                                    );
+                                    return;
+                                  }
+
+                                  if (
+                                    application?.order_of_payment
+                                      ?.payment_on_progress === 1
+                                  ) {
+                                    Swal.fire({
+                                      icon: "info",
+                                      title: "Processing Payment",
+                                      text: "Your application payment is currently being processed. Please wait for further updates.",
+                                      confirmButtonText: "OK",
+                                    });
+                                    return;
+                                  }
+
+                                  setSelectedRow([application?.id]);
+                                  toggleOverTheCounterModal();
+                                }}
+                              >
+                                Upload Payment
+                              </DropdownItem>
+                            </DropdownMenu>
+                          </UncontrolledDropdown>
+                        </div>
+                      </td>
                     ) : (
                       <div className="d-flex gap-2">
                         <Button
@@ -611,6 +692,20 @@ export default function OccupationalTableIndividualAdmin({
                             Upload
                           </Button>
                         </div>
+                        {status === "for_payment" && (
+                          <div>
+                            <Button
+                              color="warning"
+                              outline
+                              onClick={() => {
+                                setSelectedEvent(application);
+                                toggleUpdateModal();
+                              }}
+                            >
+                              <i className="fas fa-pen-nib"></i>
+                            </Button>
+                          </div>
+                        )}
                         <div>
                           <Button
                             onClick={() => {

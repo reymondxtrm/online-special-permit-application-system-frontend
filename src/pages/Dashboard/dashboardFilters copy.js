@@ -104,7 +104,6 @@ const DashboardFilters = ({
                 placeholder="Select Status"
                 onChange={(statuses) => {
                   setStatus(statuses);
-                  console.log(statuses);
 
                   validation.setFieldValue("status", statuses);
                 }}

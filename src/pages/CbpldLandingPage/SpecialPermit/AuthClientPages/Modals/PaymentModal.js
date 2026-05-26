@@ -158,7 +158,6 @@ function PaymentModal({
   const eor_collection = useMemo(() => {
     // If modal is not open, return empty immediately
     if (!openModal) return [];
-    console.log(paymentDetails);
     const quantity = paymentDetails?.quantity ?? 0;
     const totalAmount = paymentDetails?.total_amount ?? 0;
     const typeLabel = type?.label ?? "";
@@ -773,7 +772,7 @@ function PaymentModal({
                                         const obj = {
                                           amount:
                                             paymentDetails?.total_amount?.toString(),
-                                          // amount: 100,
+
                                           transaction_type: "Business Permit",
                                           merchant_reference_number: `OSPAS-${[
                                             applicationId?.[0],

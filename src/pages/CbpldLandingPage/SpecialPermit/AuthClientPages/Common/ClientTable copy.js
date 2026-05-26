@@ -93,7 +93,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
     setShowAttachmentModal((prev) => !prev);
   };
   const toggleIsViewerOpen = () => {
-    console.log(currentImage);
     setIsViewerOpen((prev) => !prev);
   };
   const toggleCedulaApplicationForm = () => {

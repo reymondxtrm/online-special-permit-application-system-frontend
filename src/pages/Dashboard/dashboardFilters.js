@@ -129,7 +129,7 @@ const DashboardFilters = ({
       <BasicInputField
         col={"6"}
         type={"text"}
-        label={"Keyword"}
+        label={"Date From"}
         touched={validation.touched.keyword}
         errors={validation.errors.keyword}
         name={"keyword"}
@@ -137,6 +137,31 @@ const DashboardFilters = ({
         placeholder={"Enter keyword"}
         value={validation.values.keyword}
       />
+      {withDate && (
+        <>
+          <BasicInputField
+            col={"6"}
+            type={"date"}
+            label={"Date From"}
+            touched={validation.touched.date_from}
+            errors={validation.errors.date_from}
+            name={"date_from"}
+            validation={validation}
+            placeholder={"Enter date_from"}
+            value={validation.values.date_from}
+          />
+          <BasicInputField
+            col={"6"}
+            type={"date"}
+            touched={validation.touched.date_to}
+            errors={validation.errors.date_to}
+            name={"date_to"}
+            validation={validation}
+            value={validation.values.date_to}
+          />
+        </>
+      )}
+
       {withPermitType && (
         <Col style={{ width: "250px" }}>
           <InputGroup className="d-flex flex-column">
