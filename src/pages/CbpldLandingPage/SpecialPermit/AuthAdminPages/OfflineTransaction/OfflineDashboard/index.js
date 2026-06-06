@@ -34,7 +34,9 @@ function OfflineDashboard() {
     toggleOfflineTransactionModal();
   };
   useEffect(() => {
-    dispatch(getOfflineTransaction({ type: activeTab, status: "released" }));
+    dispatch(
+      getOfflineTransaction({ permit_type: activeTab, status: "released" }),
+    );
   }, [refresh, activeTab]);
   const toggleOfflineTransactionModal = () => {
     setOfflineTransactionModal((prev) => !prev);
@@ -75,7 +77,7 @@ function OfflineDashboard() {
     try {
       const response = await axios.get("api/admin/get/offline-transactions", {
         params: {
-          type: activeTab, // your existing filters
+          permit_type: activeTab, // your existing filters
           status: "released",
           generate: true,
         },
@@ -115,9 +117,10 @@ function OfflineDashboard() {
                 <DashboardFilters
                   action={getOfflineTransaction}
                   tableParams={{
-                    type: activeTab,
+                    permit_type: activeTab,
                     status: "released",
                   }}
+                  withDateRange
                 />
               </CardBody>
             </Card>

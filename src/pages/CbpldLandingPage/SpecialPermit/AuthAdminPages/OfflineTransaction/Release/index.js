@@ -29,7 +29,9 @@ function Release() {
     setReleaseModal((prev) => !prev);
   };
   useEffect(() => {
-    dispatch(getOfflineTransaction({ type: activeTab, status: "received" }));
+    dispatch(
+      getOfflineTransaction({ permit_type: activeTab, status: "received" }),
+    );
   }, [refresh, activeTab]);
 
   return (
@@ -51,9 +53,10 @@ function Release() {
                 <DashboardFilters
                   action={getOfflineTransaction()}
                   tableParams={{
-                    type: activeTab,
+                    permit_type: activeTab,
                     status: "received",
                   }}
+                  // withDateRange
                 />
               </CardBody>
             </Card>

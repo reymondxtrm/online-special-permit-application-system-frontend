@@ -16,6 +16,7 @@ const DashboardFilters = ({
   tableParams,
   withPermitType = false,
   action,
+  withDateRange = false,
 }) => {
   const dispatch = useDispatch();
   const [parameters, setParams] = useState("");
@@ -137,7 +138,7 @@ const DashboardFilters = ({
         placeholder={"Enter keyword"}
         value={validation.values.keyword}
       />
-      {withDate && (
+      {withDateRange && (
         <>
           <BasicInputField
             col={"6"}
@@ -153,6 +154,7 @@ const DashboardFilters = ({
           <BasicInputField
             col={"6"}
             type={"date"}
+            label={"Date To"}
             touched={validation.touched.date_to}
             errors={validation.errors.date_to}
             name={"date_to"}

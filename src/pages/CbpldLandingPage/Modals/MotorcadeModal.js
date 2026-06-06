@@ -110,13 +110,18 @@ function MotorcadeModal({
     }
   };
 
-  const SUPPORTED_FORMATS = ["image/jpeg", "image/png", "image/jpg"];
+  const SUPPORTED_FORMATS = [
+    "image/jpeg",
+    "image/png",
+    "image/jpg",
+    "application/pdf",
+  ];
 
   const fileValidationRequired = Yup.mixed()
     .required("This file is required")
     .test(
       "fileFormat",
-      "Only image and PDF files are allowed",
+      "Only images and PDF files are allowed",
       (value) => !value || SUPPORTED_FORMATS.includes(value.type),
     );
 
@@ -373,7 +378,7 @@ function MotorcadeModal({
                   <div className="d-flex gap-2 align-items-start">
                     <div className="flex-grow-1">
                       <Input
-                        accept="image/*"
+                        accept="image/*,application/pdf"
                         type="file"
                         name="request_letter"
                         onChange={(e) => {
@@ -433,7 +438,7 @@ function MotorcadeModal({
                       <Input
                         type="file"
                         name="route_plan"
-                        accept="image/*"
+                        accept="image/*,application/pdf"
                         onChange={(e) => {
                           handleFileChange(e, "route_plan", 1, props);
                         }}

@@ -87,7 +87,6 @@ function LoginModal({ openModal, toggleModal, toggleSignUp }) {
           >
             {(props) => (
               <Form>
-                
                 <Row>
                   <FormGroup>
                     <Label for="username">Username</Label>
@@ -158,7 +157,7 @@ function LoginModal({ openModal, toggleModal, toggleSignUp }) {
                   params: formData,
                 },
                 [],
-                [toggleModal]
+                [toggleModal],
               );
             }}
           >

@@ -165,6 +165,12 @@ export const SpecialPermitAdminSlice = createSlice({
     setParams: (state, action) => {
       state.params = action.payload;
     },
+    setShowLoadingOfflineTable: (state, action) => {
+      state.getOfflineTransaction = action.payload;
+    },
+    setDataPropsOfflineTable: (state, action) => {
+      state.offlineTransaction = action.payload;
+    },
     setDataPropsCompanyOccupational: (state, action) => {
       state.companyOccupational = action.payload;
     },
@@ -227,7 +233,7 @@ export const SpecialPermitAdminSlice = createSlice({
       state.getAnalyticsDataIsFetching = false;
       state.analyticsData = payload;
     },
-    [getSpecialPermitAnalyticsData.pending]: (state, { payload }) => {
+    [getSpecialPermitAnalyticsData.rejected]: (state, { payload }) => {
       state.getAnalyticsDataIsFetching = false;
       state.errors = payload;
     },
@@ -238,7 +244,7 @@ export const SpecialPermitAdminSlice = createSlice({
       state.getOfflineTransaction = false;
       state.offlineTransaction = payload;
     },
-    [getOfflineTransaction.pending]: (state, { payload }) => {
+    [getOfflineTransaction.rejected]: (state, { payload }) => {
       state.getOfflineTransaction = false;
       state.errors = payload;
     },
@@ -249,7 +255,7 @@ export const SpecialPermitAdminSlice = createSlice({
       state.getOfflineTransactionDetails = false;
       state.singleOfflineTransaction = payload;
     },
-    [getOfflineTransactionDetails.pending]: (state, { payload }) => {
+    [getOfflineTransactionDetails.rejected]: (state, { payload }) => {
       state.getOfflineTransactionDetails = false;
       state.errors = payload;
     },

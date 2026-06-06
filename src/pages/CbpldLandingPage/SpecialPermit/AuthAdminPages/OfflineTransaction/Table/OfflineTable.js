@@ -10,13 +10,7 @@ import { getColumnsByStatus } from "./columnMapper";
 import Pagination from "components/Pagination";
 import DetailButton from "../Modal/DetailsButton";
 import TransactionStepperModal from "../Modal/TransactionStepperModal";
-function OfflineTable({
-  activeTab,
-  status,
-  params = null,
-  toggleModal,
-  setSelectedRow,
-}) {
+function OfflineTable({ activeTab, status, toggleModal, setSelectedRow }) {
   const [detailModal, setDetailModal] = useState(false);
   const specialPermitAdmin = useSelector(
     (state) => state.specialPermitAdmin || {},
@@ -38,6 +32,13 @@ function OfflineTable({
     "Use of Government Property": "secondary",
     "Occupational Permit": "light",
   };
+  const params = useMemo(() => {
+    return {
+      ...specialPermitAdmin.params,
+      status: status,
+      permit_type: activeTab,
+    };
+  }, [activeTab, status]);
   const detailClickHandle = (selectedRow) => {
     setSelectedRow(selectedRow);
     toggleDetailModal();
@@ -50,6 +51,7 @@ function OfflineTable({
         toggle={toggleDetailModal}
         data={specialPermitAdmin?.singleOfflineTransaction?.data}
       />
+
       <Table bordered responsive>
         <thead>
           <tr>
@@ -60,7 +62,14 @@ function OfflineTable({
         </thead>
 
         <tbody>
-          {specialPermitAdmin?.offlineTransaction?.data?.data.length === 0 ? (
+          {specialPermitAdmin?.getOfflineTransaction ? (
+            <tr>
+              <td colSpan={columns.length} className="text-center">
+                Loading...
+              </td>
+            </tr>
+          ) : specialPermitAdmin?.offlineTransaction?.data?.data.length ===
+            0 ? (
             <tr>
               <td colSpan={columns.length} className="text-center">
                 No data found
@@ -111,10 +120,13 @@ function OfflineTable({
           )}
         </tbody>
       </Table>
+
       <Pagination
-        dataProps={specialPermitAdmin.tableData}
-        setDataProps={SpecialPermitAdminSlice.actions.setDataProps}
-        setShowLoading={SpecialPermitAdminSlice.actions.setShowLoading}
+        dataProps={specialPermitAdmin.offlineTransaction.data}
+        setDataProps={SpecialPermitAdminSlice.actions.setDataPropsOfflineTable}
+        setShowLoading={
+          SpecialPermitAdminSlice.actions.setShowLoadingOfflineTable
+        }
         isLoading={specialPermitAdmin.getOfflineTransaction}
         params={params}
       />
