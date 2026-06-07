@@ -406,11 +406,10 @@ export default function OccupationalTableIndividualAdmin({
                             >
                               <DropdownItem
                                 color="success"
-                                onClick={() =>
-                                  handleViewAttachments(
-                                    application.uploaded_file,
-                                  )
-                                }
+                                onClick={() => {
+                                  setUploadedFiles(application.uploaded_file);
+                                  toggleAttachmentModal();
+                                }}
                               >
                                 Attachments
                               </DropdownItem>
@@ -443,7 +442,7 @@ export default function OccupationalTableIndividualAdmin({
                                     return;
                                   }
 
-                                  setSelectedRow([application?.id]);
+                                  setSelectedPermit([application?.id]);
                                   toggleOverTheCounterModal();
                                 }}
                               >

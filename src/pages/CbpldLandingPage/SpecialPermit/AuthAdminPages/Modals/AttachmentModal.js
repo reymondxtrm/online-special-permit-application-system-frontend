@@ -59,7 +59,7 @@ function AttachmentModal({
       "Barangay Clearance": uploadedFiles?.barangay_clearance,
       "Fiscal Clearance": uploadedFiles?.fiscal_clearance,
       "Court Clearance": uploadedFiles?.court_clearance,
-      "Certificate of Ordinance": uploadedFiles?.certificate_of_ordinance,
+      "Certificate of Ordinance": uploadedFiles?.certificate_of_ordination,
       "SEC Certificate": uploadedFiles?.s_e_c_certificate,
     },
     good_moral: {
@@ -71,6 +71,7 @@ function AttachmentModal({
     },
     event: {
       "Request Letter": uploadedFiles?.request_letter,
+      "Route Plan": uploadedFiles?.route_plan,
       "Sworn Statement": uploadedFiles?.sworn_statement,
     },
     motorcade: {

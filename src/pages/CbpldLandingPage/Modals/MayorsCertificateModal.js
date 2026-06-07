@@ -370,7 +370,7 @@ function MayorsCertificateModal({
               barangay_clearance: null,
               fiscal_clearance: null,
               court_clearance: null,
-              certificate_of_ordinance: null,
+              certificate_of_ordination: null,
               s_e_c_certificate: null,
             }}
             onSubmit={handleSubmit}
@@ -806,24 +806,24 @@ function MayorsCertificateModal({
                     <Row>
                       <Col>
                         <FormGroup>
-                          <Label>Certificate of Ordinance </Label>
+                          <Label>Certificate of Ordination </Label>
                           <div className="d-flex gap-2 align-items-start">
                             <div className="flex-grow-1">
                               <Input
                                 type="file"
-                                name="certificate_of_ordinance"
+                                name="certificate_of_ordination"
                                 accept="image/*,application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,
-                                    "certificate_of_ordinance",
+                                    "certificate_of_ordination",
                                     4,
                                     props,
                                   )
                                 }
                                 onBlur={() =>
                                   props.setFieldTouched(
-                                    "certificate_of_ordinance",
+                                    "certificate_of_ordination",
                                     true,
                                     true,
                                   )
@@ -838,25 +838,25 @@ function MayorsCertificateModal({
                                   Compression error: {compressionErrors[4]}
                                 </div>
                               )}
-                              {props.touched.certificate_of_ordinance &&
-                              props.errors.certificate_of_ordinance ? (
+                              {props.touched.certificate_of_ordination &&
+                              props.errors.certificate_of_ordination ? (
                                 <div
                                   className="text-danger mt-1"
                                   style={{ fontSize: "0.875rem" }}
                                 >
-                                  {props.errors.certificate_of_ordinance}
+                                  {props.errors.certificate_of_ordination}
                                 </div>
                               ) : null}
                             </div>
                             {isUpdate &&
-                              uploadedFiles?.certificate_of_ordinance && (
+                              uploadedFiles?.certificate_of_ordination && (
                                 <Button
                                   color="primary"
                                   size="sm"
                                   onClick={(e) => {
                                     e.preventDefault();
                                     getImageHandle({
-                                      path: uploadedFiles?.certificate_of_ordinance,
+                                      path: uploadedFiles?.certificate_of_ordination,
                                       url: "api/client/attachment",
                                       showLoader: true,
                                     });
@@ -875,7 +875,7 @@ function MayorsCertificateModal({
                       <Col>
                         <FormGroup>
                           <Label>
-                            Securities and Exchange Commission (SEC) Certificate{" "}
+                            Securities and Exchange Commission(SEC) Registration{" "}
                           </Label>
                           <div className="d-flex gap-2 align-items-start">
                             <div className="flex-grow-1">

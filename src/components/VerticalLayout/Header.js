@@ -43,7 +43,7 @@ const Header = (props) => {
   const [megaMenu, setmegaMenu] = useState(false);
   const [socialDrp, setsocialDrp] = useState(false);
   const userDetails = useSelector((state) => state.user);
-  
+
   function toggleFullscreen() {
     if (
       !document.fullscreenElement &&
@@ -57,7 +57,7 @@ const Header = (props) => {
         document.documentElement.mozRequestFullScreen();
       } else if (document.documentElement.webkitRequestFullscreen) {
         document.documentElement.webkitRequestFullscreen(
-          Element.ALLOW_KEYBOARD_INPUT
+          Element.ALLOW_KEYBOARD_INPUT,
         );
       }
     } else {
@@ -87,7 +87,7 @@ const Header = (props) => {
       <header id="page-topbar">
         <div className="navbar-header">
           <div className="d-flex">
-            <div className="navbar-brand-box d-lg-none d-md-block">
+            {/* <div className="navbar-brand-box d-lg-none d-md-block">
               <Link to="/" className="logo logo-dark">
                 <span className="logo-sm">
                   <img src={logoCicto} alt="" height="30" />
@@ -99,7 +99,7 @@ const Header = (props) => {
                   <img src={logoCicto} alt="" height="30" />
                 </span>
               </Link>
-            </div>
+            </div> */}
 
             <button
               type="button"
