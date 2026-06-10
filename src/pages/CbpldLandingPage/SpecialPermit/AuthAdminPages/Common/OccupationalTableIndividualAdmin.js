@@ -37,6 +37,7 @@ import UpdateIndividualOccupationalDetails from "../AdminControls/Modals/UpdateI
 import EditDurationModal from "../Dashboard/Modal/EditDurationModal";
 import PaymentModal from "../../AuthClientPages/Modals/PaymentModal";
 import { useSelectedPaymentDetails } from "hooks/Common/useSelectedPaymentDetails";
+import UpdateOrNumberModal from "../Modals/UpdateOrNumberModal";
 
 export default function OccupationalTableIndividualAdmin({
   status,
@@ -70,7 +71,8 @@ export default function OccupationalTableIndividualAdmin({
   const [updateDurationModal, setUpdateDurationModal] = useState(false);
   const [overTheCounterModal, setOverTheCounterModal] = useState(false);
   const [selectedPermit, setSelectedPermit] = useState([]);
-
+  const [updateOrNumberModal, setUpdateOrNumberModal] = useState(false);
+  const [orNumber, setOrNumber] = useState(null);
   const handleSubmit = useSubmit();
 
   useEffect(() => {
@@ -127,6 +129,9 @@ export default function OccupationalTableIndividualAdmin({
   };
   const toggleImageViewer = () => {
     setIsViewerOpen((prev) => !prev);
+  };
+  const toggleUpdateOrNumberModal = () => {
+    setUpdateOrNumberModal((prev) => !prev);
   };
   const handleRowOnclick = (permit_id) => {
     const response = updateTabNotification(
@@ -258,6 +263,16 @@ export default function OccupationalTableIndividualAdmin({
           toggleRefresh={toggleRefresh}
           applicationType={"occupational_permit"}
           paymentDetails={paymentDetails}
+        />
+      )}
+      {updateOrNumberModal && (
+        <UpdateOrNumberModal
+          openModal={updateOrNumberModal}
+          toggleModal={toggleUpdateOrNumberModal}
+          applicationId={applicationId}
+          // applicationType={applicationType}
+          toggleRefresh={toggleRefresh}
+          orNumber={orNumber}
         />
       )}
 
@@ -653,6 +668,18 @@ export default function OccupationalTableIndividualAdmin({
                             }}
                           >
                             Edit Details
+                          </DropdownItem>
+                          <DropdownItem
+                            onClick={() => {
+                              toggleUpdateOrNumberModal();
+                              setOrNumber(
+                                application?.order_of_payment?.payment_detail
+                                  ?.or_no,
+                              );
+                              setApplicationId(application?.id);
+                            }}
+                          >
+                            Update OR Number
                           </DropdownItem>
                         </DropdownMenu>
                       </UncontrolledDropdown>

@@ -37,6 +37,7 @@ import EditDurationModal from "../Dashboard/Modal/EditDurationModal";
 import PaymentModal from "../../AuthClientPages/Modals/PaymentModal";
 import { SpecialPermitClientSlice } from "features/SpecialPermitClient";
 import { useSelectedPaymentDetails } from "hooks/Common/useSelectedPaymentDetails";
+import UpdateOrNumberModal from "../Modals/UpdateOrNumberModal";
 
 export default function OccupationalTableCompanyAdmin({ status }) {
   const dispatch = useDispatch();
@@ -65,6 +66,9 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   const [updateDurationModal, setUpdateDurationModal] = useState(false);
   const [overTheCounterModal, setOverTheCounterModal] = useState(false);
   const [selectedPermit, setSelectedPermit] = useState([]);
+  const [updateOrNumberModal, setUpdateOrNumberModal] = useState(false);
+  const [orNumber, setOrNumber] = useState(null);
+
   useEffect(() => {
     dispatch(getCompanyOccupatinalData({ type: "company", status: status }));
   }, [refreshPage]);
@@ -121,7 +125,9 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   const toggleOverTheCounterModal = () => {
     setOverTheCounterModal((prev) => !prev);
   };
-  console.log(specialPermitAdmin?.companyOccupational?.data);
+  const toggleUpdateOrNumberModal = () => {
+    setUpdateOrNumberModal((prev) => !prev);
+  };
   const allPermit = useMemo(() => {
     return specialPermitAdmin?.companyOccupational?.data?.flatMap(
       (item) => item.special_permit_applications || [],
@@ -260,6 +266,17 @@ export default function OccupationalTableCompanyAdmin({ status }) {
           />
         </>
       ) : null}
+      {updateOrNumberModal && (
+        <UpdateOrNumberModal
+          openModal={updateOrNumberModal}
+          toggleModal={toggleUpdateOrNumberModal}
+          applicationId={applicationId}
+          // applicationType={applicationType}
+          toggleRefresh={toggleRefresh}
+          orNumber={orNumber}
+        />
+      )}
+
       <div className="d-flex gap-2">
         <div>
           {status === "for_payment" ? (
@@ -392,6 +409,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                 borderColor: item.disable ? "#EF5350" : null,
                               }}
                             >
+                              {console.log(item?.id)}
                               <td>
                                 {status === "for_payment" && (
                                   <Input
@@ -688,6 +706,18 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                         }}
                                       >
                                         Edit Details
+                                      </DropdownItem>
+                                      <DropdownItem
+                                        onClick={() => {
+                                          toggleUpdateOrNumberModal();
+                                          setOrNumber(
+                                            item?.order_of_payment
+                                              ?.payment_detail?.or_no,
+                                          );
+                                          setApplicationId(item?.id);
+                                        }}
+                                      >
+                                        Update OR Number
                                       </DropdownItem>
                                     </DropdownMenu>
                                   </UncontrolledDropdown>

@@ -51,15 +51,15 @@ const SidebarContent = (props) => {
   }
 
   function activateParentDropdown(item) {
-    item.classList.add("active");
+    item?.classList.add("active");
     const parent = item.parentElement;
     const parent2El = parent.childNodes[1];
     if (parent2El && parent2El.id !== "side-menu") {
-      parent2El.classList.add("mm-show");
+      parent2El?.classList.add("mm-show");
     }
 
     if (parent) {
-      parent.classList.add("mm-active");
+      parent?.classList.add("mm-active");
       const parent2 = parent.parentElement;
 
       if (parent2) {

@@ -52,6 +52,7 @@ import EditDurationModal from "../Dashboard/Modal/EditDurationModal";
 import PaymentModal from "../../AuthClientPages/Modals/PaymentModal";
 import { useSelectedPaymentDetails } from "hooks/Common/useSelectedPaymentDetails";
 import UpdateEventModal from "../Modals/UpdateEventModal";
+import UpdateOrNumberModal from "../Modals/UpdateOrNumberModal";
 
 const AdminTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
@@ -85,7 +86,8 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const [selectedRow, setSelectedRow] = useState([]);
   const [updateEventModal, setUpdateEventModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
-
+  const [updateOrNumberModal, setUpdateOrNumberModal] = useState(false);
+  const [orNumber, setOrNumber] = useState(null);
   const [
     openMayorsAndGoodMoralRequestForm,
     setOpenMayorsAndGoodMoralRequestForm,
@@ -149,6 +151,9 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
 
   const toggleMayorsAndGoodMoralRequestModal = () => {
     setOpenMayorsAndGoodMoralRequestForm((prev) => !prev);
+  };
+  const toggleUpdateOrNumberModal = () => {
+    setUpdateOrNumberModal((prev) => !prev);
   };
   useEffect(() => {
     if (activeTab === "mayors_permit" || activeTab === "good_moral") {
@@ -341,6 +346,16 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
           />
         </>
       ) : null}
+      {updateOrNumberModal && (
+        <UpdateOrNumberModal
+          openModal={updateOrNumberModal}
+          toggleModal={toggleUpdateOrNumberModal}
+          applicationId={applicationId}
+          // applicationType={applicationType}
+          toggleRefresh={toggleRefresh}
+          orNumber={orNumber}
+        />
+      )}
 
       <div className="tableFixHead">
         <div>
@@ -1031,6 +1046,18 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               }}
                             >
                               Return
+                            </DropdownItem>
+                            <DropdownItem
+                              onClick={() => {
+                                toggleUpdateOrNumberModal();
+                                setOrNumber(
+                                  application?.order_of_payment?.payment_detail
+                                    ?.or_no,
+                                );
+                                setApplicationId(application?.id);
+                              }}
+                            >
+                              Update OR Number
                             </DropdownItem>
                           </DropdownMenu>
                         </UncontrolledDropdown>

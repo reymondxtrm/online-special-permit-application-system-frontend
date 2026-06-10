@@ -138,7 +138,7 @@ function GeneratePermitModal({
     const year = date.getFullYear();
 
     setthirdParagraph(
-      `Issued this ${day} day of ${month} ${year} at the City Hall Building, Butuan City, Philipines.`,
+      `Issued this ${day} day of ${month} ${year} at the City Hall Building, Butuan City, Philippines.`,
     );
   }, []);
 
