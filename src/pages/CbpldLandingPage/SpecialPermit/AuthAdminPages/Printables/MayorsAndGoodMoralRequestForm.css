@@ -4,12 +4,121 @@
     width: 990px !important;
   }
 }
-.header-logo-request-form {
-  width: 150px;
+@media (min-width: 992px) {
+  .mayors-request-form-modal {
+    max-width: 980px !important;
+  }
 }
+
+/* ===== Header ===== */
+.form-header {
+  width: 900px;
+  padding: 15px 20px 0 20px;
+}
+.header-top-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+}
+.header-logo-wrap {
+  flex: 0 0 auto;
+}
+.header-logo-request-form {
+  width: 90px;
+}
+.header-text {
+  flex: 1;
+  text-align: left;
+}
+.revised-date {
+  flex: 0 0 auto;
+  font-style: italic;
+  font-size: 12px;
+  margin: 0;
+  white-space: nowrap;
+}
+.header-line {
+  width: 100%;
+  margin: 8px 0 10px 0;
+  display: block;
+}
+.title-section {
+  margin-bottom: 10px;
+}
+
+/* ===== Checkboxes / bullets ===== */
+.checkbox-square {
+  border: 2px solid red;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+.circle-bullet {
+  border: 2px solid black;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
 .main-table-cell {
   display: flex;
   gap: 10px;
   align-items: center;
   margin-left: 30px;
+}
+.main-table th,
+.main-table td {
+  border: 1px solid #333;
+  padding: 8px;
+  vertical-align: top;
+}
+.reminders-cell {
+  vertical-align: top;
+}
+.where-to-secure-cell {
+  font-size: 11px;
+  text-align: center;
+  vertical-align: middle;
+}
+.footer-table th,
+.footer-table td {
+  border: 1px solid #000;
+  padding: 8px;
+}
+.footer-table th,
+.footer-table td,
+.footer-table th *,
+.footer-table td * {
+  color: #000000 !important;
+}
+.title {
+  font-family: "Cambria", serif;
+  color: #154172;
+  font-size: 16pt;
+  font-weight: bold;
+}
+.header-title {
+  font-size: 13pt;
+  color: #154172;
+  font-weight: bold;
+}
+.header-text > p {
+  color: #154172;
+}
+.bolder-text {
+  font-weight: bolder;
+  color: #000000;
+  padding: 0;
+}
+.cambraText {
+  font-family: "Cambria", serif;
+}
+.main-table th {
+  font-family: "Cambria", serif;
+  font-weight: bolder;
+  color: #000;
+  text-align: center;
+  line-height: 1.2;
 }

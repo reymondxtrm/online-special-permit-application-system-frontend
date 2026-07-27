@@ -5,6 +5,8 @@ import cgbLogo from "../../../../../assets/images/cgbLogo.png";
 import headerLine from "../../../../../assets/images/permitHeaderLine.png";
 import footerLine from "../../../../../assets/images/permitFooterLine.png";
 import butuanOnLogo from "../../../../../assets/images/butuanOnLogo.png";
+import tuvLogo from "../../../../../assets/images/TUV.jpg";
+import qrCode from "../../../../../assets/images/qr.jpg";
 import axios from "axios";
 import ReactToPrint from "react-to-print";
 
@@ -54,7 +56,12 @@ export default function MayorsAndGoodMoralRequestForm({
     return formatedDate;
   };
   return (
-    <Modal isOpen={isOpen} toggle={toggle} size="xl">
+    <Modal
+      isOpen={isOpen}
+      toggle={toggle}
+      size="xl"
+      className="mayors-request-form-modal"
+    >
       <ModalHeader toggle={toggle}></ModalHeader>
       <ModalBody>
         <div
@@ -63,78 +70,62 @@ export default function MayorsAndGoodMoralRequestForm({
             alignItems: "center",
             justifyContent: "center",
             flexDirection: "column",
+            overflowX: "auto",
           }}
           className="testing"
           ref={printRef}
         >
           <table style={{ margin: "10px", height: "990px" }}>
             <tbody>
+              {/* ===== HEADER ===== */}
               <tr>
-                <td
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <div
-                    className="header-content"
-                    style={{ position: "relative" }}
-                  >
-                    <div
-                      style={{
-                        paddingTop: "15px",
-                        paddingLeft: "20px",
-                        zIndex: "1000",
-                      }}
-                    >
-                      <img
-                        src={cgbLogo}
-                        alt="CGB Logo"
-                        className="header-logo-request-form "
-                      />
-                    </div>
-                    <div style={{ marginTop: "10px" }}>
+                <td>
+                  <div className="form-header">
+                    <div className="header-top-row">
+                      <div className="header-logo-wrap">
+                        <img
+                          src={cgbLogo}
+                          alt="CGB Logo"
+                          className="header-logo-request-form"
+                        />
+                      </div>
                       <div className="header-text d-flex flex-column gap-1">
                         <p>Republic of the Philippines</p>
-                        <p className="header-title ">
+                        <p className="header-title">
                           CITY GOVERNMENT OF BUTUAN
                         </p>
-                        <p className="header-title ">
-                          CITY GOVERNMENT PERMITS AND LICENSING DEPARTMENT
+                        <p className="header-title">
+                          City Business Permits and Licensing Department
                         </p>
-                        <p>
-                          City Hall Bldg., J.P. Rosales Ave., Doongan, Butuan
-                          City
-                        </p>
-                        <div style={{ marginTop: "px", marginLeft: "-30px" }}>
-                          <img
-                            className="header-line"
-                            src={headerLine}
-                            alt="CGB Logo"
-                          />
-                        </div>
+                        <p className="header-title">Butuan City</p>
                       </div>
+                      <p className="fw-bold revised-date">
+                        Revised on March 19, 2026
+                      </p>
                     </div>
-                    <div
-                      className="text-center d-flex flex-column"
-                      style={{
-                        position: "absolute",
-                        bottom: "-70px",
-                        left: "250px",
-                      }}
-                    >
-                      <h1 className="title m-0 p-0">REQUEST FORM </h1>
-                      <h1 className="title ">
-                        ({" "}
+
+                    <img
+                      className="header-line"
+                      src={headerLine}
+                      alt="header line"
+                    />
+
+                    <div className="title-section text-center">
+                      <h1 className="title m-0 p-0">REQUEST FORM</h1>
+                      <h1 className="title">
+                        (
                         <span style={{ fontStyle: "italic" }}>
-                          Good Moral Character/ Mayor&apos;s Certification)
+                          {" "}
+                          Good Moral Character/ Mayor&apos;s Certification{" "}
                         </span>
+                        )
                       </h1>
                     </div>
                   </div>
                 </td>
               </tr>
+
+              {/* ===== MAIN TABLE ===== */}
               <tr>
                 <td
                   style={{
@@ -148,50 +139,56 @@ export default function MayorsAndGoodMoralRequestForm({
                     style={{
                       width: "900px",
                       borderCollapse: "collapse",
-                      marginTop: "70px",
+                      marginTop: "20px",
                       tableLayout: "fixed",
                     }}
                   >
+                    <colgroup>
+                      <col style={{ width: "35%" }} />
+                      <col style={{ width: "15%" }} />
+                      <col style={{ width: "35%" }} />
+                      <col style={{ width: "15%" }} />
+                    </colgroup>
                     <thead>
                       <tr>
                         <th>
                           <div className="d-flex align-items-center">
                             <div
+                              className="checkbox-square"
                               style={{
-                                border: "2px solid",
-                                borderColor: "red",
-                                width: "30px",
-                                height: "30px",
                                 backgroundColor: column1 ? "black" : "",
                               }}
                             >
                               {" "}
                             </div>
-                            <div style={{ marginLeft: "100px" }}>
+                            <div style={{ marginLeft: "15px" }}>
                               <p className="m-0 p-0">MAYOR&apos;S CLEARANCE</p>
-                              <p className="m-0 p-0">
+                              <p className="m-0 p-0 fw-normal">
                                 (Certificate of Good Moral Character)
                               </p>
                             </div>
                           </div>
                         </th>
+                        <th className="where-to-secure-cell">
+                          Where to secure:
+                        </th>
                         <th>
                           <div className="d-flex align-items-center">
                             <div
+                              className="checkbox-square"
                               style={{
-                                border: "2px solid",
-                                borderColor: "red",
-                                width: "30px",
-                                height: "30px",
                                 backgroundColor: !column1 ? "black" : "",
                               }}
                             ></div>
-                            <div style={{ marginLeft: "120px" }}>
+                            <div style={{ marginLeft: "15px" }}>
                               <p className="m-0 p-0">
                                 MAYOR&apos;S CERTIFICATION
                               </p>
                             </div>
                           </div>
+                        </th>
+                        <th className="where-to-secure-cell">
+                          Where to secure:
                         </th>
                       </tr>
                     </thead>
@@ -199,346 +196,250 @@ export default function MayorsAndGoodMoralRequestForm({
                       <tr>
                         <td>
                           <div className="main-table-cell">
-                            <div
-                              style={{
-                                border: "2px solid",
-                                borderRadius: "50%",
-                                borderColor: "black",
-                                width: "20px",
-                                height: "20px",
-                                // backgroundColor:
-                                //   !!application?.uploaded_file
-                                //     ?.police_clearance && column1
-                                //     ? "black"
-                                //     : "",
-                              }}
-                            ></div>
-                            <p className="fw-bold m-0 p-0">
-                              Police Clearance or NBI Clearance
-                            </p>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="main-table-cell">
-                            <div
-                              style={{
-                                border: "2px solid",
-                                borderRadius: "50%",
-                                borderColor: "black",
-                                width: "20px",
-                                height: "20px",
-                                // backgroundColor:
-                                //   !!application?.uploaded_file
-                                //     ?.police_clearance && !column1
-                                //     ? "black"
-                                //     : "",
-                              }}
-                            ></div>
+                            <div className="circle-bullet"></div>
                             <p className="fw-bold m-0 p-0">Police Clearance</p>
                           </div>
                         </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <div className="main-table-cell">
-                            <div
-                              style={{
-                                border: "2px solid",
-                                borderRadius: "50%",
-                                borderColor: "black",
-                                width: "20px",
-                                height: "20px",
-                                // backgroundColor:
-                                //   !!application?.uploaded_file
-                                //     ?.community_tax_certificate && column1
-                                //     ? "black"
-                                //     : "",
-                              }}
-                            ></div>
-                            <p className="fw-bold m-0 p-0">
-                              Community Tax Certificate(Cedula)
-                            </p>
-                          </div>
+                        <td className="where-to-secure-cell">
+                          Philippine National Police (PNP)
                         </td>
                         <td>
                           <div className="main-table-cell">
-                            <div
-                              style={{
-                                border: "2px solid",
-                                borderRadius: "50%",
-                                borderColor: "black",
-                                width: "20px",
-                                height: "20px",
-                                // backgroundColor:
-                                //   !!application?.uploaded_file
-                                //     ?.community_tax_certificate && !column1
-                                //     ? "black"
-                                //     : "",
-                              }}
-                            ></div>
-                            <p className="fw-bold m-0 p-0">
-                              Community Tax Certificate(Cedula)
-                            </p>
+                            <div className="circle-bullet"></div>
+                            <p className="fw-bold m-0 p-0">Police Clearance</p>
                           </div>
+                        </td>
+                        <td className="where-to-secure-cell">
+                          Philippine National Police (PNP)
                         </td>
                       </tr>
                       <tr>
                         <td>
-                          <div className="main-table-cell ">
-                            <div
-                              style={{
-                                border: "2px solid",
-                                borderRadius: "50%",
-                                borderColor: "black",
-                                width: "20px",
-                                height: "20px",
-                                // backgroundColor:
-                                //   !!application?.uploaded_file
-                                //     ?.barangay_clearance && column1
-                                //     ? "black"
-                                //     : "",
-                              }}
-                            ></div>
+                          <div className="main-table-cell">
+                            <div className="circle-bullet"></div>
+                            <p className="fw-bold m-0 p-0">
+                              Community Tax Certificate (Cedula)
+                            </p>
+                          </div>
+                        </td>
+                        <td className="where-to-secure-cell">
+                          City Treasury Department
+                        </td>
+                        <td>
+                          <div className="main-table-cell">
+                            <div className="circle-bullet"></div>
+                            <p className="fw-bold m-0 p-0">
+                              Community Tax Certificate (Cedula)
+                            </p>
+                          </div>
+                        </td>
+                        <td className="where-to-secure-cell">
+                          City Treasury Department
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <div className="main-table-cell">
+                            <div className="circle-bullet"></div>
                             <p
                               className="fw-bold m-0 p-0"
                               style={{ flex: "1" }}
                             >
-                              Baragay Clearance
-                              <span className="fw-normal ">
-                                (to be issued by the Punong Barangay in Butuan
-                                City, as proof of residency)
+                              Barangay Clearance{" "}
+                              <span className="fw-normal">
+                                (as proof of residency)
                               </span>
                             </p>
                           </div>
                         </td>
+                        <td className="where-to-secure-cell">
+                          Barangay Hall (to be issued by the Punong Barangay in
+                          Butuan City)
+                        </td>
                         <td>
                           <div className="main-table-cell">
-                            <div
-                              style={{
-                                border: "2px solid",
-                                borderRadius: "50%",
-                                borderColor: "black",
-                                width: "20px",
-                                height: "20px",
-                                // backgroundColor:
-                                //   !!application?.uploaded_file
-                                //     ?.barangay_clearance && !column1
-                                //     ? "black"
-                                //     : "",
-                              }}
-                            ></div>
+                            <div className="circle-bullet"></div>
                             <p
                               className="fw-bold m-0 p-0"
                               style={{ flex: "1" }}
                             >
-                              Baragay Clearance
-                              <span className="fw-normal ">
-                                (to be issued by the Punong Barangay in Butuan
-                                City, as proof of residency)
+                              Barangay Clearance{" "}
+                              <span className="fw-normal">
+                                (as proof of residency)
                               </span>
                             </p>
                           </div>
                         </td>
+                        <td className="where-to-secure-cell">
+                          Barangay Hall (to be issued by the Punong Barangay in
+                          Butuan City)
+                        </td>
                       </tr>
                       <tr>
                         <td>
-                          <div className="d-flex gap-2">
+                          <div className="main-table-cell align-items-start">
                             <div
-                              style={{
-                                border: "2px solid",
-                                borderRadius: "50%",
-                                borderColor: "black",
-                                width: "20px",
-                                height: "20px",
-                                marginLeft: "30px",
-                                // backgroundColor:
-                                //   !!application?.uploaded_file
-                                //     ?.official_receipt && column1
-                                //     ? "black"
-                                //     : "",
-                              }}
+                              className="circle-bullet"
+                              style={{ marginTop: "3px" }}
                             ></div>
                             <div>
                               <p className="fw-bold m-0 p-0">
-                                Official Receipt(OR){" "}
+                                Official Receipt (OR){" "}
                                 <span className="fw-normal">
                                   as payment for:
                                 </span>
-                                <ul>
-                                  <li>
-                                    Mayor&apos; Certificate{" "}
-                                    <span>(₱100.00)</span>
-                                  </li>
-                                  <li>
-                                    Fiscal Clearance <span>(₱20.00)</span>
-                                  </li>
-                                  <li>
-                                    Court Clearance <span>(₱20.00)</span>
-                                  </li>
-                                </ul>
                               </p>
+                              <ul className="m-0">
+                                <li>
+                                  Mayor&apos;s Certificate{" "}
+                                  <span>(₱100.00)</span>
+                                </li>
+                                <li>
+                                  Fiscal Clearance <span>(₱20.00)</span>
+                                </li>
+                                <li>
+                                  Court Clearance <span>(₱20.00)</span>
+                                </li>
+                              </ul>
                             </div>
                           </div>
                         </td>
+                        <td className="where-to-secure-cell">
+                          City Treasury Department
+                        </td>
                         <td>
-                          <div className="d-flex gap-2">
+                          <div className="main-table-cell align-items-start">
                             <div
-                              style={{
-                                border: "2px solid",
-                                borderRadius: "50%",
-                                borderColor: "black",
-                                width: "20px",
-                                height: "20px",
-                                marginLeft: "30px",
-                                // backgroundColor:
-                                //   !!application?.uploaded_file
-                                //     ?.official_receipt && column1
-                                //     ? "black"
-                                //     : "",
-                              }}
+                              className="circle-bullet"
+                              style={{ marginTop: "3px" }}
                             ></div>
                             <div>
                               <p className="fw-bold m-0 p-0">
-                                Official Receipt(OR){" "}
+                                Official Receipt (OR){" "}
                                 <span className="fw-normal">
                                   as payment for:
                                 </span>
-                                <ul>
-                                  <li>
-                                    Mayor&apos; Certificate{" "}
-                                    <span>(₱100.00)</span>
-                                  </li>
-                                  <li>
-                                    Fiscal Clearance <span>(₱20.00)</span>
-                                  </li>
-                                  <li>
-                                    Court Clearance <span>(₱20.00)</span>
-                                  </li>
-                                </ul>
                               </p>
+                              <ul className="m-0">
+                                <li>
+                                  Mayor&apos;s Certificate{" "}
+                                  <span>(₱100.00)</span>
+                                </li>
+                                <li>
+                                  Fiscal Clearance <span>(₱20.00)</span>
+                                </li>
+                                <li>
+                                  Court Clearance <span>(₱20.00)</span>
+                                </li>
+                              </ul>
                             </div>
                           </div>
+                        </td>
+                        <td className="where-to-secure-cell">
+                          City Treasury Department
                         </td>
                       </tr>
                       <tr>
                         <td>
-                          <div className="d-flex flex-column gap-2">
+                          <div className="d-flex flex-column gap-1">
                             <div className="main-table-cell">
-                              <div
-                                style={{
-                                  border: "2px solid",
-                                  borderRadius: "50%",
-
-                                  width: "20px",
-                                  height: "20px",
-                                  // backgroundColor:
-                                  //   !!application?.uploaded_file
-                                  //     ?.fiscal_clearance && column1
-                                  //     ? "black"
-                                  //     : "",
-                                }}
-                              ></div>
+                              <div className="circle-bullet"></div>
                               <p className="fw-bold m-0 p-0">
-                                Fiscal Clearance
+                                Fiscal Clearance{" "}
+                                <span className="fw-normal">
+                                  (Regional Trial Court)
+                                </span>
                               </p>
                             </div>
                             <div className="main-table-cell">
-                              <div
-                                style={{
-                                  border: "2px solid",
-                                  borderRadius: "50%",
-
-                                  width: "20px",
-                                  height: "20px",
-                                  // backgroundColor:
-                                  //   !!application?.uploaded_file
-                                  //     ?.court_clearance && column1
-                                  //     ? "black"
-                                  //     : "",
-                                }}
-                              ></div>
-                              <p className="fw-bold m-0 p-0">Court Clearance</p>
+                              <div className="circle-bullet"></div>
+                              <p className="fw-bold m-0 p-0">
+                                Court Clearance{" "}
+                                <span className="fw-normal">
+                                  (Municipal Trial Court)
+                                </span>
+                              </p>
                             </div>
                           </div>
                         </td>
+                        <td className="where-to-secure-cell">
+                          Hall of Justice
+                        </td>
                         <td>
-                          <div className="d-flex flex-column gap-2">
+                          <div className="d-flex flex-column gap-1">
                             <div className="main-table-cell">
-                              <div
-                                style={{
-                                  border: "2px solid",
-                                  borderRadius: "50%",
-
-                                  width: "20px",
-                                  height: "20px",
-                                  // backgroundColor:
-                                  //   !!application?.uploaded_file
-                                  //     ?.fiscal_clearance && !column1
-                                  //     ? "black"
-                                  //     : "",
-                                }}
-                              ></div>
+                              <div className="circle-bullet"></div>
                               <p className="fw-bold m-0 p-0">
-                                Fiscal Clearance
+                                Fiscal Clearance{" "}
+                                <span className="fw-normal">
+                                  (Regional Trial Court)
+                                </span>
                               </p>
                             </div>
                             <div className="main-table-cell">
-                              <div
-                                style={{
-                                  border: "2px solid",
-                                  borderRadius: "50%",
-
-                                  width: "20px",
-                                  height: "20px",
-                                  // backgroundColor:
-                                  //   !!application?.uploaded_file
-                                  //     ?.court_clearance && !column1
-                                  //     ? "black"
-                                  //     : "",
-                                }}
-                              ></div>
-                              <p className="fw-bold m-0 p-0">Court Clearance</p>
+                              <div className="circle-bullet"></div>
+                              <p className="fw-bold m-0 p-0">
+                                Court Clearance{" "}
+                                <span className="fw-normal">
+                                  (Municipal Trial Court)
+                                </span>
+                              </p>
                             </div>
                           </div>
+                        </td>
+                        <td className="where-to-secure-cell">
+                          Hall of Justice
                         </td>
                       </tr>
                       <tr>
-                        <td rowSpan={2}>
-                          <p style={{ color: "red" }}>
-                            <span className="fw-bold">Note:</span> Magbayad usa
-                            og <span className="fw-bold">₱140.00</span> sa
-                            <span className="fw-bold">
-                              Cashier Window 23, 24 o 26{" "}
-                            </span>
-                            para sa<span className="fw-bold">Fiscal</span> ug{" "}
-                            <span className="fw-bold">Court Clearances </span>
-                            adisir moadto sa Hall of Justice. Dapat BUTUAN CITY
-                            ang address nga ibutang sa dokumento sama sa Fiscal,
-                            Court, ug Brgy. Clearances. Mubalik sa
-                            <span className="fw-bold"> CBPLD </span> og ipakita
-                            ang tanan{" "}
-                            <span className="fw-bold"> original </span>
-                            nga mga dokumento (apil ang mga
-                            <span className="fw-bold"> photocopy</span> ) alang
-                            sa pag issue sa certificate.
+                        <td colSpan={2} rowSpan={2} className="reminders-cell">
+                          <p style={{ color: "red", fontStyle: "italic" }}>
+                            <span className="fw-bold">Reminders:</span>
                           </p>
+                          <ul style={{ color: "red", fontStyle: "italic" }}>
+                            <li>
+                              Magkuha una og{" "}
+                              <span className="fw-bold">Fiscal Clearance</span>{" "}
+                              ug{" "}
+                              <span className="fw-bold">Court Clearance</span>.
+                            </li>
+                            <li>
+                              Ang mga rekisitos sa{" "}
+                              <span className="fw-bold">Fiscal Clearance</span>{" "}
+                              mao ang{" "}
+                              <span className="fw-bold">Police Clearance</span>{" "}
+                              ug{" "}
+                              <span className="fw-bold">
+                                Barangay Clearance
+                              </span>
+                              .
+                            </li>
+                            <li>
+                              Ang mga rekisitos sa{" "}
+                              <span className="fw-bold">Court Clearance</span>{" "}
+                              mao ang{" "}
+                              <span className="fw-bold">Fiscal Clearance</span>,{" "}
+                              <span className="fw-bold">Police Clearance</span>{" "}
+                              ug{" "}
+                              <span className="fw-bold">
+                                Barangay Clearance
+                              </span>
+                              .
+                            </li>
+                            <li>
+                              Dapat <span className="fw-bold">BUTUAN CITY</span>{" "}
+                              ang address nga ibutang sa mga dokumento. Human ma
+                              kompleto ang mga rekisitos, mamahimong mag apply
+                              online @{" "}
+                              <span style={{ textDecoration: "underline" }}>
+                                ospas.butuan.gov.ph
+                              </span>
+                            </li>
+                          </ul>
                         </td>
-                        <td>
+                        <td colSpan={2}>
                           <div className="main-table-cell">
-                            <div
-                              style={{
-                                border: "2px solid",
-                                borderRadius: "50%",
-                                borderColor: "black",
-                                width: "20px",
-                                height: "20px",
-                                // backgroundColor:
-                                //   !!application?.uploaded_file
-                                //     ?.court_clearance && !column1
-                                //     ? "black"
-                                //     : "",
-                              }}
-                            ></div>
+                            <div className="circle-bullet"></div>
                             <p className="fw-bold m-0 p-0">
                               Certificate of Ordination
                             </p>
@@ -546,21 +447,12 @@ export default function MayorsAndGoodMoralRequestForm({
                         </td>
                       </tr>
                       <tr>
-                        <td>
-                          {" "}
+                        <td colSpan={2}>
                           <div className="main-table-cell">
-                            <div
-                              style={{
-                                border: "2px solid",
-                                borderRadius: "50%",
-                                borderColor: "black",
-                                width: "20px",
-                                height: "20px",
-                              }}
-                            ></div>
+                            <div className="circle-bullet"></div>
                             <p className="fw-bold m-0 p-0">
-                              Securities and Exchange Commission () Registration
-                              of the church
+                              Securities and Exchange Commission (SEC)
+                              Registration of the church
                             </p>
                           </div>
                         </td>
@@ -569,6 +461,8 @@ export default function MayorsAndGoodMoralRequestForm({
                   </table>
                 </td>
               </tr>
+
+              {/* ===== FOOTER FORM FIELDS ===== */}
               <tr>
                 <td
                   style={{
@@ -579,9 +473,19 @@ export default function MayorsAndGoodMoralRequestForm({
                 >
                   <table
                     className="footer-table"
-                    style={{ width: "900px", marginTop: "50px" }}
+                    style={{ width: "900px", marginTop: "30px" }}
                   >
                     <tbody>
+                      <tr>
+                        <td colSpan={2}>
+                          <p
+                            className="m-0 p-0 cambraText"
+                            style={{ fontStyle: "italic", fontSize: "12px" }}
+                          >
+                            (Please fill-out the following information)
+                          </p>
+                        </td>
+                      </tr>
                       <tr>
                         <td style={{ width: "65%" }}>
                           <div className="d-flex">
@@ -635,6 +539,11 @@ export default function MayorsAndGoodMoralRequestForm({
                                   ? application.user.mname.toUpperCase()
                                   : ""}
                               </p>
+                              <p className="m-0 bolder-text">
+                                {application?.user?.suffix
+                                  ? application.user.suffix.toUpperCase()
+                                  : ""}
+                              </p>
                             </div>
                           </div>
                         </td>
@@ -662,7 +571,13 @@ export default function MayorsAndGoodMoralRequestForm({
                               className="cambraText"
                               style={{ fontStyle: "italic" }}
                             >
-                              Middle Name
+                              Middle Initial
+                            </span>
+                            <span
+                              className="cambraText"
+                              style={{ fontStyle: "italic" }}
+                            >
+                              Extension
                             </span>
                           </div>
                         </td>
@@ -714,13 +629,13 @@ export default function MayorsAndGoodMoralRequestForm({
                             <i className="cambraText">Subdivision</i>
                             <i className="cambraText">Barangay</i>
                             <i className="cambraText">City</i>
-                            <i className="cambraText">Zip Code</i>
+                            <i className="cambraText">Zip code</i>
                           </div>
                         </td>
                       </tr>
                       <tr>
                         <td colSpan={2} className="bolder-text cambraText">
-                          Name of Employer{" "}
+                          Name of Employer/Establishment{" "}
                           <span
                             className="fw-normal"
                             style={{ fontStyle: "italic" }}
@@ -746,15 +661,12 @@ export default function MayorsAndGoodMoralRequestForm({
                   </table>
                 </td>
               </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
               <tr>
-                <td
-                  className="text-end"
-                  style={{
-                    paddingRight: "22px",
-                    paddingLeft: "22px",
-                    paddingTop: "40px",
-                  }}
-                >
+                <td>
                   <p
                     className="p-0 m-0 fw-bold"
                     style={{
@@ -766,22 +678,99 @@ export default function MayorsAndGoodMoralRequestForm({
                     &quot; Note. This is system generated. No signature is
                     required.&quot;
                   </p>
-                  <img src={butuanOnLogo} style={{ width: "180px" }} />
-                  <p
-                    className="p-0 m-0 fw-bold"
-                    style={{
-                      fontStyle: "italic",
-                      fontSize: "16px",
-                      marginTop: "-10px",
-                    }}
-                  >
-                    CBPLD.BPLD.F.107.REV04
-                  </p>
                 </td>
               </tr>
             </tbody>
           </table>
-          <img src={footerLine} style={{ width: "100%" }} />
+          <img src={footerLine} style={{ width: "100%", height: "5px" }} />
+          <table style={{ width: "940px" }}>
+            <tbody>
+              {/* ===== BOTTOM FOOTER ===== */}
+              <tr>
+                <td
+                  style={{
+                    paddingRight: "22px",
+                    paddingLeft: "22px",
+                    // paddingTop: "40px",
+                  }}
+                >
+                  <div
+                    className="d-flex justify-content-between align-items-end"
+                    style={{ flexWrap: "nowrap", width: "100%" }}
+                  >
+                    <div
+                      className="d-flex align-items-center gap-2"
+                      style={{ flexWrap: "nowrap", flexShrink: 0 }}
+                    >
+                      <img
+                        src={qrCode}
+                        alt="QR Code"
+                        style={{ width: "70px" }}
+                      />
+                      <div
+                        className="d-flex flex-column"
+                        style={{ fontSize: "12px", maxWidth: "230px" }}
+                      >
+                        <span className="fw-bold">
+                          City Hall Bldg., J.P. Rosales Ave., Doongan, Butuan
+                          City
+                        </span>
+                        <span>
+                          Email:{" "}
+                          <span style={{ color: "#0563C1" }}>
+                            cbpld@butuan.gov.ph
+                          </span>
+                        </span>
+                        <span>Phone: 0951-388-4193</span>
+                        <span style={{ color: "#0563C1" }}>
+                          www.butuan.gov.ph
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-center" style={{ flexShrink: 0 }}>
+                      <img
+                        src={tuvLogo}
+                        alt="TUV NORD"
+                        style={{ width: "110px" }}
+                      />
+                      <p
+                        className="p-0 m-0"
+                        style={{ fontSize: "10px", marginTop: "2px" }}
+                      >
+                        Certificate Registration No. PHP
+                        <br />
+                        QMS 23 93 0116
+                      </p>
+                    </div>
+                    <div className="text-end" style={{ flexShrink: 0 }}>
+                      {/* <p
+                        className="p-0 m-0 fw-bold"
+                        style={{
+                          fontStyle: "italic",
+                          fontSize: "13px",
+                          paddingRight: "10px",
+                        }}
+                      >
+                        &quot; Note. This is system generated. No signature is
+                        required.&quot;
+                      </p> */}
+                      <img src={butuanOnLogo} style={{ width: "180px" }} />
+                      <p
+                        className="p-0 m-0 fw-bold"
+                        style={{
+                          fontStyle: "italic",
+                          fontSize: "16px",
+                          marginTop: "-10px",
+                        }}
+                      >
+                        CBPLD.BPLD.F.017.REV07
+                      </p>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </ModalBody>
       <ModalFooter>
