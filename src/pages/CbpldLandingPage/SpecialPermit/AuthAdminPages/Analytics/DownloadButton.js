@@ -55,6 +55,12 @@ const DownloadButton = () => {
     } else if (dateFilter.filter_type.label === "Occupational Permit") {
       ws_data.push([
         "No of permits issued per day ",
+        "Date Received (Initial)",
+        "Time Received (Initial)",
+        "Date Released (Order of Payment)",
+        "Time Released (Order of Payment)",
+        "Date Received (Official Receipt)",
+        "Time Received (Official Receipt)",
         "Date Received",
         "Time Received",
         "Date Issued",
@@ -73,6 +79,12 @@ const DownloadButton = () => {
     } else {
       ws_data.push([
         "No of permits issued per day ",
+        "Date Received (Initial)",
+        "Time Received (Initial)",
+        "Date Released (Order of Payment)",
+        "Time Released (Order of Payment)",
+        "Date Received (Official Receipt)",
+        "Time Received (Official Receipt)",
         "Date Received",
         "Time Received",
         "Date Issued",
@@ -91,9 +103,21 @@ const DownloadButton = () => {
       dateFilter.filter_type.label === "Good Moral" ||
       dateFilter.filter_type.label === "Mayors Permit"
     ) {
+      // 'pending_at_date' => $pendingCarbon?->format('m/d/Y'),
+      //               'pending_at_time' => $pendingCarbon?->format('h:i A'),
+      //               'for_payment_at_date' => $forPaymentCarbon?->format('m/d/Y'),
+      //               'for_payment_at_time' => $forPaymentCarbon?->format('h:i A'),
+      //               'for_payment_approval_at_date' => $forPaymentApprovalCarbon?->format('m/d/Y'),
+      //               'for_payment_approval_at_time' =>
       data.forEach((item) => {
         ws_data.push([
           item.sequence,
+          item.pending_at_date,
+          item.pending_at_time,
+          item.for_payment_at_date,
+          item.for_payment_at_time,
+          item.for_payment_approval_at_date,
+          item.for_payment_approval_at_time,
           item.start_at_date,
           item.start_at_time,
           item.ended_at_date,
@@ -116,6 +140,12 @@ const DownloadButton = () => {
         "",
         "",
         "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
         "Average Turn Around Time:",
         initialData.average_duration,
       ]);
@@ -123,6 +153,12 @@ const DownloadButton = () => {
       data.forEach((item) => {
         ws_data.push([
           item.sequence,
+          item.pending_at_date,
+          item.pending_at_time,
+          item.for_payment_at_date,
+          item.for_payment_at_time,
+          item.for_payment_approval_at_date,
+          item.for_payment_approval_at_time,
           item.start_at_date,
           item.start_at_time,
           item.ended_at_date,
@@ -140,6 +176,12 @@ const DownloadButton = () => {
         ]);
       });
       ws_data.push([
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
         "",
         "",
         "",
@@ -174,6 +216,12 @@ const DownloadButton = () => {
         ]);
       });
       ws_data.push([
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
         "",
         "",
         "",

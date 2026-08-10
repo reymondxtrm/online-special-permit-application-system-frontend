@@ -7,9 +7,10 @@
 }
 .header-title {
   font-size: 13pt;
+  font-weight: bold;
 }
 .header-logo-request-form {
-  width: "40px";
+  width: 120px;
 }
 
 .table-header {
@@ -20,6 +21,9 @@
 }
 
 .checkbox {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 4px;
   border: 2px solid black;
   width: 20px !important;
   height: 20px !important;
@@ -67,15 +71,25 @@
 .header-text > p {
   color: #154172 !important;
 }
+/* Defined locally rather than inherited from a sibling Printables/*.css that
+   happens to be loaded first. */
+.header-line {
+  width: 100%;
+  margin: 8px 0 10px 0;
+  display: block;
+}
+.footer-table th,
+.footer-table td,
+.footer-table th *,
+.footer-table td * {
+  color: #000000 !important;
+}
 p {
   color: #000000;
 }
 @media print {
   .wrapper {
     width: 920px !important;
-  }
-  .header-logo-request-form {
-    width: "40px";
   }
   .header-text > p {
     font-size: 14px;

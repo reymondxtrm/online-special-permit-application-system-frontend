@@ -38,6 +38,7 @@ import PaymentModal from "../../AuthClientPages/Modals/PaymentModal";
 import { SpecialPermitClientSlice } from "features/SpecialPermitClient";
 import { useSelectedPaymentDetails } from "hooks/Common/useSelectedPaymentDetails";
 import UpdateOrNumberModal from "../Modals/UpdateOrNumberModal";
+import ApplicationActivityModal from "../Modals/ApplicationActivityModal";
 
 export default function OccupationalTableCompanyAdmin({ status }) {
   const dispatch = useDispatch();
@@ -68,6 +69,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   const [selectedPermit, setSelectedPermit] = useState([]);
   const [updateOrNumberModal, setUpdateOrNumberModal] = useState(false);
   const [orNumber, setOrNumber] = useState(null);
+  const [activityModal, setActivityModal] = useState(false);
 
   useEffect(() => {
     dispatch(getCompanyOccupatinalData({ type: "company", status: status }));
@@ -127,6 +129,9 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   };
   const toggleUpdateOrNumberModal = () => {
     setUpdateOrNumberModal((prev) => !prev);
+  };
+  const toggleActivityModal = () => {
+    setActivityModal((prev) => !prev);
   };
   const allPermit = useMemo(() => {
     return specialPermitAdmin?.companyOccupational?.data?.flatMap(
@@ -274,6 +279,13 @@ export default function OccupationalTableCompanyAdmin({ status }) {
           // applicationType={applicationType}
           toggleRefresh={toggleRefresh}
           orNumber={orNumber}
+        />
+      )}
+      {activityModal && (
+        <ApplicationActivityModal
+          openModal={activityModal}
+          toggleModal={toggleActivityModal}
+          applicationId={applicationId}
         />
       )}
 
@@ -580,6 +592,19 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                     </DropdownItem>
                                   </DropdownMenu>
                                 </UncontrolledDropdown>
+                              )}
+                              {status === "completed" && (
+                                <Button
+                                  color="info"
+                                  className="ms-2"
+                                  title="View Activity"
+                                  onClick={() => {
+                                    setApplicationId(item?.id);
+                                    toggleActivityModal();
+                                  }}
+                                >
+                                  <i className="mdi mdi-history fs-5"></i>
+                                </Button>
                               )}
                               {status === "pending" && (
                                 <td>

@@ -1,9 +1,11 @@
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import cgbLogo from "../../../../../assets/images/cgbLogo.png";
 import headerLine from "../../../../../assets/images/permitHeaderLine.png";
 import butuanOnLogo from "../../../../../assets/images/butuanOnLogo.png";
 import footerLine from "../../../../../assets/images/permitFooterLine.png";
+import tuvLogo from "../../../../../assets/images/TUV.jpg";
+import qrCode from "../../../../../assets/images/qr.jpg";
 import "./OccupationalRequestForm.css";
 import axios from "axios";
 import ReactToPrint from "react-to-print";
@@ -46,578 +48,369 @@ export default function OccupationalRequestForm({
       document.title = originalTitle;
     }, 5000);
   };
+
   const isCompany = application?.user?.account_type === "company";
 
-  const gender = application?.corporation_member?.sex ?? application?.user?.sex;
+  // A company application describes one of its members, an individual one
+  // describes the account holder. Same fields either way, different relations.
+  const person = isCompany
+    ? application?.corporation_member
+    : application?.user;
+  const details = isCompany
+    ? application?.corporation_member?.user_details_morph
+    : application?.user?.user_details;
+  const addressRecord = isCompany
+    ? application?.corporation_member?.user_addresses_morph?.[0]
+    : application?.user?.user_addresses?.[0];
+  const phoneRecord = isCompany
+    ? application?.corporation_member?.user_phone_numbers_morph?.[0]
+    : application?.user?.user_phone_numbers?.[0];
+  const occupation = isCompany
+    ? application?.corporation_member?.user_occupation_details_morph
+    : application?.user?.user_occupation_details;
 
+  const gender = application?.corporation_member?.sex ?? application?.user?.sex;
   const civilStatus =
     application?.corporation_member?.user_details_morph?.civil_status?.code ??
     application?.user?.user_details?.civil_status?.code;
 
+  const printedName = person
+    ? `${person.fname || ""} ${person.mname || ""} ${person.lname || ""}`
+        .replace(/\s+/g, " ")
+        .trim()
+        .toUpperCase()
+    : "";
+
+  const choice = (label, checked) => (
+    <div className="rf19-choice">
+      <span
+        className="rf19-checkbox"
+        style={{ backgroundColor: checked ? "#000" : "" }}
+      ></span>
+      <span>{label}</span>
+    </div>
+  );
+
   return (
-    <Modal isOpen={isOpen} toggle={toggleModal} size="xl">
+    <Modal
+      isOpen={isOpen}
+      toggle={toggleModal}
+      size="xl"
+      className="occupational-request-form-modal"
+    >
       <ModalHeader toggle={toggleModal}></ModalHeader>
       <ModalBody>
-        <div
-          className="wrapper"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "column",
-          }}
-          ref={printRef}
-        >
-          <table style={{ margin: "10px", height: "990px", width: "765px" }}>
+        <div className="rf19-sheet" ref={printRef}>
+          {/* ===== HEADER ===== */}
+          <div className="rf19-header">
+            <div className="rf19-header-row">
+              <img src={cgbLogo} alt="CGB Logo" className="rf19-logo" />
+              <div className="rf19-header-text">
+                <p className="rf19-header-republic">
+                  Republic of the Philippines
+                </p>
+                <p className="rf19-header-title">CITY GOVERNMENT OF BUTUAN</p>
+                <p className="rf19-header-title">
+                  City Business Permits and Licensing Department
+                </p>
+                <p className="rf19-header-city">Butuan City</p>
+              </div>
+              <p className="rf19-revised">Revised on March 19, 2026</p>
+            </div>
+          </div>
+          <img className="rf19-rule" src={headerLine} alt="" />
+
+          <p className="rf19-title">REQUEST FORM FOR OCCUPATIONAL PERMIT</p>
+
+          {/* ===== APPLICANT DETAILS ===== */}
+          <table className="rf19-form-table">
+            <colgroup>
+              <col style={{ width: "47%" }} />
+              <col style={{ width: "14%" }} />
+              <col style={{ width: "25%" }} />
+              <col style={{ width: "14%" }} />
+            </colgroup>
             <tbody>
               <tr>
-                <td>
-                  <div className="header-content d-flex flex-column">
-                    <div className="d-flex flex-row">
-                      <div
-                        style={{
-                          paddingTop: "15px",
-                          paddingLeft: "20px",
-                          zIndex: "1000",
-                        }}
-                      >
-                        <img
-                          src={cgbLogo}
-                          alt="CGB Logo"
-                          className="header-logo-request-form"
-                        />
-                      </div>
-                      <div style={{ marginTop: "10px" }}>
-                        <div className="header-text d-flex flex-column gap-1">
-                          <p>Republic of the Philippines</p>
-                          <p className="header-title">
-                            CITY GOVERNMENT OF BUTUAN
-                          </p>
-                          <p className="header-title">
-                            CITY GOVERNMENT PERMITS AND LICENSING DEPARTMENT
-                          </p>
-                          <p>
-                            City Hall Bldg., J.P. Rosales Ave., Doongan, Butuan
-                            City
-                          </p>
-                          <div style={{ marginTop: "px", marginLeft: "-30px" }}>
-                            <img
-                              className="header-line"
-                              src={headerLine}
-                              alt="Line"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className="text-center "
-                      style={{ marginTop: "50px", width: "100%" }}
-                    >
-                      <h1 className="title">
-                        REQUEST FORM FOR OCCUPATIONAL PERMIT
-                      </h1>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-
-              <tr>
-                <td
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <div style={{ width: "765px" }}>
-                    <table className="form-table split-70-30">
-                      <colgroup>
-                        <col style={{ width: "60%" }} />
-                        <col style={{ width: "40%" }} />
-                      </colgroup>
-                      <tbody>
-                        <tr>
-                          <td className="label">
-                            Date:
-                            <span className="fw-normal">
-                              {" "}
-                              {application?.application_date}
-                            </span>
-                          </td>
-                          <td className="label">Control No.:</td>
-                        </tr>
-                      </tbody>
-                    </table>
-
-                    {/* Table 2: Full width */}
-                    <table className="form-table">
-                      <tbody>
-                        <tr>
-                          <td className="label d-flex ">
-                            Name:
-                            <div className="w-100 d-flex justify-content-around  ">
-                              <span>
-                                {isCompany
-                                  ? application?.corporation_member?.lname
-                                  : application?.user?.lname || ""}
-                              </span>
-                              <span>
-                                {isCompany
-                                  ? application?.corporation_member?.fname
-                                  : application?.user?.fname || ""}
-                              </span>
-                              <span>
-                                {isCompany
-                                  ? application?.corporation_member?.mname
-                                  : application?.user?.mname || ""}
-                              </span>
-                            </div>
-                          </td>
-                        </tr>
-                        <tr className="sub-labels">
-                          <td>
-                            <div className="d-flex justify-content-around ms-5">
-                              <span>Surname</span>
-                              <span>First Name</span>
-                              <span>Middle Initial / Suffix</span>
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-
-                    {/* Table 3: 60-40 split */}
-                    <table className="form-table split-50-50">
-                      <colgroup>
-                        <col style={{ width: "50%" }} />
-                        <col style={{ width: "50%" }} />
-                      </colgroup>
-                      <tbody>
-                        <tr>
-                          <td className="label">
-                            <div>
-                              Date of Birth: <span>(Year-Month-Day)</span>
-                            </div>
-                            <div className="text-center fw-normal">
-                              <span>
-                                {isCompany
-                                  ? application?.corporation_member
-                                      ?.user_details_morph?.birthdate
-                                  : application?.user?.user_details
-                                      ?.birthdate || ""}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="label">
-                            <div className="d-flex">
-                              Gender:
-                              <div className="d-flex flex-column">
-                                <div>
-                                  <span
-                                    className="checkbox ms-2"
-                                    style={{
-                                      backgroundColor:
-                                        gender === "MALE" ? "black" : null,
-                                    }}
-                                  ></span>{" "}
-                                  Male
-                                </div>
-                                <div>
-                                  <span
-                                    className="checkbox ms-2"
-                                    style={{
-                                      backgroundColor:
-                                        gender === "FEMALE" ? "black" : null,
-                                    }}
-                                  ></span>{" "}
-                                  FEMALE
-                                </div>
-                              </div>
-                              <div>
-                                <div>
-                                  <span
-                                    className="checkbox ms-2"
-                                    style={{
-                                      backgroundColor:
-                                        gender === "PREFER NOT TO SAY"
-                                          ? "black"
-                                          : null,
-                                    }}
-                                  ></span>{" "}
-                                  Prefer not to say
-                                </div>
-                                <div>
-                                  <span
-                                    className="checkbox ms-2"
-                                    style={{
-                                      backgroundColor:
-                                        gender === "OTHERS" ? "black" : null,
-                                    }}
-                                  ></span>{" "}
-                                  Other _______
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-
-                    {/* Table 4: Full width */}
-                    <table className="form-table">
-                      <tbody>
-                        <tr>
-                          <td className="label">
-                            Address:
-                            <div className="d-flex justify-content-around">
-                              <span>
-                                {isCompany
-                                  ? application?.corporation_member
-                                      ?.user_addresses_morph?.[0]?.address_line
-                                  : application?.user?.user_addresses?.[0]
-                                      ?.address_line}
-                              </span>
-                              <span>
-                                {isCompany
-                                  ? application?.corporation_member
-                                      ?.user_addresses_morph?.[0]?.barangay
-                                  : application?.user?.user_addresses?.[0]
-                                      ?.barangay}
-                              </span>
-                              <span>
-                                {isCompany
-                                  ? application?.corporation_member
-                                      ?.user_addresses_morph?.[0]?.city
-                                  : application?.user?.user_addresses?.[0]
-                                      ?.city}{" "}
-                                / 8600
-                              </span>
-                            </div>
-                          </td>
-                        </tr>
-                        <tr className="sub-labels">
-                          <td className="d-flex justify-content-around">
-                            <span>House No./Street/Purok</span>
-                            <span>Barangay</span>
-                            <span>City / Zip Code</span>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-
-                    {/* Table 5: 50-50 split */}
-                    <table className="form-table ">
-                      <colgroup>
-                        <col style={{ width: "60%" }} />
-                        <col style={{ width: "40%" }} />
-                      </colgroup>
-                      <tbody>
-                        <tr>
-                          <td className="label">
-                            <div className="d-flex">
-                              Civil Status:
-                              <div className="d-flex flex-column">
-                                <div>
-                                  <span
-                                    className="checkbox  ms-2"
-                                    style={{
-                                      backgroundColor:
-                                        civilStatus === "single"
-                                          ? "black"
-                                          : null,
-                                    }}
-                                  ></span>{" "}
-                                  Single
-                                </div>
-                                <div>
-                                  <span
-                                    className="checkbox  ms-2"
-                                    style={{
-                                      backgroundColor:
-                                        civilStatus === "divorced"
-                                          ? "black"
-                                          : null,
-                                    }}
-                                  ></span>{" "}
-                                  Divorced
-                                </div>
-                              </div>
-                              <div className="d-flex flex-column">
-                                <div>
-                                  <span
-                                    className="checkbox  ms-2"
-                                    style={{
-                                      backgroundColor:
-                                        civilStatus === "married"
-                                          ? "black"
-                                          : null,
-                                    }}
-                                  ></span>{" "}
-                                  Married
-                                </div>
-                                <div>
-                                  <span
-                                    className="checkbox ms-2 "
-                                    style={{
-                                      backgroundColor:
-                                        civilStatus === "annulled"
-                                          ? "black"
-                                          : null,
-                                    }}
-                                  ></span>{" "}
-                                  Annulled
-                                </div>
-                              </div>
-                              <div className="d-flex flex-column">
-                                <div>
-                                  <span
-                                    className="checkbox  ms-2"
-                                    style={{
-                                      backgroundColor:
-                                        civilStatus === "separated"
-                                          ? "black"
-                                          : null,
-                                    }}
-                                  ></span>{" "}
-                                  Separated
-                                </div>
-                                <div>
-                                  <span
-                                    className="checkbox  ms-2"
-                                    style={{
-                                      backgroundColor:
-                                        civilStatus === "widowed"
-                                          ? "black"
-                                          : null,
-                                    }}
-                                  ></span>{" "}
-                                  Widowed/Widower
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="label">
-                            <div>Contact Number:</div>
-                            <div className="text-center">
-                              <span className="fw-normal">
-                                {isCompany
-                                  ? application?.corporation_member
-                                      ?.user_phone_numbers_morph?.[0]
-                                      ?.phone_number
-                                  : application?.user?.user_phone_numbers?.[0]
-                                      ?.phone_number || ""}
-                              </span>
-                            </div>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="label">
-                            Educational Attainment:{" "}
-                            <span className="fw-normal">
-                              {isCompany
-                                ? application?.corporation_member
-                                    ?.user_details_morph?.educational_attainment
-                                : application?.user?.user_details
-                                    ?.educational_attainment || ""}
-                            </span>
-                          </td>
-                          <td className="label">
-                            Occupation / Position:{" "}
-                            {isCompany
-                              ? application?.corporation_member
-                                  ?.user_occupation_details_morph?.position
-                              : application?.user?.user_occupation_details
-                                  ?.position || ""}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-
-                    {/* Table 6: Full width */}
-                    <table className="form-table">
-                      <tbody>
-                        <tr>
-                          <td className="label">
-                            Name of Employer / Establishment:{" "}
-                            <span className="fw-normal">
-                              {isCompany
-                                ? application?.corporation_member
-                                    ?.user_occupation_details_morph
-                                    ?.company_name
-                                : application?.user?.user_occupation_details
-                                    ?.company_name || ""}
-                            </span>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="label">
-                            Business Address:{" "}
-                            <span className="fw-normal">
-                              {isCompany
-                                ? application?.corporation_member
-                                    ?.user_occupation_details_morph
-                                    ?.employeer_address
-                                : application?.user?.user_occupation_details
-                                    ?.employeer_address || ""}
-                            </span>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </td>
-              </tr>
-
-              {/* DECLARATION */}
-              <tr>
-                <td style={{ textAlign: "center" }}>
-                  <p
-                    style={{ marginTop: "30px" }}
-                    className="cambraText bolder-text fs-5"
-                  >
-                    DECLARATION AS TO THE CORRECTNESS OF THE INFORMATION GIVEN
-                  </p>
-                </td>
-              </tr>
-              <tr>
-                <td style={{ width: "900px" }}>
-                  <p
-                    style={{
-                      textIndent: "40px",
-                      paddingLeft: "30px",
-                      paddingRight: "30px",
-                      fontSize: "12pt",
-                    }}
-                    className="cambraText"
-                  >
-                    I hereby voluntarily declare that all the information
-                    provided in this request form for the occupational permit is
-                    true, accurate, and complete to the best of my knowledge and
-                    belief. I fully understand that any false, misleading, or
-                    incomplete information may result in the disapproval of my
-                    application or other legal consequences. I further declare
-                    that I am of legal age and not below eighteen (18) years old
-                    at the time of this request.
-                  </p>
-                </td>
-              </tr>
-
-              {/* SIGNATURE */}
-              <tr>
-                <td>
-                  <div
-                    style={{ width: "200px" }}
-                    className="d-flex align-items-center flex-column"
-                  >
-                    <span
-                      className="fw-bold text-center"
-                      style={{ marginTop: "60px" }}
-                    >
-                      {" "}
-                      {isCompany
-                        ? `${application?.corporation_member?.fname} ${
-                            application?.corporation_member?.mname || ""
-                          } ${
-                            application?.corporation_member?.lname
-                          }`.toUpperCase()
-                        : `${application?.user?.fname} ${
-                            application?.user?.mname || ""
-                          } ${application?.user?.lname}`.toUpperCase() || ""}
-                    </span>
-                    <hr
-                      style={{
-                        width: "200px",
-                        border: "1px solid #000000",
-                        marginTop: "0px",
-                        marginBottom: "0px",
-                      }}
-                    />
-                    <p className="cambraText p-0 m-0">
-                      Signature over Printed Name
-                    </p>
-                  </div>
-                </td>
-              </tr>
-
-              {/* APPROVAL */}
-              <tr>
-                <td className="text-center ">
-                  <div
-                    style={{
-                      gap: "70px",
-                      marginTop: "18px",
-                      marginBottom: "18px",
-                    }}
-                    className="d-flex flex-column text-center cambraText"
-                  >
-                    <p>Recommending Approval:</p>
-                    <div className="d-flex flex-column text-center cambraText">
-                      <span className="fw-bold text-decoration-underline">
-                        ATTY. MOSHI ARIEL S. CAHOY
-                      </span>
-                      <span>City Government Department Head II</span>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td className="text-end">
-                  <span
-                    className="fw-bold"
-                    style={{
-                      color: "#000000",
-                      fontSize: "10px",
-                      marginRight: "10px",
-                    }}
-                  >
-                    {" "}
-                    Note. This is system generated. No signature is required.
+                <td colSpan={2}>
+                  <span className="rf19-label">Date:</span>{" "}
+                  <span className="rf19-value">
+                    {application?.application_date}
                   </span>
+                </td>
+                <td colSpan={2}>
+                  <span className="rf19-label">Control No.:</span>
+                </td>
+              </tr>
+
+              <tr>
+                <td colSpan={4}>
+                  <table className="rf19-value-grid">
+                    <colgroup>
+                      <col style={{ width: "8%" }} />
+                      <col style={{ width: "29%" }} />
+                      <col style={{ width: "27%" }} />
+                      <col style={{ width: "18%" }} />
+                      <col style={{ width: "18%" }} />
+                    </colgroup>
+                    <tbody>
+                      <tr>
+                        <td className="rf19-label">Name:</td>
+                        <td>{person?.lname}</td>
+                        <td>{person?.fname}</td>
+                        <td>{person?.mname}</td>
+                        <td>{person?.suffix}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              <tr className="rf19-caption-row">
+                <td colSpan={4}>
+                  <table className="rf19-caption-grid">
+                    <colgroup>
+                      <col style={{ width: "37%" }} />
+                      <col style={{ width: "27%" }} />
+                      <col style={{ width: "18%" }} />
+                      <col style={{ width: "18%" }} />
+                    </colgroup>
+                    <tbody>
+                      <tr>
+                        <td>Surname</td>
+                        <td>First Name</td>
+                        <td>Middle Initial</td>
+                        <td>Suffix</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <span className="rf19-label">Date of Birth:</span>{" "}
+                  <span className="rf19-hint">(Month-Day-Year)</span>
+                  <p className="rf19-value text-center">{details?.birthdate}</p>
+                </td>
+                <td colSpan={3}>
+                  <div className="rf19-choice-group">
+                    <span className="rf19-label">Gender :</span>
+                    <div className="rf19-choice-col">
+                      {choice("Male", gender === "MALE")}
+                      {choice("Female", gender === "FEMALE")}
+                    </div>
+                    <div className="rf19-choice-col">
+                      {choice("Prefer not to say", gender === "PREFER NOT TO SAY")}
+                      {choice("Other __________", gender === "OTHERS")}
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td colSpan={4}>
+                  <p className="rf19-label">Address:</p>
+                  <table className="rf19-value-grid">
+                    <colgroup>
+                      <col style={{ width: "28%" }} />
+                      <col style={{ width: "21%" }} />
+                      <col style={{ width: "18%" }} />
+                      <col style={{ width: "16%" }} />
+                      <col style={{ width: "17%" }} />
+                    </colgroup>
+                    <tbody>
+                      <tr>
+                        <td>{addressRecord?.address_line}</td>
+                        <td>{addressRecord?.subdivision}</td>
+                        <td>{addressRecord?.barangay}</td>
+                        <td>{addressRecord?.city}</td>
+                        <td>8600</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              <tr className="rf19-caption-row">
+                <td colSpan={4}>
+                  <table className="rf19-caption-grid">
+                    <colgroup>
+                      <col style={{ width: "28%" }} />
+                      <col style={{ width: "21%" }} />
+                      <col style={{ width: "18%" }} />
+                      <col style={{ width: "16%" }} />
+                      <col style={{ width: "17%" }} />
+                    </colgroup>
+                    <tbody>
+                      <tr>
+                        <td>House No./Street/Purok</td>
+                        <td>Subdivision</td>
+                        <td>Barangay</td>
+                        <td>City</td>
+                        <td>Zip Code</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </td>
               </tr>
 
               <tr>
                 <td colSpan={2}>
-                  <div className="d-flex justify-content-between align-items-end">
-                    <div className="d-flex gap-2">
-                      <div
-                        className="d-flex flex-column"
-                        style={{ fontSize: "11pt" }}
-                      >
-                        <span>Mobile #</span>
-                        <span>Email</span>
-                        <span>Website</span>
-                      </div>
-                      <div
-                        className="d-flex flex-column"
-                        style={{ fontSize: "11pt" }}
-                      >
-                        <span>: 09513884193</span>
-                        <span>: cpld@butuan.gov.ph</span>
-                        <span>: http://www.butuan.gov.ph</span>
-                      </div>
+                  <div className="rf19-choice-group">
+                    <span className="rf19-label">Civil Status:</span>
+                    <div className="rf19-choice-col">
+                      {choice("Single", civilStatus === "single")}
+                      {choice("Divorced", civilStatus === "divorced")}
                     </div>
-                    <div className="text-end">
-                      <img
-                        src={butuanOnLogo}
-                        style={{ width: "180px" }}
-                        alt="Butuan Logo"
-                      />
-                      <p
-                        className="p-0 m-0 fw-bold"
-                        style={{ fontStyle: "italic", fontSize: "16px" }}
-                      >
-                        CBPLD.BPLD.F.019.REV02
-                      </p>
+                    <div className="rf19-choice-col">
+                      {choice("Married", civilStatus === "married")}
+                      {choice("Annulled", civilStatus === "annulled")}
+                    </div>
+                    <div className="rf19-choice-col">
+                      {choice("Separated", civilStatus === "separated")}
+                      {choice("Widow/Widower", civilStatus === "widowed")}
                     </div>
                   </div>
+                </td>
+                <td colSpan={2}>
+                  <span className="rf19-label">Contact Number:</span>{" "}
+                  <span className="rf19-value">{phoneRecord?.phone_number}</span>
+                </td>
+              </tr>
+
+              <tr>
+                <td colSpan={2}>
+                  <span className="rf19-label">Educational Attainment:</span>{" "}
+                  <span className="rf19-value">
+                    {details?.educational_attainment}
+                  </span>
+                </td>
+                <td colSpan={2}>
+                  <span className="rf19-label">Occupation/Position:</span>{" "}
+                  <span className="rf19-value">{occupation?.position}</span>
+                </td>
+              </tr>
+
+              <tr>
+                <td colSpan={4}>
+                  <span className="rf19-label">
+                    Name of Employer/Establishment
+                  </span>{" "}
+                  <span className="rf19-hint">(if applicable)</span>
+                  <span className="rf19-label">:</span>{" "}
+                  <span className="rf19-value">{occupation?.company_name}</span>
+                </td>
+              </tr>
+              <tr>
+                <td colSpan={4}>
+                  <span className="rf19-label">Business Address</span>{" "}
+                  <span className="rf19-hint">(if applicable)</span>
+                  <span className="rf19-label">:</span>{" "}
+                  <span className="rf19-value">
+                    {occupation?.employeer_address}
+                  </span>
                 </td>
               </tr>
             </tbody>
           </table>
 
-          <img src={footerLine} style={{ width: "100%" }} />
+          {/* ===== DECLARATION ===== */}
+          <p className="rf19-declaration-heading">
+            DECLARATION AS TO THE CORRECTNESS OF THE INFORMATION GIVEN
+          </p>
+          <p className="rf19-declaration">
+            I hereby voluntarily declare that all the information provided in
+            this request form for the occupational permit is true, accurate, and
+            complete to the best of my knowledge and belief. I fully understand
+            that any false, misleading, or incomplete information may result in
+            the disapproval of my application or other legal consequences. I
+            further declare that I am of legal age and not below eighteen (18)
+            years old at the time of this request.
+          </p>
+
+          <div className="rf19-signature">
+            <div className="rf19-signature-inner">
+              <span className="rf19-signature-name">{printedName}</span>
+              <div className="rf19-signature-line">
+                <p className="rf19-signature-caption">
+                  Signature over Printed Name
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rf19-approval">
+            <p>Recommending Approval:</p>
+            <p className="rf19-approval-name">ATTY. MOSHI ARIEL S. CAHOY</p>
+            <p>City Government Department Head II</p>
+          </div>
+
+          {/* ===== REQUIREMENTS ===== */}
+          <div className="rf19-requirements">
+            <span className="rf19-requirements-heading">REQUIREMENTS:</span>
+            <ol>
+              <li>Community Tax Certificate (Cedula)</li>
+              <li>Certificate of Employment (if employed)</li>
+              <li>
+                Training Certificate issued by TESDA or any authorized or
+                accredited agency (for Massage Therapist)
+              </li>
+            </ol>
+          </div>
+
+          <p className="rf19-apply">
+            APPLY OCCUPATIONAL PERMIT ONLINE @{" "}
+            <span className="rf19-apply-link">ospas.butuan.gov.ph</span>
+          </p>
+
+          <p className="rf19-system-note">
+            Note. This is system generated. No signature is required.
+          </p>
+
+          {/* ===== BOTTOM FOOTER ===== */}
+          <img className="rf19-rule rf19-footer-rule" src={footerLine} alt="" />
+          <table className="rf19-bottom">
+            <colgroup>
+              <col style={{ width: "45%" }} />
+              <col style={{ width: "28%" }} />
+              <col style={{ width: "27%" }} />
+            </colgroup>
+            <tbody>
+              <tr>
+                <td>
+                  <div className="rf19-bottom-left">
+                    <img src={qrCode} alt="QR Code" className="rf19-qr" />
+                    <div className="rf19-contact">
+                      <span>
+                        City Hall Bldg., J.P. Rosales Ave., Doongan, Butuan City
+                      </span>
+                      <span>
+                        Email:{" "}
+                        <span className="rf19-link">cbpld@butuan.gov.ph</span>
+                      </span>
+                      <span>Phone: 0951-388-4193</span>
+                      <span className="rf19-link">www.butuan.gov.ph</span>
+                    </div>
+                  </div>
+                </td>
+                <td className="text-center">
+                  <img src={tuvLogo} alt="TUV NORD" className="rf19-tuv" />
+                  <p className="rf19-cert-no">
+                    Certificate Registration No. PHP
+                    <br />
+                    QMS 23 93 0116
+                  </p>
+                </td>
+                <td className="text-end">
+                  <img
+                    src={butuanOnLogo}
+                    alt="Butuan ON"
+                    className="rf19-butuanon"
+                  />
+                  <p className="rf19-form-code">CBPLD.BPLD.F.019.REV04</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </ModalBody>
 

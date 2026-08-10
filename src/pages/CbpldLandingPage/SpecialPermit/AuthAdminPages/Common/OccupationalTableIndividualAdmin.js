@@ -38,6 +38,7 @@ import EditDurationModal from "../Dashboard/Modal/EditDurationModal";
 import PaymentModal from "../../AuthClientPages/Modals/PaymentModal";
 import { useSelectedPaymentDetails } from "hooks/Common/useSelectedPaymentDetails";
 import UpdateOrNumberModal from "../Modals/UpdateOrNumberModal";
+import ApplicationActivityModal from "../Modals/ApplicationActivityModal";
 
 export default function OccupationalTableIndividualAdmin({
   status,
@@ -73,6 +74,7 @@ export default function OccupationalTableIndividualAdmin({
   const [selectedPermit, setSelectedPermit] = useState([]);
   const [updateOrNumberModal, setUpdateOrNumberModal] = useState(false);
   const [orNumber, setOrNumber] = useState(null);
+  const [activityModal, setActivityModal] = useState(false);
   const handleSubmit = useSubmit();
 
   useEffect(() => {
@@ -132,6 +134,9 @@ export default function OccupationalTableIndividualAdmin({
   };
   const toggleUpdateOrNumberModal = () => {
     setUpdateOrNumberModal((prev) => !prev);
+  };
+  const toggleActivityModal = () => {
+    setActivityModal((prev) => !prev);
   };
   const handleRowOnclick = (permit_id) => {
     const response = updateTabNotification(
@@ -273,6 +278,13 @@ export default function OccupationalTableIndividualAdmin({
           // applicationType={applicationType}
           toggleRefresh={toggleRefresh}
           orNumber={orNumber}
+        />
+      )}
+      {activityModal && (
+        <ApplicationActivityModal
+          openModal={activityModal}
+          toggleModal={toggleActivityModal}
+          applicationId={applicationId}
         />
       )}
 
@@ -533,6 +545,17 @@ export default function OccupationalTableIndividualAdmin({
                           </DropdownItem>
                         </DropdownMenu>
                       </UncontrolledDropdown>
+                      <Button
+                        color="info"
+                        className="ms-2"
+                        title="View Activity"
+                        onClick={() => {
+                          setApplicationId(application?.id);
+                          toggleActivityModal();
+                        }}
+                      >
+                        <i className="mdi mdi-history fs-5"></i>
+                      </Button>
                     </td>
                   )}
 

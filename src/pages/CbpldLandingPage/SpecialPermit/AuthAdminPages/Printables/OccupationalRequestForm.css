@@ -1,76 +1,334 @@
-.form-table {
-  border-collapse: collapse;
-  font-family: "Times New Roman", serif;
-  font-size: 12pt; /* ≈ 16px */
-  width: 100%;
-  table-layout: fixed;
+/* Replica of CBPLD.BPLD.F.019.REV04 (revised March 19, 2026).
+
+   Prefixed `rf19-` for the same reason as the request form next door: the
+   Printables/*.css files are plain global imports, and RequestForm.css claims
+   .title / .label / .checkbox / .header-title -- some with !important -- so a
+   shared name meant this form rendered differently depending on which sibling
+   had been mounted first. (Its title, for one, was being forced blue by
+   RequestForm.css when the paper form prints it black.)
+
+   NOTE ON SPECIFICITY: the `.rf19-sheet p` reset below is (0,1,1), so a bare
+   `.rf19-foo { margin-top: ... }` at (0,1,0) loses to it and silently does
+   nothing. Every rule that sets a margin on a <p> is therefore written as
+   `.rf19-sheet .rf19-foo`. Keep it that way when adding rules. */
+
+.occupational-request-form-modal {
+  max-width: 1010px !important;
+}
+.occupational-request-form-modal .modal-body {
+  padding: 12px;
+  overflow-x: auto;
+}
+
+.rf19-sheet {
+  width: 940px;
+  margin: 0 auto;
+  background: #fff;
+  color: #000;
+  font-family: "Cambria", "Times New Roman", Times, serif;
+  font-size: 12pt;
+  line-height: 1.25;
+}
+.rf19-sheet p {
   margin: 0;
 }
 
-.form-table + .form-table {
-  margin-top: -1px;
+@media print {
+  .rf19-sheet {
+    width: 940px !important;
+    /* ticked checkboxes and the red/blue notices are content, not decoration */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }
 
-.form-table td {
-  border: 1px solid #000;
-  vertical-align: top;
-  height: 36px;
+/* ===== Header ===== */
+.rf19-header {
+  padding: 10px 20px 0 20px;
+  font-family: "Times New Roman", Times, serif;
 }
-
-.label {
-  font-weight: bold;
-  vertical-align: top;
-  padding-top: 0px;
+.rf19-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
 }
-
-.input {
-  height: 28px;
+.rf19-logo {
+  width: 92px;
+  flex: 0 0 auto;
 }
-
-.sub-labels td {
-  border-top: none;
-  font-size: 10pt; /* ≈ 13px */
-  text-align: center;
+.rf19-header-text {
+  flex: 1;
   padding-top: 2px;
-  padding-bottom: 4px;
+}
+.rf19-header-text p {
+  color: #154172;
+}
+.rf19-header-republic {
+  font-size: 14pt;
+}
+.rf19-header-title {
+  font-size: 15pt;
+  font-weight: bold;
+}
+.rf19-header-city {
+  font-size: 13pt;
+}
+.rf19-revised {
+  flex: 0 0 auto;
+  font-size: 11pt;
+  font-weight: bold;
+  font-style: italic;
+  white-space: nowrap;
+}
+.rf19-rule {
+  display: block;
+  width: 940px;
+  height: 8px;
+  margin: 8px 0 0 0;
 }
 
-.checkbox {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
+/* ===== Title ===== */
+.rf19-sheet .rf19-title {
+  width: 900px;
+  margin: 22px auto 12px auto;
+  text-align: center;
+  font-size: 18pt;
+  font-weight: bold;
+}
+
+/* ===== Applicant details box ===== */
+.rf19-form-table {
+  width: 900px;
+  height: 350px;
+  margin: 0 auto;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.rf19-form-table > tbody > tr > td {
   border: 1px solid #000;
-  margin-right: 4px;
-  vertical-align: middle;
+  padding: 6px 8px;
+  vertical-align: top;
+  color: #000;
+}
+.rf19-label {
+  font-weight: bold;
+  font-size: 12pt;
+  white-space: nowrap;
+}
+.rf19-hint {
+  font-weight: normal;
+  font-style: italic;
+  font-size: 10.5pt;
+}
+.rf19-value {
+  font-weight: normal;
+  font-size: 12pt;
 }
 
-/* Header text */
-.header-text p {
-  margin: 0;
+/* Captions sit in a fixed grid shared with their values so a blank field can't
+   pull the remaining columns out of alignment. */
+/* The revised form rules off each field from its captions, so this row keeps
+   its top border and just sits tighter than a data row. */
+.rf19-caption-row > td {
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+}
+.rf19-caption-grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.rf19-caption-grid td {
+  border: none;
+  padding: 0;
+  text-align: center;
+  font-size: 9.5pt;
+  font-style: italic;
+}
+.rf19-value-grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.rf19-value-grid td {
+  border: none;
+  padding: 0;
+  text-align: center;
+  font-size: 12pt;
+  font-weight: bold;
+}
+.rf19-value-grid .rf19-label {
+  text-align: left;
+}
+
+/* ===== Tick boxes ===== */
+.rf19-choice-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+.rf19-choice-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rf19-choice {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5pt;
+  white-space: nowrap;
+}
+.rf19-checkbox {
+  flex: 0 0 auto;
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border: 1px solid #000;
+}
+
+/* ===== Declaration ===== */
+.rf19-sheet .rf19-declaration-heading {
+  width: 900px;
+  margin: 34px auto 0 auto;
+  text-align: center;
+  font-size: 11pt;
+  font-weight: bold;
+}
+/* Narrower than the box above it, as on the paper form -- this is what gives
+   the paragraph its five-line wrap. */
+.rf19-sheet .rf19-declaration {
+  width: 714px;
+  margin: 10px auto 0 auto;
+  text-align: justify;
+  text-indent: 48px;
+  font-size: 12pt;
+  line-height: 1.35;
+}
+
+/* ===== Signature / approval ===== */
+.rf19-signature {
+  width: 900px;
+  margin: 34px auto 0 auto;
+}
+.rf19-signature-inner {
+  width: 240px;
+  margin-left: 30px;
+  text-align: center;
+}
+.rf19-sheet .rf19-signature-name {
+  font-weight: bold;
+  font-size: 12pt;
+}
+.rf19-signature-line {
+  border-top: 1px solid #000;
+  margin-top: 2px;
+  padding-top: 3px;
+}
+.rf19-sheet .rf19-signature-caption {
+  font-size: 11.5pt;
+  text-align: left;
+}
+.rf19-approval {
+  width: 900px;
+  margin: 34px auto 0 auto;
+  text-align: center;
+  font-size: 12pt;
+}
+/* Blank signing space above the department head's name. */
+.rf19-sheet .rf19-approval-name {
+  margin-top: 85px;
+  font-weight: bold;
+  font-size: 12pt;
+}
+
+/* ===== Requirements / call to action ===== */
+.rf19-requirements {
+  width: 900px;
+  margin: 40px auto 0 auto;
+}
+.rf19-requirements-heading {
+  color: #c00000;
+  font-weight: bold;
   font-size: 11pt;
 }
-.header-logo-request-form {
-  width: 120px;
-}
-
-.header-title {
-  font-weight: bold;
-  font-size: 12pt;
-}
-
-/* Title */
-.title {
-  font-size: 16pt; /* ≈ 21px */
-  font-weight: bold;
-  text-align: center;
-}
-
-/* Declaration text */
-.cambraText {
-  font-size: 12pt;
+.rf19-requirements ol {
+  margin: 4px 0 0 0;
+  padding-left: 26px;
+  font-size: 11pt;
   line-height: 1.5;
 }
-
-.bolder-text {
+.rf19-sheet .rf19-apply {
+  width: 900px;
+  margin: 46px auto 0 auto;
+  font-size: 15pt;
   font-weight: bold;
+  color: #ff0000;
+}
+.rf19-apply-link {
+  color: #0563c1;
+  text-decoration: underline;
+}
+
+.rf19-sheet .rf19-system-note {
+  width: 900px;
+  margin: 12px auto 0 auto;
+  text-align: right;
+  font-size: 9.5pt;
+  font-style: italic;
+  font-weight: bold;
+}
+
+/* ===== Bottom footer ===== */
+.rf19-footer-rule {
+  margin-top: 14px;
+}
+.rf19-bottom {
+  width: 940px;
+  margin: 8px auto 0 auto;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.rf19-bottom td {
+  border: none;
+  padding: 0 10px;
+  vertical-align: bottom;
+}
+.rf19-bottom-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.rf19-qr {
+  width: 70px;
+  flex: 0 0 auto;
+}
+.rf19-contact {
+  display: flex;
+  flex-direction: column;
+  font-size: 9.5pt;
+  line-height: 1.35;
+  color: #1f4e79;
+}
+.rf19-link {
+  color: #0563c1;
+}
+.rf19-tuv {
+  width: 112px;
+}
+.rf19-sheet .rf19-cert-no {
+  margin-top: 2px;
+  font-size: 8pt;
+  line-height: 1.2;
+}
+.rf19-butuanon {
+  width: 172px;
+}
+.rf19-sheet .rf19-form-code {
+  margin-top: -6px;
+  font-size: 12.5pt;
+  font-weight: bold;
+  font-style: italic;
 }

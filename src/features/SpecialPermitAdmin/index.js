@@ -131,6 +131,24 @@ export const getOfflineTransactionDetails = createAsyncThunk(
   },
 );
 
+export const getApplicationDetails = createAsyncThunk(
+  "specialPermitAdmin/getApplicationDetails",
+  async (params, thunkAPI) => {
+    try {
+      const response = await axios({
+        url: `api/admin/special-permit/application/${params.id}`,
+        method: "GET",
+      });
+      if (response) {
+        return response.data;
+      }
+      return thunkAPI.rejectWithValue(response.data);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  },
+);
+
 export const SpecialPermitAdminSlice = createSlice({
   name: "specialPermitAdmin",
   initialState: {
@@ -141,6 +159,8 @@ export const SpecialPermitAdminSlice = createSlice({
     offlineTransaction: [],
     singleOfflineTransaction: [],
     analyticsData: [],
+    applicationDetails: {},
+    getApplicationDetailsIsFetching: false,
     errors: null,
     getAnalyticsDataIsFetching: false,
     getCompanyOccupationalData: false,
@@ -257,6 +277,17 @@ export const SpecialPermitAdminSlice = createSlice({
     },
     [getOfflineTransactionDetails.rejected]: (state, { payload }) => {
       state.getOfflineTransactionDetails = false;
+      state.errors = payload;
+    },
+    [getApplicationDetails.pending]: (state) => {
+      state.getApplicationDetailsIsFetching = true;
+    },
+    [getApplicationDetails.fulfilled]: (state, { payload }) => {
+      state.getApplicationDetailsIsFetching = false;
+      state.applicationDetails = payload;
+    },
+    [getApplicationDetails.rejected]: (state, { payload }) => {
+      state.getApplicationDetailsIsFetching = false;
       state.errors = payload;
     },
   },

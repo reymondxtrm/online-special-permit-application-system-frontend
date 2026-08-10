@@ -53,6 +53,7 @@ import PaymentModal from "../../AuthClientPages/Modals/PaymentModal";
 import { useSelectedPaymentDetails } from "hooks/Common/useSelectedPaymentDetails";
 import UpdateEventModal from "../Modals/UpdateEventModal";
 import UpdateOrNumberModal from "../Modals/UpdateOrNumberModal";
+import ApplicationActivityModal from "../Modals/ApplicationActivityModal";
 
 const AdminTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
@@ -88,6 +89,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [updateOrNumberModal, setUpdateOrNumberModal] = useState(false);
   const [orNumber, setOrNumber] = useState(null);
+  const [activityModal, setActivityModal] = useState(false);
   const [
     openMayorsAndGoodMoralRequestForm,
     setOpenMayorsAndGoodMoralRequestForm,
@@ -154,6 +156,9 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   };
   const toggleUpdateOrNumberModal = () => {
     setUpdateOrNumberModal((prev) => !prev);
+  };
+  const toggleActivityModal = () => {
+    setActivityModal((prev) => !prev);
   };
   useEffect(() => {
     if (activeTab === "mayors_permit" || activeTab === "good_moral") {
@@ -354,6 +359,13 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
           // applicationType={applicationType}
           toggleRefresh={toggleRefresh}
           orNumber={orNumber}
+        />
+      )}
+      {activityModal && (
+        <ApplicationActivityModal
+          openModal={activityModal}
+          toggleModal={toggleActivityModal}
+          applicationId={applicationId}
         />
       )}
 
@@ -784,6 +796,17 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                                   </DropdownItem>
                                 </DropdownMenu>
                               </UncontrolledDropdown>
+                              <Button
+                                color="info"
+                                className="ms-2"
+                                title="View Activity"
+                                onClick={() => {
+                                  setApplicationId(application?.id);
+                                  toggleActivityModal();
+                                }}
+                              >
+                                <i className="mdi mdi-history fs-5"></i>
+                              </Button>
                             </div>
                           </td>
                         </>
