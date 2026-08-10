@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A Create React App (react-scripts v5, React 18) frontend for **OSPAS/CBPLD** — the City Government of Butuan's Online Special Permit Application System, run by the City Business Permits and Licensing Department (CBPLD). It talks to a separate Laravel backend (not in this repo) over a REST API plus Pusher/Laravel Echo for realtime notifications.
 
-The codebase started from a generic Bootstrap admin dashboard template (folders like `Chat`, `Crypto`, `e-commerce`, `Calendar`, `Mails`, `Projects`, `AllCharts` under `src/pages` and `src/store` are template leftovers, mostly unused). **The actual product lives under `src/pages/CbpldLandingPage/`** and its supporting `src/features/*` Redux slices — that's where almost all real work happens.
+The codebase started from a generic Bootstrap admin dashboard template (folders like `Chat`, `Crypto`, `e-commerce`, `Calendar`, `Mails`, `Projects`, `AllCharts` under `src/pages` and `src/store` are template leftovers, mostly unused). On top of that, the repo also carries a second, more substantial inherited layer: an ITSM-style document-routing workflow that was the product before it became OSPAS (`package.json`'s `name` is still `"BPLD Document Tracker"`) — see [A second inherited layer](#a-second-inherited-layer-the-itsmdocument-tracker-workflow) below before assuming anything under `InitialReceiver`/`AssessmentReceiver`/`AssessmentReleaser`/`CompleteReceiver`/`FinalReleaser` is live or dead. **The actual current product lives under `src/pages/CbpldLandingPage/`** and its supporting `src/features/*` Redux slices — that's where almost all real work happens.
 
 ## Commands
 
@@ -22,6 +22,8 @@ npm test                     # react-scripts test (Jest + RTL), watch mode by de
 ```
 
 There is no `test:single` script; use CRA's built-in filtering, e.g. `npm test -- MyComponent` or `npm test -- --testPathPattern=path/to/file`.
+
+Both `yarn.lock` and `package-lock.json` are committed; `yarn.lock` is the one that changes in recent history, so prefer `yarn` for installs unless told otherwise.
 
 ESLint config lives inline in `package.json` (`eslintConfig`), not a `.eslintrc`. Notably `no-unused-vars`, `no-undef`, `react/prop-types`, and `semi` are all turned **off** — don't flag those in review, and don't add semicolons/prop-types purely for style compliance.
 
@@ -44,6 +46,15 @@ Env vars are loaded from `.env.development` / `.env.production` / `.env.staging`
 - **Legacy `redux-saga`** (`src/store/*`, `rootSaga` in `src/store/sagas`) still runs alongside RTK for the inherited template features (auth/register/forgetpwd/profile reducers). Don't extend the saga pattern for new work — follow the RTK slice pattern instead.
 - Both reducer trees are combined in one `combineReducers` in `src/app/store.js`, persisted via `redux-persist` (only the `user` slice is whitelisted for persistence). Logging out (`user/logoutUser/fulfilled` or `/rejected`) resets the entire Redux state to `undefined`.
 - `src/helpers/api_helper.js`, `url_helper.js`, and `src/helpers/AuthType/fakeBackend.js` are unused template boilerplate (fake endpoints like `/post-fake-login`) — don't build on them; real API calls go straight through `axios` inside RTK thunks.
+
+### A second inherited layer: the ITSM/document-tracker workflow
+Beyond the generic template pages, `src/pages/` also has a full receive→assess→release document-routing pipeline (`InitialReceiver`, `AssessmentReceiver`, `AssessmentReleaser`, `CompleteReceiver`, `FinalReleaser`, plus `RequestedServices`, `Services/RequestTracker`, `Reports`, `Summary`, `Tools/MultipurposeSMS`, `Tools/VaxcertSMS`, `UserControls/Verification`), backed by real `src/features/*` slices (`InitialReceiver`, `AssessmentReceiver`, `AssessmentReleaser`, `CompleteReceiver`, `FinalReleaser`, `Summary`, `office`, `status`, `request`, `filters`, `modal`) wired into `src/app/store.js`.
+
+`src/routes/index.js` imports all of this under an `//ITSM Components` comment banner, but **almost none of it is added to the exported `authProtectedRoutes`/`publicRoutes` arrays** — it's unreachable in the running app, same as the generic template folders, just with real backing slices that can mislead you into thinking it's active. The only two exceptions actually mounted: `pages/Analytics` (mounted at `/dashboard`, though no post-login redirect in `Authmiddleware` ever sends a user there — see Routing above) and `pages/UserControls/Controls` (mounted at `/user-control`). Don't extend this pipeline for new work.
+
+That cuts the other way too — some pieces of this "ITSM" layer are still load-bearing for the live CBPLD product, so don't assume everything with that flavor is dead:
+- `features/AdminSlice` backs the real `AuthAdminPages/AdminControls` page (clearances, exempted cases, government property).
+- `components/Notifications` is rendered unconditionally in `App.js` and is a **second, legacy realtime connection** — raw `pusher-js` with a hardcoded app key, gated on `userDetails.role === 'Administrator'` — running alongside the newer Laravel-Echo connection in `AuthAdminPages/Common/echo.js`. It depends on `features/pusher`, `features/office`, `features/status`, `features/request`, `features/modal`, `features/filters`, `features/notifications`, and `features/user/onlineUserSlice`.
 
 ### The actual product: `src/pages/CbpldLandingPage/SpecialPermit/`
 Split into parallel portals sharing one backend:

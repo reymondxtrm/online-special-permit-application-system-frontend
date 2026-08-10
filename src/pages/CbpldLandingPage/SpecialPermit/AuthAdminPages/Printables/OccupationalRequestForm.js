@@ -551,10 +551,10 @@ export default function OccupationalRequestForm({
                     }}
                     className="d-flex flex-column text-center cambraText"
                   >
-                    <p>Recomminding Approval:</p>
+                    <p>Recommending Approval:</p>
                     <div className="d-flex flex-column text-center cambraText">
                       <span className="fw-bold text-decoration-underline">
-                        ATTY.MOSHI ARIEL S. CAHOY
+                        ATTY. MOSHI ARIEL S. CAHOY
                       </span>
                       <span>City Government Department Head II</span>
                     </div>
