@@ -6,20 +6,24 @@ import OccupationalTableAdmin from "./OccupationalTableCompanyAdmin";
 import { useState } from "react";
 import OccupationalTableIndividualAdmin from "./OccupationalTableIndividualAdmin";
 
-const OccupationalTables = ({ status, motherTab }) => {
-  const [activeTab, setActiveTab] = useState("individual");
-  const handleSelectTab = (key) => {
-    setActiveTab(key);
-  };
-
+const OccupationalTables = ({
+  status,
+  motherTab,
+  childTab,
+  handleSelectChildTab,
+}) => {
   return (
     <Row>
       <Col>
-        <Tabs activeKey={activeTab} onSelect={handleSelectTab} unmountOnExit>
+        <Tabs
+          activeKey={childTab}
+          onSelect={handleSelectChildTab}
+          unmountOnExit
+        >
           <Tab eventKey={"individual"} title="INDIVIDUAL">
             <OccupationalTableIndividualAdmin
               status={status}
-              activeTab={activeTab}
+              activeTab={childTab}
               motherTab={motherTab}
             />
             {/* <AdminTable status={status} /> */}
@@ -27,7 +31,7 @@ const OccupationalTables = ({ status, motherTab }) => {
           <Tab eventKey={"company"} title="COMPANY">
             <OccupationalTableAdmin
               status={status}
-              activeTab={activeTab}
+              activeTab={childTab}
               motherTab={motherTab}
             />
           </Tab>

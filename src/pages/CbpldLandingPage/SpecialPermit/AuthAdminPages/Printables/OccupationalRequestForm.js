@@ -15,7 +15,7 @@ export default function OccupationalRequestForm({
 }) {
   const [application, setApplication] = useState(null);
   const printRef = useRef();
- 
+
   useEffect(() => {
     let mounted = true;
     const fetchData = async () => {
@@ -510,7 +510,10 @@ export default function OccupationalRequestForm({
                     style={{ width: "200px" }}
                     className="d-flex align-items-center flex-column"
                   >
-                    <span className="fw-bold" style={{ marginTop: "60px" }}>
+                    <span
+                      className="fw-bold text-center"
+                      style={{ marginTop: "60px" }}
+                    >
                       {" "}
                       {isCompany
                         ? `${application?.corporation_member?.fname} ${
@@ -543,17 +546,34 @@ export default function OccupationalRequestForm({
                   <div
                     style={{
                       gap: "70px",
-                      marginTop: "30px",
-                      marginBottom: "30px",
+                      marginTop: "18px",
+                      marginBottom: "18px",
                     }}
                     className="d-flex flex-column text-center cambraText"
                   >
                     <p>Recomminding Approval:</p>
                     <div className="d-flex flex-column text-center cambraText">
-                      <span className="fw-bold">ATTY.MOSHI ARIEL S. CAHOY</span>
+                      <span className="fw-bold text-decoration-underline">
+                        ATTY.MOSHI ARIEL S. CAHOY
+                      </span>
                       <span>City Government Department Head II</span>
                     </div>
                   </div>
+                </td>
+              </tr>
+              <tr>
+                <td className="text-end">
+                  <span
+                    className="fw-bold"
+                    style={{
+                      color: "#000000",
+                      fontSize: "10px",
+                      marginRight: "10px",
+                    }}
+                  >
+                    {" "}
+                    Note. This is system generated. No signature is required.
+                  </span>
                 </td>
               </tr>
 

@@ -115,7 +115,6 @@ const ExportButton = (params) => {
 
       ws_data.push([
         item.business_code,
-        item.business_name,
         item.owner,
         item.type,
         item.status,
@@ -247,7 +246,7 @@ const ExportButton = (params) => {
       },
       function (error) {
         setIsLoading(false);
-      }
+      },
     );
   };
 

@@ -98,29 +98,39 @@ function MotorcadeModal({
   const handleFileChange = async (e, fieldName, index, props) => {
     const file = e.currentTarget.files[0];
     if (!file) return;
-    const compressed = await handleImageChange(e, index);
-    if (compressed) {
-      props.setFieldValue(fieldName, compressed);
+    if (file.type.startsWith("image")) {
+      const compressed = await handleImageChange(e, index);
+      if (compressed) {
+        props.setFieldValue(fieldName, compressed);
+        props.setFieldTouched(fieldName, true, true);
+      }
+    } else {
+      props.setFieldValue(fieldName, file);
       props.setFieldTouched(fieldName, true, true);
     }
   };
 
-  const SUPPORTED_FORMATS = ["image/jpeg", "image/png", "image/jpg"];
+  const SUPPORTED_FORMATS = [
+    "image/jpeg",
+    "image/png",
+    "image/jpg",
+    "application/pdf",
+  ];
 
   const fileValidationRequired = Yup.mixed()
     .required("This file is required")
     .test(
       "fileFormat",
-      "Only JPG and PNG images are allowed",
-      (value) => !value || SUPPORTED_FORMATS.includes(value.type)
+      "Only images and PDF files are allowed",
+      (value) => !value || SUPPORTED_FORMATS.includes(value.type),
     );
 
   const fileValidationOptional = Yup.mixed()
     .nullable()
     .test(
       "fileFormat",
-      "Only JPG and PNG images are allowed",
-      (value) => !value || SUPPORTED_FORMATS.includes(value.type)
+      "Only image and PDF files are allowed",
+      (value) => !value || SUPPORTED_FORMATS.includes(value.type),
     );
 
   const MotorcadeSchema = Yup.object().shape({
@@ -141,7 +151,7 @@ function MotorcadeModal({
       .required("End date is required")
       .min(
         Yup.ref("event_date_from"),
-        "End date must be after or equal to start date"
+        "End date must be after or equal to start date",
       ),
 
     event_time_from: Yup.string().required("Start time is required"),
@@ -368,7 +378,7 @@ function MotorcadeModal({
                   <div className="d-flex gap-2 align-items-start">
                     <div className="flex-grow-1">
                       <Input
-                        accept="image/*"
+                        accept="image/*,application/pdf"
                         type="file"
                         name="request_letter"
                         onChange={(e) => {
@@ -428,7 +438,7 @@ function MotorcadeModal({
                       <Input
                         type="file"
                         name="route_plan"
-                        accept="image/*"
+                        accept="image/*,application/pdf"
                         onChange={(e) => {
                           handleFileChange(e, "route_plan", 1, props);
                         }}
@@ -539,7 +549,7 @@ function MotorcadeModal({
                     params: formData,
                   },
                   [],
-                  [toggleModal, toggleRefresh]
+                  [toggleModal, toggleRefresh],
                 );
               }
             }}

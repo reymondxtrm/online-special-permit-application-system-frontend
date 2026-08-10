@@ -51,22 +51,21 @@ const SidebarContent = (props) => {
   }
 
   function activateParentDropdown(item) {
-    item.classList.add("active");
+    item?.classList.add("active");
     const parent = item.parentElement;
     const parent2El = parent.childNodes[1];
     if (parent2El && parent2El.id !== "side-menu") {
-      parent2El.classList.add("mm-show");
+      parent2El?.classList.add("mm-show");
     }
 
     if (parent) {
-      parent.classList.add("mm-active");
+      parent?.classList.add("mm-active");
       const parent2 = parent.parentElement;
 
       if (parent2) {
         parent2.classList.add("mm-show"); // ul tag
 
         const parent3 = parent2.parentElement; // li tag
-
         if (parent3) {
           parent3.classList.add("mm-active"); // li
           parent3.childNodes[0].classList.add("mm-active"); //a
@@ -126,199 +125,8 @@ const SidebarContent = (props) => {
     <React.Fragment>
       <SimpleBar className="h-100" ref={ref}>
         <div id="sidebar-menu">
-          <ul className="metismenu list-unstyled" id="side-menu">
-            {/* {checkUserType(["admin"]) &&
-              checkRole([
-                "super_admin",
-                "admin",
-                "initial_receiver",
-                "assessment_receiver",
-                "assessment_releaser",
-                "complete_receiver",
-                "final_releaser",
-              ]) && (
-                <>
-                  <li>
-                    <Link to="/dashboard">
-                      <i className="fas fa-chart-line"></i>
-                      <span>{props.t("Analytics")}</span>
-                    </Link>
-                  </li>
-                </>
-              )} */}
-
-            {/* {checkUserType(["admin"]) &&
-              checkRole([
-                "super_admin",
-                "admin",
-                "initial_receiver",
-                "assessment_receiver",
-                "assessment_releaser",
-                "complete_receiver",
-                "final_releaser",
-              ]) && (
-                <>
-                  {checkRole(["super_admin", "admin", "initial_receiver"]) && (
-                    <li>
-                      <Link to="/#" className="has-arrow">
-                        <i className="fas fa-file-word fs-2"></i>
-                        <span>{props.t("Initial Receiving")}</span>
-                      </Link>
-                      <ul className="sub-menu">
-                        <li>
-                          <Link to="/initial-receiver/dashboard">
-                            {props.t("Dashboard")}
-                          </Link>
-                        </li>
-                        <li>
-                          <Link to="/initial-receiver/receive">
-                            {props.t("For Receiving")}
-                          </Link>
-                        </li>
-                      </ul>
-                    </li>
-                  )}
-                  {checkRole([
-                    "assessment_receiver",
-                    "super_admin",
-                    "admin",
-                  ]) && (
-                    <li>
-                      <Link to="/#" className="has-arrow">
-                        <i className="fas fa-file-word fs-2"></i>
-                        <span>{props.t("Assessment Receiving")}</span>
-                      </Link>
-                      <ul className="sub-menu">
-                        <li>
-                          <Link to="/assessment-receiver/dashboard">
-                            {props.t("Dashboard")}
-                          </Link>
-                        </li>
-                        <li>
-                          <Link to="/assessment-receiver/for-receiving">
-                            {props.t("For Receiving")}
-                          </Link>
-                        </li>
-                      </ul>
-                    </li>
-                  )}
-
-                  {checkRole([
-                    "super_admin",
-                    "admin",
-                    "assessment_releaser",
-                  ]) && (
-                    <li>
-                      <Link to="/#" className="has-arrow">
-                        <i className="mdi mdi-inbox-arrow-up fs-2"></i>
-                        <span>{props.t("Assessment Releasing")}</span>
-                      </Link>
-                      <ul className="sub-menu">
-                        <li>
-                          <Link to="/assessment-releaser/dashboard">
-                            {props.t("Dashboard")}
-                          </Link>
-                        </li>
-
-                        <li>
-                          <Link to="/assessment-releaser/for-releasing">
-                            {props.t("For Releasing")}
-                          </Link>
-                        </li>
-                      </ul>
-                    </li>
-                  )}
-                  {checkRole(["super_admin", "admin", "complete_receiver"]) && (
-                    <li>
-                      <Link to="/#" className="has-arrow">
-                        <i className="mdi mdi-inbox-arrow-down fs-2"></i>
-                        <span>{props.t("Complete Receiving")}</span>
-                      </Link>
-                      <ul className="sub-menu">
-                        <li>
-                          <Link to="/complete-receiver/dashboard">
-                            {props.t("Dashboard")}
-                          </Link>
-                        </li>
-
-                        <li>
-                          <Link to="/complete-receiver/for-receiving">
-                            {props.t("For Receiving")}
-                          </Link>
-                        </li>
-                      </ul>
-                    </li>
-                  )}
-
-                  {checkRole(["super_admin", "admin", "final_releaser"]) && (
-                    <li>
-                      <Link to="/#" className="has-arrow">
-                        <i className="mdi mdi-file-check fs-2"></i>
-                        <span>{props.t("Final Releasing")}</span>
-                      </Link>
-                      <ul className="sub-menu">
-                        <li>
-                          <Link to="/final-releaser/dashboard">
-                            {props.t("Dashboard")}
-                          </Link>
-                        </li>
-                        <li>
-                          <Link to="/final-releaser/for-printing">
-                            {props.t("For Printing")}
-                          </Link>
-                        </li>
-
-                        <li>
-                          <Link to="/final-releaser/for-releasing">
-                            <span>{props.t("For Releasing")}</span>
-                          </Link>
-                        </li>
-                      </ul>
-                    </li>
-                  )}
-                  {checkRole(["admin"]) && (
-                    <>
-                      <li>
-                        <Link to="/summary">
-                          <i className="mdi mdi-chart-box fs-2"></i>
-                          <span>{props.t("Summary Table")}</span>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link to="/user-control">
-                          <i className="mdi mdi-account-cog fs-2"></i>
-                          <span>{props.t("User Controls")}</span>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link to="/releasing-records">
-                          <i className="fas fa-th-list"></i>
-                          <span>{props.t("Releasing Records")}</span>
-                        </Link>
-                      </li>
-                    </>
-                  )}
-                  {checkRole([""])}
-
-                  {checkRole(["super_admin"]) && (
-                    <li>
-                      <Link to="/#" className="has-arrow">
-                        <i className="fas fa-th-list"></i>
-                        <span>{props.t("Controls")}</span>
-                      </Link>
-                      <ul className="sub-menu">
-                        <li>
-                          <Link to="/usercontrols">
-                            {props.t("User Controls")}
-                          </Link>
-                        </li>
-                      </ul>
-                    </li>
-                  )}
-                </>
-              )} */}
-
-            {checkUserType(["client"]) && (
+          {checkUserType(["client"]) && (
+            <ul className="metismenu list-unstyled" id="side-menu">
               <>
                 <li>
                   <Link to="/client/services">
@@ -381,10 +189,28 @@ const SidebarContent = (props) => {
                   </Link>
                 </li>
               </>
-            )}
-
-            {checkUserType(["admin"]) && checkRole(["special_permit_admin"]) && (
-              <>
+            </ul>
+          )}
+          {checkUserType(["admin"]) && checkRole(["special_permit_admin"]) && (
+            <>
+              <ul className="metismenu list-unstyled" id="side-menu">
+                <li>
+                  <p
+                    style={{
+                      color: "white",
+                      marginTop: "20px",
+                      marginLeft: "10px",
+                    }}
+                  >
+                    {props.t("ONLINE TRANSACTION")}
+                  </p>
+                </li>
+                <li>
+                  <Link to="/admin/analytics">
+                    <i className="mdi mdi-view-dashboard fs-2"></i>
+                    <span>{props.t("Analytics")}</span>
+                  </Link>
+                </li>
                 <li>
                   <Link to="/admin/dashboard">
                     <i className="mdi mdi-view-dashboard fs-2"></i>
@@ -432,26 +258,7 @@ const SidebarContent = (props) => {
                     <span> {props.t("For Final Approval")}</span>
                   </Link>
                 </li>
-                {/* <li>
-                  <Link to="/admin/for-payment">
-                    <i className="fas fa-th-list"></i>
-                    {props.t("For Payment")}
-                  </Link>
-                </li> */}
-                {/* <li>
-                  <Link to="/#" className="has-arrow">
-                    <i className="fas fa-th-list"></i>
-                    <span>{props.t("Admin Controls")}</span>
-                  </Link>
-                  <ul className="sub-menu">
-                    <li>
-                      <Link to="/admin/controls">
-                        <i className="fas fa-th-list"></i>
-                        {props.t("Admin Controls")}
-                      </Link>
-                    </li>
-                  </ul>
-                </li> */}
+
                 <li>
                   <Link to="/admin/controls">
                     <i className="mdi mdi-shield-account fs-2"></i>
@@ -472,9 +279,33 @@ const SidebarContent = (props) => {
                     </Link>
                   </li>
                 )}
-              </>
-            )}
-          </ul>
+                <li>
+                  <p
+                    style={{
+                      color: "white",
+                      marginTop: "20px",
+                      marginLeft: "10px",
+                    }}
+                  >
+                    {props.t("OFFLINE TRANSACTION")}
+                  </p>
+                </li>
+                <li>
+                  <Link to="/offline-transaction/dashboard">
+                    <i className="bx bxs-user-detail fs-2"></i>
+                    <span>{props.t("Dashboard")}</span>
+                  </Link>
+                </li>
+
+                <li>
+                  <Link to="/offline-transaction/release">
+                    <i className="bx bxs-user-detail fs-2"></i>
+                    <span>{props.t("For Releasing")}</span>
+                  </Link>
+                </li>
+              </ul>
+            </>
+          )}
         </div>
       </SimpleBar>
     </React.Fragment>

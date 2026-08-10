@@ -66,7 +66,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
         ? 1090
         : 1319;
 
-    const minus18mmInPx = (18 * 96) / 25.4; // ~68 px
+    const minus18mmInPx = (18 * 96) / 25.4;
     return baseHeight - minus18mmInPx;
   }, [permitType]);
 

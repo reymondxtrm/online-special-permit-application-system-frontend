@@ -42,18 +42,20 @@ import RecorridaModal from "pages/CbpldLandingPage/Modals/RecorridaModal";
 import UseOfGovernmentPropertyModal from "pages/CbpldLandingPage/Modals/UseOfGovernmentPropertyModal";
 import ReuploadCedulaModal from "../Modals/ReuploadCedulaModal";
 import TableLoaders from "components/Loaders/TableLoaders";
+import FileViewerModal2 from "../../AuthAdminPages/AdminControls/Modals/FileViewerModal2";
+import { useSelectedPaymentDetails } from "hooks/Common/useSelectedPaymentDetails";
 const ClientTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
 
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
-  const { getImageHandle, currentImage, isFetching } = useGetImage();
+  const { getImageHandle, currentImage, isFetching, fileType } = useGetImage();
   const [refreshPage, setrefreshPage] = useState(false);
   const [overTheCounterModal, setoverTheCounterModal] = useState(false); // State for selected application's uploaded files
   const [selectedRow, setSelectedRow] = useState([]);
 
   const [reuploadModal, setreuploadModal] = useState(false);
-  const [paymentDetails, setPaymentDetails] = useState([]);
+  // const [paymentDetails, setPaymentDetails] = useState([]);
   const [cedulaApplicationModal, setCedulaApplicationModal] = useState(false);
   const [attachmentModal, setShowAttachmentModal] = useState(false);
   const [selectedUploadedFiles, setSelectedUploadedFiles] = useState([]);
@@ -80,7 +82,10 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
     setrefreshPage(!refreshPage);
   };
   const specialPermitClient = useSelector((state) => state.specialPermitClient);
-
+  const paymentDetails = useSelectedPaymentDetails(
+    selectedRow,
+    specialPermitClient?.clientTableData?.data,
+  );
   const toggleReUploadModal = () => {
     setreuploadModal(!reuploadModal);
   };
@@ -183,27 +188,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
     }
   };
 
-  useEffect(() => {
-    if (selectedRow && specialPermitClient?.clientTableData?.data?.length > 0) {
-      const selectedTotal = specialPermitClient?.clientTableData?.data
-        ?.filter((app) => selectedRow.includes(app.id))
-        ?.reduce(
-          (acc, app) => {
-            const billed = app.order_of_payment?.billed_amount || 0;
-            const total = app.order_of_payment?.total_amount || 0;
-            acc.billed_amount += billed;
-            acc.total_amount += total;
-            acc.fullname = app.order_of_payment?.fullname || "";
-            acc.created_at = app.order_of_payment?.created_at || "";
-            acc.quantity += 1;
-            return acc;
-          },
-          { billed_amount: 0, total_amount: 0, quantity: 0 }
-        );
-      setPaymentDetails(selectedTotal);
-    }
-  }, [selectedRow, specialPermitClient?.clientTableData?.data?.length]);
-
   const columnConfig = useMemo(
     () => [
       { key: "checkbox", label: "", condition: () => true },
@@ -220,7 +204,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
         condition: () =>
           applicationType === "good_moral" &&
           ["pending", "declined", "for_signature", "completed"].includes(
-            status
+            status,
           ),
       },
       {
@@ -229,7 +213,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
         condition: () =>
           applicationType === "good_moral" &&
           ["pending", "declined", "for_signature", "completed"].includes(
-            status
+            status,
           ),
       },
       {
@@ -261,8 +245,15 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
           ["pending", "declined"].includes(status),
       },
       {
-        key: "courtClearance",
-        label: "Court Clearance",
+        key: "certificateOfOrdinance",
+        label: "Certificate of Ordinance",
+        condition: () =>
+          ["mayors_permit", "good_moral"].includes(applicationType) &&
+          ["pending", "declined"].includes(status),
+      },
+      {
+        key: "SECCertificate",
+        label: "SEC Certificate",
         condition: () =>
           ["mayors_permit", "good_moral"].includes(applicationType) &&
           ["pending", "declined"].includes(status),
@@ -361,27 +352,36 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
         condition: () => status === "completed",
       },
     ],
-    [applicationType, status, user?.accountType]
+    [applicationType, status, user?.accountType],
   );
   const getActiveColumnCount = useMemo(
     () => columnConfig.filter((col) => col.condition()).length,
-    [applicationType, status, user?.accountType]
+    [applicationType, status, user?.accountType],
   );
   return (
     <>
-      {isViewerOpen && currentImage && isFetching === false && (
-        <ImageViewer
-          src={[currentImage]}
-          currentIndex={0}
-          onClose={toggleIsViewerOpen}
-          backgroundStyle={{
-            backgroundColor: "rgba(0,0,0,0.8)",
-            zIndex: 9999,
-          }}
-          closeOnClickOutside={true}
-          disableZoom={false} // ✔ enables zoom
-        />
-      )}
+      {isViewerOpen &&
+        currentImage &&
+        isFetching === false &&
+        (fileType === "image" ? (
+          <ImageViewer
+            src={[currentImage]}
+            currentIndex={0}
+            onClose={toggleIsViewerOpen}
+            backgroundStyle={{
+              backgroundColor: "rgba(0,0,0,0.8)",
+              zIndex: 9999,
+            }}
+            closeOnClickOutside={true}
+            disableZoom={false} // ✔ enables zoom
+          />
+        ) : (
+          <FileViewerModal2
+            file={currentImage}
+            toggle={toggleIsViewerOpen}
+            isOpen={isViewerOpen}
+          />
+        ))}
       {status === "returned" ? (
         <ReuploadModal
           toggleModal={toggleReUploadModal}
@@ -509,8 +509,8 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                 toggleOverTheCounterModal();
                 dispatch(
                   SpecialPermitClientSlice.actions.setApplicationIdsForPayment(
-                    selectedRow
-                  )
+                    selectedRow,
+                  ),
                 );
               }}
               disabled={selectedRow.length <= 0}
@@ -520,12 +520,6 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
             </Button>
           ) : null}
         </div>
-        {/* <div>
-          <Button color="success">
-            <i className="mdi mdi-printer "></i>{" "}
-            <span> Reprint Cedula Application Form</span>{" "}
-          </Button>
-        </div> */}
       </div>
 
       <div className="tableFixHead">
@@ -550,7 +544,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                     }
                     onClick={() => {
                       handleSelectAll(
-                        specialPermitClient?.clientTableData?.data
+                        specialPermitClient?.clientTableData?.data,
                       );
                     }}
                     style={{ width: "20px", height: "20px" }}
@@ -558,6 +552,9 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                 ) : null}
               </th>
               <th>#</th>
+              {(status === "for_signature" || status === "completed") && (
+                <th>Reference No.</th>
+              )}
 
               {(applicationType === "mayors_permit" ||
                 applicationType === "good_moral") && (
@@ -576,6 +573,8 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                       <th>Community Tax Certificate</th>
                       <th>Fiscal Clearance</th>
                       <th>Court Clearance</th>
+                      <th>Certificate of Ordinance</th>
+                      <th>SEC Certificate</th>
                     </>
                   )}
 
@@ -716,7 +715,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                     <td>
                       <div className="d-flex gap-2">{`${index + 1}.`}</div>
                     </td>
-                    {status === "for_signature" && (
+                    {(status === "for_signature" || status === "completed") && (
                       <td>{application.reference_no}</td>
                     )}
 
@@ -824,6 +823,39 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                                 "N/A"
                               )}
                             </td>
+                            <td>
+                              {application.uploaded_file
+                                ?.certificate_of_ordinance &&
+                              status !== "for_payment" ? (
+                                <FileIconFormat
+                                  fileType="certificate_of_ordinance"
+                                  path={
+                                    application.uploaded_file
+                                      ?.certificate_of_ordinance
+                                  }
+                                  toggleIsViewerOpen={toggleIsViewerOpen}
+                                  getImageHandle={getImageHandle}
+                                />
+                              ) : (
+                                "N/A"
+                              )}
+                            </td>
+                            <td>
+                              {application?.uploaded_file?.s_e_c_certificate &&
+                              status !== "for_payment" ? (
+                                <FileIconFormat
+                                  fileType="s_e_c_certificate"
+                                  path={
+                                    application?.uploaded_file
+                                      ?.s_e_c_certificate
+                                  }
+                                  toggleIsViewerOpen={toggleIsViewerOpen}
+                                  getImageHandle={getImageHandle}
+                                />
+                              ) : (
+                                "N/A"
+                              )}
+                            </td>
                           </>
                         )}
 
@@ -921,7 +953,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                                   toggleAttachmentModal();
 
                                   setSelectedUploadedFiles(
-                                    application?.uploaded_file
+                                    application?.uploaded_file,
                                   );
                                 }}
                               >
@@ -930,10 +962,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                             </td>
                           </>
                         )}
-                        {status === "for_payment_approval" ||
-                          (status === "for_signature" && (
-                            <td>{application?.reference_no || ""}</td>
-                          ))}
+
                         {(status === "for_payment" ||
                           status === "for_payment_approval") && (
                           <td>{`₱ ${application?.order_of_payment?.total_amount}`}</td>
@@ -984,14 +1013,14 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         <td>
                           {dateOfEvent(
                             application?.event_date_from,
-                            application?.event_time_from
+                            application?.event_time_from,
                           )}
                         </td>
 
                         <td>
                           {dateOfEvent(
                             application?.event_date_to,
-                            application?.event_time_to
+                            application?.event_time_to,
                           )}
                         </td>
                         {status === "returned" && (
@@ -1059,8 +1088,8 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                               setSelectedRow([application?.id]);
                               dispatch(
                                 SpecialPermitClientSlice?.actions?.setApplicationIdsForPayment(
-                                  [application?.id]
-                                )
+                                  [application?.id],
+                                ),
                               );
                               toggleOverTheCounterModal();
                             }}
@@ -1156,54 +1185,56 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                             className="d-flex gap-2"
                           >
                             <Button
+                              type="button"
                               color="success"
                               onClick={() => {
                                 const fileId = application?.id;
 
                                 if (!fileId) {
                                   alert(
-                                    "Special Permit ID is required for download."
+                                    "Special Permit ID is required for download.",
                                   );
                                   return;
                                 }
 
-                                axios({
-                                  url: `/api/client/download-permit`, // Backend endpoint
-                                  method: "GET",
-                                  responseType: "blob", // Important for binary data like PDFs
-                                  params: {
-                                    special_permit_id: fileId, // Send the permit ID as a query parameter
-                                  },
-                                })
+                                axios
+                                  .get("/api/client/download-permit", {
+                                    responseType: "blob",
+                                    params: {
+                                      special_permit_id: fileId,
+                                      _t: Date.now(),
+                                    },
+                                  })
                                   .then((response) => {
-                                    // Create a URL for the file and trigger the download
-                                    const url = window.URL.createObjectURL(
-                                      new Blob([response.data])
-                                    );
-                                    const link = document.createElement("a");
-                                    link.href = url;
-                                    link.setAttribute(
-                                      "download",
-                                      `${applicationType}_${fileId}.pdf` // Set a file name
-                                    );
-                                    document.body.appendChild(link);
-                                    link.click();
-                                    link.parentNode.removeChild(link); // Cleanup the link element
+                                    const blob = new Blob([response.data], {
+                                      type:
+                                        response.headers["content-type"] ||
+                                        "application/pdf",
+                                    });
+
+                                    const url =
+                                      window.URL.createObjectURL(blob);
+
+                                    const a = document.createElement("a");
+                                    a.href = url;
+                                    a.download = `${applicationType}_${fileId}.pdf`;
+
+                                    document.body.appendChild(a);
+                                    a.click();
+
+                                    document.body.removeChild(a);
+                                    window.URL.revokeObjectURL(url);
                                   })
                                   .catch((error) => {
-                                    console.error(
-                                      "Error downloading file:",
-                                      error
-                                    );
-                                    alert(
-                                      "Failed to download the file. Please try again."
-                                    );
+                                    console.error("Download error:", error);
+                                    alert("Failed to download the file.");
                                   });
                               }}
                             >
                               <i className="mdi mdi-download fs-4 me-2"></i>
                               Download
                             </Button>
+
                             <Button
                               color="primary"
                               onClick={() => {
@@ -1244,7 +1275,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                       </>
                     )}
                   </tr>
-                )
+                ),
               )
             ) : (
               <tr>

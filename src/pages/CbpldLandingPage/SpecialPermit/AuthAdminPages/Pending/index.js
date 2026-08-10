@@ -1,5 +1,5 @@
 /* eslint-disable padded-blocks */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Container,
   Row,
@@ -38,11 +38,18 @@ import Pagination from "components/Pagination";
 import AdminTable from "../Common/AdminTable";
 import { set } from "lodash";
 import OccupationalTables from "../Common/OccupationalTables.js";
+import DashboardFilters from "pages/Dashboard/dashboardFilters";
+import {
+  getCompanyOccupatinalData,
+  getIndividualOccupationalApplications,
+  getTableData,
+} from "features/SpecialPermitAdmin";
 
 const Pending = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("good_moral");
+
   const user = useSelector((state) => state.user);
 
   const [newCounts, setNewCounts] = useState({
@@ -55,6 +62,9 @@ const Pending = () => {
     use_of_government_property: 0,
     occupational_permit: 0,
   });
+
+  const [childTab, setChildTab] = useState("individual");
+
   const handleTabSelect = (key) => {
     setActiveTab(key);
   };
@@ -62,13 +72,16 @@ const Pending = () => {
     { value: 1, label: "2023" },
     { value: 2, label: "2024" },
   ];
+
   const opcr = useSelector((state) => state.opcr);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [newMfoModal, setNewMfoModal] = useState(false);
   const toggleNewMfoModal = () => {
     setNewMfoModal(!newMfoModal);
   };
-
+  const handleSelectChildTab = (key) => {
+    setChildTab(key);
+  };
   useEffect(() => {
     const channel = echo.channel("special-permit-pending");
     const handler = (event) => {
@@ -94,7 +107,7 @@ const Pending = () => {
       try {
         const response = await axios.get(
           "api/admin/special-permit/all-counts",
-          { params: { status_id: 1 } }
+          { params: { status_id: 1 } },
         );
 
         if (response && response.data) {
@@ -114,6 +127,15 @@ const Pending = () => {
     };
     fetchInitialCounts();
   }, []);
+  const action = useMemo(() => {
+    if (activeTab === "occupational" && childTab === "company") {
+      return getCompanyOccupatinalData;
+    } else if (activeTab === "occupational" && childTab === "individual") {
+      return getIndividualOccupationalApplications;
+    } else {
+      return getTableData;
+    }
+  }, [activeTab, childTab]);
   return (
     <React.Fragment>
       <div className="page-content">
@@ -122,7 +144,22 @@ const Pending = () => {
             title="Special Permit"
             breadcrumbItem="Pending Applications"
           />
-
+          <Row>
+            <Col xs="12">
+              <Card>
+                <CardBody>
+                  <DashboardFilters
+                    action={action}
+                    tableParams={{
+                      permit_type: activeTab,
+                      status: "pending",
+                      type: childTab || "",
+                    }}
+                  />
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
           <Row>
             <Col xs="12">
               <Card>
@@ -289,6 +326,8 @@ const Pending = () => {
                       <OccupationalTables
                         status={"pending"}
                         motherTab={activeTab}
+                        childTab={childTab}
+                        handleSelectChildTab={handleSelectChildTab}
                       />
                     </Tab>
                   </Tabs>

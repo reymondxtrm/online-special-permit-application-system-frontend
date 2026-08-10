@@ -42,19 +42,29 @@ export const createMayorsCertificateSchema = (isUpdate) =>
           .nullable()
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           )
       : Yup.mixed()
           .required("Police clearance is required")
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           ),
 
     community_tax_certificate: isUpdate
@@ -62,19 +72,29 @@ export const createMayorsCertificateSchema = (isUpdate) =>
           .nullable()
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           )
       : Yup.mixed()
           .required("Community tax certificate is required")
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           ),
 
     barangay_clearance: isUpdate
@@ -82,19 +102,29 @@ export const createMayorsCertificateSchema = (isUpdate) =>
           .nullable()
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           )
       : Yup.mixed()
           .required("Barangay clearance is required")
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           ),
 
     fiscal_clearance: isUpdate
@@ -102,19 +132,29 @@ export const createMayorsCertificateSchema = (isUpdate) =>
           .nullable()
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           )
       : Yup.mixed()
           .required("Fiscal clearance is required")
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           ),
 
     court_clearance: isUpdate
@@ -122,19 +162,29 @@ export const createMayorsCertificateSchema = (isUpdate) =>
           .nullable()
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               !value ||
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           )
       : Yup.mixed()
           .required("Court clearance is required")
           .test(
             "fileType",
-            "Only image files are allowed",
+            "Only image and PDF files are allowed",
             (value) =>
               value &&
-              ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+              [
+                "image/jpeg",
+                "image/png",
+                "image/jpg",
+                "application/pdf",
+              ].includes(value.type),
           ),
   });
 
@@ -177,7 +227,7 @@ function MayorsCertificateModal({
     if (openModal) {
       axios
         .get("api/get-purpose", {
-          params: { permit_type: "mayors_certificate" },
+          params: { permit_type: "mayors_permit" },
         })
         .then(
           (res) => {
@@ -190,7 +240,7 @@ function MayorsCertificateModal({
           },
           (error) => {
             console.log(error);
-          }
+          },
         );
     }
   }, [openModal]);
@@ -216,7 +266,7 @@ function MayorsCertificateModal({
                 data = {
                   ...data,
                   purpose: purposeOptions?.find(
-                    (item) => item.value === data?.application?.purpose
+                    (item) => item.value === data?.application?.purpose,
                   ),
                 };
               }
@@ -228,7 +278,7 @@ function MayorsCertificateModal({
 
             setUploadedFiles(data?.uploaded_files || []);
           },
-          (error) => console.log(error)
+          (error) => console.log(error),
         );
     }
   }, [openModal, isUpdate, specialPermitApplicationId, purposeOptions]);
@@ -244,6 +294,7 @@ function MayorsCertificateModal({
         formData.append(key, JSON.stringify(object[key]));
       } else {
         formData.append(key, object[key]);
+        2;
       }
     });
     return formData;
@@ -252,9 +303,14 @@ function MayorsCertificateModal({
   const handleFileChange = async (e, fieldName, index, props) => {
     const file = e.currentTarget.files[0];
     if (!file) return;
-    const compressed = await handleImageChange(e, index);
-    if (compressed) {
-      props.setFieldValue(fieldName, compressed);
+    if (file.type.startsWith("image")) {
+      const compressed = await handleImageChange(e, index);
+      if (compressed) {
+        props.setFieldValue(fieldName, compressed);
+        props.setFieldTouched(fieldName, true, true);
+      }
+    } else {
+      props.setFieldValue(fieldName, file);
       props.setFieldTouched(fieldName, true, true);
     }
   };
@@ -314,6 +370,8 @@ function MayorsCertificateModal({
               barangay_clearance: null,
               fiscal_clearance: null,
               court_clearance: null,
+              certificate_of_ordination: null,
+              s_e_c_certificate: null,
             }}
             onSubmit={handleSubmit}
           >
@@ -343,7 +401,7 @@ function MayorsCertificateModal({
                                 setotherPurpose(label === "Others");
                                 props.setFieldValue(
                                   "purpose",
-                                  selectedOption || null
+                                  selectedOption || null,
                                 );
                               }}
                               onBlur={() =>
@@ -394,20 +452,20 @@ function MayorsCertificateModal({
                               <Input
                                 type="file"
                                 name="police_clearance"
-                                accept="image/*"
+                                accept="image/*, application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,
                                     "police_clearance",
                                     0,
-                                    props
+                                    props,
                                   )
                                 }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "police_clearance",
                                     true,
-                                    true
+                                    true,
                                   )
                                 }
                                 disabled={isCompressing}
@@ -467,20 +525,20 @@ function MayorsCertificateModal({
                               <Input
                                 type="file"
                                 name="community_tax_certificate"
-                                accept="image/*"
+                                accept="image/*,application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,
                                     "community_tax_certificate",
                                     1,
-                                    props
+                                    props,
                                   )
                                 }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "community_tax_certificate",
                                     true,
-                                    true
+                                    true,
                                   )
                                 }
                                 disabled={isCompressing}
@@ -541,20 +599,20 @@ function MayorsCertificateModal({
                               <Input
                                 type="file"
                                 name="barangay_clearance"
-                                accept="image/*"
+                                accept="image/*,application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,
                                     "barangay_clearance",
                                     2,
-                                    props
+                                    props,
                                   )
                                 }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "barangay_clearance",
                                     true,
-                                    true
+                                    true,
                                   )
                                 }
                                 disabled={isCompressing}
@@ -614,20 +672,20 @@ function MayorsCertificateModal({
                               <Input
                                 type="file"
                                 name="fiscal_clearance"
-                                accept="image/*"
+                                accept="image/*, application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,
                                     "fiscal_clearance",
                                     3,
-                                    props
+                                    props,
                                   )
                                 }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "fiscal_clearance",
                                     true,
-                                    true
+                                    true,
                                   )
                                 }
                                 disabled={isCompressing}
@@ -687,20 +745,20 @@ function MayorsCertificateModal({
                               <Input
                                 type="file"
                                 name="court_clearance"
-                                accept="image/*"
+                                accept="image/*,application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,
                                     "court_clearance",
                                     4,
-                                    props
+                                    props,
                                   )
                                 }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "court_clearance",
                                     true,
-                                    true
+                                    true,
                                   )
                                 }
                                 disabled={isCompressing}
@@ -731,6 +789,143 @@ function MayorsCertificateModal({
                                   e.preventDefault();
                                   getImageHandle({
                                     path: uploadedFiles?.court_clearance,
+                                    url: "api/client/attachment",
+                                    showLoader: true,
+                                  });
+                                  toggleIsViewerOpen();
+                                }}
+                              >
+                                <i className="mdi mdi-eye"></i>
+                              </Button>
+                            )}
+                          </div>
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                    {/* Certificate of Ordinance */}
+                    <Row>
+                      <Col>
+                        <FormGroup>
+                          <Label>Certificate of Ordination </Label>
+                          <div className="d-flex gap-2 align-items-start">
+                            <div className="flex-grow-1">
+                              <Input
+                                type="file"
+                                name="certificate_of_ordination"
+                                accept="image/*,application/pdf"
+                                onChange={(e) =>
+                                  handleFileChange(
+                                    e,
+                                    "certificate_of_ordination",
+                                    4,
+                                    props,
+                                  )
+                                }
+                                onBlur={() =>
+                                  props.setFieldTouched(
+                                    "certificate_of_ordination",
+                                    true,
+                                    true,
+                                  )
+                                }
+                                disabled={isCompressing}
+                              />
+                              {compressionErrors[4] && (
+                                <div
+                                  className="text-warning mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  Compression error: {compressionErrors[4]}
+                                </div>
+                              )}
+                              {props.touched.certificate_of_ordination &&
+                              props.errors.certificate_of_ordination ? (
+                                <div
+                                  className="text-danger mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  {props.errors.certificate_of_ordination}
+                                </div>
+                              ) : null}
+                            </div>
+                            {isUpdate &&
+                              uploadedFiles?.certificate_of_ordination && (
+                                <Button
+                                  color="primary"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    getImageHandle({
+                                      path: uploadedFiles?.certificate_of_ordination,
+                                      url: "api/client/attachment",
+                                      showLoader: true,
+                                    });
+                                    toggleIsViewerOpen();
+                                  }}
+                                >
+                                  <i className="mdi mdi-eye"></i>
+                                </Button>
+                              )}
+                          </div>
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                    {/* SEC Cetificate */}
+                    <Row>
+                      <Col>
+                        <FormGroup>
+                          <Label>
+                            Securities and Exchange Commission(SEC) Registration{" "}
+                          </Label>
+                          <div className="d-flex gap-2 align-items-start">
+                            <div className="flex-grow-1">
+                              <Input
+                                type="file"
+                                name="s_e_c_certificate"
+                                accept="image/*,application/pdf"
+                                onChange={(e) =>
+                                  handleFileChange(
+                                    e,
+                                    "s_e_c_certificate",
+                                    4,
+                                    props,
+                                  )
+                                }
+                                onBlur={() =>
+                                  props.setFieldTouched(
+                                    "s_e_c_certificate",
+                                    true,
+                                    true,
+                                  )
+                                }
+                                disabled={isCompressing}
+                              />
+                              {compressionErrors[4] && (
+                                <div
+                                  className="text-warning mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  Compression error: {compressionErrors[4]}
+                                </div>
+                              )}
+                              {props.touched.s_e_c_certificate &&
+                              props.errors.s_e_c_certificate ? (
+                                <div
+                                  className="text-danger mt-1"
+                                  style={{ fontSize: "0.875rem" }}
+                                >
+                                  {props.errors.s_e_c_certificate}
+                                </div>
+                              ) : null}
+                            </div>
+                            {isUpdate && uploadedFiles?.s_e_c_certificate && (
+                              <Button
+                                color="primary"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  getImageHandle({
+                                    path: uploadedFiles?.s_e_c_certificate,
                                     url: "api/client/attachment",
                                     showLoader: true,
                                   });
@@ -810,7 +1005,7 @@ function MayorsCertificateModal({
                     params: formData,
                   },
                   [],
-                  [toggleModal, toggleRefresh]
+                  [toggleModal, toggleRefresh],
                 );
               }
             }}

@@ -200,7 +200,7 @@ function Services() {
         openModal={occupationalPermitModal}
         toggleModal={() => toggleModal("OCCUPATIONAL PERMIT")}
         mode="create"
-        title="Create Occupational Permit"
+        title="OCCUPATIONAL PERMIT"
         submitUrl="api/client/single-occupational-permit-application"
         fetchUrl="api/client/get-user-occupation-details"
       />

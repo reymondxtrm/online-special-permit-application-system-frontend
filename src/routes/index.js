@@ -75,6 +75,9 @@ import SpecialPermitEmailVerication from "pages/AuthenticationInner/SpecialPermi
 import ForgetPasswordPage from "pages/AuthenticationInner/ForgetPassword";
 import ConfirmMail from "pages/AuthenticationInner/page-confirm-mail";
 
+//Offline Module
+import OfflineTransaction from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/OfflineTransaction";
+
 //QR code
 import SpecialPermitDetailsQr from "pages/CbpldLandingPage/SpecialPermit/SpecialPermitDetailsQr";
 import { components } from "react-select/dist/react-select.cjs.prod";
@@ -84,6 +87,9 @@ import TwostepVerification2 from "pages/AuthenticationInner/auth-two-step-verifi
 import TwostepVerification from "pages/AuthenticationInner/auth-two-step-verification";
 import SuperAdminControl from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/SuperAdminControl";
 import AdminDeclined from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Declined";
+import SpecialPermitAnalytics from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Analytics/index";
+import Release from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/OfflineTransaction/Release";
+import OfflineDashboard from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/OfflineTransaction/OfflineDashboard";
 
 const authProtectedRoutes = [
   { path: "/dashboard", component: Analytics },
@@ -113,6 +119,7 @@ const authProtectedRoutes = [
   },
   { path: "/admin/pending", component: AdminPending },
   { path: "/admin/controls", component: AdminControls },
+  { path: "/admin/analytics", component: SpecialPermitAnalytics },
   {
     path: "/user-control",
     component: Controls,
@@ -123,6 +130,18 @@ const authProtectedRoutes = [
   {
     path: "/super-admin",
     component: SuperAdminControl,
+  },
+  {
+    path: "/offline-transaction",
+    component: OfflineTransaction,
+  },
+  {
+    path: "/offline-transaction/release",
+    component: Release,
+  },
+  {
+    path: "/offline-transaction/dashboard",
+    component: OfflineDashboard,
   },
 ];
 
@@ -136,7 +155,6 @@ const publicRoutes = [
   { path: "/pages-500", component: Pages500 },
   { path: "/crypto-ico-landing", component: CryptoIcoLanding },
   { path: "/not-found", component: Pages404 },
-
   {
     path: "/email-verification",
     component: SpecialPermitEmailVerication,

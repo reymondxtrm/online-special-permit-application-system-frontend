@@ -68,7 +68,7 @@ function GoodMoralModal({
           },
           (error) => {
             console.log(error);
-          }
+          },
         );
     }
   }, [openModal]);
@@ -89,12 +89,12 @@ function GoodMoralModal({
         } else {
           purposeValue =
             purposeOptions?.find(
-              (item) => item.value === data?.application_purpose?.id
+              (item) => item.value === data?.application_purpose?.id,
             ) || null;
         }
         const exemptionCaseValue =
           discountOptions?.find(
-            (opt) => opt.value === data?.permitApplicationExemption?.id
+            (opt) => opt.value === data?.permitApplicationExemption?.id,
           ) || null;
 
         setExistingData({
@@ -148,7 +148,7 @@ function GoodMoralModal({
           },
           (error) => {
             console.log(error);
-          }
+          },
         );
     }
   }, [openModal, employmentPurpose]);
@@ -161,9 +161,14 @@ function GoodMoralModal({
   const handleFileChange = async (e, fieldName, index, props) => {
     const file = e.currentTarget.files[0];
     if (!file) return;
-    const compressed = await handleImageChange(e, index);
-    if (compressed) {
-      props.setFieldValue(fieldName, compressed);
+    if (file.type.startsWith("image")) {
+      const compressed = await handleImageChange(e, index);
+      if (compressed) {
+        props.setFieldValue(fieldName, compressed);
+        props.setFieldTouched(fieldName, true, true);
+      }
+    } else {
+      props.setFieldValue(fieldName, file);
       props.setFieldTouched(fieldName, true, true);
     }
   };
@@ -185,22 +190,27 @@ function GoodMoralModal({
   };
 
   const IMAGE_SIZE = 2 * 1024 * 1024;
-  const SUPPORTED_IMAGE_FORMATS = ["image/jpeg", "image/png", "image/jpg"];
+  const SUPPORTED_IMAGE_FORMATS = [
+    "image/jpeg",
+    "image/png",
+    "image/jpg",
+    "application/pdf",
+  ];
 
   const fileValidationOptional = Yup.mixed()
     .nullable()
     .test(
       "fileFormat",
-      "Only JPG and PNG images are allowed",
-      (value) => !value || SUPPORTED_IMAGE_FORMATS.includes(value.type)
+      "Only image and Pdf files are allowed",
+      (value) => !value || SUPPORTED_IMAGE_FORMATS.includes(value.type),
     );
 
   const fileValidationRequired = Yup.mixed()
     .required("File is required")
     .test(
       "fileFormat",
-      "Only JPG and PNG images are allowed",
-      (value) => value && SUPPORTED_IMAGE_FORMATS.includes(value.type)
+      "Only image and Pdf files are allowed",
+      (value) => value && SUPPORTED_IMAGE_FORMATS.includes(value.type),
     );
 
   const validationSchema = Yup.object().shape({
@@ -317,17 +327,17 @@ function GoodMoralModal({
                               options={purposeOptions}
                               onChange={(selectedOption) => {
                                 setotherPurpose(
-                                  selectedOption?.label === "Others"
+                                  selectedOption?.label === "Others",
                                 );
                                 setemploymentPurpose(
-                                  selectedOption?.label === "Local Employment"
+                                  selectedOption?.label === "Local Employment",
                                 );
 
                                 props.setValues({
                                   ...props.values,
                                   purpose: selectedOption || null,
                                   exemption_proof: null,
-                                  exemption: {},
+                                  exemption: null,
                                 });
                               }}
                               onBlur={() =>
@@ -396,7 +406,7 @@ function GoodMoralModal({
                                   onChange={(opt) =>
                                     props.setFieldValue(
                                       "exemption",
-                                      opt || null
+                                      opt || null,
                                     )
                                   }
                                   onBlur={() =>
@@ -413,77 +423,81 @@ function GoodMoralModal({
                             </FormGroup>
                           </Col>
                         </Row>
-                        <Row>
-                          <Col>
-                            <FormGroup>
-                              <Label>
-                                Attachment (Upload Image as Proof for Exemption){" "}
-                                {/* {(!isUpdate || Boolean(exemption?.value)) && (
+                        {props?.values?.exemption && (
+                          <Row>
+                            <Col>
+                              <FormGroup>
+                                <Label>
+                                  Attachment (Upload Image as Proof for
+                                  Exemption){" "}
+                                  {/* {(!isUpdate || Boolean(exemption?.value)) && (
                                   <span className="text-danger">*</span>
                                 )} */}
-                              </Label>
-                              <div className="d-flex gap-2 align-items-start">
-                                <div className="flex-grow-1">
-                                  <Input
-                                    type="file"
-                                    name="exemption_proof"
-                                    accept="image/*"
-                                    onChange={(e) =>
-                                      handleFileChange(
-                                        e,
-                                        "exemption_proof",
-                                        0,
-                                        props
-                                      )
-                                    }
-                                    onBlur={() =>
-                                      props.setFieldTouched(
-                                        "exemption_proof",
-                                        true,
-                                        true
-                                      )
-                                    }
-                                    disabled={isCompressing}
-                                  />
-                                  {compressionErrors[0] && (
-                                    <div
-                                      className="text-warning mt-1"
-                                      style={{ fontSize: "0.875rem" }}
+                                </Label>
+                                <div className="d-flex gap-2 align-items-start">
+                                  <div className="flex-grow-1">
+                                    <Input
+                                      type="file"
+                                      name="exemption_proof"
+                                      accept="image/*"
+                                      onChange={(e) =>
+                                        handleFileChange(
+                                          e,
+                                          "exemption_proof",
+                                          0,
+                                          props,
+                                        )
+                                      }
+                                      onBlur={() =>
+                                        props.setFieldTouched(
+                                          "exemption_proof",
+                                          true,
+                                          true,
+                                        )
+                                      }
+                                      disabled={isCompressing}
+                                    />
+                                    {compressionErrors[0] && (
+                                      <div
+                                        className="text-warning mt-1"
+                                        style={{ fontSize: "0.875rem" }}
+                                      >
+                                        Compression error:{" "}
+                                        {compressionErrors[0]}
+                                      </div>
+                                    )}
+                                    {props.touched.exemption_proof &&
+                                    props.errors.exemption_proof ? (
+                                      <div
+                                        className="text-danger mt-1"
+                                        style={{ fontSize: "0.875rem" }}
+                                      >
+                                        {props.errors.exemption_proof}
+                                      </div>
+                                    ) : null}
+                                  </div>
+                                  {isUpdate && uploadedFiles?.exemption_proof && (
+                                    <Button
+                                      color="primary"
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        getImageHandle({
+                                          path: uploadedFiles?.exemption_proof,
+                                          url: "api/client/attachment",
+                                          showLoader: true,
+                                        });
+                                        toggleIsViewerOpen();
+                                      }}
                                     >
-                                      Compression error: {compressionErrors[0]}
-                                    </div>
+                                      <i className="mdi mdi-eye"></i>
+                                    </Button>
                                   )}
-                                  {props.touched.exemption_proof &&
-                                  props.errors.exemption_proof ? (
-                                    <div
-                                      className="text-danger mt-1"
-                                      style={{ fontSize: "0.875rem" }}
-                                    >
-                                      {props.errors.exemption_proof}
-                                    </div>
-                                  ) : null}
                                 </div>
-                                {isUpdate && uploadedFiles?.exemption_proof && (
-                                  <Button
-                                    color="primary"
-                                    size="sm"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      getImageHandle({
-                                        path: uploadedFiles?.exemption_proof,
-                                        url: "api/client/attachment",
-                                        showLoader: true,
-                                      });
-                                      toggleIsViewerOpen();
-                                    }}
-                                  >
-                                    <i className="mdi mdi-eye"></i>
-                                  </Button>
-                                )}
-                              </div>
-                            </FormGroup>
-                          </Col>
-                        </Row>
+                              </FormGroup>
+                            </Col>
+                          </Row>
+                        )}
                       </>
                     ) : null}
 
@@ -501,20 +515,20 @@ function GoodMoralModal({
                               <Input
                                 type="file"
                                 name="police_clearance"
-                                accept="image/*"
+                                accept="image/*,application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,
                                     "police_clearance",
                                     1,
-                                    props
+                                    props,
                                   )
                                 }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "police_clearance",
                                     true,
-                                    true
+                                    true,
                                   )
                                 }
                                 disabled={isCompressing}
@@ -574,20 +588,20 @@ function GoodMoralModal({
                               <Input
                                 type="file"
                                 name="community_tax_certificate"
-                                accept="image/*"
+                                accept="image/*,application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,
                                     "community_tax_certificate",
                                     2,
-                                    props
+                                    props,
                                   )
                                 }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "community_tax_certificate",
                                     true,
-                                    true
+                                    true,
                                   )
                                 }
                                 disabled={isCompressing}
@@ -648,20 +662,20 @@ function GoodMoralModal({
                               <Input
                                 type="file"
                                 name="barangay_clearance"
-                                accept="image/*"
+                                accept="image/*,application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,
                                     "barangay_clearance",
                                     3,
-                                    props
+                                    props,
                                   )
                                 }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "barangay_clearance",
                                     true,
-                                    true
+                                    true,
                                   )
                                 }
                                 disabled={isCompressing}
@@ -721,20 +735,20 @@ function GoodMoralModal({
                               <Input
                                 type="file"
                                 name="fiscal_clearance"
-                                accept="image/*"
+                                accept="image/*,application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,
                                     "fiscal_clearance",
                                     4,
-                                    props
+                                    props,
                                   )
                                 }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "fiscal_clearance",
                                     true,
-                                    true
+                                    true,
                                   )
                                 }
                                 disabled={isCompressing}
@@ -794,20 +808,20 @@ function GoodMoralModal({
                               <Input
                                 type="file"
                                 name="court_clearance"
-                                accept="image/*"
+                                accept="image/*,application/pdf"
                                 onChange={(e) =>
                                   handleFileChange(
                                     e,
                                     "court_clearance",
                                     5,
-                                    props
+                                    props,
                                   )
                                 }
                                 onBlur={() =>
                                   props.setFieldTouched(
                                     "court_clearance",
                                     true,
-                                    true
+                                    true,
                                   )
                                 }
                                 disabled={isCompressing}
@@ -934,7 +948,7 @@ function GoodMoralModal({
                     params: formData,
                   },
                   [],
-                  [toggleModal, toggleRefresh]
+                  [toggleModal, toggleRefresh],
                 );
               }
             }}

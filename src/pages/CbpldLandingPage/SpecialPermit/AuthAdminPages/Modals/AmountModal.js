@@ -55,10 +55,13 @@ function AmountModal({
           },
           (error) => {
             console.log(error);
-          }
+          },
         );
     }
   }, [openModal]);
+  const toggleResetExemption = () => {
+    setExempted(!exempted);
+  };
   return (
     <React.Fragment>
       <Modal
@@ -208,7 +211,7 @@ function AmountModal({
                             onChange={(selected) => {
                               props.setFieldValue(
                                 "exemption_id",
-                                selected.value
+                                selected.value,
                               );
                             }}
                             isDisabled={!exempted}
@@ -266,16 +269,17 @@ function AmountModal({
                   toggleRefresh,
                   () => {
                     toggleModal();
-                    if (
-                      formikRef.current &&
-                      typeof formikRef.current.resetForm === "function"
-                    ) {
-                      formikRef.current.resetForm();
-                    }
+                    setExempted(false);
+                    // if (
+                    //   formikRef.current &&
+                    //   typeof formikRef.current.resetForm === "function"
+                    // ) {
+                    //   formikRef.current.resetForm();
+                    // }
                   },
-                ]
+                ],
               );
-              setExempted(false);
+              // setExempted(false);
             }}
           >
             SAVE
@@ -284,7 +288,7 @@ function AmountModal({
             color="secondary"
             onClick={() => {
               toggleModal();
-              setExempted(false);
+              // setExempted(false);
             }}
           >
             Close

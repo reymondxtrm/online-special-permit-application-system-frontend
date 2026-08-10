@@ -50,6 +50,7 @@ const RequestDetails = ({ modal, toggle, modalData, setModalData, history, param
       })
       setTotalTimeWorked(totalTime)
       modalData.status_id === 5 || modalData.status_id === 7 || modalData.status_id === 8 || modalData.status_id === 9 ? setStartTimer(false) : setStartTimer(true)
+      
     }
   }, [modalData])
   //**End */

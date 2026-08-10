@@ -1,0 +1,659 @@
+/* Import Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Golos+Text:wght@400..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+
+/* ===== CERTIFICATE WRAPPER ===== */
+.certificate-wrapper {
+  background: white;
+  margin: auto;
+  overflow: hidden;
+  color: #000000;
+  font-family: "Golos Text", sans-serif;
+  position: relative;
+  box-sizing: border-box;
+  margin: 9mm;
+
+  /* padding: calc(7px * var(--scale)); */
+
+  /* Scale factor - will be updated via inline style */
+  --scale: 1;
+
+  /* ===== Scalable font sizes ===== */
+  --font-xs: 11pt;
+  --font-sm: 12pt;
+  --font-md: 13pt;
+  --font-lg: 14pt;
+  --font-xl: 18pt;
+
+  /* ===== Scalable spacing ===== */
+  --space-xs: 6px;
+  --space-sm: 10px;
+  --space-md: 20px;
+  --space-lg: 40px;
+  --space-xl: 60px;
+
+  /* ===== Scalable indentation ===== */
+  --indent-base: 50px;
+
+  /* ===== FIXED margins for print (DO NOT SCALE) ===== */
+  --margin-x: 1.5cm;
+  --margin-top: 0.5cm;
+  --margin-bottom: 0.25cm;
+}
+
+/* Paper sizes */
+.certificate-wrapper.a4 {
+  width: 194mm;
+  height: 297mm;
+}
+
+.certificate-wrapper.legal {
+  width: 197.9mm;
+  height: 348.9mm;
+}
+
+/* ===== UTILITY CLASSES (Scalable) ===== */
+.text-xs {
+  font-size: calc(var(--font-xs) * var(--scale));
+}
+
+.text-sm {
+  font-size: calc(var(--font-sm) * var(--scale));
+}
+
+.text-md {
+  font-size: calc(var(--font-md) * var(--scale));
+}
+
+.text-lg {
+  font-size: calc(var(--font-lg) * var(--scale));
+  font-weight: 600;
+}
+
+.text-xl {
+  font-size: calc(var(--font-xl) * var(--scale));
+  font-weight: bold;
+}
+
+/* Spacing utilities */
+.space-top-xs {
+  margin-top: calc(var(--space-xs) * var(--scale));
+}
+
+.space-top-sm {
+  margin-top: calc(var(--space-sm) * var(--scale));
+}
+
+.space-top-md {
+  margin-top: calc(var(--space-md) * var(--scale));
+}
+
+.space-top-lg {
+  margin-top: calc(var(--space-lg) * var(--scale));
+}
+
+.space-top-xl {
+  margin-top: calc(var(--space-xl) * var(--scale));
+}
+
+.space-bottom-xs {
+  margin-bottom: calc(var(--space-xs) * var(--scale));
+}
+
+.space-bottom-sm {
+  margin-bottom: calc(var(--space-sm) * var(--scale));
+}
+
+.space-bottom-md {
+  margin-bottom: calc(var(--space-md) * var(--scale));
+}
+
+.space-bottom-lg {
+  margin-bottom: calc(var(--space-lg) * var(--scale));
+}
+
+/* Padding utilities */
+.padding-xs {
+  padding: calc(var(--space-xs) * var(--scale));
+}
+
+.padding-sm {
+  padding: calc(var(--space-sm) * var(--scale));
+}
+
+.padding-md {
+  padding: calc(var(--space-md) * var(--scale));
+}
+
+.padding-lg {
+  padding: calc(var(--space-lg) * var(--scale));
+}
+
+/* Text utilities */
+.text-indent {
+  text-indent: calc(var(--indent-base) * var(--scale));
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-justify {
+  text-align: justify;
+}
+
+/* Paragraph with fixed margins */
+.paragraph {
+  margin-left: var(--margin-x);
+  margin-right: var(--margin-x);
+  margin-bottom: calc(var(--space-sm) * var(--scale));
+}
+
+/* ===== CERTIFICATE TABLE ===== */
+.certificate-table {
+  width: 100%;
+  height: 100%;
+  background-image: url("../../../../../assets/images/permit-background-1.png");
+  background-size: cover;
+  background-position: center;
+  border-collapse: collapse;
+  table-layout: fixed;
+  /* border: 1px dashed #3a38ad; */
+  border-collapse: collapse;
+  background-repeat: no-repeat;
+}
+
+/* ===== HEADER SECTION ===== */
+.certificate-header {
+  text-align: center;
+  vertical-align: top;
+}
+
+.header-content {
+  display: flex;
+  align-items: flex-start;
+  padding: calc(15px * var(--scale)) calc(20px * var(--scale));
+}
+
+.header-logo {
+  width: calc(120px * var(--scale)) !important;
+  height: calc(120px * var(--scale)) !important;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.header-text {
+  flex: 1;
+  margin-left: calc(5px * var(--scale));
+  padding-top: calc(20px * var(--scale));
+  font-size: calc(11pt * var(--scale));
+  line-height: 1.2;
+  color: #000000 !important;
+}
+
+.header-text p {
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  font-weight: 500;
+  color: #000000 !important;
+}
+
+.certificate-header .header-text,
+.certificate-header .header-text > p {
+  color: #000000 !important;
+}
+
+/* ===== QR CODE ===== */
+.qr-wrapper {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-right: calc(15px * var(--scale));
+}
+
+/* ===== CONTENT SECTION ===== */
+.certificate-content {
+  padding-left: var(--margin-x);
+  padding-right: var(--margin-x);
+  padding-top: var(--margin-top);
+  padding-bottom: var(--margin-bottom);
+  text-align: left;
+}
+
+/* ===== CONDITIONS SECTION ===== */
+.conditions-wrapper {
+  margin-top: calc(3px * var(--scale));
+  margin-left: var(--margin-x);
+  margin-right: var(--margin-x);
+  margin-bottom: var(--margin-bottom);
+  line-height: 1.2;
+}
+
+.conditions-title {
+  font-family: "Montserrat", sans-serif;
+  font-size: calc(13pt * var(--scale));
+  font-weight: 500;
+  color: #ff0d21;
+  margin-bottom: 1em;
+  text-align: justify;
+  line-height: 1.5;
+}
+
+.conditions-list {
+  margin-top: calc(10px * var(--scale));
+  margin-bottom: var(--margin-bottom);
+}
+
+.condition-item {
+  font-family: "Montserrat", sans-serif;
+  font-size: calc(13pt * var(--scale));
+  font-weight: 500;
+  font-style: italic;
+  text-align: justify;
+  /* line-height: 1.5; */
+  margin-bottom: calc(5px * var(--scale));
+  text-indent: 10px;
+}
+
+/* ===== MAYOR SIGNATORY SECTION ===== */
+.mayor-signatory {
+  --mayor-font-size: 15pt;
+  --mayor-top-padding: 50px;
+  --mayor-bottom-padding: 30px;
+}
+
+.signatory-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+.signatory-section p {
+  font-family: "Montserrat", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.mayorname {
+  font-size: calc(var(--mayor-font-size) * var(--scale));
+  padding-top: calc(var(--mayor-top-padding) * var(--scale));
+  font-weight: 700;
+}
+
+.mayor-position {
+  font-size: calc(var(--mayor-font-size) * var(--scale));
+  font-weight: 500;
+}
+
+.mayor-authority {
+  font-size: calc(var(--mayor-font-size) * var(--scale));
+  padding-top: calc(var(--mayor-bottom-padding) * var(--scale));
+  font-style: italic;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+/* ===== DEPARTMENT HEAD SIGNATORY SECTION ===== */
+.dept-head-signatory {
+  --dept-head-font-size: 15pt;
+  --dept-head-top-padding: 120px;
+  margin-top: calc(var(--dept-head-top-padding) * var(--scale));
+}
+.dept-head-name {
+  font-size: calc(var(--dept-head-font-size) * var(--scale));
+  padding-top: calc(var(--dept-head-top-padding) * var(--scale));
+  /* text-decoration: underline; */
+  font-weight: 700;
+}
+
+.dept-head-position {
+  font-size: calc(var(--dept-head-font-size) * var(--scale));
+  font-weight: 500;
+}
+
+/* ===== EVENT NAME SECTION ===== */
+.event-name-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.event-name-text {
+  font-family: "Montserrat", sans-serif;
+  font-size: calc(20pt * var(--scale));
+  font-weight: 700;
+  margin-bottom: calc(14px * var(--scale));
+  text-align: center;
+  line-height: 1.5;
+  margin-top: 0;
+  padding: 0;
+}
+
+/* ===== FIRST PARAGRAPH SECTION ===== */
+.first-paragraph-wrapper {
+  margin-top: calc(10px * var(--scale));
+  margin-left: var(--margin-x);
+  margin-right: var(--margin-x);
+  margin-bottom: var(--margin-bottom);
+  line-height: 1.2;
+}
+
+.first-paragraph-text {
+  font-family: "Montserrat", sans-serif;
+  font-size: calc(13pt * var(--scale));
+  font-weight: 500;
+  text-indent: calc(50px * var(--scale));
+  margin-bottom: 1em;
+  text-align: justify;
+  line-height: 1.5;
+  margin-top: 0;
+}
+/* ===== ADDITIONAL PARAGRAPH SECTION ===== */
+.additional-paragraph-wrapper {
+  margin-top: calc(10px * var(--scale));
+  margin-left: var(--margin-x);
+  margin-right: var(--margin-x);
+  margin-bottom: var(--margin-bottom);
+  line-height: 1.2;
+}
+
+.additional-paragraph-text {
+  font-family: "Montserrat", sans-serif;
+  font-size: calc(13pt * var(--scale));
+  font-weight: 500;
+  text-indent: calc(50px * var(--scale));
+  margin-bottom: 1em;
+  text-align: justify;
+  line-height: 1.5;
+  margin-top: 0;
+}
+/*====WITH CASE ADDITINAL TEXT====*/
+
+.case-additional-text-wrapper {
+  margin-top: calc(10px * var(--scale));
+  margin-left: var(--margin-x);
+  margin-right: var(--margin-x);
+  margin-bottom: var(--margin-bottom);
+  line-height: 1.2;
+}
+
+.case-additional-text {
+  font-family: "Montserrat", sans-serif;
+  font-size: calc(15pt * var(--scale));
+  font-weight: 500;
+  /* text-indent: calc(50px * var(--scale)); */
+  margin-bottom: 1em;
+  text-align: justify;
+  line-height: 1.5;
+  margin-top: 0;
+}
+
+/* ===== HEADERS TITLE SECTION ===== */
+.headers-title-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.headers-title-text {
+  font-family: "Montserrat", sans-serif;
+  font-size: calc(28pt * var(--scale));
+  font-weight: 700;
+  color: #154172;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== PURPOSE SECTION ===== */
+.purpose-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: calc(50px * var(--scale));
+}
+
+.purpose-text {
+  font-family: "Montserrat", sans-serif;
+  font-size: calc(17pt * var(--scale));
+  font-weight: 600;
+  text-decoration: underline;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== SECOND PARAGRAPH SECTION ===== */
+.second-paragraph-wrapper {
+  margin-top: calc(10px * var(--scale));
+  margin-left: var(--margin-x);
+  margin-right: var(--margin-x);
+  margin-bottom: var(--margin-bottom);
+  line-height: 1.2;
+}
+
+.second-paragraph-text {
+  font-family: "Montserrat", sans-serif;
+  font-size: calc(13pt * var(--scale));
+  font-weight: 500;
+  text-indent: calc(50px * var(--scale));
+  margin-bottom: 1em;
+  text-align: justify;
+  line-height: 1.5;
+  margin-top: 0;
+}
+
+/* ===== SUBHEADER SECTION ===== */
+.subheader-section {
+  text-align: center;
+}
+
+.subheader-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.subheader-title {
+  font-family: "Montserrat", sans-serif;
+  font-size: calc(17pt * var(--scale));
+  font-weight: 600;
+  color: #154172;
+  margin: 0;
+  padding: 0;
+}
+
+.subheader-title--light {
+  font-weight: 400; /* Lighter weight for good_moral */
+}
+
+.subheader-series {
+  font-family: "Book Antiqua", serif;
+  font-size: calc(11pt * var(--scale));
+  font-style: italic;
+  color: #11a7ee;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== THIRD PARAGRAPH SECTION ===== */
+.third-paragraph-wrapper {
+  margin-top: calc(4px * var(--scale));
+  margin-left: var(--margin-x);
+  margin-right: var(--margin-x);
+  margin-bottom: var(--margin-bottom);
+  line-height: 1.2;
+}
+
+.third-paragraph-text {
+  font-family: "Montserrat", sans-serif;
+  font-size: calc(13pt * var(--scale));
+  font-weight: 500;
+  text-indent: calc(50px * var(--scale));
+  margin-bottom: 1em;
+  text-align: justify;
+  line-height: 1.5;
+  margin-top: 0;
+}
+
+/* ===== WITH CASES SECTION ===== */
+.with-cases-wrapper {
+  margin-top: calc(10px * var(--scale));
+  margin-left: calc(2.54cm * var(--scale));
+  margin-right: var(--margin-x);
+  margin-bottom: var(--margin-bottom);
+  line-height: 1.2;
+}
+
+.with-cases-inner {
+  margin-left: calc(50px * var(--scale));
+}
+
+.with-cases-text {
+  font-family: "Montserrat", sans-serif;
+  font-size: calc(13pt * var(--scale));
+  font-weight: 500;
+  margin-bottom: 1em;
+  text-align: justify;
+  line-height: 1.5;
+  margin-top: 0;
+}
+
+/* ===== FOOTER SECTION ===== */
+.certificate-footer {
+  text-align: center;
+  padding: calc(10px * var(--scale));
+  vertical-align: bottom;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-left: calc(30px * var(--scale));
+}
+
+.footer-left p {
+  margin: 0;
+  font-size: calc(9pt * var(--scale));
+  text-align: left;
+  line-height: 1.2;
+}
+
+.footer-small {
+  font-size: calc(7pt * var(--scale));
+  color: black;
+}
+
+.footer-right img {
+  height: calc(79px * var(--scale));
+  width: calc(213px * var(--scale));
+}
+
+.footer-note {
+  text-align: center;
+  font-size: calc(11pt * var(--scale));
+}
+
+.footer-tagline {
+  margin: 0;
+  font-style: italic;
+  color: green;
+}
+
+.footer-warning {
+  margin: 0;
+  font-size: calc(15px * var(--scale));
+  color: rgb(197, 55, 55);
+  font-weight: bold;
+}
+
+.footer-code {
+  text-align: right;
+  margin-bottom: 0;
+  margin-right: calc(30px * var(--scale));
+  font-size: calc(8pt * var(--scale));
+  font-weight: bold;
+  color: black;
+}
+
+/* ===== PRINT  ===== */
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+    background: white;
+  }
+
+  .print-btn {
+    display: none;
+  }
+
+  .certificate-wrapper {
+    --scale: 1;
+  }
+
+  .certificate-table {
+    width: 100%;
+    height: 100%;
+    page-break-inside: avoid;
+  }
+
+  .certificate-header,
+  .certificate-footer {
+    page-break-before: avoid;
+    page-break-after: avoid;
+  }
+
+  .certificate-content {
+    font-size: 12pt;
+    line-height: 1.2;
+  }
+
+  .footer-content {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .certificate-header .header-text,
+  .certificate-header .header-text > p {
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .header-logo {
+    width: 120px !important;
+    height: 120px !important;
+    object-fit: contain;
+    object-position: center;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .header-text {
+    font-size: 11pt !important;
+    line-height: 1.2 !important;
+    color: #000000 !important;
+    padding-top: 20px !important;
+    margin-left: 5px !important;
+  }
+
+  .qr-wrapper {
+    margin-left: auto !important;
+    justify-content: flex-end !important;
+    margin-right: 15px !important;
+  }
+  s img {
+    max-width: 100% !important;
+    height: auto !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .certificate-table {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

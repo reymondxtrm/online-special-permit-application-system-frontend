@@ -24,12 +24,10 @@ import {
   RECORRIDA_CERT_CONDITIONS,
   USE_OF_GOVERNMENT_PROPERTY_CERT_CONDITIONS,
 } from "assets/data/data";
-import { forEach } from "lodash";
-import Condition from "yup/lib/Condition";
-import { formateDateIntoString } from "common/utility/utilityFunction";
 import moment from "moment";
 import useGetImage from "hooks/Common/useGetImage";
 import RoutePlanViewer from "./Common/RoutePlanViewer";
+import useSubmit from "hooks/Common/useSubmit";
 let debounce = null;
 function GeneratePermitModal({
   openModal,
@@ -57,6 +55,7 @@ function GeneratePermitModal({
   const [activeParagraph, setActiveParagraph] = useState(null);
   const [representativeName, setRepresentativeName] = useState();
   const { currentImage, getImageHandle, isFetching } = useGetImage();
+  const handleSubmit = useSubmit();
   const openFirstColumn = useMemo(() => {
     if (
       permitType === "event" ||
@@ -139,7 +138,7 @@ function GeneratePermitModal({
     const year = date.getFullYear();
 
     setthirdParagraph(
-      `Issued this ${day} day of ${month} ${year} at the City Hall Building, Butuan City, Philipines.`
+      `Issued this ${day} day of ${month} ${year} at the City Hall Building, Butuan City, Philippines.`,
     );
   }, []);
 
@@ -171,7 +170,7 @@ function GeneratePermitModal({
           },
           (error) => {
             console.log(error);
-          }
+          },
         );
     }
   }, [openModal]);
@@ -216,6 +215,18 @@ function GeneratePermitModal({
       document.title = originalTitle;
     }, 5000);
   };
+  const handleAfterPrint = () => {
+    if (!data) return;
+
+    if (data.printed_at !== null) return;
+    try {
+      axios.post("api/admin/permit-printed", {
+        special_permit_application_id: specialPermitID,
+      });
+    } catch (error) {
+      console.error("Failed to mark permit as printed:", error);
+    }
+  };
 
   const addNameToActiveParagraph = () => {
     if (data?.applicant_name && activeParagraph) {
@@ -223,28 +234,28 @@ function GeneratePermitModal({
         setFirstParagraph(
           (prevText) =>
             prevText +
-            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.applicant_name?.toUpperCase()}</span>`
+            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.applicant_name?.toUpperCase()}</span>`,
         );
         setFirstParagraphTextArea(
-          (prevText) => prevText + data?.applicant_name
+          (prevText) => prevText + data?.applicant_name,
         );
       } else if (activeParagraph === "second") {
         setSecondParagraph(
           (prevText) =>
             prevText +
-            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.applicant_name?.toUpperCase()}</span>`
+            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.applicant_name?.toUpperCase()}</span>`,
         );
         setSecondParagraphTextArea(
-          (prevText) => prevText + data?.applicant_name
+          (prevText) => prevText + data?.applicant_name,
         );
       } else if (activeParagraph === "additionalForWithCase") {
         setAdditionalParagraphForWithCase(
           (prevText) =>
             prevText +
-            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.applicant_name?.toUpperCase()}</span>`
+            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.applicant_name?.toUpperCase()}</span>`,
         );
         setAdditionalParagraphForWithCaseTextArea(
-          (prevText) => prevText + data?.applicant_name
+          (prevText) => prevText + data?.applicant_name,
         );
       }
     }
@@ -256,28 +267,28 @@ function GeneratePermitModal({
         setFirstParagraph(
           (prevText) =>
             prevText +
-            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.requestor_name.toUpperCase()}</span>`
+            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.requestor_name.toUpperCase()}</span>`,
         );
         setFirstParagraphTextArea(
-          (prevText) => prevText + data?.requestor_name
+          (prevText) => prevText + data?.requestor_name,
         );
       } else if (activeParagraph === "second") {
         setSecondParagraph(
           (prevText) =>
             prevText +
-            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.requestor_name.toUpperCase()}</span>`
+            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.requestor_name.toUpperCase()}</span>`,
         );
         setSecondParagraphTextArea(
-          (prevText) => prevText + data?.requestor_name
+          (prevText) => prevText + data?.requestor_name,
         );
       } else if (activeParagraph === "additionalForWithCase") {
         setAdditionalParagraphForWithCase(
           (prevText) =>
             prevText +
-            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.requestor_name.toUpperCase()}</span>`
+            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.requestor_name.toUpperCase()}</span>`,
         );
         setAdditionalParagraphForWithCaseTextArea(
-          (prevText) => prevText + data?.requestor_name
+          (prevText) => prevText + data?.requestor_name,
         );
       }
     }
@@ -289,24 +300,24 @@ function GeneratePermitModal({
         setFirstParagraph(
           (prevText) =>
             prevText +
-            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${concatEventDate}</span>`
+            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${concatEventDate}</span>`,
         );
         setFirstParagraphTextArea((prevText) => prevText + concatEventDate);
       } else if (activeParagraph === "second") {
         setSecondParagraph(
           (prevText) =>
             prevText +
-            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${concatEventDate}</span>`
+            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${concatEventDate}</span>`,
         );
         setSecondParagraphTextArea((prevText) => prevText + concatEventDate);
       } else if (activeParagraph === "addtionalForWithCase") {
         setAdditionalParagraphForWithCase(
           (prevText) =>
             prevText +
-            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${concatEventDate}</span>`
+            ` <span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${concatEventDate}</span>`,
         );
         setAdditionalParagraphForWithCaseTextArea(
-          (prevText) => prevText + concatEventDate
+          (prevText) => prevText + concatEventDate,
         );
       }
     }
@@ -317,19 +328,19 @@ function GeneratePermitModal({
         setFirstParagraph(
           (prevText) =>
             prevText +
-            `<span style="fontFamily: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.name_of_property}</span>`
+            `<span style="fontFamily: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${data?.name_of_property}</span>`,
         );
         setFirstParagraphTextArea(
-          (prevText) => prevText + data?.name_of_property
+          (prevText) => prevText + data?.name_of_property,
         );
       } else if (activeParagraph === "second") {
         setSecondParagraph(
           (prevText) =>
             prevText +
-            ` <span style="fontFamily: 'Golos Text', sans-serif, serif; font-weight: bold;  text-decoration: underline;">${data?.name_of_property}</span>`
+            ` <span style="fontFamily: 'Golos Text', sans-serif, serif; font-weight: bold;  text-decoration: underline;">${data?.name_of_property}</span>`,
         );
         setSecondParagraphTextArea(
-          (prevText) => prevText + data?.name_of_property
+          (prevText) => prevText + data?.name_of_property,
         );
       }
     }
@@ -340,19 +351,19 @@ function GeneratePermitModal({
         setFirstParagraph(
           (prevText) =>
             prevText +
-            `<span style="fontFamily: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${representativeName}</span>`
+            `<span style="fontFamily: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${representativeName}</span>`,
         );
         setFirstParagraphTextArea(
-          (prevText) => prevText + `${representativeName}`
+          (prevText) => prevText + `${representativeName}`,
         );
       } else if (activeParagraph === "second") {
         setSecondParagraph(
           (prevText) =>
             prevText +
-            `<span style="fontFamily: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${representativeName}</span>`
+            `<span style="fontFamily: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${representativeName}</span>`,
         );
         setSecondParagraphTextArea(
-          (prevText) => prevText + `${representativeName}`
+          (prevText) => prevText + `${representativeName}`,
         );
       }
     }
@@ -367,10 +378,10 @@ function GeneratePermitModal({
         setSecondParagraphTextArea((prevText) => prevText + `${data?.address}`);
       } else if (activeParagraph === "additionalForWithCase") {
         setAdditionalParagraphForWithCase(
-          (prevText) => prevText + `${data?.address}`
+          (prevText) => prevText + `${data?.address}`,
         );
         setAdditionalParagraphForWithCaseTextArea(
-          (prevText) => prevText + `${data?.address}`
+          (prevText) => prevText + `${data?.address}`,
         );
       }
     }
@@ -506,26 +517,26 @@ function GeneratePermitModal({
                           if (applicantName) {
                             styledHTML = styledHTML.replace(
                               new RegExp(applicantName, "g"),
-                              `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${applicantName}</span>`
+                              `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${applicantName}</span>`,
                             );
                           }
                           if (representativeName) {
                             styledHTML = styledHTML.replace(
                               new RegExp(representativeName, "g"),
-                              `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${representativeName}</span>`
+                              `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${representativeName}</span>`,
                             );
                           }
 
                           if (requestorName) {
                             styledHTML = styledHTML.replace(
                               new RegExp(requestorName, "g"),
-                              `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${requestorName}</span>`
+                              `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${requestorName}</span>`,
                             );
                           }
                           if (propertyName) {
                             styledHTML = styledHTML.replace(
                               new RegExp(propertyName, "g"),
-                              `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${propertyName}</span>`
+                              `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${propertyName}</span>`,
                             );
                           }
 
@@ -533,7 +544,7 @@ function GeneratePermitModal({
                             const safeEventDate = escapeRegex(eventDate);
                             styledHTML = styledHTML.replace(
                               new RegExp(safeEventDate, "g"),
-                              `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${eventDate}</span>`
+                              `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${eventDate}</span>`,
                             );
                           }
 
@@ -712,26 +723,26 @@ function GeneratePermitModal({
                         if (applicantName) {
                           styledHTML = styledHTML.replace(
                             new RegExp(applicantName, "g"),
-                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${applicantName}</span>`
+                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${applicantName}</span>`,
                           );
                         }
                         if (representativeName) {
                           styledHTML = styledHTML.replace(
                             new RegExp(representativeName, "g"),
-                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${representativeName}</span>`
+                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${representativeName}</span>`,
                           );
                         }
 
                         if (requestorName) {
                           styledHTML = styledHTML.replace(
                             new RegExp(requestorName, "g"),
-                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${requestorName}</span>`
+                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${requestorName}</span>`,
                           );
                         }
                         if (propertyName) {
                           styledHTML = styledHTML.replace(
                             new RegExp(propertyName, "g"),
-                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${propertyName}</span>`
+                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${propertyName}</span>`,
                           );
                         }
 
@@ -739,7 +750,7 @@ function GeneratePermitModal({
                           const safeEventDate = escapeRegex(eventDate);
                           styledHTML = styledHTML.replace(
                             new RegExp(safeEventDate, "g"),
-                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${eventDate}</span>`
+                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold;  text-decoration: underline;">${eventDate}</span>`,
                           );
                         }
 
@@ -966,7 +977,7 @@ function GeneratePermitModal({
                         if (applicantName) {
                           const styledHTML = plainText.replace(
                             new RegExp(applicantName, "g"),
-                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold; text-decoration: underline;">${applicantName}</span>`
+                            `<span style="font-family: 'Golos Text', sans-serif; font-weight: bold; text-decoration: underline;">${applicantName}</span>`,
                           );
                           setSecondParagraph(styledHTML);
                         } else {
@@ -1148,6 +1159,7 @@ function GeneratePermitModal({
           trigger={() => <Button color="primary">Print</Button>}
           content={() => componentRef.current}
           onBeforePrint={handleBeforePrint}
+          onAfterPrint={handleAfterPrint}
         />
         <Button color="secondary" onClick={toggleModal}>
           Close

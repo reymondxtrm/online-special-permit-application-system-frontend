@@ -39,14 +39,14 @@ const Pending = () => {
 
   const user = useSelector((state) => state.user);
   const [activeTab, setActiveTab] = useState(
-    user.accountType === "company" ? "occupational_permit" : "mayors_permit"
+    user.accountType === "company" ? "occupational_permit" : "mayors_permit",
   );
   const handleTabSelect = (key) => {
     setActiveTab(key);
-    setNewCounts((prev) => ({
-      ...prev,
-      [key]: {},
-    }));
+    // setNewCounts((prev) => ({
+    //   ...prev,
+    //   [key]: {},
+    // }));
   };
   const options = [
     { value: 1, label: "2023" },

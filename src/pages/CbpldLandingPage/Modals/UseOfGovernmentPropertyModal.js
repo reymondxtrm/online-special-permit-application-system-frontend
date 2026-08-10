@@ -92,9 +92,14 @@ function UseOfGovernmentPropertyModal({
   const handleFileChange = async (e, fieldName, index, props) => {
     const file = e.currentTarget.files[0];
     if (!file) return;
-    const compressed = await handleImageChange(e, index);
-    if (compressed) {
-      props.setFieldValue(fieldName, compressed);
+    if (file.type.startsWith("image")) {
+      const compressed = await handleImageChange(e, index);
+      if (compressed) {
+        props.setFieldValue(fieldName, compressed);
+        props.setFieldTouched(fieldName, true, true);
+      }
+    } else {
+      props.setFieldValue(fieldName, file);
       props.setFieldTouched(fieldName, true, true);
     }
   };
@@ -118,7 +123,7 @@ function UseOfGovernmentPropertyModal({
           const { event_date_from } = this.parent;
           if (!event_date_from || !value) return true;
           return new Date(value) >= new Date(event_date_from);
-        }
+        },
       ),
 
     event_time_from: Yup.string().required("Start time is required"),
@@ -132,7 +137,7 @@ function UseOfGovernmentPropertyModal({
       function (value) {
         if (isUpdate && uploadedFiles?.request_letter) return true;
         return value !== null && value !== undefined;
-      }
+      },
     ),
   });
 
@@ -147,7 +152,7 @@ function UseOfGovernmentPropertyModal({
               params: {
                 special_permit_application_id: specialPermitApplicationId,
               },
-            }
+            },
           );
           const d = res.data.data;
 
@@ -289,12 +294,12 @@ function UseOfGovernmentPropertyModal({
                           placeholder="Select a property.."
                           value={propertyOptions.find(
                             (option) =>
-                              option.label === props.values.name_of_property
+                              option.label === props.values.name_of_property,
                           )}
                           onChange={(selected) =>
                             props.setFieldValue(
                               "name_of_property",
-                              selected.label
+                              selected.label,
                             )
                           }
                           onBlur={() =>
@@ -427,7 +432,7 @@ function UseOfGovernmentPropertyModal({
                           <div className="flex-grow-1">
                             <Input
                               type="file"
-                              accept="image/*"
+                              accept="image/*,application/pdf"
                               onChange={(e) => {
                                 handleFileChange(e, "request_letter", 0, props);
                               }}
@@ -485,7 +490,7 @@ function UseOfGovernmentPropertyModal({
                           <div className="flex-grow-1">
                             <Input
                               type="file"
-                              accept="image/jpeg,image/png"
+                              accept="image/jpeg,image/png,application/pdf"
                               onChange={(e) => {
                                 handleFileChange(e, "route_plan", 1, props);
                               }}
@@ -605,7 +610,7 @@ function UseOfGovernmentPropertyModal({
                   params: formData,
                 },
                 [],
-                [toggleModal, toggleRefresh]
+                [toggleModal, toggleRefresh],
               );
             }}
           >

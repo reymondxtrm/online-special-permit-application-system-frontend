@@ -48,6 +48,11 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import useGetImage from "hooks/Common/useGetImage";
 import FileViewerModal from "../AdminControls/Modals/FileViewerModal";
+import EditDurationModal from "../Dashboard/Modal/EditDurationModal";
+import PaymentModal from "../../AuthClientPages/Modals/PaymentModal";
+import { useSelectedPaymentDetails } from "hooks/Common/useSelectedPaymentDetails";
+import UpdateEventModal from "../Modals/UpdateEventModal";
+import UpdateOrNumberModal from "../Modals/UpdateOrNumberModal";
 
 const AdminTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
@@ -59,7 +64,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const [amountModal, setamountModal] = useState(false);
   const [remarksModal, setremarksModal] = useState(false);
   const [returnRemarksModal, setreturnRemarksModal] = useState(false);
-  const [selectedImage, setSelectedImage] = useState("");
   const [selectedFiles, setSelectedFiles] = useState(null);
   const [refreshPage, setrefreshPage] = useState(false);
   const [generateModal, setgenerateModal] = useState(false);
@@ -73,18 +77,27 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const [name, setname] = useState(null);
   const [purpose, setpurpose] = useState(null);
   const [referenceNo, setreferenceNo] = useState(null);
-  const [imageViewerScale, setimageViewScale] = useState(1);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [pdfViewer, setPdfViewer] = useState(false);
-  const [selectedRow, setSelectedRow] = useState([]);
   const [openRequestFormModal, setOpenRequestFormModal] = useState(false);
   const [completedPermit, setCompletedPermit] = useState(null);
+  const [updateDurationModal, setUpdateDurationModal] = useState(false);
+  const [overTheCounterModal, setOverTheCounterModal] = useState(false);
+  const [selectedRow, setSelectedRow] = useState([]);
+  const [updateEventModal, setUpdateEventModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [updateOrNumberModal, setUpdateOrNumberModal] = useState(false);
+  const [orNumber, setOrNumber] = useState(null);
   const [
     openMayorsAndGoodMoralRequestForm,
     setOpenMayorsAndGoodMoralRequestForm,
   ] = useState(false);
   const dispatch = useDispatch();
   const admin = useSelector((state) => state.specialPermitAdmin);
+  const paymentDetails = useSelectedPaymentDetails(
+    selectedRow,
+    admin?.tableData?.data,
+  );
   const filter = useSelector((state) => state.dateFilter);
   const params = useMemo(() => {
     return status === "completed"
@@ -104,10 +117,13 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
 
     return `${firstName} ${middleName} ${lastName}`;
   };
+
   const toggleGenerateModal = () => {
     setgenerateModal(!generateModal);
   };
-
+  const toggleOverTheCounterModal = () => {
+    setOverTheCounterModal((prev) => !prev);
+  };
   const toggleRemarksModal = useCallback(() => {
     setremarksModal((prev) => !prev);
   }, []);
@@ -122,19 +138,28 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const toggleAmountModal = () => {
     setamountModal(!amountModal);
   };
+  const toggleUpdateModal = () => {
+    setUpdateDurationModal(!updateDurationModal);
+  };
 
   const toggleReturnRemarksModal = () => {
     setreturnRemarksModal(!returnRemarksModal);
+  };
+  const toggleUpdateEventModal = () => {
+    setUpdateEventModal((prev) => !prev);
   };
 
   const toggleMayorsAndGoodMoralRequestModal = () => {
     setOpenMayorsAndGoodMoralRequestForm((prev) => !prev);
   };
+  const toggleUpdateOrNumberModal = () => {
+    setUpdateOrNumberModal((prev) => !prev);
+  };
   useEffect(() => {
     if (activeTab === "mayors_permit" || activeTab === "good_moral") {
       axios
         .get("api/get-purpose", {
-          params: { permit_type: "good_moral" },
+          params: { permit_type: activeTab },
         })
         .then(
           (res) => {
@@ -147,7 +172,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
           },
           (error) => {
             console.log(error);
-          }
+          },
         );
     }
   }, []);
@@ -191,8 +216,37 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const handleRowOnclick = (permit_id) => {
     const response = updateTabNotification(applicationType, permit_id, status);
   };
+  const handleClickPermitStatus = async (id) => {
+    handleSubmit(
+      {
+        url: "api/admin/disable-enable-permit",
+        params: { special_permit_application_id: id },
+        message: {
+          title: "Are you sure you want change the status?",
+        },
+      },
+      [],
+      [toggleRefresh],
+    );
+  };
   return (
     <>
+      {updateDurationModal && (
+        <EditDurationModal
+          openModal={updateDurationModal}
+          toggleModal={toggleUpdateModal}
+          specialPermitId={applicationId}
+        />
+      )}
+      {updateEventModal && (
+        <UpdateEventModal
+          toggleModal={toggleUpdateEventModal}
+          openModal={updateEventModal}
+          initialData={selectedEvent}
+          toggleRefresh={toggleRefresh}
+        />
+      )}
+
       <AttachmentModal
         toggleModal={toggleAttachmentModal}
         openModal={attachmentModal}
@@ -205,6 +259,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
         toggle={toggleRequestFormModal}
         applicationId={applicationId}
       />
+
       <MayorsAndGoodMoralRequestForm
         isOpen={openMayorsAndGoodMoralRequestForm}
         toggle={toggleMayorsAndGoodMoralRequestModal}
@@ -215,6 +270,16 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
           fileUrl={completedPermit}
           isOpen={pdfViewer}
           toggle={togglePdfViewer}
+        />
+      )}
+      {overTheCounterModal && (
+        <PaymentModal
+          toggleModal={toggleOverTheCounterModal}
+          openModal={overTheCounterModal}
+          applicationId={selectedRow}
+          toggleRefresh={toggleRefresh}
+          applicationType={applicationType}
+          paymentDetails={paymentDetails}
         />
       )}
       {status === "pending" ? (
@@ -260,7 +325,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
         </>
       ) : null}
 
-      {status === "for_signature" ? (
+      {status === "for_signature" || status === "completed" ? (
         <>
           <GeneratePermitModal
             toggleModal={toggleGenerateModal}
@@ -281,6 +346,16 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
           />
         </>
       ) : null}
+      {updateOrNumberModal && (
+        <UpdateOrNumberModal
+          openModal={updateOrNumberModal}
+          toggleModal={toggleUpdateOrNumberModal}
+          applicationId={applicationId}
+          // applicationType={applicationType}
+          toggleRefresh={toggleRefresh}
+          orNumber={orNumber}
+        />
+      )}
 
       <div className="tableFixHead">
         <div>
@@ -312,7 +387,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
           </Button>
         </div>
 
-        <Table hover>
+        <Table>
           <thead
             className="table-light"
             style={{
@@ -323,7 +398,9 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
           >
             <tr>
               <th>#</th>
-              {status === "for_signature" && <th>Reference No</th>}
+              {(status === "for_signature" || status === "completed") && (
+                <th>Reference No</th>
+              )}
               <th>Name</th>
               {applicationType === "mayors_permit" ||
               applicationType === "good_moral" ||
@@ -365,18 +442,29 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                   <th>Date To</th>
                 </>
               ) : null}
+              {status === "for_payment_approval" && <th>OR No.</th>}
 
-              {(status !== "for_payment_approval" || status !== "returned") && (
-                <th>Attachment</th>
-              )}
+              {status !== "for_payment_approval" &&
+                status !== "returned" &&
+                status !== "for_payment" && (
+                  <>
+                    <th>Attachment </th>
+                  </>
+                )}
 
               {status === "returned" || status === "declined" ? (
                 <th>Remarks</th>
               ) : null}
 
-              {status === "pending" ? <th>Actions</th> : null}
-              {status === "for_signature" ? <th>Actions</th> : null}
-              {status === "for_payment_approval" ? <th>Actions</th> : null}
+              {status === "pending" ||
+              status === "for_signature" ||
+              status === "for_payment_approval" ||
+              status === "completed" ||
+              status === "for_payment" ? (
+                <th>Actions</th>
+              ) : null}
+              {/* { ? <th>Actions</th> : null}
+              { ? <th>Actions</th> : null} */}
             </tr>
           </thead>
 
@@ -396,9 +484,13 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                         ? null
                         : handleRowOnclick(application.id);
                     }}
+                    style={{
+                      backgroundColor: application.disable ? "#ef53502a" : null,
+                      borderColor: application.disable ? "#EF5350" : null,
+                    }}
                   >
                     <td>{`${index + 1}`}</td>
-                    {status === "for_signature" && (
+                    {(status === "for_signature" || status === "completed") && (
                       <td>{application.reference_no}</td>
                     )}
                     <td>
@@ -462,12 +554,6 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                     applicationType === "recorrida" ||
                     applicationType === "use_of_government_property" ? (
                       <>
-                        {/* <td>
-                          {
-                            application.user?.user_phone_numbers[0]
-                              ?.phone_number
-                          }
-                        </td> */}
                         <td>
                           {application?.requestor_name}{" "}
                           {application?.mark_as_read ? (
@@ -480,14 +566,13 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                         <td>
                           {dateOfEvent(
                             application?.event_date_from,
-                            application?.event_time_from
+                            application?.event_time_from,
                           )}
                         </td>
-
                         <td>
                           {dateOfEvent(
                             application?.event_date_to,
-                            application?.event_time_to
+                            application?.event_time_to,
                           )}
                         </td>
                       </>
@@ -496,25 +581,23 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                       <>
                         <td>{application.application_purpose?.name}</td>
 
-                        {/* {applicationType === "good_moral" && (
-                        <th>Name of Employer</th>
-                      )} */}
                         <td>{application.user?.gender}</td>
                         <td>{application.user?.email}</td>
-                        {/* <td>
-                          {
-                            application.user?.user_phone_numbers[0]
-                              ?.phone_number
-                          }
-                        </td> */}
+
                         <td>{application.user?.email}</td>
                       </>
                     ) : null}
-
-                    <td>
-                      {status === "for_payment_approval" ||
-                      status === "returned" ? (
-                        application?.order_of_payment?.payment_detail
+                    {(status === "for_payment_approval" ||
+                      status === "returned") && (
+                      <td>
+                        {application?.order_of_payment?.payment_detail?.or_no ||
+                          "N/A"}
+                      </td>
+                    )}
+                    {(status === "for_payment_approval" ||
+                      status === "returned") && (
+                      <td>
+                        {application?.order_of_payment?.payment_detail
                           ?.payment_type === "online" ? (
                           <>
                             <Button
@@ -524,7 +607,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                                 window.open(
                                   application?.order_of_payment?.payment_detail
                                     ?.attachment,
-                                  "_blank"
+                                  "_blank",
                                 );
                               }}
                             >
@@ -548,25 +631,15 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                             >
                               Attachment
                             </Button>
-                            {/* <img
-                              src={`${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`}
-                              alt={`Thumbnail`}
-                              style={{
-                                width: "100px",
-                                height: "50px",
-                                margin: "5px",
-                                cursor: "pointer",
-                              }}
-                              onClick={() =>
-                                openImageViewer(
-                                  `${window.location.protocol}//${process.env.REACT_APP_API}storage/${application?.order_of_payment?.payment_detail?.attachment}`
-                                )
-                              }
-                            /> */}
                           </>
-                        )
-                      ) : (
-                        <div className="d-flex gap-2">
+                        )}
+                      </td>
+                    )}
+
+                    {status !== "for_payment_approval" &&
+                      status !== "returned" &&
+                      status !== "for_payment" && (
+                        <td>
                           <Button
                             color="success"
                             onClick={() =>
@@ -575,47 +648,146 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                           >
                             Attachments
                           </Button>
-                          {status === "completed" && (
-                            <Button
-                              color="success"
-                              onClick={() => {
-                                togglePdfViewer();
-                                setCompletedPermit(
-                                  application?.complete_special_permit?.file
-                                );
+                        </td>
+                      )}
+
+                    {status === "for_payment" && (
+                      <td>
+                        <div className="flex">
+                          <UncontrolledDropdown
+                            className="me-2"
+                            direction="end"
+                          >
+                            <DropdownToggle caret color="primary">
+                              Actions
+                            </DropdownToggle>
+                            <DropdownMenu
+                              style={{
+                                maxHeight: "200px",
+                                overflowY: "auto",
+                                zIndex: 1050, // High z-index to appear above
+                                position: "absolute", // Ensure it's detached from parent
                               }}
                             >
-                              Permit
-                            </Button>
-                          )}
+                              <DropdownItem
+                                color="success"
+                                onClick={() =>
+                                  handleViewAttachments(
+                                    application.uploaded_file,
+                                  )
+                                }
+                              >
+                                Attachments
+                              </DropdownItem>
+                              <DropdownItem
+                                color="success"
+                                disabled={
+                                  application?.order_of_payment
+                                    ?.payment_on_progress === 1
+                                }
+                                onClick={(e) => {
+                                  e.preventDefault();
+
+                                  if (!application?.id) {
+                                    console.error(
+                                      "Application data is missing",
+                                    );
+                                    return;
+                                  }
+
+                                  if (
+                                    application?.order_of_payment
+                                      ?.payment_on_progress === 1
+                                  ) {
+                                    Swal.fire({
+                                      icon: "info",
+                                      title: "Processing Payment",
+                                      text: "Your application payment is currently being processed. Please wait for further updates.",
+                                      confirmButtonText: "OK",
+                                    });
+                                    return;
+                                  }
+
+                                  setSelectedRow([application?.id]);
+                                  toggleOverTheCounterModal();
+                                }}
+                              >
+                                Upload Payment
+                              </DropdownItem>
+                            </DropdownMenu>
+                          </UncontrolledDropdown>
                         </div>
+                      </td>
+                    )}
+                    {applicationType !== "occupational_permit" &&
+                      status === "completed" && (
+                        <>
+                          <td>
+                            <div className="flex">
+                              <UncontrolledDropdown
+                                className="me-2"
+                                direction="end"
+                              >
+                                <DropdownToggle caret color="primary">
+                                  Actions
+                                </DropdownToggle>
+                                <DropdownMenu
+                                  style={{
+                                    maxHeight: "200px",
+                                    overflowY: "auto",
+                                    zIndex: 1050, // High z-index to appear above
+                                    position: "absolute", // Ensure it's detached from parent
+                                  }}
+                                >
+                                  <DropdownItem
+                                    onClick={() => {
+                                      togglePdfViewer();
+                                      setCompletedPermit(
+                                        application?.complete_special_permit
+                                          ?.file,
+                                      );
+                                    }}
+                                  >
+                                    Generated Permit
+                                  </DropdownItem>
+                                  <DropdownItem
+                                    onClick={() => {
+                                      toggleUploadModal();
+                                      setspecialPermitID(application?.id);
+                                    }}
+                                  >
+                                    Re-Upload
+                                  </DropdownItem>
+                                  <DropdownItem
+                                    onClick={() => {
+                                      toggleUpdateModal();
+                                      setApplicationId(application?.id);
+                                    }}
+                                  >
+                                    Update Permit Duration
+                                  </DropdownItem>
+                                  <DropdownItem
+                                    onClick={() => {
+                                      if (
+                                        applicationType === "good_moral" ||
+                                        applicationType === "mayors_permit"
+                                      ) {
+                                        toggleMayorsAndGoodMoralRequestModal();
+                                        setApplicationId(application.id);
+                                      } else {
+                                        toggleRequestFormModal();
+                                        setApplicationId(application.id);
+                                      }
+                                    }}
+                                  >
+                                    View Request Form
+                                  </DropdownItem>
+                                </DropdownMenu>
+                              </UncontrolledDropdown>
+                            </div>
+                          </td>
+                        </>
                       )}
-                    </td>
-
-                    {/* {(status === "for_payment_approval" ||
-                      status === "returned") &&
-                      (applicationType === "good_moral" ||
-                        applicationType === "mayors_permit" ||
-                        applicationType === "occupational_permit") && (
-                        <td>
-                          <Button
-                            color="primary"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              getImageHandle({
-                                url: "api/admin/attachment",
-                                path: application?.uploaded_file
-                                  ?.community_tax_certificate,
-                                showLoader: true,
-                              });
-                              toggleImageViewer();
-                            }}
-                          >
-                            Cedula
-                          </Button>
-                        </td>
-                      )} */}
-
                     {status === "returned" || status === "declined" ? (
                       <td>
                         {application.status_histories
@@ -635,7 +807,11 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                             className="me-2"
                             direction="end"
                           >
-                            <DropdownToggle caret color="primary">
+                            <DropdownToggle
+                              caret
+                              color="primary"
+                              disabled={application.disable}
+                            >
                               Actions
                             </DropdownToggle>
                             <DropdownMenu
@@ -687,7 +863,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                                   onClick={() => {
                                     togglePurposeModal();
                                     setpurposeData(
-                                      application.application_purpose
+                                      application.application_purpose,
                                     );
 
                                     setpurposeData((prevState) => {
@@ -710,7 +886,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                                     onClick={() => {
                                       toggleExemptionModal();
                                       setexemptionData(
-                                        application.permit_application_exemption
+                                        application.permit_application_exemption,
                                       );
                                     }}
                                   >
@@ -744,6 +920,17 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               </DropdownItem>
                             </DropdownMenu>
                           </UncontrolledDropdown>
+                          <Button
+                            color="warning"
+                            onClick={() =>
+                              handleClickPermitStatus(application.id)
+                            }
+                          >
+                            <i
+                              className="mdi mdi-eye fs-5"
+                              style={{ cursor: "pointer" }}
+                            ></i>
+                          </Button>
                         </div>
                       </td>
                     ) : null}
@@ -762,10 +949,10 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               onClick={() => {
                                 toggleGenerateModal();
                                 setname(
-                                  formatName(application?.user?.fullname)
+                                  formatName(application?.user?.fullname),
                                 );
                                 setpurpose(
-                                  application?.application_purpose?.name?.toUpperCase()
+                                  application?.application_purpose?.name?.toUpperCase(),
                                 );
                                 setreferenceNo(application?.reference_no);
 
@@ -775,7 +962,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               Generate
                             </Button>
                           </div>
-                          <div>
+                          <div style={{ paddingRight: "10px" }}>
                             <Button
                               color="primary"
                               style={{ width: "90px" }}
@@ -787,6 +974,26 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               Upload
                             </Button>
                           </div>
+                          {(applicationType === "event" ||
+                            applicationType === "motorcade" ||
+                            applicationType === "motorcade" ||
+                            applicationType === "parade" ||
+                            applicationType === "recorrida" ||
+                            applicationType ===
+                              "use_of_government_property") && (
+                            <div>
+                              <Button
+                                color="warning"
+                                outline
+                                onClick={() => {
+                                  setSelectedEvent(application);
+                                  toggleUpdateEventModal();
+                                }}
+                              >
+                                <i className="fas fa-pen-nib"></i>
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       </td>
                     ) : null}
@@ -823,7 +1030,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                                     },
                                   },
                                   [],
-                                  [toggleRefresh]
+                                  [toggleRefresh],
                                 );
                               }}
                             >
@@ -834,11 +1041,23 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                               onClick={() => {
                                 toggleReturnRemarksModal();
                                 setorderOfPaymentId(
-                                  application?.order_of_payment?.id
+                                  application?.order_of_payment?.id,
                                 );
                               }}
                             >
                               Return
+                            </DropdownItem>
+                            <DropdownItem
+                              onClick={() => {
+                                toggleUpdateOrNumberModal();
+                                setOrNumber(
+                                  application?.order_of_payment?.payment_detail
+                                    ?.or_no,
+                                );
+                                setApplicationId(application?.id);
+                              }}
+                            >
+                              Update OR Number
                             </DropdownItem>
                           </DropdownMenu>
                         </UncontrolledDropdown>

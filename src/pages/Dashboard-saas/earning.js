@@ -12,7 +12,7 @@ import { useSelector, useDispatch } from "react-redux";
 function Earning(props) {
   const dispatch = useDispatch();
 
-  const { earningChartData } = useSelector(state => ({
+  const { earningChartData } = useSelector((state) => ({
     earningChartData: state.DashboardSaas.earningChartData,
   }));
 
@@ -53,7 +53,7 @@ function Earning(props) {
   }, [dispatch]);
 
   const [seletedMonth, setSeletedMonth] = useState("jan");
-  const onChangeMonth = value => {
+  const onChangeMonth = (value) => {
     setSeletedMonth(value);
     dispatch(getEarningChartsData(value));
   };

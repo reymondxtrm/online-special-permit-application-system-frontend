@@ -33,7 +33,7 @@ const TwostepVerification = (props) => {
     "Two Step Verification | Skote - React Admin & Dashboard Template";
   const clickSubmitHandle = () => {
     dispatch(
-      sendOtp({ data: { otp: otp, email: email }, history: props.history })
+      sendOtp({ data: { otp: otp, email: email }, history: props.history }),
     );
   };
   const resendHandle = async () => {

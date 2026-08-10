@@ -11,7 +11,6 @@ export const getCompleteReceived = createAsyncThunk(
         params: filters,
       });
       if (response.data) {
-      
         return response.data;
       } else {
         return thunkAPI.rejectWithValue(response.data);
@@ -19,7 +18,7 @@ export const getCompleteReceived = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const getForCompleteReceiving = createAsyncThunk(
@@ -39,7 +38,7 @@ export const getForCompleteReceiving = createAsyncThunk(
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
-  }
+  },
 );
 
 export const completeReceiverSlice = createSlice({

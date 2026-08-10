@@ -66,6 +66,7 @@ function PaymentModal({
   const toggleGenerateModal = () => {
     setgenerateModal(!generateModal);
   };
+
   function getTransactionDate() {
     const d = new Date();
     return (
@@ -80,6 +81,7 @@ function PaymentModal({
     setTermsAndConditionsModal((prev) => !prev);
   };
   const user = useSelector((state) => state.user);
+
   const formatDate = (dateString) => {
     if (!dateString) return "No Date Provided"; // Handle missing date
     const date = new Date(dateString);
@@ -94,7 +96,7 @@ function PaymentModal({
   useEffect(() => {
     if (openModal) {
       setisLoading(true);
-      axios.get("api/client/user-details").then(
+      axios.get("api/user-details", { params: { applicationId } }).then(
         (res) => {
           setisLoading(false);
           setuserData(res.data);
@@ -102,7 +104,7 @@ function PaymentModal({
         (error) => {
           setisLoading(false);
           console.log(error);
-        }
+        },
       );
     }
   }, [openModal]);
@@ -156,7 +158,6 @@ function PaymentModal({
   const eor_collection = useMemo(() => {
     // If modal is not open, return empty immediately
     if (!openModal) return [];
-
     const quantity = paymentDetails?.quantity ?? 0;
     const totalAmount = paymentDetails?.total_amount ?? 0;
     const typeLabel = type?.label ?? "";
@@ -725,7 +726,7 @@ function PaymentModal({
                                               onChange={(event) => {
                                                 props.setFieldValue(
                                                   "attachment",
-                                                  event.currentTarget.files[0]
+                                                  event.currentTarget.files[0],
                                                 );
                                               }}
                                               type="file"
@@ -771,7 +772,7 @@ function PaymentModal({
                                         const obj = {
                                           amount:
                                             paymentDetails?.total_amount?.toString(),
-                                          // amount: 100,
+
                                           transaction_type: "Business Permit",
                                           merchant_reference_number: `OSPAS-${[
                                             applicationId?.[0],
@@ -848,7 +849,7 @@ function PaymentModal({
                                         const jsonString = JSON.stringify(obj);
                                         const encrypted = CryptoJS.AES.encrypt(
                                           jsonString,
-                                          secretKey
+                                          secretKey,
                                         ).toString();
                                         const encoded =
                                           encodeURIComponent(encrypted);
@@ -898,12 +899,13 @@ function PaymentModal({
                                         applicationId.forEach((id) => {
                                           formData.append(
                                             "special_permit_application_id[]",
-                                            id
+                                            id,
                                           );
                                         });
+
                                         handleSubmit(
                                           {
-                                            url: "api/client/pay-permit",
+                                            url: "api/pay-permit",
                                             message: {
                                               title:
                                                 "Are you sure you want to Proceed?",
@@ -914,7 +916,7 @@ function PaymentModal({
                                             params: formData,
                                           },
                                           [],
-                                          [toggleRefresh, toggleModal]
+                                          [toggleRefresh, toggleModal],
                                         );
                                       }
                                     }}

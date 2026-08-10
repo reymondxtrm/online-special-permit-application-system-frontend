@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Select, { StylesConfig } from "react-select";
+import Select from "react-select";
 import { Form, Col, Button, Input, InputGroup, Label } from "reactstrap";
 import * as Yup from "yup";
 import { useFormik } from "formik";
@@ -7,20 +7,45 @@ import BasicInputField from "components/Forms/BasicInputField";
 import ExportButton from "../../pages/Summary/common/ExportButton";
 import { dateFilterSlice } from "features/filters/dateFilterSlice";
 import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
 const DashboardFilters = ({
   forAction,
   withStatus,
   statuses,
   withExport = false,
   tableParams,
+  withPermitType = false,
   action,
+  withDateRange = false,
 }) => {
   const dispatch = useDispatch();
   const [parameters, setParams] = useState("");
-  const [status, setStatus] = useState({ label: "", value: "" });
+  const [permitTypeOptions, setPermitTypeOptions] = useState([]);
 
   useEffect(() => {
     dispatch(dateFilterSlice.actions.clearState());
+  }, []);
+  useEffect(() => {
+    if (withPermitType) {
+      const fetchData = async () => {
+        try {
+          const response = await axios({
+            url: "api/admin/get/permit-types",
+            method: "GET",
+          });
+          if (response) {
+            const options = response.data.map((options) => ({
+              value: options.id,
+              label: options.name,
+            }));
+            setPermitTypeOptions(options);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      fetchData();
+    }
   }, []);
 
   const validation = useFormik({
@@ -29,6 +54,7 @@ const DashboardFilters = ({
       keyword: "",
       date_from: "",
       date_to: "",
+      type: "",
     },
     validationSchema: Yup.object({
       keyword: Yup.string().notRequired(),
@@ -38,10 +64,9 @@ const DashboardFilters = ({
 
     onSubmit: (values) => {
       const params = {
-        ...tableParams,
         ...values,
+        ...tableParams,
       };
-
       setParams(params);
       dispatch(action(params));
       dispatch(dateFilterSlice.actions.setParams(params));
@@ -105,7 +130,7 @@ const DashboardFilters = ({
       <BasicInputField
         col={"6"}
         type={"text"}
-        label={"Keyword"}
+        label={"Date From"}
         touched={validation.touched.keyword}
         errors={validation.errors.keyword}
         name={"keyword"}
@@ -113,52 +138,60 @@ const DashboardFilters = ({
         placeholder={"Enter keyword"}
         value={validation.values.keyword}
       />
+      {withDateRange && (
+        <>
+          <BasicInputField
+            col={"6"}
+            type={"date"}
+            label={"Date From"}
+            touched={validation.touched.date_from}
+            errors={validation.errors.date_from}
+            name={"date_from"}
+            validation={validation}
+            placeholder={"Enter date_from"}
+            value={validation.values.date_from}
+          />
+          <BasicInputField
+            col={"6"}
+            type={"date"}
+            label={"Date To"}
+            touched={validation.touched.date_to}
+            errors={validation.errors.date_to}
+            name={"date_to"}
+            validation={validation}
+            value={validation.values.date_to}
+          />
+        </>
+      )}
+
+      {withPermitType && (
+        <Col style={{ width: "250px" }}>
+          <InputGroup className="d-flex flex-column">
+            <Label>Permit Type</Label>
+            <Select
+              options={permitTypeOptions}
+              onChange={(selected) => {
+                validation.setFieldValue("type", selected.value);
+              }}
+              value={
+                validation.values.type
+                  ? permitTypeOptions.find(
+                      (option) => option.value === validation.values.type,
+                    )
+                  : null
+              }
+            />
+          </InputGroup>
+        </Col>
+      )}
       <div className="d-flex align-items-center" style={{ marginTop: "27px" }}>
         <Button type="submit">
           <i className="fas fa-search"></i>
         </Button>
       </div>
-      {/* <BasicInputField
-        col={"6"}
-        type={"date"}
-        label={"Date From:"}
-        touched={validation.touched.date_from}
-        errors={validation.errors.date_from}
-        name={"date_from"}
-        validation={validation}
-        placeholder={""}
-        value={validation.values.date_from}
-      /> */}
 
-      {/* <Col xs={12} style={{ width: "208px", paddingRight: "10px" }}>
-        <label
-          // className="visually-hidden"
-          htmlFor="inlineFormInputGroupUsername"
-        >
-          Date To:
-        </label>
-        <InputGroup>
-          <Input
-            id="date_to"
-            name="date_to"
-            className="form-control"
-            placeholder="Enter Date To"
-            type="date"
-            onChange={validation.handleChange}
-            value={validation.values.date_to || ""}
-          />
-          <Button type="submit">
-            <i className="fas fa-search"></i>
-          </Button>
-        </InputGroup>
-      </Col> */}
       <Col>
-        <label
-          // className="visually-hidden"
-          style={{ color: "#f8f8fb" }}
-        >
-          *
-        </label>
+        <label style={{ color: "#f8f8fb" }}>*</label>
         <br />
         <Button
           outline

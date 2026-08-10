@@ -1,5 +1,5 @@
 /* eslint-disable padded-blocks */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Container,
   Row,
@@ -37,10 +37,18 @@ import classnames from "classnames";
 import Pagination from "components/Pagination";
 import AdminTable from "../../Common/AdminTable";
 import OccupationalTables from "../../Common/OccupationalTables";
+import DashboardFilters from "pages/Dashboard/dashboardFilters";
+import {
+  getCompanyOccupatinalData,
+  getIndividualOccupationalApplications,
+  getTableData,
+} from "features/SpecialPermitAdmin";
 const ForApproval = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("good_moral");
+  const [childTab, setChildTab] = useState("individual");
+
   const [newCounts, setNewCounts] = useState({
     mayors_permit: 0,
     good_moral: 0,
@@ -75,6 +83,9 @@ const ForApproval = () => {
   const toggleNewMfoModal = () => {
     setNewMfoModal(!newMfoModal);
   };
+  const handleSelectChildTab = (key) => {
+    setChildTab(key);
+  };
   useEffect(() => {
     const channel = echo.channel("special-permit-for_payment_approval");
     const handler = (event) => {
@@ -96,7 +107,7 @@ const ForApproval = () => {
       try {
         const response = await axios.get(
           "api/admin/special-permit/all-counts",
-          { params: { status_id: 5 } }
+          { params: { status_id: 5 } },
         );
 
         if (response && response.data) {
@@ -117,14 +128,40 @@ const ForApproval = () => {
     fetchInitialCounts();
   }, []);
 
+  const action = useMemo(() => {
+    if (activeTab === "occupational" && childTab === "company") {
+      return getCompanyOccupatinalData;
+    } else if (activeTab === "occupational" && childTab === "individual") {
+      return getIndividualOccupationalApplications;
+    } else {
+      return getTableData;
+    }
+  }, [activeTab, childTab]);
   return (
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
           <Breadcrumbs
             title="Special Permit"
-            breadcrumbItem="For Payment Applications"
+            breadcrumbItem="For Payment Approval"
           />
+          <Row>
+            <Col xs="12">
+              <Card>
+                <CardBody>
+                  <DashboardFilters
+                    action={action}
+                    tableParams={{
+                      permit_type: activeTab,
+                      status: "for_payment_approval",
+                      type: childTab || "",
+                    }}
+                  />
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+          <Row></Row>
 
           <Row>
             <Col xs="12">
@@ -300,6 +337,8 @@ const ForApproval = () => {
                       <OccupationalTables
                         status={"for_payment_approval"}
                         motherTab={activeTab}
+                        childTab={childTab}
+                        handleSelectChildTab={handleSelectChildTab}
                       />
                     </Tab>
                   </Tabs>

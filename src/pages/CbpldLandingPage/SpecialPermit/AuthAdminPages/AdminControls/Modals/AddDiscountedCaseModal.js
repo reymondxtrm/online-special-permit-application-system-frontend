@@ -63,7 +63,7 @@ function AddDiscountedCaseModal({ openModal, toggleModal, toggleRefresh }) {
           },
           (error) => {
             console.log(error);
-          }
+          },
         );
     }
   }, [openModal]);
@@ -122,7 +122,7 @@ function AddDiscountedCaseModal({ openModal, toggleModal, toggleRefresh }) {
                           onChange={(selectedOption) => {
                             props.setFieldValue(
                               "permit_type",
-                              selectedOption?.value || ""
+                              selectedOption?.value || "",
                             ); // Send only the value
                           }}
                           placeholder="Select Permit Type"
@@ -154,7 +154,7 @@ function AddDiscountedCaseModal({ openModal, toggleModal, toggleRefresh }) {
                           onChange={(selectedOption) => {
                             props.setFieldValue(
                               "discount_percent",
-                              selectedOption?.value || ""
+                              selectedOption?.value || "",
                             );
                           }}
                           placeholder="Select Percentage 1-100"
@@ -171,10 +171,9 @@ function AddDiscountedCaseModal({ openModal, toggleModal, toggleRefresh }) {
                           id="attachment"
                           name={`attachment`}
                           onChange={(event) => {
-                            
                             props.setFieldValue(
                               "attachment",
-                              event.currentTarget.files[0]
+                              event.currentTarget.files[0],
                             );
                           }}
                           type="file"
@@ -198,9 +197,9 @@ function AddDiscountedCaseModal({ openModal, toggleModal, toggleRefresh }) {
             }}
             onClick={() => {
               const formik = formikRef.current.values;
-            
+
               const formData = getFormData(formik);
-           
+
               handleSubmit(
                 {
                   url: "api/admin/create/discount-case",
@@ -216,7 +215,7 @@ function AddDiscountedCaseModal({ openModal, toggleModal, toggleRefresh }) {
                   params: formData,
                 },
                 [toggleRefresh],
-                [toggleModal]
+                [toggleModal],
               );
             }}
           >

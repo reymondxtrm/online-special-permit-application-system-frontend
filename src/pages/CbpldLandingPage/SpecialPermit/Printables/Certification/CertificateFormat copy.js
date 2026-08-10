@@ -29,6 +29,7 @@ import { REVISION_CODE } from "assets/data/data";
 import { debounce } from "lodash";
 import QrCodeGenerator from "./CertificateSections/QrCodeGenerator";
 import index from "pages/Dashboard-Blog";
+import AdditionalParagraphForWithCase from "./CertificateSections/AdditionalParagraphForWithCase";
 const CertificateFormat = React.forwardRef((props, ref) => {
   const {
     permitType,
@@ -48,14 +49,25 @@ const CertificateFormat = React.forwardRef((props, ref) => {
     conditions,
     eventName,
     specialPermitApplicationId,
+    isCase,
+    additionalParagraphForWithCase,
   } = props;
   const [scale, setScale] = useState(1);
   const certificateRef = useRef();
 
+  const year = new Date();
+  const paperSize =
+    permitType === "good_moral" || permitType === "mayors_permit"
+      ? "a4"
+      : "legal";
   const maxHeight = useMemo(() => {
-    return permitType === "good_moral" || permitType === "mayors_permit"
-      ? 1090
-      : 1195;
+    const baseHeight =
+      permitType === "good_moral" || permitType === "mayors_permit"
+        ? 1090
+        : 1319;
+
+    const minus18mmInPx = (18 * 96) / 25.4; // ~68 px
+    return baseHeight - minus18mmInPx;
   }, [permitType]);
 
   useEffect(() => {
@@ -64,7 +76,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
 
     let timeoutId;
     let isRunning = true;
-    const scaleRef = { current: scale }; // keep the latest scale in a ref-like object
+    const scaleRef = { current: scale };
 
     const adjustScale = () => {
       if (!isRunning) return;
@@ -72,9 +84,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
       const tolerance = 5;
       const lowerBound = maxHeight - 80;
       const upperBound = maxHeight + tolerance;
-
       let newScale = scaleRef.current;
-   
       if (currentHeight > upperBound && newScale > 0.5) {
         newScale = +Math.max(newScale - 0.01, 0.5).toFixed(2);
         setScale(newScale);
@@ -90,9 +100,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
         clearTimeout(timeoutId);
       }
     };
-
     adjustScale();
-
     return () => {
       isRunning = false;
       clearTimeout(timeoutId);
@@ -112,7 +120,9 @@ const CertificateFormat = React.forwardRef((props, ref) => {
   if (permitType === "mayors_permit") {
     headerTitle = "MAYOR'S CERTIFICATION";
   } else if (permitType === "good_moral") {
-    headerTitle = "MAYOR'S CLEARANCE";
+    if (isCase) {
+      headerTitle = "MAYOR'S CERTIFICATION";
+    } else headerTitle = "MAYOR'S CLEARANCE";
   } else if (
     permitType === "event" ||
     permitType === "motorcade" ||
@@ -132,12 +142,17 @@ const CertificateFormat = React.forwardRef((props, ref) => {
     subHeader = "PARADE";
   } else if (permitType === "motorcade") {
     subHeader = "MOTORCADE";
-  } else if (permitType === "good_moral") {
+  } else if (permitType === "good_moral" && !isCase) {
     subHeader = "Certificate of Good Moral Character";
   } else subHeader = "";
 
   return (
-    <div ref={ref} className={` certificate-wrapper `}>
+    <div
+      ref={ref}
+      className={` certificate-wrapper ${paperSize}`}
+      style={{ "--scale": scale }}
+      id="dynamic-print-style"
+    >
       <div ref={certificateRef}>
         <table className="certificate-table">
           <tbody>
@@ -146,27 +161,26 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                 <div className="header-content">
                   <div
                     style={{
-                      paddingTop: "15px",
-                      paddingLeft: "20px",
+                      paddingTop: "5px",
+                      paddingLeft: "5px",
                       zIndex: "1000",
                     }}
                   >
                     <img src={cgbLogo} alt="CGB Logo" className="header-logo" />
                   </div>
 
-                  <div style={{ paddingTop: "15px" }}>
+                  <div style={{ paddingTop: "5px" }}>
                     <div className="d-flex gap-5">
                       <div className="header-text" style={{ color: "black" }}>
                         {" "}
                         <p>Republic of the Philippines</p>
                         <p>CITY GOVERNMENT OF BUTUAN</p>
-                        <p>City Business Permits and Licensing Department</p>
+                        <p>CITY BUSINESS PERMITS AND LICENSING DEPARTMENT</p>
                         <p>
                           City Hall Bldg., J.P. Rosales Ave., Doongan, Butuan
                           City
                         </p>
                       </div>
-
                       <div className="qr-wrapper d-flex align-items-center">
                         <QrCodeGenerator
                           specialPermitId={specialPermitApplicationId}
@@ -190,6 +204,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                     fontWeight: "bold",
                     color: "#11a7ee",
                     marginRight: "1.5cm",
+                    marginBottom: "0px",
                   }}
                 >
                   {referenceNo}
@@ -198,40 +213,41 @@ const CertificateFormat = React.forwardRef((props, ref) => {
             </tr>
             <tr>
               <td colSpan="2" style={{ paddingTop: `-${scale * 1}` }}>
-                <HeadersTitle headerTitle={headerTitle} scale={scale} />
+                <HeadersTitle headerTitle={headerTitle} />
                 <SubHeader
                   permitType={permitType}
                   purpose={purpose}
                   subHeader={subHeader}
-                  scale={scale}
                 />
-                <FirstParagraph firstParagraph={firstParagraph} scale={scale} />
-                <EventName
-                  permitType={permitType}
-                  eventName={eventName}
-                  scale={scale}
+                {isCase && (
+                  <div className="case-additional-text-wrapper">
+                    <p className="case-additional-text">
+                      TO WHOM IT MAY CONCERN:
+                    </p>
+                  </div>
+                )}
+                <AdditionalParagraphForWithCase
+                  additionalParagraphForWithCase={
+                    additionalParagraphForWithCase
+                  }
                 />
-                {!!withCase && <WithCases withCase={withCase} scale={scale} />}
+                <FirstParagraph firstParagraph={firstParagraph} />
+                <EventName permitType={permitType} eventName={eventName} />
+                {!!withCase && <WithCases withCase={withCase} />}
                 {!!secondParagraph && (
-                  <SecondParagraph
-                    secondParagraph={secondParagraph}
-                    scale={scale}
-                  />
+                  <SecondParagraph secondParagraph={secondParagraph} />
                 )}
-                <Conditions
-                  conditions={conditions}
-                  permitType={permitType}
-                  scale={scale}
-                />
-                {permitType === "good_moral" && (
-                  <Purpose purpose={purpose} scale={scale} />
-                )}
-                <ThirdParagraph thirdParagraph={thirdParagraph} scale={scale} />
-                {(permitType === "good_moral" ||
+                <Conditions conditions={conditions} permitType={permitType} />
+                {permitType === "good_moral" && <Purpose purpose={purpose} />}
+                <ThirdParagraph thirdParagraph={thirdParagraph} />
+
+                <MayorSignatory permitType={permitType} />
+
+                {/* {(permitType === "good_moral" ||
                   permitType === "mayors_permit") && (
-                  <MayorSignatory permitType={permitType} scale={scale} />
-                )}
-                <DepartmentHeadSingnatory scale={scale} />
+                  <MayorSignatory permitType={permitType} />
+                )} */}
+                <DepartmentHeadSingnatory />
               </td>
             </tr>
 
@@ -267,8 +283,7 @@ const CertificateFormat = React.forwardRef((props, ref) => {
                   {(permitType === "good_moral" ||
                     permitType === "mayors_permit") && (
                     <p className="footer-warning">
-                      <span style={{ color: "black" }}>Note:</span> This permit
-                      is valid until December 31, 2025 only.
+                      {`Note: This permit is valid until December 31, ${year.getFullYear()} only.`}
                     </p>
                   )}
                   <p className="footer-code">{REVISION_CODE[permitType]}</p>

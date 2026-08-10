@@ -67,9 +67,14 @@ function RecorridaModal({
   const handleFileChange = async (e, fieldName, index, props) => {
     const file = e.currentTarget.files[0];
     if (!file) return;
-    const compressed = await handleImageChange(e, index);
-    if (compressed) {
-      props.setFieldValue(fieldName, compressed);
+    if (file.type.startsWith("image")) {
+      const compressed = await handleImageChange(e, index);
+      if (compressed) {
+        props.setFieldValue(fieldName, compressed);
+        props.setFieldTouched(fieldName, true, true);
+      }
+    } else {
+      props.setFieldValue(fieldName, file);
       props.setFieldTouched(fieldName, true, true);
     }
   };
@@ -85,7 +90,7 @@ function RecorridaModal({
               params: {
                 special_permit_application_id: specialPermitApplicationId,
               },
-            }
+            },
           );
           const d = res.data.data;
           setExistingData({
@@ -124,14 +129,19 @@ function RecorridaModal({
   };
 
   const IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
-  const SUPPORTED_FORMATS = ["image/jpeg", "image/png", "image/jpg"];
+  const SUPPORTED_FORMATS = [
+    "image/jpeg",
+    "image/png",
+    "image/jpg",
+    "application/pdf",
+  ];
 
   const fileValidationRequired = Yup.mixed()
     .required("This file is required")
     .test(
       "fileFormat",
       "Only JPG and PNG images are allowed",
-      (value) => !value || SUPPORTED_FORMATS.includes(value.type)
+      (value) => !value || SUPPORTED_FORMATS.includes(value.type),
     );
 
   const fileValidationOptional = Yup.mixed()
@@ -139,7 +149,7 @@ function RecorridaModal({
     .test(
       "fileFormat",
       "Only JPG and PNG images are allowed",
-      (value) => !value || SUPPORTED_FORMATS.includes(value.type)
+      (value) => !value || SUPPORTED_FORMATS.includes(value.type),
     );
 
   const RecorridaSchema = Yup.object().shape({
@@ -160,7 +170,7 @@ function RecorridaModal({
       .required("End date is required")
       .min(
         Yup.ref("event_date_from"),
-        "End date must be after or equal to start date"
+        "End date must be after or equal to start date",
       ),
 
     event_time_from: Yup.string().required("Start time is required"),
@@ -403,20 +413,20 @@ function RecorridaModal({
                             <Input
                               type="file"
                               name="request_letter"
-                              accept="image/*"
+                              accept="image/*,application/pdf"
                               onChange={(e) => {
                                 handleFileChange(e, "request_letter", 0, props);
                                 props.setFieldTouched(
                                   "request_letter",
                                   true,
-                                  true
+                                  true,
                                 );
                               }}
                               onBlur={() =>
                                 props.setFieldTouched(
                                   "request_letter",
                                   true,
-                                  true
+                                  true,
                                 )
                               }
                               disabled={isCompressing}
@@ -470,7 +480,7 @@ function RecorridaModal({
                             <Input
                               type="file"
                               name="route_plan"
-                              accept="image/*"
+                              accept="image/*,application/pdf"
                               onChange={(e) => {
                                 handleFileChange(e, "route_plan", 1, props);
                                 props.setFieldTouched("route_plan", true, true);
@@ -593,7 +603,7 @@ function RecorridaModal({
                     params: formData,
                   },
                   [],
-                  [toggleModal, toggleRefresh]
+                  [toggleModal, toggleRefresh],
                 );
               }
             }}

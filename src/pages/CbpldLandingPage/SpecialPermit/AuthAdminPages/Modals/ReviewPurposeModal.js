@@ -26,21 +26,21 @@ function ReviewPurposeModal({
   const formikRef = useRef(null);
   const [changePurpose, setChangePurpose] = useState(false);
 
-  useEffect(() => {
-    if (openModal) {
-      axios.get("api/admin/get/permit-types").then(
-        (res) => {
-          const options = res.data.map((option) => ({
-            value: option.id,
-            label: option.name,
-          }));
-        },
-        (error) => {
-          console.log(error);
-        }
-      );
-    }
-  }, [openModal]);
+  // useEffect(() => {
+  //   if (openModal) {
+  //     axios.get("api/admin/get/permit-types").then(
+  //       (res) => {
+  //         const options = res.data.map((option) => ({
+  //           value: option.id,
+  //           label: option.name,
+  //         }));
+  //       },
+  //       (error) => {
+  //         console.log(error);
+  //       }
+  //     );
+  //   }
+  // }, [openModal]);
 
   return (
     <Modal
@@ -157,7 +157,7 @@ function ReviewPurposeModal({
                 params: payload,
               },
               [],
-              [toggleModal, toggleRefresh]
+              [toggleModal, toggleRefresh],
             );
           }}
         >

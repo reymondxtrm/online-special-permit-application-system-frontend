@@ -1,273 +1,411 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
-  Card,
-  CardBody,
-  CardHeader,
-  Container,
-  Button,
   Form,
-  Row,
-  Col,
+  FormGroup,
   Input,
   Label,
-  FormGroup,
-  UncontrolledAlert,
   Spinner,
-  Modal,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
+  UncontrolledAlert,
 } from "reactstrap";
-import bg from "../../../assets/images/cgb-bg.jpg";
-import LoginModal from "../Modals/LoginModal";
-import SignupModal from "../Modals/SignupModal";
-import { FieldArray, Formik } from "formik";
-import useSubmit from "hooks/Common/useSubmit";
-import { loginUser } from "../../../features/user/userSlice";
-import { userSlice } from "../../../features/user/userSlice";
-
+import { Formik } from "formik";
+import { loginUser, userSlice } from "../../../features/user/userSlice";
 import { useHistory } from "react-router-dom";
-function SpecialPermit({ props }) {
-  const [loginModalState, setloginModalState] = useState(false);
-  const [signupModalState, setsignupModalState] = useState(false);
-  const [selectAccountTypeModal, setselectAccountTypeModal] = useState(false);
+import bg from "../../../assets/images/Background.svg";
+import SignupModal from "../Modals/SignupModal";
+import logo from "../../../assets/images/cgbLogo.png";
 
-  const toggleAccountTypeModal = () => {
-    setselectAccountTypeModal(!selectAccountTypeModal);
-  };
+function useWindowWidth() {
+  const [width, setWidth] = useState(window.innerWidth);
+  useEffect(() => {
+    const handler = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+  return width;
+}
+
+function SpecialPermit({ props }) {
   const dispatch = useDispatch();
+  const history = useHistory();
+  const formikRef = useRef(null);
+  const loginStatus = useSelector((state) => state.user);
+  const [signupModalState, setSignupModalState] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const width = useWindowWidth();
+  const isMobile = width < 900;
+
   useEffect(() => {
     dispatch(userSlice.actions.clearState());
   }, []);
-  const loginStatus = useSelector((state) => state.user);
- 
-  const formikRef = useRef(null);
-  const handleSubmit = useSubmit();
-  const history = useHistory(); // Initialize useHistory
-  const toggleLoginModal = () => {
-    setloginModalState(!loginModalState);
+
+  const toggleSignUp = () => setSignupModalState((prev) => !prev);
+  const handleForgotPassword = () => history.push("/forgot-password");
+
+  const styles = {
+    root: {
+      minHeight: "100vh",
+      width: "100vw",
+      display: "flex",
+      alignItems: isMobile ? "flex-start" : "center",
+      justifyContent: "center",
+      backgroundImage: `url(${bg})`,
+      backgroundSize: "cover",
+      backgroundRepeat: "no-repeat",
+      backgroundPosition: "center",
+      fontFamily: "'DM Sans', Inter, system-ui, sans-serif",
+      padding: isMobile ? "0" : "1rem",
+      boxSizing: "border-box",
+    },
+    card: {
+      width: "100%",
+      maxWidth: isMobile ? "100%" : 440,
+      minHeight: isMobile ? "100vh" : "auto",
+      backgroundColor: "#ffffff",
+      borderRadius: isMobile ? 0 : 12,
+      overflow: "hidden",
+      boxShadow: isMobile ? "none" : "0 8px 40px rgba(0,0,0,0.18)",
+      display: "flex",
+      flexDirection: "column",
+    },
+    banner: {
+      position: "relative",
+      height: isMobile ? 280 : 260,
+      backgroundImage: `url(${bg})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center top",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      padding: "1.5rem",
+      overflow: "hidden",
+      flexShrink: 0,
+    },
+    bannerOverlay: {
+      position: "absolute",
+      inset: 0,
+      background: "rgba(30, 100, 180, 0.55)",
+      backdropFilter: "blur(1px)",
+    },
+    logoCircle: {
+      width: 64,
+      height: 64,
+      borderRadius: "50%",
+      background: "#fff",
+      border: "2px solid rgba(255,255,255,0.6)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      position: "relative",
+      zIndex: 1,
+      overflow: "hidden",
+      boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
+    },
+    logoImg: {
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+    },
+    bannerOrg: {
+      fontSize: 14,
+      color: "rgba(255,255,255,0.9)",
+      letterSpacing: "0.01em",
+      position: "relative",
+      zIndex: 1,
+      margin: 0,
+      fontWeight: 400,
+    },
+    bannerTitle: {
+      fontSize: isMobile ? 24 : 26,
+      fontWeight: 700,
+      color: "#fff",
+      textAlign: "center",
+      position: "relative",
+      zIndex: 1,
+      margin: 0,
+      lineHeight: 1.25,
+    },
+    body: {
+      padding: isMobile ? "2rem 1.5rem 1.5rem" : "1.75rem 2rem 1.5rem",
+      display: "flex",
+      flexDirection: "column",
+      gap: "1.1rem",
+      flex: 1,
+    },
+    heading: {
+      fontSize: 22,
+      fontWeight: 600,
+      color: "#111",
+      textAlign: "center",
+      margin: 0,
+      letterSpacing: "0.01em",
+    },
+    label: {
+      fontSize: 14,
+      color: "#374151",
+      fontWeight: 400,
+      marginBottom: 2,
+      display: "block",
+    },
+    input: {
+      width: "100%",
+      padding: "6px 0",
+      fontSize: 15,
+      background: "transparent",
+      color: "#111",
+      border: "none",
+      borderBottom: "1px solid #9ca3af",
+      borderRadius: 0,
+      outline: "none",
+      fontFamily: "inherit",
+      boxSizing: "border-box",
+    },
+    passwordWrapper: {
+      position: "relative",
+      display: "flex",
+      alignItems: "center",
+    },
+    eyeBtn: {
+      position: "absolute",
+      right: 0,
+      bottom: 6,
+      background: "none",
+      border: "none",
+      padding: 0,
+      cursor: "pointer",
+      color: "#9ca3af",
+      fontSize: 18,
+      lineHeight: 1,
+    },
+    forgotLink: {
+      textAlign: "right",
+      fontSize: 14,
+      color: "#2563EB",
+      cursor: "pointer",
+      textDecoration: "underline",
+      background: "none",
+      border: "none",
+      padding: 0,
+      fontFamily: "inherit",
+      display: "block",
+      width: "100%",
+      marginTop: -4,
+    },
+    submitBtn: {
+      width: "100%",
+      padding: "13px",
+      background: "#4162bd",
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      fontSize: 15,
+      fontWeight: 700,
+      cursor: "pointer",
+      letterSpacing: "0.08em",
+      fontFamily: "inherit",
+      marginTop: 4,
+    },
+    disabledBtn: {
+      width: "100%",
+      padding: "13px",
+      background: "#93b8e0",
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      fontSize: 15,
+      fontWeight: 700,
+      fontFamily: "inherit",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      cursor: "not-allowed",
+      marginTop: 4,
+      letterSpacing: "0.08em",
+    },
+    footer: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+      padding: "0.75rem 2rem 1.5rem",
+      marginTop: "auto",
+    },
+    footerText: {
+      fontSize: 14,
+      color: "#374151",
+      margin: 0,
+    },
+    footerLink: {
+      fontSize: 14,
+      color: "#2563EB",
+      cursor: "pointer",
+      textDecoration: "underline",
+      background: "none",
+      border: "none",
+      padding: 0,
+      fontFamily: "inherit",
+      fontWeight: 500,
+    },
   };
 
-  const toggleSignUp = () => {
-    setsignupModalState(!signupModalState);
-  };
-  const handleForgotPassword = () => {
-    props.history.push("/forgot-password");
-  };
   return (
-    <React.Fragment>
-      <LoginModal
-        openModal={loginModalState}
-        toggleModal={toggleLoginModal}
-        toggleSignUp={toggleSignUp}
-      />
+    <>
       <SignupModal
         openModal={signupModalState}
         toggleModal={toggleSignUp}
         props={props}
       />
-      <section
-        className="section hero-section bg-ico-hero"
-        style={styles.section}
-      >
-        {/* <div className="bg-overlay bg-primary" /> */}
-        <Container>
-          <Row className="align-items-center">
-            <Col md={5}>
-              <Card
-                style={{
-                  borderRadius: "10px",
-                  boxShadow: "10px 10px 30px ",
-                  height: "auto",
-                }}
-              >
-                <CardBody>
-                  <p
-                    style={{
-                      fontWeight: "bold",
-                      letterSpacing: ".2rem",
-                      fontSize: "18pt",
-                      margin: "0",
 
-                      paddingBottom: "20px",
-                      color: "#368be0",
-                    }}
-                  >
-                    {"LOGIN"}
-                  </p>
-                  <Formik
-                    innerRef={formikRef}
-                    initialValues={{
-                      username: "",
-                      password: "",
-                    }}
-                    onSubmit={(values) => {
-                      dispatch(
-                        loginUser({ data: values, history: props.history })
-                      );
-                    }}
-                  >
-                    {(props) => (
-                      <Form>
-                        <Row>
-                          {loginStatus?.isLoginError &&
-                            !loginStatus?.isFetching && (
-                              <UncontrolledAlert
-                                color="danger"
-                                className="alert-dismissible fade show"
-                                role="alert"
-                              >
-                                <i className="mdi mdi-block-helper me-2"></i>
-                                {loginStatus?.errorMessage}
-                              </UncontrolledAlert>
-                            )}
-                          <FormGroup>
-                            <Label for="username">Username</Label>
-                            <Input
-                              id="username"
-                              name={`username`}
-                              placeholder="Username"
-                              onChange={props.handleChange}
-                            />
-                          </FormGroup>
-                          <FormGroup>
-                            <Label for="password">Password</Label>
-                            <Input
-                              id="password"
-                              type="password"
-                              name={`password`}
-                              placeholder="Password"
-                              onChange={props.handleChange}
-                            />
-                          </FormGroup>
-                        </Row>
-                        <Row>
-                          <div className="text-end">
-                            <p
-                              style={{
-                                color: "#368be0",
-                                cursor: "pointer",
-                                paddingLeft: "5px",
-                                margin: 0,
-                                paddingTop: "0px",
-                                // fontWeight: "bold",
-                                marginRight: "15px",
-                              }}
-                              onClick={() => handleForgotPassword()}
-                            >
-                              Forgot Password?
-                            </p>
-                          </div>
-                        </Row>
-                        <Row
-                          style={{
-                            paddingRight: "10px",
-                            paddingLeft: "10px",
-                            paddingTop: "10px",
-                          }}
-                        >
-                          <div className="mt-3 d-grid">
-                            {!loginStatus.isFetching ? (
-                              <Button
-                                style={{
-                                  backgroundColor: "#1a56db",
-                                  fontWeight: "600",
-                                  fontFamily:
-                                    "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
-                                  color: "white",
-                                }}
-                                onClick={() => formikRef.current.handleSubmit()}
-                              >
-                                Sign in
-                              </Button>
-                            ) : (
-                              <button
-                                className="btn btn-primary btn-block "
-                                disabled
-                              >
-                                <Spinner size="sm">Loading...</Spinner>
-                                <span> Logging in...</span>
-                              </button>
-                            )}
-                          </div>
-                        </Row>
-                        <Row>
-                          <div className="mt-3 text-center">
-                            <p>
-                              Don&apos;t have an account ?
-                              <span
-                                style={{
-                                  color: "#368be0",
-                                  cursor: "pointer",
-                                  paddingLeft: "5px",
-                                }}
-                                onClick={() => {
-                                  // toggleAccountTypeModal();
-                                  toggleSignUp();
-                                }}
-                              >
-                                Signup now
-                              </span>
-                            </p>
-                          </div>
-                        </Row>
-                      </Form>
-                    )}
-                  </Formik>
-                </CardBody>
-              </Card>
-            </Col>
-            <Col md={2}></Col>
-            <Col lg="5">
-              <div className="text-black-50">
-                <h1 className="text-black font-weight-semibold mb-3 hero-title">
-                  SPECIAL PERMIT
-                </h1>
-                <p
-                  className="font-size-16"
-                  style={{ color: "black", textAlign: "justify" }}
+      <div style={styles.root}>
+        <div style={styles.card}>
+          {/* Banner */}
+          <div style={styles.banner}>
+            <div style={styles.bannerOverlay} />
+            <div style={styles.logoCircle}>
+              <img
+                src={logo}
+                alt="City Government of Butuan logo"
+                style={styles.logoImg}
+                onError={(e) => {
+                  e.target.style.display = "none";
+                  e.target.parentNode.style.fontSize = "11px";
+                  e.target.parentNode.style.fontWeight = "700";
+                  e.target.parentNode.style.color = "#1D4ED8";
+                  e.target.parentNode.style.textAlign = "center";
+                  e.target.parentNode.innerText = "CGB";
+                }}
+              />
+            </div>
+            <p style={styles.bannerOrg}>City Government of Butuan</p>
+            <p style={styles.bannerTitle}>
+              Online Special Permit
+              <br />
+              Application Systems
+            </p>
+          </div>
+
+          {/* Form Body */}
+          <div style={styles.body}>
+            <p style={styles.heading}>Sign In</p>
+
+            <Formik
+              innerRef={formikRef}
+              initialValues={{ username: "", password: "" }}
+              validateOnMount={false}
+              validateOnChange={false}
+              validateOnBlur={false}
+              onSubmit={(values) => {
+                dispatch(loginUser({ data: values, history: props.history }));
+              }}
+            >
+              {(formikProps) => (
+                <Form
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "1rem",
+                  }}
                 >
-                  A special permit is an authorization granted by a government
-                  or regulatory authority allowing an individual or organization
-                  to engage in activities that are otherwise restricted or
-                  regulated.
-                </p>
-              </div>
-            </Col>
-          </Row>
-        </Container>
-      </section>
-    </React.Fragment>
+                  {loginStatus?.isLoginError &&
+                    !loginStatus?.isFetching &&
+                    formikProps.submitCount > 0 && (
+                      <UncontrolledAlert
+                        color="danger"
+                        style={{
+                          borderRadius: 8,
+                          fontSize: 14,
+                          marginBottom: 0,
+                        }}
+                      >
+                        <i className="mdi mdi-block-helper me-2" />
+                        {loginStatus?.errorMessage}
+                      </UncontrolledAlert>
+                    )}
+
+                  <FormGroup style={{ margin: 0 }}>
+                    <Label style={styles.label} for="username">
+                      Username
+                    </Label>
+                    <Input
+                      id="username"
+                      name="username"
+                      placeholder=""
+                      onChange={formikProps.handleChange}
+                      style={styles.input}
+                    />
+                  </FormGroup>
+
+                  <FormGroup style={{ margin: 0 }}>
+                    <Label style={styles.label} for="password">
+                      Password
+                    </Label>
+                    <div style={styles.passwordWrapper}>
+                      <Input
+                        id="password"
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder=""
+                        onChange={formikProps.handleChange}
+                        style={{ ...styles.input, paddingRight: 28 }}
+                      />
+                      <button
+                        type="button"
+                        style={styles.eyeBtn}
+                        onClick={() => setShowPassword((v) => !v)}
+                        aria-label={
+                          showPassword ? "Hide password" : "Show password"
+                        }
+                      >
+                        {showPassword ? (
+                          <i className="fa fas fa-eye-slash"></i>
+                        ) : (
+                          <i className="fa fas fa-eye"></i>
+                        )}
+                      </button>
+                    </div>
+                  </FormGroup>
+
+                  <button
+                    type="button"
+                    style={styles.forgotLink}
+                    onClick={handleForgotPassword}
+                  >
+                    Forgot your password?
+                  </button>
+
+                  {!loginStatus.isFetching ? (
+                    <button
+                      type="button"
+                      style={styles.submitBtn}
+                      onClick={() => formikRef.current.handleSubmit()}
+                    >
+                      SIGN IN
+                    </button>
+                  ) : (
+                    <button type="button" style={styles.disabledBtn} disabled>
+                      <Spinner size="sm" />
+                      <span>Signing in...</span>
+                    </button>
+                  )}
+                </Form>
+              )}
+            </Formik>
+          </div>
+
+          {/* Footer */}
+          <div style={styles.footer}>
+            <p style={styles.footerText}>Don&apos;t have an account?</p>
+            <button style={styles.footerLink} onClick={toggleSignUp}>
+              Sign up
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
-
-// Styles object
-const styles = {
-  section: {
-    backgroundPosition: "100%",
-    backgroundRepeat: "no-repeat",
-    backgroundImage: `url(${bg})`,
-    backgroundSize: "100%",
-  },
-  card: {
-    borderRadius: "10px",
-    overflow: "hidden",
-  },
-  cardHeader: {
-    backgroundColor: "#0d6dfc",
-    color: "white",
-    fontWeight: "bold",
-    letterSpacing: ".2rem",
-    minHeight: "60px",
-    textAlign: "center",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  button: {
-    backgroundColor: "#144071",
-  },
-};
 
 export default SpecialPermit;

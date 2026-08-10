@@ -1,5 +1,5 @@
 /* eslint-disable padded-blocks */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Container,
   Row,
@@ -37,10 +37,17 @@ import classnames from "classnames";
 import Pagination from "components/Pagination";
 import AdminTable from "../../Common/AdminTable";
 import OccupationalTables from "../../Common/OccupationalTables";
+import DashboardFilters from "pages/Dashboard/dashboardFilters";
+import {
+  getCompanyOccupatinalData,
+  getIndividualOccupationalApplications,
+  getTableData,
+} from "features/SpecialPermitAdmin";
 const Dashboard = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("good_moral");
+  const [childTab, setChildTab] = useState("individual");
   const [newCounts, setNewCounts] = useState({
     mayors_permit: 0,
     good_moral: 0,
@@ -51,6 +58,16 @@ const Dashboard = () => {
     use_of_government_property: 0,
     occupational_permit: 0,
   });
+
+  const action = useMemo(() => {
+    if (activeTab === "occupational" && childTab === "company") {
+      return getCompanyOccupatinalData;
+    } else if (activeTab === "occupational" && childTab === "individual") {
+      return getIndividualOccupationalApplications;
+    } else {
+      return getTableData;
+    }
+  }, [activeTab, childTab]);
 
   const handleTabSelect = (key) => {
     setActiveTab(key);
@@ -74,6 +91,9 @@ const Dashboard = () => {
   const [newMfoModal, setNewMfoModal] = useState(false);
   const toggleNewMfoModal = () => {
     setNewMfoModal(!newMfoModal);
+  };
+  const handleSelectChildTab = (key) => {
+    setChildTab(key);
   };
   useEffect(() => {
     const channel = echo.channel("special-permit-for_payment");
@@ -100,7 +120,7 @@ const Dashboard = () => {
       try {
         const response = await axios.get(
           "api/admin/special-permit/all-counts",
-          { params: { status_id: 2 } }
+          { params: { status_id: 2 } },
         );
 
         if (response && response.data) {
@@ -129,6 +149,22 @@ const Dashboard = () => {
             title="Special Permit"
             breadcrumbItem="For Payment Applications"
           />
+          <Row>
+            <Col xs="12">
+              <Card>
+                <CardBody>
+                  <DashboardFilters
+                    action={action}
+                    tableParams={{
+                      permit_type: activeTab,
+                      status: "for_payment",
+                      type: childTab || "",
+                    }}
+                  />
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
 
           <Row>
             <Col xs="12">
@@ -319,6 +355,8 @@ const Dashboard = () => {
                       <OccupationalTables
                         status={"for_payment"}
                         motherTab={activeTab}
+                        childTab={childTab}
+                        handleSelectChildTab={handleSelectChildTab}
                       />
                     </Tab>
                   </Tabs>

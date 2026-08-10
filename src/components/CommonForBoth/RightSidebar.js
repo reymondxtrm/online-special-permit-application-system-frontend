@@ -10,53 +10,46 @@ import SimpleBar from "simplebar-react";
 import { Link } from "react-router-dom";
 
 import "../../components/CommonForBoth/rightbar.scss";
-import {
-  showRightSidebarAction,
-} from "../../store/actions";
+import { showRightSidebarAction } from "../../store/actions";
 import { userModalSlice } from "features/modal/userModalSlice";
-const RightSidebar = props => {
-  const dispatch = useDispatch()
-  const onlineUsers = useSelector((state) => state.onlineUsers.users)
+const RightSidebar = (props) => {
+  const dispatch = useDispatch();
+  const onlineUsers = useSelector((state) => state.onlineUsers.users);
   const getSpecificUserDetails = (e, id) => {
-    e.preventDefault()
-    props.showRightSidebarAction(false)
-    dispatch(userModalSlice.actions.openModal())
-    axios.post('api/admin/get-specific-user-details', {
-      'id': id,
-    }).then(res => {
-      dispatch(userModalSlice.actions.setModalData(res.data))
-
-    }, error => {
-      console.log(error.response.data.message)
-      if (error.response.status === 401) {
-        Swal.fire({
-          icon: 'warning',
-          title: error.response.data.message,
-          showConfirmButton: true,
-        }).then(function () {
-
-        });
-      }
-      else if (error.response.status === 400) {
-        Swal.fire({
-          icon: 'warning',
-          title: error.response.data.message,
-          showConfirmButton: true,
-        }).then(function () {
-
-        });
-      }
-      else {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Something went wrong, please try again',
-          showConfirmButton: true,
-        }).then(function () {
-
-        });
-      }
-    })
-  }
+    e.preventDefault();
+    props.showRightSidebarAction(false);
+    dispatch(userModalSlice.actions.openModal());
+    axios
+      .post("api/admin/get-specific-user-details", {
+        id: id,
+      })
+      .then(
+        (res) => {
+          dispatch(userModalSlice.actions.setModalData(res.data));
+        },
+        (error) => {
+          if (error.response.status === 401) {
+            Swal.fire({
+              icon: "warning",
+              title: error.response.data.message,
+              showConfirmButton: true,
+            }).then(function () {});
+          } else if (error.response.status === 400) {
+            Swal.fire({
+              icon: "warning",
+              title: error.response.data.message,
+              showConfirmButton: true,
+            }).then(function () {});
+          } else {
+            Swal.fire({
+              icon: "warning",
+              title: "Something went wrong, please try again",
+              showConfirmButton: true,
+            }).then(function () {});
+          }
+        },
+      );
+  };
   return (
     <React.Fragment>
       <div className="right-bar" id="right-bar">
@@ -65,9 +58,9 @@ const RightSidebar = props => {
             <div className="rightbar-title px-3 py-4">
               <Link
                 to="#"
-                onClick={e => {
-                  e.preventDefault()
-                  props.showRightSidebarAction(false)
+                onClick={(e) => {
+                  e.preventDefault();
+                  props.showRightSidebarAction(false);
                 }}
                 className="right-bar-toggle float-end"
               >
@@ -77,38 +70,37 @@ const RightSidebar = props => {
             </div>
             <hr className="my-0" />
 
+            {onlineUsers.length !== 0 ? (
+              <div className="p-2">
+                <Table hover responsive>
+                  <thead></thead>
+                  <tbody>
+                    {onlineUsers.map(function (member) {
+                      return (
+                        <tr
+                          key={member[1].id + member[1].username}
+                          style={{ cursor: "pointer" }}
+                          onClick={(e) => {
+                            getSpecificUserDetails(e, member[1].id);
+                          }}
+                        >
+                          <td>
+                            <img
+                              className="rounded-circle header-profile-user"
+                              src={user1}
+                              alt="Header Avatar"
+                            />
+                          </td>
+                          <td>
+                            <b>{member[1].name}</b>
+                            <br />
+                            <i>@{member[1].userRole}</i>
+                          </td>
+                        </tr>
+                      );
+                    })}
 
-            {
-              onlineUsers.length !== 0 ? (
-                <div className="p-2">
-                  <Table hover responsive>
-                    <thead>
-                    </thead>
-                    <tbody>
-                      {
-                        onlineUsers.map(function (member) {
-                          return (
-                            <tr key={member[1].id + member[1].username}
-                              style={{ cursor: 'pointer' }}
-                              onClick={(e) => { getSpecificUserDetails(e, member[1].id) }}
-                            >
-                              <td>
-                                <img
-                                  className="rounded-circle header-profile-user"
-                                  src={user1}
-                                  alt="Header Avatar"
-                                />
-                              </td>
-                              <td>
-                                <b>{member[1].name}</b><br />
-                                <i>@{member[1].userRole}</i>
-                              </td>
-                            </tr>
-                          )
-                        })
-                      }
-
-                      {/* <tr>
+                    {/* <tr>
                         <td style={{ height: '20%' }}>
                           <img
                             className="rounded-circle header-profile-user"
@@ -121,20 +113,14 @@ const RightSidebar = props => {
                           <i>@PRINCEARNELCONDE</i>
                         </td>
                       </tr> */}
-                    </tbody>
-                  </Table>
-                </div>
-              ) : (
-                <div className="p-4">
-                  <h6 style={{ textAlign: 'center' }}>
-                    No online user
-                  </h6>
-                </div>
-              )
-            }
-
-
-
+                  </tbody>
+                </Table>
+              </div>
+            ) : (
+              <div className="p-4">
+                <h6 style={{ textAlign: "center" }}>No online user</h6>
+              </div>
+            )}
           </div>
         </SimpleBar>
       </div>
@@ -145,7 +131,7 @@ const RightSidebar = props => {
 RightSidebar.propTypes = {
   showRightSidebarAction: PropTypes.func,
 };
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return { ...state.Layout };
 };
 

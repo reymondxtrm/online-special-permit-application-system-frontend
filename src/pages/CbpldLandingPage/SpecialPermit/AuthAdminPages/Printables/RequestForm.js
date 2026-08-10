@@ -42,16 +42,15 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
       mounted = false;
     };
   }, [applicationId]);
-  const column1 = application?.special_permit_type?.code === "good_moral";
+
   const handleDefaultFileName = async () => {
     const originalTitle = document.title;
-    // set a readable default filename for the print dialog
     document.title = `${
       application?.special_permit_type?.code || "request"
     } Request Form`;
     setTimeout(() => {
-      document.title = originalTitle; // Restore the original title after the print dialog opens
-    }, 5000); // Slight delay to ensure the print dialog uses the updated title
+      document.title = originalTitle;
+    }, 5000);
   };
   const formater = (date) => {
     const newDate = new Date(date);
@@ -142,7 +141,7 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                     className="main-table"
                     style={{
                       borderCollapse: "collapse",
-                      marginTop: "30px",
+                      marginTop: "40px",
                       tableLayout: "fixed",
 
                       width: "740px",
@@ -150,11 +149,56 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                   >
                     <thead>
                       <tr>
-                        <th>EVENT</th>
-                        <th>MOTORCADE</th>
-                        <th>PARADE</th>
-                        <th>RECORRIDA</th>
-                        <th>USE OF GOVERNMENT PROPERTY</th>
+                        <th
+                          style={{
+                            color: type === "event" ? "white" : "black",
+                            backgroundColor:
+                              type === "event" ? "#0c7dcc" : "white",
+                          }}
+                        >
+                          EVENT
+                        </th>
+                        <th
+                          style={{
+                            color: type === "motorcade" ? "white" : "black",
+                            backgroundColor:
+                              type === "motorcade" ? "#0c7dcc" : "white",
+                          }}
+                        >
+                          MOTORCADE
+                        </th>
+                        <th
+                          style={{
+                            color: type === "parade" ? "white" : "black",
+                            backgroundColor:
+                              type === "parade" ? "#0c7dcc" : "white",
+                          }}
+                        >
+                          PARADE
+                        </th>
+                        <th
+                          style={{
+                            color: type === "recorrida" ? "white" : "black",
+                            backgroundColor:
+                              type === "recorrida" ? "#0c7dcc" : "white",
+                          }}
+                        >
+                          RECORRIDA
+                        </th>
+                        <th
+                          style={{
+                            color:
+                              type === "use_of_government_property"
+                                ? "white"
+                                : "black",
+                            backgroundColor:
+                              type === "use_of_government_property"
+                                ? "#0c7dcc"
+                                : "white",
+                          }}
+                        >
+                          USE OF GOVERNMENT PROPERTY
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -460,7 +504,7 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                             <p className="label">Date:</p>
                             <p className="p-0 m-0">
                               {new Date(
-                                application?.created_at
+                                application?.created_at,
                               ).toLocaleDateString()}
                             </p>
                           </div>
@@ -605,7 +649,7 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
               <tr>
                 <td>
                   <div
-                    style={{ width: "200px", padding: "10px" }}
+                    style={{ width: "230px", padding: "10px" }}
                     className="d-flex align-items-center flex-column"
                   >
                     <hr
@@ -617,7 +661,7 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                         marginBottom: "0px",
                       }}
                     />
-                    <p className="cambraText p-0 m-0">
+                    <p className="cambraText p-0 m-0 ">
                       Signature over Printed Name
                     </p>
                   </div>
@@ -625,6 +669,17 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
               </tr>
               <tr>
                 <td className="text-end">
+                  <p
+                    className="p-0 m-0 fw-bold"
+                    style={{
+                      fontStyle: "italic",
+                      fontSize: "13px",
+                      paddingRight: "10px",
+                    }}
+                  >
+                    &quot; Note. This is system generated. No signature is
+                    required.&quot;
+                  </p>
                   <img src={butuanOnLogo} style={{ width: "180px" }} />
                   <p
                     className="p-0 m-0 fw-bold"

@@ -8,7 +8,7 @@ const useSubmit = () => {
   const handleApprove = (
     { url, params, message, headers = {} },
     forDispatchArray,
-    toggleArray
+    toggleArray,
   ) => {
     Swal.fire({
       title: message?.title
@@ -49,14 +49,14 @@ const useSubmit = () => {
               showConfirmButton: false,
               timer: 1500,
             }).then(() => {
-              forDispatchArray.forEach((forDispatch) => dispatch(forDispatch));
+              forDispatchArray?.forEach((forDispatch) => dispatch(forDispatch));
               toggleArray.forEach((toggle) => toggle());
             });
           })
           .catch((error) => {
             let errorMessage = message?.error
               ? message?.error
-              : "Unknown error occurred"; // Default error message
+              : "Unknown error occurred";
 
             if (
               error.response &&

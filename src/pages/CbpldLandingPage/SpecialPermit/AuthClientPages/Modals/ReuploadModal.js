@@ -20,6 +20,8 @@ import axios from "axios";
 import ImageViewer from "react-simple-image-viewer";
 import useSubmit from "hooks/Common/useSubmit";
 import OrderOfPaymentModal from "../Modals/OrderOfPaymentModal";
+import BasicInputField from "components/Forms/BasicInputField";
+import * as Yup from "yup";
 
 function ReuploadModal({
   openModal,
@@ -77,7 +79,12 @@ function ReuploadModal({
             innerRef={formikRef}
             initialValues={{
               attachment: "",
+              or_number: "",
             }}
+            validationSchema={Yup.object({
+              attachment: Yup.string().required("Required"),
+              or_number: Yup.string().required("Required"),
+            })}
             onSubmit={handleSubmit}
             enableReinitialize
           >
@@ -92,6 +99,7 @@ function ReuploadModal({
                             style={{
                               marginBottom: "0.5rem",
                               fontWeight: 500,
+                              color: "#4b4949",
                             }}
                           >
                             Reupload Receipt
@@ -102,7 +110,7 @@ function ReuploadModal({
                             onChange={(event) => {
                               props.setFieldValue(
                                 "attachment",
-                                event.currentTarget.files[0]
+                                event.currentTarget.files[0],
                               );
                             }}
                             type="file"
@@ -110,6 +118,19 @@ function ReuploadModal({
                           />
                         </div>
                       </FormGroup>
+                      <Row>
+                        <BasicInputField
+                          name="or_number"
+                          col={12}
+                          type={"text"}
+                          validation={props}
+                          label={"OR Number:"}
+                          error={props.errors.or_number}
+                          touched={props.touched.or_number}
+                          value={props.values.or_number}
+                          required
+                        />
+                      </Row>
                     </Col>
                   </Row>
                 </Col>
@@ -126,9 +147,14 @@ function ReuploadModal({
                 "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
               color: "white",
             }}
-            onClick={() => {
+            onClick={async () => {
               const formik = formikRef.current.values;
               const formData = getFormData(formik);
+              await formikRef.current.validateForm();
+              formikRef.current?.setTouched({
+                or_number: true,
+                or_date: true,
+              });
               formData.append("special_permit_application_id", applicationId);
               handleSubmit(
                 {
@@ -142,7 +168,7 @@ function ReuploadModal({
                   params: formData,
                 },
                 [],
-                [toggleRefresh, toggleModal]
+                [toggleRefresh, toggleModal],
               );
             }}
           >

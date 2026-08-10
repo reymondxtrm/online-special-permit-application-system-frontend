@@ -185,7 +185,7 @@
   flex: 1;
   margin-left: calc(5px * var(--scale));
   padding-top: calc(20px * var(--scale));
-  font-size: calc(11pt * var(--scale));
+  font-size: calc(12pt * var(--scale));
   line-height: 1.2;
   color: #000000 !important;
 }
@@ -232,7 +232,7 @@
 
 .conditions-title {
   font-family: "Montserrat", sans-serif;
-  font-size: calc(13pt * var(--scale));
+  font-size: calc(14pt * var(--scale));
   font-weight: 500;
   color: #ff0d21;
   margin-bottom: 1em;
@@ -247,19 +247,18 @@
 
 .condition-item {
   font-family: "Montserrat", sans-serif;
-  font-size: calc(13pt * var(--scale));
+  font-size: calc(14pt * var(--scale));
   font-weight: 500;
   font-style: italic;
   text-align: justify;
   /* line-height: 1.5; */
   margin-bottom: calc(5px * var(--scale));
-  text-indent: 10px;
 }
 
 /* ===== MAYOR SIGNATORY SECTION ===== */
 .mayor-signatory {
-  --mayor-font-size: 15pt;
-  --mayor-top-padding: 50px;
+  --mayor-font-size: 17pt;
+  --mayor-top-padding: 70px;
   --mayor-bottom-padding: 30px;
 }
 
@@ -298,7 +297,7 @@
 
 /* ===== DEPARTMENT HEAD SIGNATORY SECTION ===== */
 .dept-head-signatory {
-  --dept-head-font-size: 15pt;
+  --dept-head-font-size: 17pt;
   --dept-head-top-padding: 120px;
   margin-top: calc(var(--dept-head-top-padding) * var(--scale));
 }
@@ -323,18 +322,21 @@
 
 .event-name-text {
   font-family: "Montserrat", sans-serif;
-  font-size: calc(20pt * var(--scale));
+  font-size: calc(21pt * var(--scale));
   font-weight: 700;
   margin-bottom: calc(14px * var(--scale));
   text-align: center;
   line-height: 1.5;
   margin-top: 0;
-  padding: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-right: 60px;
+  padding-left: 60px;
 }
 
 /* ===== FIRST PARAGRAPH SECTION ===== */
 .first-paragraph-wrapper {
-  margin-top: calc(10px * var(--scale));
+  margin-top: calc(11px * var(--scale));
   margin-left: var(--margin-x);
   margin-right: var(--margin-x);
   margin-bottom: var(--margin-bottom);
@@ -343,7 +345,7 @@
 
 .first-paragraph-text {
   font-family: "Montserrat", sans-serif;
-  font-size: calc(13pt * var(--scale));
+  font-size: calc(14pt * var(--scale));
   font-weight: 500;
   text-indent: calc(50px * var(--scale));
   margin-bottom: 1em;
@@ -362,7 +364,7 @@
 
 .additional-paragraph-text {
   font-family: "Montserrat", sans-serif;
-  font-size: calc(13pt * var(--scale));
+  font-size: calc(14pt * var(--scale));
   font-weight: 500;
   text-indent: calc(50px * var(--scale));
   margin-bottom: 1em;
@@ -382,7 +384,7 @@
 
 .case-additional-text {
   font-family: "Montserrat", sans-serif;
-  font-size: calc(15pt * var(--scale));
+  font-size: calc(16pt * var(--scale));
   font-weight: 500;
   /* text-indent: calc(50px * var(--scale)); */
   margin-bottom: 1em;
@@ -400,7 +402,7 @@
 
 .headers-title-text {
   font-family: "Montserrat", sans-serif;
-  font-size: calc(28pt * var(--scale));
+  font-size: calc(30pt * var(--scale));
   font-weight: 700;
   color: #154172;
   margin: 0;
@@ -417,7 +419,7 @@
 
 .purpose-text {
   font-family: "Montserrat", sans-serif;
-  font-size: calc(17pt * var(--scale));
+  font-size: calc(19pt * var(--scale));
   font-weight: 600;
   text-decoration: underline;
   margin: 0;
@@ -435,7 +437,7 @@
 
 .second-paragraph-text {
   font-family: "Montserrat", sans-serif;
-  font-size: calc(13pt * var(--scale));
+  font-size: calc(15pt * var(--scale));
   font-weight: 500;
   text-indent: calc(50px * var(--scale));
   margin-bottom: 1em;
@@ -457,7 +459,7 @@
 
 .subheader-title {
   font-family: "Montserrat", sans-serif;
-  font-size: calc(17pt * var(--scale));
+  font-size: calc(19pt * var(--scale));
   font-weight: 600;
   color: #154172;
   margin: 0;
@@ -470,7 +472,7 @@
 
 .subheader-series {
   font-family: "Book Antiqua", serif;
-  font-size: calc(11pt * var(--scale));
+  font-size: calc(13pt * var(--scale));
   font-style: italic;
   color: #11a7ee;
   margin: 0;
@@ -488,7 +490,7 @@
 
 .third-paragraph-text {
   font-family: "Montserrat", sans-serif;
-  font-size: calc(13pt * var(--scale));
+  font-size: calc(15pt * var(--scale));
   font-weight: 500;
   text-indent: calc(50px * var(--scale));
   margin-bottom: 1em;
@@ -512,7 +514,7 @@
 
 .with-cases-text {
   font-family: "Montserrat", sans-serif;
-  font-size: calc(13pt * var(--scale));
+  font-size: calc(15pt * var(--scale));
   font-weight: 500;
   margin-bottom: 1em;
   text-align: justify;
@@ -536,13 +538,13 @@
 
 .footer-left p {
   margin: 0;
-  font-size: calc(9pt * var(--scale));
+  font-size: calc(11pt * var(--scale));
   text-align: left;
   line-height: 1.2;
 }
 
 .footer-small {
-  font-size: calc(7pt * var(--scale));
+  font-size: calc(9pt * var(--scale));
   color: black;
 }
 
@@ -553,7 +555,7 @@
 
 .footer-note {
   text-align: center;
-  font-size: calc(11pt * var(--scale));
+  font-size: calc(13pt * var(--scale));
 }
 
 .footer-tagline {
@@ -564,7 +566,7 @@
 
 .footer-warning {
   margin: 0;
-  font-size: calc(15px * var(--scale));
+  font-size: calc(17px * var(--scale));
   color: rgb(197, 55, 55);
   font-weight: bold;
 }
@@ -573,7 +575,7 @@
   text-align: right;
   margin-bottom: 0;
   margin-right: calc(30px * var(--scale));
-  font-size: calc(8pt * var(--scale));
+  font-size: calc(10pt * var(--scale));
   font-weight: bold;
   color: black;
 }
@@ -607,7 +609,7 @@
   }
 
   .certificate-content {
-    font-size: 12pt;
+    font-size: 13pt;
     line-height: 1.2;
   }
 

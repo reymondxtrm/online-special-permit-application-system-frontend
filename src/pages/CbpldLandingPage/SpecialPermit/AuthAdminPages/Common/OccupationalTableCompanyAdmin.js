@@ -32,6 +32,12 @@ import {
   updateTabNotification,
 } from "common/utility/utilityFunction";
 import FileViewerModal from "../AdminControls/Modals/FileViewerModal";
+import UpdateCorporationMemberDetailsModal from "../AdminControls/Modals/UpdateCorporationMemberDetailsModal";
+import EditDurationModal from "../Dashboard/Modal/EditDurationModal";
+import PaymentModal from "../../AuthClientPages/Modals/PaymentModal";
+import { SpecialPermitClientSlice } from "features/SpecialPermitClient";
+import { useSelectedPaymentDetails } from "hooks/Common/useSelectedPaymentDetails";
+import UpdateOrNumberModal from "../Modals/UpdateOrNumberModal";
 
 export default function OccupationalTableCompanyAdmin({ status }) {
   const dispatch = useDispatch();
@@ -51,11 +57,17 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   const handleSubmit = useSubmit();
   const [showAttachmentModal, setShowAttachmentModal] = useState(false);
   const [orderOfPaymentId, setOrderOfPaymentId] = useState();
-  const [uploadImageModal, setUpdloadImageModal] = useState(false);
+  const [corporationMemberDetails, setCorporationMemberDetails] = useState();
   const [occupationalRequestModal, setOccupationalRequestModal] =
     useState(false);
   const [pdfViewer, setPdfViewer] = useState(false);
   const [completedPermit, setCompletedPermit] = useState(null);
+  const [updateDetailsModal, setUpdateDetailsModal] = useState(false);
+  const [updateDurationModal, setUpdateDurationModal] = useState(false);
+  const [overTheCounterModal, setOverTheCounterModal] = useState(false);
+  const [selectedPermit, setSelectedPermit] = useState([]);
+  const [updateOrNumberModal, setUpdateOrNumberModal] = useState(false);
+  const [orNumber, setOrNumber] = useState(null);
 
   useEffect(() => {
     dispatch(getCompanyOccupatinalData({ type: "company", status: status }));
@@ -64,14 +76,14 @@ export default function OccupationalTableCompanyAdmin({ status }) {
     setSelectedRow((prev) =>
       prev.includes(index)
         ? prev.filter((item) => item !== index)
-        : [...prev, index]
+        : [...prev, index],
     );
   };
   const handleRowOnclick = (permit_id) => {
     const response = updateTabNotification(
       "occupational_permit",
       permit_id,
-      status
+      status,
     );
   };
   const togglePdfViewer = () => {
@@ -104,9 +116,57 @@ export default function OccupationalTableCompanyAdmin({ status }) {
   const toggleReturnRemarksModal = () => {
     setOpenReturnRemarksModal((prev) => !prev);
   };
+  const toggleUpdateDetailsModal = () => {
+    setUpdateDetailsModal((prev) => !prev);
+  };
+  const toggleUpdateModal = () => {
+    setUpdateDurationModal(!updateDurationModal);
+  };
+  const toggleOverTheCounterModal = () => {
+    setOverTheCounterModal((prev) => !prev);
+  };
+  const toggleUpdateOrNumberModal = () => {
+    setUpdateOrNumberModal((prev) => !prev);
+  };
+  const allPermit = useMemo(() => {
+    return specialPermitAdmin?.companyOccupational?.data?.flatMap(
+      (item) => item.special_permit_applications || [],
+    );
+  }, [specialPermitAdmin]);
+  const paymentDetails = useSelectedPaymentDetails(selectedPermit, allPermit);
+  const handleSelect = (id) => {
+    setSelectedPermit((prev) => {
+      const rows = Array.isArray(prev) ? [...prev] : [];
+      if (rows.includes(id)) {
+        return rows.filter((item) => item !== id);
+      } else {
+        return [...rows, id];
+      }
+    });
+  };
+  const handleClickPermitStatus = async (id) => {
+    handleSubmit(
+      {
+        url: "api/admin/disable-enable-permit",
+        params: { special_permit_application_id: id },
+        message: {
+          title: "Are you sure you want change the status?",
+        },
+      },
+      [],
+      [toggleRefresh],
+    );
+  };
 
   return (
     <React.Fragment>
+      {updateDurationModal && (
+        <EditDurationModal
+          openModal={updateDurationModal}
+          toggleModal={toggleUpdateModal}
+          specialPermitId={applicationId}
+        />
+      )}
       {isViewerOpen && currentImage && !isFetching && (
         <>
           <Viewer
@@ -129,6 +189,15 @@ export default function OccupationalTableCompanyAdmin({ status }) {
           toggle={togglePdfViewer}
         />
       )}
+      {updateDetailsModal && (
+        <UpdateCorporationMemberDetailsModal
+          openModal={updateDetailsModal}
+          toggleModal={toggleUpdateDetailsModal}
+          corporationMemberId={applicationId}
+          userDetails={corporationMemberDetails}
+          toggleRefresh={toggleRefresh}
+        />
+      )}
       <AmountModal
         openModal={amountModal}
         toggleModal={toggleAmountModal}
@@ -142,7 +211,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
         toggleRefresh={toggleRefresh}
       />
 
-      {AttachmentModal && (
+      {showAttachmentModal && (
         <AttachmentModal
           openModal={showAttachmentModal}
           uploadedFiles={uploadedFiles}
@@ -163,6 +232,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
           />
         </>
       ) : null}
+
       {occupationalRequestModal && (
         <OccupationalRequestForm
           isOpen={occupationalRequestModal}
@@ -170,8 +240,17 @@ export default function OccupationalTableCompanyAdmin({ status }) {
           applicationId={applicationId}
         />
       )}
-
-      {status === "for_signature" ? (
+      {overTheCounterModal && (
+        <PaymentModal
+          toggleModal={toggleOverTheCounterModal}
+          openModal={overTheCounterModal}
+          applicationId={selectedPermit}
+          toggleRefresh={toggleRefresh}
+          applicationType={"occupational_permit"}
+          paymentDetails={paymentDetails}
+        />
+      )}
+      {status === "for_signature" || status === "completed" ? (
         <>
           <GenerateOccupationalPermitModal
             toggle={toggleGenerateModal}
@@ -187,20 +266,63 @@ export default function OccupationalTableCompanyAdmin({ status }) {
           />
         </>
       ) : null}
+      {updateOrNumberModal && (
+        <UpdateOrNumberModal
+          openModal={updateOrNumberModal}
+          toggleModal={toggleUpdateOrNumberModal}
+          applicationId={applicationId}
+          // applicationType={applicationType}
+          toggleRefresh={toggleRefresh}
+          orNumber={orNumber}
+        />
+      )}
+
+      <div className="d-flex gap-2">
+        <div>
+          {status === "for_payment" ? (
+            <Button
+              color="primary"
+              onClick={() => {
+                toggleOverTheCounterModal();
+                dispatch(
+                  specialPermitAdmin.actions.setApplicationIdsForPayment(
+                    selectedPermit,
+                  ),
+                );
+              }}
+              disabled={selectedPermit.length <= 0}
+            >
+              <i className="fa fas fa-money-bill-wave"></i>
+              <span>Upload</span>
+            </Button>
+          ) : null}
+        </div>
+      </div>
       <Table>
         <thead>
           <tr>
+            {status === "for_payment" && <th></th>}
             <th>#</th>
-            {status === "for_signature" && <th>Reference No</th>}
+            {(status === "for_signature" || status === "completed") && (
+              <th>Reference No</th>
+            )}
             <th>Name of Requestor / Corporation</th>
             <th>Gender</th>
             <th>Address</th>
             <th>Contact</th>
-            {status === "for_payment_approval" && <th> Mode of Payment</th>}
+            {(status === "declined" || status === "returned") && (
+              <th>Remarks</th>
+            )}
+            {status === "for_payment_approval" && (
+              <>
+                <th> Mode of Payment</th> <th>OR No.</th>
+              </>
+            )}
             <th>Attachment</th>
             {status === "for_payment_approval" ||
             status === "pending" ||
-            status === "for_signature" ? (
+            status === "for_signature" ||
+            status === "completed" ? (
               <th className="text-center">Actions</th>
             ) : null}
           </tr>
@@ -251,10 +373,22 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                     </td>
 
                     <td colSpan={2} className="fw-bold">
-                      {company.fname}
+                      <Badge
+                        color="info"
+                        style={{
+                          padding: "5px",
+                          marginRight: "5px",
+                          minWidth: "20px",
+                        }}
+                      >
+                        {company?.special_permit_applications?.length || 0}
+                      </Badge>
+                      {company.fname}{" "}
                     </td>
                     <td>{company?.user_addresses[0]?.company_fulladdress}</td>
-                    <td colSpan={4}></td>
+                    <td colSpan={3}></td>
+                    <td></td>
+                    <td></td>
                   </tr>
 
                   {selectedRow?.includes(companyIndex)
@@ -268,13 +402,41 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                   ? null
                                   : handleRowOnclick(item.id);
                               }}
+                              style={{
+                                backgroundColor: item.disable
+                                  ? "#ef53502a"
+                                  : null,
+                                borderColor: item.disable ? "#EF5350" : null,
+                              }}
                             >
-                              <td></td>
-                              {status === "for_signature" && (
+                              {console.log(item?.id)}
+                              <td>
+                                {status === "for_payment" && (
+                                  <Input
+                                    type="checkbox"
+                                    disabled={
+                                      item?.order_of_payment
+                                        ?.payment_on_progress === 1
+                                    }
+                                    checked={selectedPermit?.includes(item.id)}
+                                    onClick={(e) => {
+                                      handleSelect(item.id);
+                                    }}
+                                    style={{ width: "20px", height: "20px" }}
+                                  />
+                                )}
+                              </td>
+                              <td>{index + 1}</td>
+                              {(status === "for_signature" ||
+                                status === "completed") && (
                                 <td>{item?.reference_no}</td>
                               )}
                               <td>
-                                {`${item?.corporation_member?.fname}  ${item?.corporation_member?.mname} ${item?.corporation_member?.lname}`}{" "}
+                                {`${item?.corporation_member?.fname}  ${
+                                  item?.corporation_member?.mname ?? ""
+                                } ${item?.corporation_member?.lname} ${
+                                  item?.corporation_member?.suffix ?? ""
+                                }`}{" "}
                                 {item?.mark_as_read ? (
                                   ""
                                 ) : (
@@ -295,21 +457,33 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                 }
                               </td>
                               {status === "for_payment_approval" && (
-                                <td>
-                                  <Badge
-                                    color={
-                                      item?.order_of_payment?.payment_detail
-                                        ?.payment_type === "online"
-                                        ? "info"
-                                        : "warning"
-                                    }
-                                  >
+                                <>
+                                  <td>
+                                    <Badge
+                                      color={
+                                        item?.order_of_payment?.payment_detail
+                                          ?.payment_type === "online"
+                                          ? "info"
+                                          : "warning"
+                                      }
+                                    >
+                                      {
+                                        item?.order_of_payment?.payment_detail
+                                          ?.payment_type
+                                      }
+                                    </Badge>
+                                  </td>
+                                  <td>
                                     {
-                                      item?.order_of_payment?.payment_detail
-                                        ?.payment_type
+                                      item.order_of_payment?.payment_detail
+                                        ?.or_no
                                     }
-                                  </Badge>
-                                </td>
+                                  </td>
+                                </>
+                              )}
+                              {(status === "declined" ||
+                                status === "returned") && (
+                                <td>{item.latest_status_history?.remarks}</td>
                               )}
                               <td>
                                 {status === "for_payment_approval" ||
@@ -350,55 +524,123 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                     >
                                       Attachment
                                     </Button>
-                                    {status === "completed" && (
-                                      <Button
-                                        color="success"
-                                        onClick={() => {
-                                          togglePdfViewer();
-                                          setCompletedPermit(
-                                            item?.complete_special_permit?.file
-                                          );
-                                        }}
-                                      >
-                                        Permit
-                                      </Button>
-                                    )}
                                   </div>
                                 )}
                               </td>
+                              {status === "completed" && (
+                                <UncontrolledDropdown>
+                                  <DropdownToggle color="primary">
+                                    Actions
+                                  </DropdownToggle>
+                                  <DropdownMenu>
+                                    <DropdownItem
+                                      onClick={() => {
+                                        togglePdfViewer();
+                                        setCompletedPermit(
+                                          item?.complete_special_permit?.file,
+                                        );
+                                      }}
+                                    >
+                                      Generated Permit
+                                    </DropdownItem>
+                                    <DropdownItem
+                                      onClick={() => {
+                                        toggleUploadPermitModal();
+                                        setApplicationId(item?.id);
+                                      }}
+                                    >
+                                      Re-Upload
+                                    </DropdownItem>
+                                    <DropdownItem
+                                      onClick={() => {
+                                        toggleUpdateDetailsModal();
+                                        setApplicationId(
+                                          item.corporation_member.id,
+                                        );
+                                        setCorporationMemberDetails(item);
+                                      }}
+                                    >
+                                      Edit Details
+                                    </DropdownItem>
+                                    <DropdownItem
+                                      onClick={() => {
+                                        toggleUpdateModal();
+                                        setApplicationId(item?.id);
+                                      }}
+                                    >
+                                      Update Permit Duration
+                                    </DropdownItem>
+                                    <DropdownItem
+                                      onClick={() => {
+                                        toggleOccupationalRequestModal();
+                                        setApplicationId(item?.id);
+                                      }}
+                                    >
+                                      View Request Form
+                                    </DropdownItem>
+                                  </DropdownMenu>
+                                </UncontrolledDropdown>
+                              )}
                               {status === "pending" && (
                                 <td>
-                                  <UncontrolledDropdown>
-                                    <DropdownToggle color="primary">
-                                      Actions
-                                    </DropdownToggle>
-                                    <DropdownMenu>
-                                      <DropdownItem
-                                        onClick={() => {
-                                          setApplicationId(item.id);
-                                          toggleAmountModal();
-                                        }}
+                                  <div className="d-flex gap-1">
+                                    <UncontrolledDropdown>
+                                      <DropdownToggle
+                                        color="primary"
+                                        disabled={item.disable}
                                       >
-                                        Procced to payment
-                                      </DropdownItem>
-                                      <DropdownItem
-                                        onClick={() => {
-                                          toggleRemarksModal();
-                                          setApplicationId(item?.id);
-                                        }}
-                                      >
-                                        Return
-                                      </DropdownItem>
-                                      <DropdownItem
-                                        onClick={() => {
-                                          toggleOccupationalRequestModal();
-                                          setApplicationId(item?.id);
-                                        }}
-                                      >
-                                        View Request Form
-                                      </DropdownItem>
-                                    </DropdownMenu>
-                                  </UncontrolledDropdown>
+                                        Actions
+                                      </DropdownToggle>
+                                      <DropdownMenu>
+                                        <DropdownItem
+                                          onClick={() => {
+                                            setApplicationId(item.id);
+                                            toggleAmountModal();
+                                          }}
+                                        >
+                                          Procced to payment
+                                        </DropdownItem>
+                                        <DropdownItem
+                                          onClick={() => {
+                                            toggleRemarksModal();
+                                            setApplicationId(item?.id);
+                                          }}
+                                        >
+                                          Return
+                                        </DropdownItem>
+                                        <DropdownItem
+                                          onClick={() => {
+                                            toggleOccupationalRequestModal();
+                                            setApplicationId(item?.id);
+                                          }}
+                                        >
+                                          View Request Form
+                                        </DropdownItem>
+                                        <DropdownItem
+                                          onClick={() => {
+                                            toggleUpdateDetailsModal();
+                                            setApplicationId(
+                                              item.corporation_member.id,
+                                            );
+                                            setCorporationMemberDetails(item);
+                                          }}
+                                        >
+                                          Edit Details
+                                        </DropdownItem>
+                                      </DropdownMenu>
+                                    </UncontrolledDropdown>
+                                    <Button
+                                      color="warning"
+                                      onClick={() =>
+                                        handleClickPermitStatus(item.id)
+                                      }
+                                    >
+                                      <i
+                                        className="mdi mdi-eye fs-5"
+                                        style={{ cursor: "pointer" }}
+                                      ></i>
+                                    </Button>
+                                  </div>
                                 </td>
                               )}
                               {status === "for_payment_approval" ? (
@@ -437,7 +679,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                               },
                                             },
                                             [],
-                                            [toggleRefresh]
+                                            [toggleRefresh],
                                           );
                                         }}
                                       >
@@ -447,13 +689,35 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                       <DropdownItem
                                         onClick={() => {
                                           toggleReturnRemarksModal();
-
                                           setOrderOfPaymentId(
-                                            item?.order_of_payment?.id
+                                            item?.order_of_payment?.id,
                                           );
                                         }}
                                       >
                                         Return
+                                      </DropdownItem>
+                                      <DropdownItem
+                                        onClick={() => {
+                                          toggleUpdateDetailsModal();
+                                          setApplicationId(
+                                            item.corporation_member.id,
+                                          );
+                                          setCorporationMemberDetails(item);
+                                        }}
+                                      >
+                                        Edit Details
+                                      </DropdownItem>
+                                      <DropdownItem
+                                        onClick={() => {
+                                          toggleUpdateOrNumberModal();
+                                          setOrNumber(
+                                            item?.order_of_payment
+                                              ?.payment_detail?.or_no,
+                                          );
+                                          setApplicationId(item?.id);
+                                        }}
+                                      >
+                                        Update OR Number
                                       </DropdownItem>
                                     </DropdownMenu>
                                   </UncontrolledDropdown>
@@ -480,7 +744,7 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                         Generate
                                       </Button>
                                     </div>
-                                    <div>
+                                    <div style={{ paddingRight: "10px" }}>
                                       <Button
                                         color="primary"
                                         style={{ width: "90px" }}
@@ -492,16 +756,29 @@ export default function OccupationalTableCompanyAdmin({ status }) {
                                         Upload
                                       </Button>
                                     </div>
+                                    <div>
+                                      <Button
+                                        onClick={() => {
+                                          toggleUpdateDetailsModal();
+                                          setApplicationId(
+                                            item.corporation_member.id,
+                                          );
+                                          setCorporationMemberDetails(item);
+                                        }}
+                                      >
+                                        Edit Details
+                                      </Button>
+                                    </div>
                                   </div>
                                 </td>
                               ) : null}
                             </tr>
-                          )
+                          ),
                         )
                       : null
                     : null}
                 </React.Fragment>
-              )
+              ),
             )
           ) : (
             <tr>

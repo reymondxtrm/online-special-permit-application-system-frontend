@@ -1,5 +1,5 @@
 /* eslint-disable padded-blocks */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Container,
   Row,
@@ -37,10 +37,18 @@ import classnames from "classnames";
 import Pagination from "components/Pagination";
 import AdminTable from "../Common/AdminTable";
 import OccupationalTables from "../Common/OccupationalTables";
+import DashboardFilters from "pages/Dashboard/dashboardFilters";
+import {
+  getCompanyOccupatinalData,
+  getIndividualOccupationalApplications,
+  getTableData,
+} from "features/SpecialPermitAdmin";
 const ForSignature = () => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("good_moral");
+  const [childTab, setChildTab] = useState("individual");
+
   const [newCounts, setNewCounts] = useState({
     mayors_permit: 0,
     good_moral: 0,
@@ -51,6 +59,15 @@ const ForSignature = () => {
     use_of_government_property: 0,
     occupational_permit: 0,
   });
+  const action = useMemo(() => {
+    if (activeTab === "occupational" && childTab === "company") {
+      return getCompanyOccupatinalData;
+    } else if (activeTab === "occupational" && childTab === "individual") {
+      return getIndividualOccupationalApplications;
+    } else {
+      return getTableData;
+    }
+  }, [activeTab, childTab]);
 
   const handleTabSelect = (key) => {
     setActiveTab(key);
@@ -75,6 +92,9 @@ const ForSignature = () => {
   const toggleNewMfoModal = () => {
     setNewMfoModal(!newMfoModal);
   };
+  const handleSelectChildTab = (key) => {
+    setChildTab(key);
+  };
   useEffect(() => {
     const channel = echo.channel("special-permit-for_signature");
     const handler = (event) => {
@@ -98,7 +118,7 @@ const ForSignature = () => {
       try {
         const response = await axios.get(
           "api/admin/special-permit/all-counts",
-          { params: { status_id: 3 } }
+          { params: { status_id: 3 } },
         );
 
         if (response && response.data) {
@@ -126,6 +146,23 @@ const ForSignature = () => {
             title="Special Permit"
             breadcrumbItem="For Signature Applications"
           />
+          <Row>
+            <Col xs="12">
+              <Card>
+                <CardBody>
+                  <DashboardFilters
+                    action={action}
+                    tableParams={{
+                      permit_type: activeTab,
+                      status: "for_signature",
+                      type: childTab || "",
+                    }}
+                  />
+                </CardBody>
+              </Card>
+            </Col>
+          </Row>
+          <Row></Row>
           {/* 
           <Row>
             <Col>
@@ -318,6 +355,8 @@ const ForSignature = () => {
                       <OccupationalTables
                         status={"for_signature"}
                         motherTab={activeTab}
+                        childTab={childTab}
+                        handleSelectChildTab={handleSelectChildTab}
                       />
                     </Tab>
                   </Tabs>

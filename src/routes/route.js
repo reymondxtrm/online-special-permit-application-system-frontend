@@ -40,7 +40,6 @@ const Authmiddleware = ({
               if (authUser.user.user_type === "client")
                 return <Redirect to="/client/services" />;
             }
-
             return (
               <Layout>
                 <Component {...props} />
