@@ -250,17 +250,21 @@ export default function MayorsAndGoodMoralRequestForm({
                       Dapat <b>BUTUAN CITY</b> ang address nga ibutang sa mga
                       dokumento. Human ma kompleto ang mga rekisitos, mamahimong
                       mag apply online @{" "}
-                      <span className="rf17-underline">ospas.butuan.gov.ph</span>
+                      <span className="rf17-underline">
+                        ospas.butuan.gov.ph
+                      </span>
                     </li>
                   </ul>
                 </td>
-                <td colSpan={2}>{requirement("Certificate of Ordination", "")}</td>
+                <td colSpan={2}>
+                  {requirement("Certificate of Ordination", "")}
+                </td>
               </tr>
               <tr>
                 <td colSpan={2}>
                   {requirement(
                     "Securities and Exchange Commission (SEC) Registration of the church",
-                    ""
+                    "",
                   )}
                 </td>
               </tr>
@@ -348,7 +352,9 @@ export default function MayorsAndGoodMoralRequestForm({
                         <td className="rf17-field-value">
                           {address?.subdivision}
                         </td>
-                        <td className="rf17-field-value">{address?.barangay}</td>
+                        <td className="rf17-field-value">
+                          {address?.barangay}
+                        </td>
                         <td className="rf17-grid-preprinted">Butuan City</td>
                         <td className="rf17-grid-preprinted">8600</td>
                       </tr>
@@ -387,8 +393,7 @@ export default function MayorsAndGoodMoralRequestForm({
           </table>
 
           <p className="rf17-system-note">
-            &quot; Note. This is system generated. No signature is required.
-            &quot;
+            Note. This is system generated. No signature is required.
           </p>
 
           {/* ===== BOTTOM FOOTER ===== */}

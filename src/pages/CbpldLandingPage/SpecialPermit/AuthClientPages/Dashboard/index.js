@@ -72,7 +72,7 @@ const ClientDashboard = () => {
         <Container fluid>
           <Breadcrumbs
             title="Special Permit"
-            breadcrumbItem="For Payment Applications"
+            breadcrumbItem="Dashboard"
           />
           {/* 
           <Row>

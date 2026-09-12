@@ -41,6 +41,12 @@ const DownloadButton = () => {
     ) {
       ws_data.push([
         "No of permits issued per day ",
+        "Date Received (Initial)",
+        "Time Received (Initial)",
+        "Date Released (Order of Payment)",
+        "Time Released (Order of Payment)",
+        "Date Received (Official Receipt)",
+        "Time Received (Official Receipt)",
         "Date Received",
         "Time Received",
         "Date Issued",

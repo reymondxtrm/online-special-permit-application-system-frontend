@@ -1,25 +1,53 @@
-import React, { useEffect, useState, useMemo, useRef } from "react";
-import {
-  Button,
-  ButtonToggle,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-} from "reactstrap";
-// import cgbLogo from "../../../../../assets/images/cgbLogo.png";
-// import headerLine from "../../../../../assets/images/permitHeaderLine.png";
+import React, { useEffect, useState, useRef } from "react";
+import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import cgbLogo from "../../../../../assets/images/cgbLogo.png";
 import headerLine from "../../../../../assets/images/permitHeaderLine.png";
 import butuanOnLogo from "../../../../../assets/images/butuanOnLogo.png";
 import footerLine from "../../../../../assets/images/permitFooterLine.png";
+import tuvLogo from "../../../../../assets/images/TUV.jpg";
+import qrCode from "../../../../../assets/images/qr.jpg";
 import "./RequestForm.css";
 import axios from "axios";
-import moment from "moment";
 import ReactToPrint from "react-to-print";
+
+// The five permit types the paper form columns stand for, in printed order.
+const COLUMNS = [
+  { code: "event", label: "EVENT" },
+  { code: "motorcade", label: "MOTORCADE" },
+  { code: "parade", label: "PARADE" },
+  { code: "recorrida", label: "RECORRIDA" },
+  { code: "use_of_government_property", label: "USE OF GOVERNMENT PROPERTY" },
+];
+
+const REQUEST_LETTER =
+  "Request Letter stamped “Received” by the Office of the City Mayor";
+const OFFICIAL_RECEIPT =
+  "Official Receipt (pursuant to City Ordinance No. 6795-2022)";
+const ROUTE_PLAN = "Route Plan approved by the CTTMD";
+const VEHICLE_FEE =
+  "Official Receipt ₱200.00 per day (less than 10 vehicles) or ₱300.00 per day (more than 10 vehicles) pursuant to City Ordinance No. 6795-2022.";
+const RECORRIDA_FEE =
+  "Official Receipt ₱200.00 per day pursuant to City Ordinance No. 6795-2022.";
+
+// One row per line of the paper form; `null` is a cell the form leaves blank.
+// Most of these repeat across columns, so they are listed once here rather than
+// hand-copied into 13 near-identical JSX blocks that can drift apart.
+const REQUIREMENT_ROWS = [
+  [
+    REQUEST_LETTER,
+    REQUEST_LETTER,
+    REQUEST_LETTER,
+    REQUEST_LETTER,
+    REQUEST_LETTER,
+  ],
+  [OFFICIAL_RECEIPT, ROUTE_PLAN, ROUTE_PLAN, ROUTE_PLAN, OFFICIAL_RECEIPT],
+  [null, VEHICLE_FEE, VEHICLE_FEE, RECORRIDA_FEE, null],
+];
+
 export default function RequestForm({ isOpen, toggle, applicationId }) {
   const [application, setApplication] = useState(null);
   const printRef = useRef();
+
   useEffect(() => {
     let mounted = true;
     const fetchData = async () => {
@@ -52,648 +80,286 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
       document.title = originalTitle;
     }, 5000);
   };
-  const formater = (date) => {
-    const newDate = new Date(date);
-    const formatedDate = newDate.toLocaleDateString("en-US");
-    return formatedDate;
-  };
+
+  const formater = (date) =>
+    date ? new Date(date).toLocaleDateString("en-US") : "";
+
   const type = application?.special_permit_type?.code;
+  const user = application?.user;
+  const address = user?.user_addresses?.[0];
+
+  // Every part is optional on the backend, so filter before joining -- an
+  // applicant with no subdivision or province must not print "undefined".
+  const addressText = [
+    address?.address_line,
+    address?.barangay,
+    address?.city,
+    address?.province,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const eventDates = [application?.event_date_from, application?.event_date_to]
+    .filter(Boolean)
+    .join(" to ");
+  const eventTimes = [application?.event_time_from, application?.event_time_to]
+    .filter(Boolean)
+    .join(" to ");
+  const printedName = [user?.fname, user?.mname, user?.lname]
+    .filter(Boolean)
+    .join(" ")
+    .toUpperCase();
+
+  const requirement = (text) =>
+    text ? (
+      <div className="rf18-req">
+        <span className="rf18-checkbox"></span>
+        <p className="rf18-req-text">{text}</p>
+      </div>
+    ) : null;
 
   return (
-    <Modal isOpen={isOpen} toggle={toggle} size="xl">
+    <Modal
+      isOpen={isOpen}
+      toggle={toggle}
+      size="xl"
+      className="special-permit-request-form-modal"
+    >
       <ModalHeader toggle={toggle}></ModalHeader>
       <ModalBody>
-        <div
-          className="wrapper"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "column",
-          }}
-          ref={printRef}
-        >
-          <table style={{ margin: "10px", height: "990px", width: "765px" }}>
+        <div className="rf18-sheet" ref={printRef}>
+          {/* ===== HEADER ===== */}
+          <div className="rf18-header">
+            <div className="rf18-header-content">
+              <img src={cgbLogo} alt="CGB Logo" className="rf18-logo" />
+              <div className="rf18-header-text">
+                <p className="rf18-header-republic">
+                  Republic of the Philippines
+                </p>
+                <p className="rf18-header-department">
+                  CITY GOVERNMENT OF BUTUAN
+                </p>
+                <p className="rf18-header-department">
+                  City Business Permits and Licensing Department
+                </p>
+                <p className="rf18-header-city">Butuan City</p>
+              </div>
+              <p className="rf18-revised">Revised on March 19, 2026</p>
+            </div>
+          </div>
+          <img className="rf18-rule" src={headerLine} alt="" />
+
+          <p className="rf18-title">REQUEST FORM FOR SPECIAL PERMIT</p>
+
+          {/* ===== REQUIREMENTS TABLE ===== */}
+          <table className="rf18-main-table">
+            <colgroup>
+              {COLUMNS.map((column) => (
+                <col key={column.code} style={{ width: "20%" }} />
+              ))}
+            </colgroup>
+            <thead>
+              <tr>
+                {COLUMNS.map((column) => (
+                  <th
+                    key={column.code}
+                    style={{
+                      color: type === column.code ? "white" : "black",
+                      backgroundColor:
+                        type === column.code ? "#0c7dcc" : "white",
+                    }}
+                  >
+                    {column.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {REQUIREMENT_ROWS.map((row, rowIndex) => (
+                <tr key={rowIndex}>
+                  {row.map((text, cellIndex) => (
+                    <td key={COLUMNS[cellIndex].code}>{requirement(text)}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* ===== FILL-OUT SECTION ===== */}
+          <table className="rf18-form-table">
+            <colgroup>
+              <col style={{ width: "60%" }} />
+              <col style={{ width: "40%" }} />
+            </colgroup>
             <tbody>
               <tr>
                 <td>
-                  <div
-                    className="header-content"
-                    style={{ position: "relative" }}
-                  >
-                    <div
-                      style={{
-                        paddingTop: "15px",
-                        paddingLeft: "20px",
-                        zIndex: "1000",
-                      }}
-                    >
-                      <img
-                        src={cgbLogo}
-                        alt="CGB Logo"
-                        className="header-logo-request-form"
-                      />
-                    </div>
-                    <div style={{ marginTop: "10px" }}>
-                      <div className="header-text d-flex flex-column gap-1">
-                        <p>Republic of the Philippines</p>
-                        <p className="header-title ">
-                          CITY GOVERNMENT OF BUTUAN
-                        </p>
-                        <p className="header-title ">
-                          CITY GOVERNMENT PERMITS AND LICENSING DEPARTMENT
-                        </p>
-                        <p>
-                          City Hall Bldg., J.P. Rosales Ave., Doongan, Butuan
-                          City
-                        </p>
-                        <div style={{ marginTop: "px", marginLeft: "-30px" }}>
-                          <img
-                            className="header-line"
-                            src={headerLine}
-                            alt="CGB Logo"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className="text-center"
-                      style={{
-                        position: "absolute",
-                        bottom: "-40px",
-                        left: "250px",
-                      }}
-                    >
-                      <h1 className="title">REQUEST FORM FOR SPECIAL PERMIT</h1>
-                    </div>
-                  </div>
+                  <span className="rf18-label">Date:</span>{" "}
+                  <span className="rf18-value">
+                    {formater(application?.created_at)}
+                  </span>
+                </td>
+                <td>
+                  <span className="rf18-label">Contact No.:</span>{" "}
+                  <span className="rf18-value">
+                    {user?.user_phone_numbers?.[0]?.phone_number}
+                  </span>
                 </td>
               </tr>
               <tr>
-                <td
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <table
-                    className="main-table"
-                    style={{
-                      borderCollapse: "collapse",
-                      marginTop: "40px",
-                      tableLayout: "fixed",
-
-                      width: "740px",
-                    }}
-                  >
-                    <thead>
-                      <tr>
-                        <th
-                          style={{
-                            color: type === "event" ? "white" : "black",
-                            backgroundColor:
-                              type === "event" ? "#0c7dcc" : "white",
-                          }}
-                        >
-                          EVENT
-                        </th>
-                        <th
-                          style={{
-                            color: type === "motorcade" ? "white" : "black",
-                            backgroundColor:
-                              type === "motorcade" ? "#0c7dcc" : "white",
-                          }}
-                        >
-                          MOTORCADE
-                        </th>
-                        <th
-                          style={{
-                            color: type === "parade" ? "white" : "black",
-                            backgroundColor:
-                              type === "parade" ? "#0c7dcc" : "white",
-                          }}
-                        >
-                          PARADE
-                        </th>
-                        <th
-                          style={{
-                            color: type === "recorrida" ? "white" : "black",
-                            backgroundColor:
-                              type === "recorrida" ? "#0c7dcc" : "white",
-                          }}
-                        >
-                          RECORRIDA
-                        </th>
-                        <th
-                          style={{
-                            color:
-                              type === "use_of_government_property"
-                                ? "white"
-                                : "black",
-                            backgroundColor:
-                              type === "use_of_government_property"
-                                ? "#0c7dcc"
-                                : "white",
-                          }}
-                        >
-                          USE OF GOVERNMENT PROPERTY
-                        </th>
-                      </tr>
-                    </thead>
+                <td colSpan={2}>
+                  <span className="rf18-label">
+                    Name of Requestor/Organization:
+                  </span>{" "}
+                  <span className="rf18-value">
+                    {application?.requestor_name}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td colSpan={2}>
+                  <table className="rf18-value-grid">
+                    <colgroup>
+                      <col style={{ width: "28%" }} />
+                      <col style={{ width: "24%" }} />
+                      <col style={{ width: "24%" }} />
+                      <col style={{ width: "24%" }} />
+                    </colgroup>
                     <tbody>
                       <tr>
-                        <td>
-                          <div className="d-flex gap-1 align-items-center">
-                            <div
-                              className="checkbox"
-                              style={
-                                {
-                                  // backgroundColor:
-                                  //   !!application?.uploaded_file
-                                  //     ?.request_letter && type === "event"
-                                  //     ? "black"
-                                  //     : "",
-                                }
-                              }
-                            ></div>
-                            <p style={{ flex: "1" }} className="m-0 p-0">
-                              Request Letter &quot;Received&quot; by the Office
-                              of the City Mayor.{" "}
-                            </p>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="d-flex gap-1 align-items-center">
-                            <div
-                              className="checkbox"
-                              style={
-                                {
-                                  // backgroundColor:
-                                  //   !!application?.uploaded_file
-                                  //     ?.request_letter && type === "motorcade"
-                                  //     ? "black"
-                                  //     : "",
-                                }
-                              }
-                            ></div>
-                            <p style={{ flex: "1" }} className="m-0 p-0">
-                              Request Letter &quot;Received&quot; by the Office
-                              of the City Mayor.{" "}
-                            </p>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="d-flex gap-1 align-items-center">
-                            <div
-                              className="checkbox"
-                              style={
-                                {
-                                  // backgroundColor:
-                                  //   !!application?.uploaded_file
-                                  //     ?.request_letter && type === "parade"
-                                  //     ? "black"
-                                  //     : "",
-                                }
-                              }
-                            ></div>
-                            <p style={{ flex: "1" }} className="m-0 p-0">
-                              Request Letter &quot;Received&quot; by the Office
-                              of the City Mayor.{" "}
-                            </p>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="d-flex gap-1 align-items-center">
-                            <div
-                              className="checkbox"
-                              style={
-                                {
-                                  // backgroundColor:
-                                  //   !!application?.uploaded_file
-                                  //     ?.request_letter && type === "recorrida"
-                                  //     ? "black"
-                                  //     : "",
-                                }
-                              }
-                            ></div>
-                            <p style={{ flex: "1" }} className="m-0 p-0">
-                              Request Letter &quot;Received&quot; by the Office
-                              of the City Mayor.{" "}
-                            </p>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="d-flex gap-1 align-items-center">
-                            <div
-                              className="checkbox"
-                              style={
-                                {
-                                  // backgroundColor:
-                                  //   !!application?.uploaded_file
-                                  //     ?.request_letter &&
-                                  //   type === "use_of_government_property"
-                                  //     ? "black"
-                                  //     : "",
-                                }
-                              }
-                            ></div>
-                            <p style={{ flex: "1" }} className="m-0 p-0">
-                              Request Letter &quot;Received&quot; by the Office
-                              of the City Mayor.{" "}
-                            </p>
-                          </div>
-                        </td>
+                        <td className="rf18-label">Name of Representative:</td>
+                        <td>{user?.lname}</td>
+                        <td>{user?.fname}</td>
+                        <td>{user?.mname}</td>
                       </tr>
-                      <tr>
-                        <td>
-                          <div className="d-flex gap-1 align-items-center">
-                            <div
-                              className="checkbox"
-                              style={
-                                {
-                                  // backgroundColor:
-                                  //   !!application?.uploaded_file
-                                  //     ?.official_receipt && type === "event"
-                                  //     ? "black"
-                                  //     : "",
-                                }
-                              }
-                            >
-                              {" "}
-                            </div>
-                            <p style={{ flex: "1" }} className="m-0 p-0">
-                              Official Receipt (pursuant to City Ordinance No.
-                              6795 - 2022)
-                            </p>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="d-flex gap-1 align-items-center">
-                            <div
-                              className="checkbox"
-                              style={
-                                {
-                                  // backgroundColor:
-                                  //   !!application?.uploaded_file?.route_plan &&
-                                  //   type === "motorcade"
-                                  //     ? "black"
-                                  //     : "",
-                                }
-                              }
-                            ></div>
-                            <p style={{ flex: "1" }} className="m-0 p-0">
-                              Route Plan approved by the CTTMD
-                            </p>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="d-flex gap-1 align-items-center">
-                            <div
-                              className="checkbox"
-                              style={
-                                {
-                                  // backgroundColor:
-                                  //   !!application?.uploaded_file?.route_plan &&
-                                  //   type === "parade"
-                                  //     ? "black"
-                                  //     : "",
-                                }
-                              }
-                            ></div>
-                            <p style={{ flex: "1" }} className="m-0 p-0">
-                              Route Plan approved by the CTTMD
-                            </p>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="d-flex gap-1 align-items-center">
-                            <div
-                              className="checkbox"
-                              style={
-                                {
-                                  // backgroundColor:
-                                  //   !!application?.uploaded_file?.route_plan &&
-                                  //   type === "recorrida"
-                                  //     ? "black"
-                                  //     : "",
-                                }
-                              }
-                            ></div>
-                            <p style={{ flex: "1" }} className="m-0 p-0">
-                              Route Plan approved by the CTTMD
-                            </p>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="d-flex gap-1 align-items-center">
-                            <div
-                              className="checkbox"
-                              style={
-                                {
-                                  // backgroundColor:
-                                  //   !!application?.uploaded_file
-                                  //     ?.official_receipt &&
-                                  //   type === "use_of_government_property"
-                                  //     ? "black"
-                                  //     : "",
-                                }
-                              }
-                            >
-                              {" "}
-                            </div>
-                            <p style={{ flex: "1" }} className="m-0 p-0">
-                              Official Receipt (pursuant to City Ordinance No.
-                              6795 - 2022)
-                            </p>
-                          </div>
-                        </td>
-                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+              <tr className="rf18-caption-row">
+                <td colSpan={2}>
+                  <table className="rf18-caption-grid">
+                    <colgroup>
+                      <col style={{ width: "28%" }} />
+                      <col style={{ width: "24%" }} />
+                      <col style={{ width: "24%" }} />
+                      <col style={{ width: "24%" }} />
+                    </colgroup>
+                    <tbody>
                       <tr>
                         <td></td>
-                        <td>
-                          <div className="d-flex gap-1 align-items-center">
-                            <div
-                              className="checkbox"
-                              style={
-                                {
-                                  // backgroundColor:
-                                  //   !!application?.uploaded_file
-                                  //     ?.official_receipt && type === "motorcade"
-                                  //     ? "black"
-                                  //     : "",
-                                }
-                              }
-                            ></div>
-                            <p style={{ flex: "1" }} className="m-0 p-0">
-                              Official Receipt &#8369;200.00 per day (less than
-                              10 vehicles) pursuant to City Ordinance No, 6795
-                              -2022.
-                            </p>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="d-flex gap-1 align-items-center">
-                            <div
-                              className="checkbox"
-                              style={
-                                {
-                                  // backgroundColor:
-                                  //   !!application?.uploaded_file
-                                  //     ?.official_receipt && type === "parade"
-                                  //     ? "black"
-                                  //     : "",
-                                }
-                              }
-                            ></div>
-                            <p style={{ flex: "1" }} className="m-0 p-0">
-                              Official Receipt &#8369;200.00 per day (less than
-                              10 vehicles) pursuant to City Ordinance No, 6795
-                              -2022.
-                            </p>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="d-flex gap-1 align-items-center">
-                            <div
-                              className="checkbox"
-                              style={
-                                {
-                                  // backgroundColor:
-                                  //   !!application?.uploaded_file
-                                  //     ?.official_receipt && type === "recorrida"
-                                  //     ? "black"
-                                  //     : "",
-                                }
-                              }
-                            >
-                              {" "}
-                            </div>
-                            <p style={{ flex: "1" }} className="m-0 p-0">
-                              Official Receipt &#8369;200.00 per day pursuant to
-                              City Ordinance No. 6795-2022
-                            </p>
-                          </div>
-                        </td>
-                        <td></td>
+                        <td>Surname</td>
+                        <td>First Name</td>
+                        <td>Middle Name</td>
                       </tr>
                     </tbody>
                   </table>
                 </td>
               </tr>
               <tr>
-                <td
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <table
-                    className="footer-table"
-                    style={{
-                      width: "765px",
-                      marginTop: "20px",
-                      tableLayout: "fixed",
-                    }}
-                  >
-                    <tbody>
-                      <tr>
-                        <td style={{ width: "65%" }} className="m-0 p-0">
-                          <div className="d-flex align-items-center gap-2">
-                            <p className="label">Date:</p>
-                            <p className="p-0 m-0">
-                              {new Date(
-                                application?.created_at,
-                              ).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </td>
-                        <td style={{ width: "35%" }} className="m-0 p-0">
-                          <div className="d-flex align-items-center gap-2">
-                            <p className="label">Contact No.:</p>
-                            <p className="p-0 m-0">
-                              {" "}
-                              {
-                                application?.user?.user_phone_numbers[0]
-                                  ?.phone_number
-                              }
-                            </p>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td colSpan={2} className="m-0 p-0">
-                          <div className="d-flex align-items-center gap-2">
-                            <p className="label">
-                              Name of Requestor/ Organization:
-                            </p>
-                            <p className="p-0 m-0">
-                              {application?.requestor_name}
-                            </p>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td colSpan={2} className=" m-0 p-0">
-                          <div className="d-flex gap-2 h-100">
-                            <p className="label" style={{ width: "30%" }}>
-                              Name of Representative:
-                            </p>
-                            <div
-                              className="d-flex justify-content-around"
-                              style={{ width: "70%" }}
-                            >
-                              <p className="p-0 m-0">
-                                {application?.user?.lname}
-                              </p>
-                              <p className="m-0 p-0">
-                                {application?.user?.fname}
-                              </p>
-                              <p className="m-0 p-0">
-                                {application?.user?.mname}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td colSpan={2} className="text-center p-0">
-                          <div
-                            className="d-flex justify-content-around"
-                            style={{ marginLeft: "30%" }}
-                          >
-                            <span className="cambraText me-5 ms-5 fst-italic">
-                              Surname
-                            </span>
-                            <span className="cambraText me-5 ms-5 fst-italic">
-                              First Name
-                            </span>
-                            <span className="cambraText me-5 ms-5 fst-italic">
-                              Middle Name
-                            </span>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td colSpan={2} className=" m-0 p-0">
-                          <div className="d-flex gap-2">
-                            <p className="label">Address:</p>
-                            <p className="p-0 m-0 ">
-                              {`${
-                                application?.user?.user_addresses[0]
-                                  ?.address_line || ""
-                              } ${
-                                application?.user?.user_addresses[0]?.barangay
-                              } ${application?.user?.user_addresses[0]?.city} ${
-                                application?.user?.user_addresses[0]?.province
-                              }`}
-                            </p>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td colSpan={2} className="t m-0 p-0">
-                          <div className="d-flex gap-2">
-                            <p className="label">Name of Event:</p>
-                            <p className="p-0 m-0">{application?.event_name}</p>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className=" m-0 p-0">
-                          <div className="d-flex gap-2">
-                            <p className="label">Date of Event</p>
-                            <p className="p-0 m-0">{`${
-                              application?.event_date_from
-                            }  ${
-                              application?.event_date_to
-                                ? "to " + application?.event_date_to
-                                : ""
-                            }`}</p>
-                          </div>
-                        </td>
-                        <td className=" m-0 p-0">
-                          <div className="d-flex gap-2">
-                            <p className="label">Time of Event</p>
-                            <p className="m-0 p-0">{`${application?.event_time_from} to ${application?.event_time_to}`}</p>
-                          </div>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <td colSpan={2}>
+                  <span className="rf18-label">Address:</span>{" "}
+                  <span className="rf18-value">{addressText}</span>
                 </td>
               </tr>
               <tr>
-                <td style={{ textAlign: "center" }}>
-                  <p
-                    style={{ marginTop: "30px" }}
-                    className="cambraText bolder-text fs-5"
-                  >
-                    DECLARATION AS TO THE CORRECTNESS OF THE INFORMATION GIVEN
-                  </p>
-                </td>
-              </tr>
-              <tr>
-                <td style={{ width: "900px", padding: "10px" }}>
-                  <p style={{ textIndent: "40px" }} className="cambraText">
-                    I hereby voluntarily declare that all the information
-                    provided in this request form for the special permit is
-                    true, accurate, and complete to the best of my knowledge and
-                    belief. I fully understand that any false, misleading, or
-                    incomplete information may result in the disapproval of my
-                    application.
-                  </p>
+                <td colSpan={2}>
+                  <span className="rf18-label">Name of Event:</span>{" "}
+                  <span className="rf18-value">{application?.event_name}</span>
                 </td>
               </tr>
               <tr>
                 <td>
-                  <div
-                    style={{ width: "230px", padding: "10px" }}
-                    className="d-flex align-items-center flex-column"
-                  >
-                    <hr
-                      style={{
-                        width: "200px",
-                        border: "1px solid #000000",
-                        color: "#000000",
-                        marginTop: "40px",
-                        marginBottom: "0px",
-                      }}
-                    />
-                    <p className="cambraText p-0 m-0 ">
-                      Signature over Printed Name
-                    </p>
-                  </div>
+                  <span className="rf18-label">Date of Event:</span>{" "}
+                  <span className="rf18-value">{eventDates}</span>
                 </td>
-              </tr>
-              <tr>
-                <td className="text-end">
-                  <p
-                    className="p-0 m-0 fw-bold"
-                    style={{
-                      fontStyle: "italic",
-                      fontSize: "13px",
-                      paddingRight: "10px",
-                    }}
-                  >
-                    &quot; Note. This is system generated. No signature is
-                    required.&quot;
-                  </p>
-                  <img src={butuanOnLogo} style={{ width: "180px" }} />
-                  <p
-                    className="p-0 m-0 fw-bold"
-                    style={{ fontStyle: "italic", fontSize: "16px" }}
-                  >
-                    CBPLD.BPLD.F.018.REV02
-                  </p>
+                <td>
+                  <span className="rf18-label">Time of Event:</span>{" "}
+                  <span className="rf18-value">{eventTimes}</span>
                 </td>
               </tr>
             </tbody>
           </table>
-          <img src={footerLine} style={{ width: "100%" }} />
+
+          {/* ===== DECLARATION ===== */}
+          <p className="rf18-declaration-heading">
+            DECLARATION AS TO THE CORRECTNESS OF THE INFORMATION GIVEN
+          </p>
+          <p className="rf18-declaration">
+            I hereby voluntarily declare that all the information provided in
+            this request form for the special permit is true, accurate, and
+            complete to the best of my knowledge and belief. I fully understand
+            that any false, misleading, or incomplete information may result in
+            the disapproval of my application.
+          </p>
+
+          <div className="rf18-signature">
+            <div className="rf18-signature-inner">
+              <span className="rf18-signature-name">{printedName}</span>
+              <div className="rf18-signature-line">
+                <p className="rf18-signature-caption">
+                  Signature over Printed Name
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <p className="rf18-apply">
+            APPLY SPECIAL PERMIT ONLINE @{" "}
+            <span className="rf18-apply-link">ospas.butuan.gov.ph</span>
+          </p>
+
+          <p className="rf18-system-note">
+            Note. This is system generated. No signature is required.
+          </p>
+
+          {/* ===== BOTTOM FOOTER ===== */}
+          <img className="rf18-rule rf18-footer-rule" src={footerLine} alt="" />
+          <table className="rf18-bottom">
+            <colgroup>
+              <col style={{ width: "45%" }} />
+              <col style={{ width: "28%" }} />
+              <col style={{ width: "27%" }} />
+            </colgroup>
+            <tbody>
+              <tr>
+                <td>
+                  <div className="rf18-bottom-left">
+                    <img src={qrCode} alt="QR Code" className="rf18-qr" />
+                    <div className="rf18-contact">
+                      <span>
+                        City Hall Bldg., J.P. Rosales Ave., Doongan, Butuan City
+                      </span>
+                      <span>
+                        Email:{" "}
+                        <span className="rf18-link">cbpld@butuan.gov.ph</span>
+                      </span>
+                      <span>Phone: 0951-388-4193</span>
+                      <span className="rf18-link">www.butuan.gov.ph</span>
+                    </div>
+                  </div>
+                </td>
+                <td className="text-center">
+                  <img src={tuvLogo} alt="TUV NORD" className="rf18-tuv" />
+                  <p className="rf18-cert-no">
+                    Certificate Registration No. PHP
+                    <br />
+                    QMS 23 93 0116
+                  </p>
+                </td>
+                <td className="text-end">
+                  <img
+                    src={butuanOnLogo}
+                    alt="Butuan ON"
+                    className="rf18-butuanon"
+                  />
+                  <p className="rf18-form-code">CBPLD.BPLD.F.018.REV06</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </ModalBody>
+
       <ModalFooter>
         <div className="d-flex gap-2">
           <ReactToPrint

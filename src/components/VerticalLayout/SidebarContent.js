@@ -143,7 +143,7 @@ const SidebarContent = (props) => {
                 <li>
                   <Link to="/client/pending">
                     <i className="mdi mdi-progress-clock fs-2"></i>
-                    <span>{props.t("Pending")}</span>
+                    <span>{props.t("Initial Receiving")}</span>
                   </Link>
                 </li>
                 <li>
@@ -154,12 +154,12 @@ const SidebarContent = (props) => {
                   <ul className="sub-menu">
                     <li>
                       <Link to="/client/for-payment/approval">
-                        {props.t("For Approval")}
+                        {props.t("Final Receiving")}
                       </Link>
                     </li>
                     <li>
                       <Link to="/client/for-payment/dashboard">
-                        {props.t("For Payment")}
+                        {props.t("Initial Action")}
                       </Link>
                     </li>
                     <li>
@@ -172,7 +172,7 @@ const SidebarContent = (props) => {
                 <li>
                   <Link to="/client/for-signature">
                     <i className="mdi mdi-file-check fs-2"></i>
-                    <span>{props.t("For Final Approval")}</span>
+                    <span>{props.t("Issuance")}</span>
                   </Link>
                 </li>
                 <li>
@@ -220,7 +220,7 @@ const SidebarContent = (props) => {
                 <li>
                   <Link to="/admin/pending">
                     <i className="mdi mdi-progress-clock fs-2"></i>
-                    <span>{props.t("Pending")}</span>{" "}
+                    <span>{props.t("Initial Receiving")}</span>{" "}
                   </Link>
                 </li>
                 <li>
@@ -231,12 +231,12 @@ const SidebarContent = (props) => {
                   <ul className="sub-menu">
                     <li>
                       <Link to="/admin/for-payment/approval">
-                        {props.t("For Approval")}
+                        {props.t("Final Receiving")}
                       </Link>
                     </li>
                     <li>
                       <Link to="/admin/for-payment/dashboard">
-                        {props.t("For Payment ")}
+                        {props.t("Initial Action")}
                       </Link>
                     </li>
                     <li>
@@ -255,7 +255,7 @@ const SidebarContent = (props) => {
                 <li>
                   <Link to="/admin/for-signature">
                     <i className="mdi mdi-file-check fs-2"></i>
-                    <span> {props.t("For Final Approval")}</span>
+                    <span> {props.t("Issuance")}</span>
                   </Link>
                 </li>
 

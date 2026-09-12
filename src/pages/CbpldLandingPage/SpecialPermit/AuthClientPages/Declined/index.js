@@ -69,7 +69,7 @@ const Declined = () => {
         <Container fluid>
           <Breadcrumbs
             title="Special Permit"
-            breadcrumbItem="Pending Applications"
+            breadcrumbItem="Returned Applications"
           />
           {/* 
           <Row>

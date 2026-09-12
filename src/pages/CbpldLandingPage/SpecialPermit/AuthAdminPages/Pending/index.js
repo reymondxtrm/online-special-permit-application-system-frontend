@@ -142,7 +142,7 @@ const Pending = () => {
         <Container fluid>
           <Breadcrumbs
             title="Special Permit"
-            breadcrumbItem="Pending Applications"
+            breadcrumbItem="Initial Receiving Applications"
           />
           <Row>
             <Col xs="12">

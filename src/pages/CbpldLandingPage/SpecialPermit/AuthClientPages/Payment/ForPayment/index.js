@@ -64,7 +64,7 @@ const ForPayment = () => {
         <Container fluid>
           <Breadcrumbs
             title="Special Permit"
-            breadcrumbItem="For Payment Applications"
+            breadcrumbItem="Initial Action Applications"
           />
 
           <Row>

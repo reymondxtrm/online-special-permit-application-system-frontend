@@ -735,7 +735,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                       status === "completed" && (
                         <>
                           <td>
-                            <div className="flex">
+                            <div className="d-flex align-items-center flex-nowrap">
                               <UncontrolledDropdown
                                 className="me-2"
                                 direction="end"

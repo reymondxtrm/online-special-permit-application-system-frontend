@@ -72,7 +72,7 @@ const ForApproval = () => {
         <Container fluid>
           <Breadcrumbs
             title="Special Permit"
-            breadcrumbItem="For Payment Applications"
+            breadcrumbItem="Final Receiving Applications"
           />
 
           <Row>

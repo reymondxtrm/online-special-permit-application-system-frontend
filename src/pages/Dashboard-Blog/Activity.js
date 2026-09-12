@@ -1,5 +1,5 @@
-import React from "react"
-import { Link } from "react-router-dom"
+import React from "react";
+import { Link } from "react-router-dom";
 
 import {
   Card,
@@ -8,12 +8,12 @@ import {
   UncontrolledDropdown,
   DropdownMenu,
   DropdownToggle,
-} from "reactstrap"
+} from "reactstrap";
 
 //SimpleBar
-import SimpleBar from "simplebar-react"
+import SimpleBar from "simplebar-react";
 
-const Activity = props => {
+const Activity = (props) => {
   return (
     <React.Fragment>
       <Col xl={4}>
@@ -21,7 +21,7 @@ const Activity = props => {
           <CardBody>
             <div className="d-flex">
               <div className="me-2">
-                <h5 className="card-title mb-4">Activity</h5>
+                <h5 className="card-title mb-4">DETAILS</h5>
               </div>
               <UncontrolledDropdown className="ms-auto">
                 <DropdownToggle
@@ -154,10 +154,7 @@ const Activity = props => {
               </div>
             </SimpleBar>
             <div className="text-center mt-4">
-              <a
-                href=""
-                className="btn btn-primary  btn-sm"
-              >
+              <a href="" className="btn btn-primary  btn-sm">
                 View More <i className="mdi mdi-arrow-right ms-1"></i>
               </a>
             </div>
@@ -165,7 +162,7 @@ const Activity = props => {
         </Card>
       </Col>
     </React.Fragment>
-  )
-}
+  );
+};
 
-export default Activity
+export default Activity;
