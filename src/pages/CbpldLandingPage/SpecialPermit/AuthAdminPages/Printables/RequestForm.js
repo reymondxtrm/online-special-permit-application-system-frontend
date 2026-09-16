@@ -309,7 +309,7 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
           </p>
 
           <p className="rf18-system-note">
-            Note. This is system generated. No signature is required.
+            Note: This is system generated. No signature is required.
           </p>
 
           {/* ===== BOTTOM FOOTER ===== */}
@@ -333,7 +333,7 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                         Email:{" "}
                         <span className="rf18-link">cbpld@butuan.gov.ph</span>
                       </span>
-                      <span>Phone: 0951-388-4193</span>
+                      <span>Phone: 0938-312-0415</span>
                       <span className="rf18-link">www.butuan.gov.ph</span>
                     </div>
                   </div>

@@ -6,9 +6,17 @@ export const getReportByType = createAsyncThunk(
   async (params, thunkAPI) => {
     try {
       const response = await axios({
-        url: "api/admin/get/reports",
+        url: "api/admin/get/receiving-logbook",
         method: "GET",
-        params: { ...params },
+        params: {
+          ...params,
+          type: params.type?.value,
+          transaction_type: "online",
+          // The preview table has no pagination control (it scrolls instead),
+          // so request every matching row up front. The endpoint still
+          // paginates server-side until that's removed on the backend.
+          per_page: 10000,
+        },
       });
       if (response) {
         return response.data;
@@ -26,8 +34,23 @@ export const SpecialPermitReport = createSlice({
     reportData: [],
     getReportByTypeIsFetching: false,
     errors: null,
+    filter_date_from: "",
+    filter_date_to: "",
+    filter_type: {},
   },
-
+  reducers: {
+    setDataProps: (state, action) => {
+      state.reportData = action.payload;
+    },
+    setShowLoading: (state, action) => {
+      state.getReportByTypeIsFetching = action.payload;
+    },
+    setFilters: (state, { payload }) => {
+      state.filter_date_from = payload.date_from;
+      state.filter_date_to = payload.date_to;
+      state.filter_type = payload.type;
+    },
+  },
   extraReducers: {
     [getReportByType.pending]: (state) => {
       state.getReportByTypeIsFetching = true;
@@ -36,7 +59,7 @@ export const SpecialPermitReport = createSlice({
       state.getReportByTypeIsFetching = false;
       state.reportData = payload;
     },
-    [getReportByType.pending]: (state, { payload }) => {
+    [getReportByType.rejected]: (state, { payload }) => {
       state.getReportByTypeIsFetching = false;
       state.errors = payload;
     },

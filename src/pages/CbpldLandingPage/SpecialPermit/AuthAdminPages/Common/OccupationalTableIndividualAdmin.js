@@ -495,67 +495,71 @@ export default function OccupationalTableIndividualAdmin({
                   </td>
                   {status === "completed" && (
                     <td>
-                      <UncontrolledDropdown>
-                        <DropdownToggle color="primary">Actions</DropdownToggle>
-                        <DropdownMenu>
-                          <DropdownItem
-                            onClick={() => {
-                              togglePdfViewer();
-                              setCompletedPermit(
-                                application?.complete_special_permit?.file,
-                              );
-                            }}
-                          >
-                            {" "}
-                            Generated Permit
-                          </DropdownItem>
-                          <DropdownItem
-                            onClick={() => {
-                              toggleUploadPermitModal();
-                              setApplicationId(application?.id);
-                            }}
-                          >
-                            {" "}
-                            Re-Upload
-                          </DropdownItem>
-                          <DropdownItem
-                            onClick={() => {
-                              toggleUpdateDetailModal();
-                              setUserId(application.user.id);
-                            }}
-                          >
-                            {" "}
-                            Edit Details
-                          </DropdownItem>
-                          <DropdownItem
-                            onClick={() => {
-                              toggleUpdateModal();
-                              setApplicationId(application?.id);
-                            }}
-                          >
-                            Update Permit Duration
-                          </DropdownItem>
-                          <DropdownItem
-                            onClick={() => {
-                              toggleOccupationalRequestModal();
-                              setApplicationId(application?.id);
-                            }}
-                          >
-                            View Request Form
-                          </DropdownItem>
-                        </DropdownMenu>
-                      </UncontrolledDropdown>
-                      <Button
-                        color="info"
-                        className="ms-2"
-                        title="View Activity"
-                        onClick={() => {
-                          setApplicationId(application?.id);
-                          toggleActivityModal();
-                        }}
-                      >
-                        <i className="mdi mdi-history fs-5"></i>
-                      </Button>
+                      <div className="d-flex align-items-center flex-nowrap">
+                        <UncontrolledDropdown>
+                          <DropdownToggle color="primary">
+                            Actions
+                          </DropdownToggle>
+                          <DropdownMenu>
+                            <DropdownItem
+                              onClick={() => {
+                                togglePdfViewer();
+                                setCompletedPermit(
+                                  application?.complete_special_permit?.file,
+                                );
+                              }}
+                            >
+                              {" "}
+                              Generated Permit
+                            </DropdownItem>
+                            <DropdownItem
+                              onClick={() => {
+                                toggleUploadPermitModal();
+                                setApplicationId(application?.id);
+                              }}
+                            >
+                              {" "}
+                              Re-Upload
+                            </DropdownItem>
+                            <DropdownItem
+                              onClick={() => {
+                                toggleUpdateDetailModal();
+                                setUserId(application.user.id);
+                              }}
+                            >
+                              {" "}
+                              Edit Details
+                            </DropdownItem>
+                            <DropdownItem
+                              onClick={() => {
+                                toggleUpdateModal();
+                                setApplicationId(application?.id);
+                              }}
+                            >
+                              Update Permit Duration
+                            </DropdownItem>
+                            <DropdownItem
+                              onClick={() => {
+                                toggleOccupationalRequestModal();
+                                setApplicationId(application?.id);
+                              }}
+                            >
+                              View Request Form
+                            </DropdownItem>
+                          </DropdownMenu>
+                        </UncontrolledDropdown>
+                        <Button
+                          color="info"
+                          className="ms-2"
+                          title="View Activity"
+                          onClick={() => {
+                            setApplicationId(application?.id);
+                            toggleActivityModal();
+                          }}
+                        >
+                          <i className="mdi mdi-history fs-5"></i>
+                        </Button>
+                      </div>
                     </td>
                   )}
 

@@ -88,6 +88,7 @@ import TwostepVerification from "pages/AuthenticationInner/auth-two-step-verific
 import SuperAdminControl from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/SuperAdminControl";
 import AdminDeclined from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Declined";
 import SpecialPermitAnalytics from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Analytics/index";
+import SpecialPermitReports from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Reports/index";
 import Release from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/OfflineTransaction/Release";
 import OfflineDashboard from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/OfflineTransaction/OfflineDashboard";
 
@@ -120,6 +121,7 @@ const authProtectedRoutes = [
   { path: "/admin/pending", component: AdminPending },
   { path: "/admin/controls", component: AdminControls },
   { path: "/admin/analytics", component: SpecialPermitAnalytics },
+  { path: "/admin/reports", component: SpecialPermitReports },
   {
     path: "/user-control",
     component: Controls,

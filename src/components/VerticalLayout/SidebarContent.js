@@ -212,6 +212,12 @@ const SidebarContent = (props) => {
                   </Link>
                 </li>
                 <li>
+                  <Link to="/admin/reports">
+                    <i className="mdi mdi-file-chart fs-2"></i>
+                    <span>{props.t("Reports")}</span>
+                  </Link>
+                </li>
+                <li>
                   <Link to="/admin/dashboard">
                     <i className="mdi mdi-view-dashboard fs-2"></i>
                     <span>{props.t("Dashboard")}</span>

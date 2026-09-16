@@ -200,7 +200,10 @@ export default function OccupationalRequestForm({
                       {choice("Female", gender === "FEMALE")}
                     </div>
                     <div className="rf19-choice-col">
-                      {choice("Prefer not to say", gender === "PREFER NOT TO SAY")}
+                      {choice(
+                        "Prefer not to say",
+                        gender === "PREFER NOT TO SAY",
+                      )}
                       {choice("Other __________", gender === "OTHERS")}
                     </div>
                   </div>
@@ -273,7 +276,9 @@ export default function OccupationalRequestForm({
                 </td>
                 <td colSpan={2}>
                   <span className="rf19-label">Contact Number:</span>{" "}
-                  <span className="rf19-value">{phoneRecord?.phone_number}</span>
+                  <span className="rf19-value">
+                    {phoneRecord?.phone_number}
+                  </span>
                 </td>
               </tr>
 
@@ -363,7 +368,7 @@ export default function OccupationalRequestForm({
           </p>
 
           <p className="rf19-system-note">
-            Note. This is system generated. No signature is required.
+            Note: This is system generated. No signature is required.
           </p>
 
           {/* ===== BOTTOM FOOTER ===== */}
@@ -387,7 +392,7 @@ export default function OccupationalRequestForm({
                         Email:{" "}
                         <span className="rf19-link">cbpld@butuan.gov.ph</span>
                       </span>
-                      <span>Phone: 0951-388-4193</span>
+                      <span>Phone: 0938-312-0415</span>
                       <span className="rf19-link">www.butuan.gov.ph</span>
                     </div>
                   </div>

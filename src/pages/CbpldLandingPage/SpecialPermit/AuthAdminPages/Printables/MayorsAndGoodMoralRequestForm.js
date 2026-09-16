@@ -393,7 +393,7 @@ export default function MayorsAndGoodMoralRequestForm({
           </table>
 
           <p className="rf17-system-note">
-            Note. This is system generated. No signature is required.
+            Note: This is system generated. No signature is required.
           </p>
 
           {/* ===== BOTTOM FOOTER ===== */}
@@ -417,7 +417,7 @@ export default function MayorsAndGoodMoralRequestForm({
                         Email:{" "}
                         <span className="rf17-link">cbpld@butuan.gov.ph</span>
                       </span>
-                      <span>Phone: 0951-388-4193</span>
+                      <span>Phone: 0938-312-0415</span>
                       <span className="rf17-link">www.butuan.gov.ph</span>
                     </div>
                   </div>
