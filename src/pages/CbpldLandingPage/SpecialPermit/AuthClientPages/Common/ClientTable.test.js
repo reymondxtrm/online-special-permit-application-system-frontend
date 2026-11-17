@@ -95,7 +95,7 @@ const mayorsRows = [
   }),
 ];
 
-const setup = ({ rows, accountType = "individual", props = {} }) => {
+const setup = ({ rows, accountType = "individual", props = {}, unread }) => {
   mockState = {
     user: { accountType },
     specialPermitClient: {
@@ -103,6 +103,8 @@ const setup = ({ rows, accountType = "individual", props = {} }) => {
       getTableDataIsFetching: false,
       params: {},
     },
+    // Left out unless given, to cover state without the clientNotifications slice.
+    ...(unread && { clientNotifications: { unreadApplicationIds: unread } }),
   };
   const all = {
     applicationType: "mayors_permit",
@@ -267,5 +269,23 @@ describe("ClientTable company bulk payment (occupational)", () => {
     setup({ rows: [app(20, "pending")], accountType: "company", props });
     expect(screen.queryByRole("button", { name: "Pay" })).toBeNull();
     expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
+  });
+});
+
+describe("ClientTable unread notification highlight", () => {
+  test("marks only unread rows as New and clears on row click", () => {
+    setup({ rows: [app(1, "pending"), app(7, "declined")], unread: [7] });
+    expect(within(rowByIndex(0)).queryByText("New")).toBeNull();
+    const row = rowByIndex(1);
+    expect(within(row).getByText("New")).toBeTruthy();
+    expect(row.className).toContain("table-warning");
+
+    fireEvent.click(within(row).getAllByRole("cell")[1]);
+    expect(mockDispatch).toHaveBeenCalledWith(expect.any(Function));
+  });
+
+  test("no highlight without the notifications slice", () => {
+    setup({ rows: [app(7, "declined")] });
+    expect(screen.queryByText("New")).toBeNull();
   });
 });

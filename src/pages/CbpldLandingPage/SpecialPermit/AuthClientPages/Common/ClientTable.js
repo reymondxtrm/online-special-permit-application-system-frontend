@@ -44,6 +44,9 @@ import ReuploadCedulaModal from "../Modals/ReuploadCedulaModal";
 import TableLoaders from "components/Loaders/TableLoaders";
 import FileViewerModal2 from "../../AuthAdminPages/AdminControls/Modals/FileViewerModal2";
 import { useSelectedPaymentDetails } from "hooks/Common/useSelectedPaymentDetails";
+import { markApplicationNotificationsRead } from "features/clientNotifications/clientNotificationsSlice";
+
+const NO_UNREAD = [];
 
 // Client-facing stage labels (same wording the old sidebar used).
 export const STATUS_LABELS = {
@@ -128,6 +131,10 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
     setrefreshPage(!refreshPage);
   };
   const specialPermitClient = useSelector((state) => state.specialPermitClient);
+  // Rows with an unread in-app notification get a "New" highlight.
+  const unreadApplicationIds = useSelector(
+    (state) => state.clientNotifications?.unreadApplicationIds ?? NO_UNREAD,
+  );
   const paymentDetails = useSelectedPaymentDetails(
     selectedRow,
     specialPermitClient?.clientTableData?.data,
@@ -635,8 +642,20 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
             ) : rows.length > 0 ? (
               rows.map((application, index) => {
                 const rowStatus = rowStatusOf(application);
+                const isNew = unreadApplicationIds.includes(application.id);
                 return (
-                  <tr key={application.id}>
+                  <tr
+                    key={application.id}
+                    className={isNew ? "table-warning" : undefined}
+                    onClickCapture={
+                      isNew
+                        ? () =>
+                            dispatch(
+                              markApplicationNotificationsRead(application.id),
+                            )
+                        : undefined
+                    }
+                  >
                     <td>
                       {isCompany && rowStatus === "for_payment" && (
                         <Input
@@ -667,6 +686,11 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                           application?.special_permit_status?.name ||
                           "—"}
                       </Badge>
+                      {isNew && (
+                        <Badge color="danger" pill className="ms-1">
+                          New
+                        </Badge>
+                      )}
                     </td>
                     <td>
                       {["for_signature", "completed"].includes(rowStatus) &&

@@ -12,6 +12,7 @@ import { Dropdown, DropdownToggle, DropdownMenu } from "reactstrap";
 import LanguageDropdown from "../CommonForBoth/TopbarDropdown/LanguageDropdown";
 import NotificationDropdown from "../CommonForBoth/TopbarDropdown/NotificationDropdown";
 import ProfileMenu from "../CommonForBoth/TopbarDropdown/ProfileMenu";
+import ClientNotificationDropdown from "../CommonForBoth/TopbarDropdown/ClientNotificationDropdown";
 import megamenuImg from "../../assets/images/megamenu-img.png";
 
 // import images
@@ -177,6 +178,9 @@ const Header = (props) => {
             </div>
 
             {/* <NotificationDropdown /> */}
+            {userDetails.user_type === "client" && (
+              <ClientNotificationDropdown userId={userDetails.id} />
+            )}
             <ProfileMenu userType={userDetails.user_type} />
             {/* {userRole === "Administrator" && (
               <div

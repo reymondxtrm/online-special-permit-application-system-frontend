@@ -35,6 +35,7 @@ import { AdminSlice } from "features/AdminSlice/AdminSlice";
 import { SpecialPermitAdminSlice } from "features/SpecialPermitAdmin";
 import { SpecialPermitClientSlice } from "features/SpecialPermitClient";
 import { SpecialPermitReport } from "features/SpecialPermitReport";
+import { clientNotificationsSlice } from "features/clientNotifications/clientNotificationsSlice";
 
 const sagaMiddleware = createSagaMiddleware();
 // const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
@@ -65,6 +66,7 @@ const reducers = combineReducers({
   specialPermitAdmin: SpecialPermitAdminSlice.reducer,
   specialPermitClient: SpecialPermitClientSlice.reducer,
   specialPermitReport: SpecialPermitReport.reducer,
+  clientNotifications: clientNotificationsSlice.reducer,
   Layout,
   Account,
   ForgetPassword,
