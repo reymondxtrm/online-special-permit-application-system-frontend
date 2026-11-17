@@ -65,23 +65,7 @@ export const clientNotificationsSlice = createSlice({
     unreadCount: 0,
     unreadApplicationIds: [],
   },
-  reducers: {
-    // Payload is what Laravel broadcasts: toArray() fields + id + type.
-    notificationReceived: (state, { payload }) => {
-      const { id, type, ...data } = payload;
-      if (state.items.some((n) => n.id === id)) return;
-      state.items.unshift({
-        id,
-        data,
-        read_at: null,
-        created_at: new Date().toISOString(),
-      });
-      state.unreadCount += 1;
-      if (!state.unreadApplicationIds.includes(data.application_id)) {
-        state.unreadApplicationIds.push(data.application_id);
-      }
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchClientNotifications.fulfilled, (state, { payload }) => {
@@ -115,5 +99,3 @@ export const clientNotificationsSlice = createSlice({
       );
   },
 });
-
-export const { notificationReceived } = clientNotificationsSlice.actions;

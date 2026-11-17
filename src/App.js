@@ -68,6 +68,8 @@ const App = (props) => {
   }
   const Layout = getLayout();
   useEffect(() => {
+    // Touching echo opens the Pusher socket; only admins need it.
+    if (userDetails?.user_type !== "admin") return;
     if (!echo?.connector?.pusher?.connection) return;
 
     const connection = echo.connector.pusher.connection;
@@ -89,7 +91,7 @@ const App = (props) => {
       connection.unbind("connected", handleConnected);
       connection.unbind("disconnected", handleDisconnected);
     };
-  }, []);
+  }, [userDetails?.user_type]);
 
   return (
     <React.Fragment>

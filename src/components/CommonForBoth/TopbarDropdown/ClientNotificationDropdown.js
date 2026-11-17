@@ -3,12 +3,10 @@ import { useHistory } from "react-router-dom";
 import { Dropdown, DropdownToggle, DropdownMenu, Row, Col } from "reactstrap";
 import SimpleBar from "simplebar-react";
 import { useSelector, useDispatch } from "react-redux";
-import echo from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Common/echo";
 import {
   fetchClientNotifications,
   markNotificationRead,
   markAllNotificationsRead,
-  notificationReceived,
 } from "features/clientNotifications/clientNotificationsSlice";
 
 const STATUS_ICONS = {
@@ -26,15 +24,9 @@ const ClientNotificationDropdown = ({ userId }) => {
     (state) => state.clientNotifications,
   );
 
+  // No Pusher for clients: loads once per page load; a reload shows new notifications.
   useEffect(() => {
-    if (!userId) return;
-    // DB is the source of truth; realtime only adds on top of it.
-    dispatch(fetchClientNotifications());
-    const channelName = `App.Models.User.${userId}`;
-    echo
-      .private(channelName)
-      .notification((n) => dispatch(notificationReceived(n)));
-    return () => echo.leave(channelName);
+    if (userId) dispatch(fetchClientNotifications());
   }, [userId, dispatch]);
 
   const open = (n) => {
