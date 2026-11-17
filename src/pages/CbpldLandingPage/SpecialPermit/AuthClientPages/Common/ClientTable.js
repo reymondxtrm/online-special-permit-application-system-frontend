@@ -335,16 +335,17 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
     toggleOverTheCounterModal();
   };
 
-  const fileCell = (fileType, path) =>
+  const fileCell = (fileType, path, label) =>
     path ? (
       <FileIconFormat
         fileType={fileType}
         path={path}
         toggleIsViewerOpen={toggleIsViewerOpen}
         getImageHandle={getImageHandle}
+        label={label}
       />
     ) : (
-      "N/A"
+      <span className="text-muted">N/A</span>
     );
 
   const renderActions = (application, rowStatus) => {
@@ -359,6 +360,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                 application.order_of_payment.payment_detail.attachment,
               )}
             <Button
+              size="sm"
               color="primary"
               onClick={() => {
                 setSelectedRow([application?.id]);
@@ -374,6 +376,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
           <div className="d-flex gap-2 align-items-center">
             {!isCompany && (
               <Button
+                size="sm"
                 color="primary"
                 disabled={inProgress}
                 onClick={(e) => {
@@ -385,10 +388,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
               </Button>
             )}
             <Badge
-              style={{
-                borderRadius: "20px",
-                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-              }}
+              pill
               color={inProgress ? "warning" : "primary"}
             >
               {inProgress ? "Paying" : "Unpaid"}
@@ -398,6 +398,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
       case "declined":
         return (
           <Button
+            size="sm"
             onClick={() => {
               setSelectedRow([application?.id]);
               togglerFunction();
@@ -409,17 +410,19 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
         );
       case "completed":
         return (
-          <div className="d-flex gap-2">
+          <div className="d-flex gap-2 text-nowrap">
             <Button
+              size="sm"
               type="button"
               color="success"
               onClick={() => downloadPermit(application?.id)}
             >
-              <i className="mdi mdi-download fs-4 me-2"></i>
+              <i className="mdi mdi-download me-1"></i>
               Download
             </Button>
 
             <Button
+              size="sm"
               color="primary"
               onClick={() => {
                 const url = process.env.REACT_APP_FEEDBACK_URL;
@@ -427,7 +430,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                 window.open(url, "_blank");
               }}
             >
-              <i className="mdi mdi-star fs-4 me-2 text-warning"></i>
+              <i className="mdi mdi-star me-1 text-warning"></i>
               Submit Feedback
             </Button>
           </div>
@@ -601,12 +604,8 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
       </div>
 
       <div className="tableFixHead">
-        <Table>
-          <thead
-            style={{
-              backgroundColor: "white",
-            }}
-          >
+        <Table className="client-table align-middle">
+          <thead>
             <tr>
               <th style={{ width: "5%" }}>
                 {isCompany && payableIds.length > 0 ? (
@@ -693,7 +692,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         )}
                         {DOCUMENT_COLUMNS.map((d) => (
                           <td key={d.key}>
-                            {fileCell(d.key, application.uploaded_file?.[d.key])}
+                            {fileCell(d.key, application.uploaded_file?.[d.key], "View")}
                           </td>
                         ))}
                       </>
@@ -737,6 +736,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         )}
                         <td>
                           <Button
+                            size="sm"
                             color="success"
                             onClick={() => {
                               toggleAttachmentModal();
@@ -757,7 +757,7 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                         : "—"}
                     </td>
                     <td>{remarksOf(application, rowStatus)}</td>
-                    <td>{renderActions(application, rowStatus)}</td>
+                    <td className="text-nowrap">{renderActions(application, rowStatus)}</td>
                   </tr>
                 );
               })

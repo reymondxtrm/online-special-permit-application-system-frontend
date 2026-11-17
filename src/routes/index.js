@@ -1,91 +1,42 @@
-import React from "react";
+import React, { lazy } from "react";
 import { Redirect } from "react-router-dom";
 
-//ITSM Components***********/
-import RequestedServices from "../pages/RequestedServices/index";
-import Reports from "../pages/Reports/index";
-import MultipurposeSMS from "../pages/Tools/MultipurposeSMS/index";
-import VaxcertSMS from "../pages/Tools/VaxcertSMS/index";
-import Verification from "../pages/UserControls/Verification/index";
-import Controls from "../pages/UserControls/Controls/index";
-import RequestService from "pages/Services/RequestService/index";
-import RequestTracker from "pages/Services/RequestTracker/index";
-import CreateUser from "pages/UserControls/CreateUser/index";
-//********************** */
-
-// Profile
-import UserProfile from "../pages/Authentication/user-profile";
-
-// Authentication related pages
-import Login from "../pages/Authentication/Login";
-import Logout from "../pages/Authentication/Logout";
-import Register from "../pages/Authentication/Register";
-import ForgetPwd from "../pages/Authentication/ForgetPassword";
-
-// Dashboard
-import Dashboard from "../pages/Dashboard/index";
-import Analytics from "pages/Analytics";
-
-import InitialReceiverDashboard from "../pages/InitialReceiver/Dashboard/index";
-import Receive from "../pages/InitialReceiver/ForReceiving/index";
-import AssessmentReceiverDashboard from "../pages/AssessmentReceiver/Dashboard/index";
-import AssessmentForReceiving from "../pages/AssessmentReceiver/ForReceiving/index";
-import AssessmentReleaserDashboard from "../pages/AssessmentReleaser/Dashboard/index";
-import AssessmentForReleasing from "../pages/AssessmentReleaser/ForReleasing/index";
-import CompleteReceiverDashboard from "../pages/CompleteReceiver/Dashboard/index";
-import CompleteForReceiving from "../pages/CompleteReceiver/ForReceiving/index";
-
-import NotificationsPage from "pages/Notification";
-
-import CryptoIcoLanding from "../pages/Crypto/CryptoIcoLanding/index";
-
-import PagesMaintenance from "../pages/Utility/pages-maintenance";
-import PagesComingsoon from "../pages/Utility/pages-comingsoon";
-import PagesForbidden from "../pages/Utility/pages-forbidden";
-
-import Pages404 from "../pages/Utility/pages-404";
-import Pages500 from "../pages/Utility/pages-500";
-import FinalReleaserDashboard from "pages/FinalReleaser/Dashboard";
-import FinalForReleasing from "pages/FinalReleaser/ForReleasing";
-import ForPrinting from "pages/FinalReleaser/ForPrinting";
-import Summary from "pages/Summary";
-
-import CbpldLandingPage from "pages/CbpldLandingPage";
-
-import ClientServices from "../pages/CbpldLandingPage/SpecialPermit/AuthClientPages/Services";
-import ClientProfile from "../pages/CbpldLandingPage/SpecialPermit/AuthClientPages/Profile";
-import ClientApplications from "../pages/CbpldLandingPage/SpecialPermit/AuthClientPages/Applications";
-
-
-import AdminPending from "../pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Pending";
-import AdminDashboard from "../pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Dashboard";
-import AdminForPaymentDashboard from "../pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Payment/ForPayment";
-import AdminReturnedDashboard from "../pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Payment/Returned";
-import AdminForPaymentApproval from "../pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Payment/ForApproval";
-import AdminForSignature from "../pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/ForSignature";
-import AdminControls from "../pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/AdminControls";
-import FormEditors from "pages/Forms/FormEditors";
-import EmailVerification from "pages/AuthenticationInner/auth-email-verification-2";
-import SpecialPermitEmailVerication from "pages/AuthenticationInner/SpecialPermitEmailVerication";
-import ForgetPasswordPage from "pages/AuthenticationInner/ForgetPassword";
-import ConfirmMail from "pages/AuthenticationInner/page-confirm-mail";
-
-//Offline Module
-import OfflineTransaction from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/OfflineTransaction";
-
-//QR code
-import SpecialPermitDetailsQr from "pages/CbpldLandingPage/SpecialPermit/SpecialPermitDetailsQr";
-import { components } from "react-select/dist/react-select.cjs.prod";
-import CedulaApplicationFormModal from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Modals/CedulaApplicationFormModal";
-import PassportCropper from "pages/TrialPages/PassportCropper";
-import TwostepVerification2 from "pages/AuthenticationInner/auth-two-step-verification-2";
-import TwostepVerification from "pages/AuthenticationInner/auth-two-step-verification";
-import SuperAdminControl from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/SuperAdminControl";
-import AdminDeclined from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Declined";
-import SpecialPermitAnalytics from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Analytics/index";
-import SpecialPermitReports from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Reports/index";
-import Release from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/OfflineTransaction/Release";
-import OfflineDashboard from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/OfflineTransaction/OfflineDashboard";
+// Each page is its own chunk so users only download what they open.
+const Controls = lazy(() => import("../pages/UserControls/Controls/index"));
+const UserProfile = lazy(() => import("../pages/Authentication/user-profile"));
+const Logout = lazy(() => import("../pages/Authentication/Logout"));
+const Register = lazy(() => import("../pages/Authentication/Register"));
+const ForgetPwd = lazy(() => import("../pages/Authentication/ForgetPassword"));
+const Analytics = lazy(() => import("pages/Analytics"));
+const CryptoIcoLanding = lazy(() => import("../pages/Crypto/CryptoIcoLanding/index"));
+const PagesMaintenance = lazy(() => import("../pages/Utility/pages-maintenance"));
+const PagesComingsoon = lazy(() => import("../pages/Utility/pages-comingsoon"));
+const PagesForbidden = lazy(() => import("../pages/Utility/pages-forbidden"));
+const Pages404 = lazy(() => import("../pages/Utility/pages-404"));
+const Pages500 = lazy(() => import("../pages/Utility/pages-500"));
+const CbpldLandingPage = lazy(() => import("pages/CbpldLandingPage"));
+const ClientServices = lazy(() => import("../pages/CbpldLandingPage/SpecialPermit/AuthClientPages/Services"));
+const ClientProfile = lazy(() => import("../pages/CbpldLandingPage/SpecialPermit/AuthClientPages/Profile"));
+const ClientApplications = lazy(() => import("../pages/CbpldLandingPage/SpecialPermit/AuthClientPages/Applications"));
+const AdminPending = lazy(() => import("../pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Pending"));
+const AdminDashboard = lazy(() => import("../pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Dashboard"));
+const AdminForPaymentDashboard = lazy(() => import("../pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Payment/ForPayment"));
+const AdminReturnedDashboard = lazy(() => import("../pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Payment/Returned"));
+const AdminForPaymentApproval = lazy(() => import("../pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Payment/ForApproval"));
+const AdminForSignature = lazy(() => import("../pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/ForSignature"));
+const AdminControls = lazy(() => import("../pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/AdminControls"));
+const SpecialPermitEmailVerication = lazy(() => import("pages/AuthenticationInner/SpecialPermitEmailVerication"));
+const ForgetPasswordPage = lazy(() => import("pages/AuthenticationInner/ForgetPassword"));
+const ConfirmMail = lazy(() => import("pages/AuthenticationInner/page-confirm-mail"));
+const OfflineTransaction = lazy(() => import("pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/OfflineTransaction"));
+const SpecialPermitDetailsQr = lazy(() => import("pages/CbpldLandingPage/SpecialPermit/SpecialPermitDetailsQr"));
+const TwostepVerification = lazy(() => import("pages/AuthenticationInner/auth-two-step-verification"));
+const SuperAdminControl = lazy(() => import("pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/SuperAdminControl"));
+const AdminDeclined = lazy(() => import("pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Declined"));
+const SpecialPermitAnalytics = lazy(() => import("pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Analytics/index"));
+const SpecialPermitReports = lazy(() => import("pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Reports/index"));
+const Release = lazy(() => import("pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/OfflineTransaction/Release"));
+const OfflineDashboard = lazy(() => import("pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/OfflineTransaction/OfflineDashboard"));
 
 // Old per-stage client URLs (still linked from sent emails / payment returns).
 const ToClientApplications = () => <Redirect to="/client/applications" />;

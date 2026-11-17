@@ -26,9 +26,10 @@ export default function FileIconFormat({
   toggleIsViewerOpen,
   getImageHandle,
   isAdmin = false,
+  label, // optional short text, e.g. "View" when the column header names the file
 }) {
-  const text = FILE_LABELS[fileType] || "";
-  if (!text) return null;
+  if (!FILE_LABELS[fileType]) return null;
+  const text = label || FILE_LABELS[fileType];
 
   const handleOpen = async () => {
     if (!getImageHandle) {
@@ -49,15 +50,9 @@ export default function FileIconFormat({
   };
 
   return (
-    <div
-      className="d-flex"
-      style={{
-        cursor: "pointer",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: "2px",
-      }}
+    <span
+      className="file-chip"
+      title={`View ${FILE_LABELS[fileType]}`}
       onClick={handleOpen}
       role="button"
       tabIndex={0}
@@ -65,29 +60,8 @@ export default function FileIconFormat({
         if (e.key === "Enter" || e.key === " ") handleOpen();
       }}
     >
-      <div
-        style={{
-          backgroundColor: "#CFD7F5",
-          borderRadius: "50%",
-          width: "30px",
-          height: "30px",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <i className="mdi mdi-file-check fs-5 text-primary" />
-      </div>
-      <span
-        style={{
-          fontWeight: "bold",
-          fontSize: "10px",
-          textDecoration: "underline",
-        }}
-        className="text-primary"
-      >
-        {text}
-      </span>
-    </div>
+      <i className="mdi mdi-file-check-outline" />
+      {text}
+    </span>
   );
 }

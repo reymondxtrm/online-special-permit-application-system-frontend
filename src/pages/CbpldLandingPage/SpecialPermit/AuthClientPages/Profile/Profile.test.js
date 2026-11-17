@@ -16,6 +16,7 @@ jest.mock("react-redux", () => ({
   useDispatch: () => (fn) => (typeof fn === "function" ? fn() : fn),
 }));
 jest.mock("../Modals/ChangePasswordModal", () => () => null);
+jest.mock("components/Common/Breadcrumb", () => () => null);
 
 const profile = {
   fname: "JUAN",

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import {
+  Container,
   Card,
   CardBody,
   Row,
@@ -17,6 +18,7 @@ import { ErrorMessage, Field, Form, Formik } from "formik";
 import * as Yup from "yup";
 import useSubmit from "hooks/Common/useSubmit";
 import ChangePasswordModal from "../Modals/ChangePasswordModal";
+import Breadcrumbs from "components/Common/Breadcrumb";
 
 const UserProfile = () => {
   const [editOccupationState, seteditOccupationState] = useState(false);
@@ -198,1056 +200,707 @@ const UserProfile = () => {
     return true;
   }, [userData]);
   return (
-    <div
-      style={{
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        margin: 0,
-      }}
-    >
-      <ChangePasswordModal
-        isOpen={changePassword}
-        toggle={handleChangePassword}
-      />
-      <Card
-        className="shadow-lg"
-        style={{
-          minHeight: "83%",
-          minWidth: "96%",
-          display: "flex",
-          padding: "2rem",
-          borderRadius: "10px",
-          boxShadow: "10px 10px 30px ",
-          marginTop: "40px",
-        }}
-      >
-        <CardBody style={{ display: "flex", flexDirection: "column" }}>
-          <Row style={{ flexGrow: 1 }}>
-            <Col
-              md="3"
-              style={{
-                borderRight: "1px solid #dee2e6", // Adjust the color as per your design
-                // textAlign: "center",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  minHeight: "100%",
-                  alignItems: "center",
-                  flexDirection: "column",
-                }}
-              >
+    <div className="page-content">
+      <Container fluid>
+        <Breadcrumbs title="Special Permit" breadcrumbItem="My Profile" />
+        <ChangePasswordModal
+          isOpen={changePassword}
+          toggle={handleChangePassword}
+        />
+        <Row>
+          <Col xs="12" lg="3">
+            <Card>
+              <CardBody className="text-center">
                 <img
-                  className="rounded-circle mt-5"
-                  width="300px"
-                  height="300px"
+                  className="rounded-circle mb-3"
+                  width="96"
+                  height="96"
+                  style={{ objectFit: "cover" }}
                   src={avatar1}
                   alt="Profile"
                 />
-
-                <span
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: "18pt",
-                    letterSpacing: ".1rem",
-                  }}
+                <h5 className="mb-1">{userDetails.name || ""}</h5>
+                <p className="text-muted mb-0 text-break">
+                  {userDetails.email || ""}
+                </p>
+                <hr />
+                <Button
+                  color="primary"
+                  outline
+                  block
+                  onClick={handleChangePassword}
                 >
-                  {userDetails.name ? userDetails.name : ""}
-                </span>
-                <span
-                  style={{
-                    fontSize: "12pt",
-                    letterSpacing: ".1rem",
-                  }}
-                >
-                  {userDetails.email ? userDetails.email : ""}
-                </span>
-              </div>
-            </Col>
+                  Change Password
+                </Button>
+              </CardBody>
+            </Card>
+          </Col>
 
-            <Col
-              md={individual ? "5" : "8"}
-              style={{ overflowY: "auto", maxHeight: "70vh" }}
-            >
-              {loadError && (
-                <div className="alert alert-danger">{loadError}</div>
-              )}
-              <Formik
-                initialValues={personalInitialValues}
-                validationSchema={personalValidationSchema}
-                onSubmit={(values, { setSubmitting }) => {
-                  setSubmitting(false);
-                  savePersonalDetails(values);
-                }}
-                enableReinitialize
-              >
-                {({ isSubmitting, values, resetForm }) => (
-                  <Form>
-                    <p
-                      style={{
-                        fontWeight: "bold",
-                        letterSpacing: ".2rem",
-                        fontSize: "18pt",
-                        margin: "0",
-                        padding: "0 0 0 12px", // top, right, bottom, left
-                        color: "#368be0",
-                      }}
-                    >
-                      {"PERSONAL INFORMATION"}
-                    </p>
-                    <div style={{ paddingTop: "25px" }}>
-                      <Table striped>
-                        <tbody>
-                          <tr>
-                            <th scope="row">
-                              {individual ? "Full Name:" : "Company Name:"}
-                            </th>
-                            <td>
-                              {isLoading
-                                ? "loading ..."
-                                : userData
-                                ? individual
-                                  ? userData.fullname
-                                  : userData.fname
-                                : ""}
-                              {editPersonalState && (
-                                <div className="text-muted small">
-                                  To correct your name or email, please contact
-                                  CBPLD.
-                                </div>
-                              )}
-                            </td>
-                          </tr>
-                          {individual ? (
-                            <React.Fragment>
-                              <tr>
-                                <th scope="row">Birthday:</th>
-                                <td>
-                                  {editableCell(
-                                    "birthdate",
-                                    formatDate(
-                                      userData?.user_details?.birthdate
-                                    ),
-                                    { type: "date" }
-                                  )}
-                                </td>
-                              </tr>
-                              <tr>
-                                <th scope="row">Age:</th>
-                                <td>
-                                  {isLoading
-                                    ? "loading ..."
-                                    : editPersonalState
-                                    ? values.birthdate
-                                      ? calculateAge(values.birthdate)
-                                      : ""
-                                    : userData?.user_details?.birthdate
-                                    ? calculateAge(
-                                        userData.user_details.birthdate
-                                      )
-                                    : ""}
-                                </td>
-                              </tr>
-                              <tr>
-                                <th scope="row">Birth Place:</th>
-                                <td>
-                                  {editableCell(
-                                    "birthplace",
-                                    userData?.user_details?.birthplace
-                                  )}
-                                </td>
-                              </tr>
-                              <tr>
-                                <th scope="row">Sex:</th>
-                                <td>
-                                  {editableCell("sex", userData?.sex, {
-                                    type: "select",
-                                    children: [
-                                      <option key="" value="">
-                                        Select Sex
-                                      </option>,
-                                      ...sexOptions.map((option) => (
-                                        <option key={option} value={option}>
-                                          {option}
-                                        </option>
-                                      )),
-                                    ],
-                                  })}
-                                </td>
-                              </tr>
-                              <tr>
-                                <th scope="row">Civil Status:</th>
-                                <td>
-                                  {editableCell(
-                                    "civil_status_id",
-                                    userData?.user_details?.civil_status?.name,
-                                    {
+          <Col xs="12" lg="9">
+            <Card>
+              <CardBody>
+                {loadError && (
+                  <div className="alert alert-danger">{loadError}</div>
+                )}
+                <Formik
+                  initialValues={personalInitialValues}
+                  validationSchema={personalValidationSchema}
+                  onSubmit={(values, { setSubmitting }) => {
+                    setSubmitting(false);
+                    savePersonalDetails(values);
+                  }}
+                  enableReinitialize
+                >
+                  {({ isSubmitting, values, resetForm }) => (
+                    <Form>
+                      <div className="d-flex justify-content-between align-items-center mb-3">
+                        <h5 className="text-primary mb-0">
+                          Personal Information
+                        </h5>
+                        {individual && userData && (
+                          <div className="d-flex gap-2">
+                            {editPersonalState ? (
+                              <>
+                                <Button
+                                  size="sm"
+                                  key="save-personal"
+                                  type="submit"
+                                  color="primary"
+                                  disabled={isSubmitting}
+                                >
+                                  Save
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  key="cancel-personal"
+                                  type="button"
+                                  color="light"
+                                  onClick={() => {
+                                    resetForm();
+                                    seteditPersonalState(false);
+                                  }}
+                                  disabled={isSubmitting}
+                                >
+                                  Cancel
+                                </Button>
+                              </>
+                            ) : (
+                              <Button
+                                size="sm"
+                                key="edit-personal"
+                                color="primary"
+                                type="button"
+                                onClick={() => seteditPersonalState(true)}
+                              >
+                                Edit Personal Details
+                              </Button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <Table striped>
+                          <tbody>
+                            <tr>
+                              <th scope="row">
+                                {individual ? "Full Name:" : "Company Name:"}
+                              </th>
+                              <td>
+                                {isLoading
+                                  ? "loading ..."
+                                  : userData
+                                  ? individual
+                                    ? userData.fullname
+                                    : userData.fname
+                                  : ""}
+                                {editPersonalState && (
+                                  <div className="text-muted small">
+                                    To correct your name or email, please
+                                    contact CBPLD.
+                                  </div>
+                                )}
+                              </td>
+                            </tr>
+                            {individual ? (
+                              <React.Fragment>
+                                <tr>
+                                  <th scope="row">Birthday:</th>
+                                  <td>
+                                    {editableCell(
+                                      "birthdate",
+                                      formatDate(
+                                        userData?.user_details?.birthdate
+                                      ),
+                                      { type: "date" }
+                                    )}
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Age:</th>
+                                  <td>
+                                    {isLoading
+                                      ? "loading ..."
+                                      : editPersonalState
+                                      ? values.birthdate
+                                        ? calculateAge(values.birthdate)
+                                        : ""
+                                      : userData?.user_details?.birthdate
+                                      ? calculateAge(
+                                          userData.user_details.birthdate
+                                        )
+                                      : ""}
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Birth Place:</th>
+                                  <td>
+                                    {editableCell(
+                                      "birthplace",
+                                      userData?.user_details?.birthplace
+                                    )}
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Sex:</th>
+                                  <td>
+                                    {editableCell("sex", userData?.sex, {
                                       type: "select",
                                       children: [
                                         <option key="" value="">
-                                          Select Civil Status
+                                          Select Sex
                                         </option>,
-                                        ...civilStatuses.map((status) => (
-                                          <option
-                                            key={status.id}
-                                            value={status.id}
-                                          >
-                                            {status.name}
-                                          </option>
-                                        )),
-                                      ],
-                                    }
-                                  )}
-                                </td>
-                              </tr>
-                              <tr>
-                                <th scope="row">Educational Attainment:</th>
-                                <td>
-                                  {editableCell(
-                                    "educational_attainment",
-                                    educationalAttainmentOptions.find(
-                                      (option) =>
-                                        option.value ===
-                                        userData?.user_details
-                                          ?.educational_attainment
-                                    )?.label ||
-                                      userData?.user_details
-                                        ?.educational_attainment,
-                                    {
-                                      type: "select",
-                                      children: [
-                                        <option key="" value="">
-                                          Select Educational Attainment
-                                        </option>,
-                                        ...educationalAttainmentOptions.map(
-                                          (option) => (
-                                            <option
-                                              key={option.value}
-                                              value={option.value}
-                                            >
-                                              {option.label}
-                                            </option>
-                                          )
-                                        ),
-                                      ],
-                                    }
-                                  )}
-                                </td>
-                              </tr>
-                              <tr>
-                                <th scope="row">Height (cm):</th>
-                                <td>
-                                  {editableCell(
-                                    "height",
-                                    userData?.user_details?.height,
-                                    { type: "number", step: "any", min: "0" }
-                                  )}
-                                </td>
-                              </tr>
-                              <tr>
-                                <th scope="row">Weight (kg):</th>
-                                <td>
-                                  {editableCell(
-                                    "weight",
-                                    userData?.user_details?.weight,
-                                    { type: "number", step: "any", min: "0" }
-                                  )}
-                                </td>
-                              </tr>
-                              <tr>
-                                <th scope="row">Blood Type:</th>
-                                <td>
-                                  {editableCell(
-                                    "blood_type",
-                                    userData?.user_details?.blood_type,
-                                    {
-                                      type: "select",
-                                      children: [
-                                        <option key="" value="">
-                                          Select Blood Type
-                                        </option>,
-                                        ...bloodTypeOptions.map((option) => (
+                                        ...sexOptions.map((option) => (
                                           <option key={option} value={option}>
                                             {option}
                                           </option>
                                         )),
                                       ],
-                                    }
-                                  )}
-                                </td>
-                              </tr>
-                            </React.Fragment>
-                          ) : null}
-                        </tbody>
-                      </Table>
-                    </div>
-
-                    {/* Contact Div */}
-                    <div>
-                      <p
-                        style={{
-                          fontWeight: "bold",
-                          letterSpacing: ".2rem",
-                          fontSize: "18pt",
-                          margin: "0",
-                          padding: "12px 0 0 12px", // top, right, bottom, left
-                          color: "#368be0",
-                        }}
-                      >
-                        {"CONTACT"}
-                      </p>
-                      <p
-                        style={{
-                          margin: "0",
-                          padding: "12px 0 0 12px", // top, right, bottom, left
-                        }}
-                      >
-                        <span style={{ fontWeight: "600" }}>Email: </span>
-                        {userDetails.email ? userDetails.email : ""}
-                      </p>
-
-                      {editPersonalState ? (
-                        <Table striped>
-                          <tbody>
-                            <tr>
-                              <th scope="row">Phone Number:</th>
-                              <td>{editableCell("contact_no")}</td>
-                            </tr>
+                                    })}
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Civil Status:</th>
+                                  <td>
+                                    {editableCell(
+                                      "civil_status_id",
+                                      userData?.user_details?.civil_status
+                                        ?.name,
+                                      {
+                                        type: "select",
+                                        children: [
+                                          <option key="" value="">
+                                            Select Civil Status
+                                          </option>,
+                                          ...civilStatuses.map((status) => (
+                                            <option
+                                              key={status.id}
+                                              value={status.id}
+                                            >
+                                              {status.name}
+                                            </option>
+                                          )),
+                                        ],
+                                      }
+                                    )}
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Educational Attainment:</th>
+                                  <td>
+                                    {editableCell(
+                                      "educational_attainment",
+                                      educationalAttainmentOptions.find(
+                                        (option) =>
+                                          option.value ===
+                                          userData?.user_details
+                                            ?.educational_attainment
+                                      )?.label ||
+                                        userData?.user_details
+                                          ?.educational_attainment,
+                                      {
+                                        type: "select",
+                                        children: [
+                                          <option key="" value="">
+                                            Select Educational Attainment
+                                          </option>,
+                                          ...educationalAttainmentOptions.map(
+                                            (option) => (
+                                              <option
+                                                key={option.value}
+                                                value={option.value}
+                                              >
+                                                {option.label}
+                                              </option>
+                                            )
+                                          ),
+                                        ],
+                                      }
+                                    )}
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Height (cm):</th>
+                                  <td>
+                                    {editableCell(
+                                      "height",
+                                      userData?.user_details?.height,
+                                      { type: "number", step: "any", min: "0" }
+                                    )}
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Weight (kg):</th>
+                                  <td>
+                                    {editableCell(
+                                      "weight",
+                                      userData?.user_details?.weight,
+                                      { type: "number", step: "any", min: "0" }
+                                    )}
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <th scope="row">Blood Type:</th>
+                                  <td>
+                                    {editableCell(
+                                      "blood_type",
+                                      userData?.user_details?.blood_type,
+                                      {
+                                        type: "select",
+                                        children: [
+                                          <option key="" value="">
+                                            Select Blood Type
+                                          </option>,
+                                          ...bloodTypeOptions.map((option) => (
+                                            <option key={option} value={option}>
+                                              {option}
+                                            </option>
+                                          )),
+                                        ],
+                                      }
+                                    )}
+                                  </td>
+                                </tr>
+                              </React.Fragment>
+                            ) : null}
                           </tbody>
                         </Table>
-                      ) : (
-                        <Table striped>
-                          <thead>
-                            <tr>
-                              <th>Phone Number</th>
-                              <th>Type</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {userData?.user_phone_numbers?.map(
-                              (items, index) => {
+                      </div>
+
+                      {/* Contact Div */}
+                      <div>
+                        <h6 className="text-primary mt-4 mb-2">Contact</h6>
+
+                        {editPersonalState ? (
+                          <Table striped>
+                            <tbody>
+                              <tr>
+                                <th scope="row">Phone Number:</th>
+                                <td>{editableCell("contact_no")}</td>
+                              </tr>
+                            </tbody>
+                          </Table>
+                        ) : (
+                          <Table striped>
+                            <thead>
+                              <tr>
+                                <th>Phone Number</th>
+                                <th>Type</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {userData?.user_phone_numbers?.map(
+                                (items, index) => {
+                                  return (
+                                    <tr key={index}>
+                                      <td>
+                                        {isLoading
+                                          ? "loading ..."
+                                          : items.phone_number}
+                                      </td>
+                                      <td>
+                                        {isLoading ? "loading ..." : items.type}
+                                      </td>
+                                    </tr>
+                                  );
+                                }
+                              )}
+                            </tbody>
+                          </Table>
+                        )}
+                      </div>
+
+                      {/* Address Div */}
+                      <div>
+                        <h6 className="text-primary mt-4 mb-2">Address</h6>
+
+                        {editPersonalState ? (
+                          <Table striped>
+                            <tbody>
+                              <tr>
+                                <th scope="row">Province:</th>
+                                <td>
+                                  {editableCell("province", null, {
+                                    placeholder: "Leave blank if Butuan City",
+                                  })}
+                                </td>
+                              </tr>
+                              <tr>
+                                <th scope="row">City:</th>
+                                <td>{editableCell("city")}</td>
+                              </tr>
+                              <tr>
+                                <th scope="row">Barangay:</th>
+                                <td>{editableCell("barangay")}</td>
+                              </tr>
+                              <tr>
+                                <th scope="row">Subdivision:</th>
+                                <td>{editableCell("subdivision")}</td>
+                              </tr>
+                              <tr>
+                                <th scope="row">
+                                  Specific Location/Address Line:
+                                </th>
+                                <td>{editableCell("address_line")}</td>
+                              </tr>
+                            </tbody>
+                          </Table>
+                        ) : (
+                          <Table striped>
+                            <thead>
+                              <tr>
+                                <th>City</th>
+                                <th>Barangay</th>
+                                <th>Subdivision</th>
+                                <th>Specific Location/Address Line</th>
+                                <th>Type</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {userData?.user_addresses?.map((items, index) => {
                                 return (
                                   <tr key={index}>
                                     <td>
-                                      {isLoading
-                                        ? "loading ..."
-                                        : items.phone_number}
+                                      {isLoading ? "loading ..." : items.city}
                                     </td>
                                     <td>
-                                      {isLoading ? "loading ..." : items.type}
+                                      {isLoading
+                                        ? "loading ..."
+                                        : items.barangay}
+                                    </td>
+                                    <td>
+                                      {isLoading
+                                        ? "loading ..."
+                                        : items.subdivision}
+                                    </td>
+                                    <td>
+                                      {isLoading
+                                        ? "loading ..."
+                                        : items.address_line}
+                                    </td>
+                                    <td>
+                                      {isLoading
+                                        ? "loading ..."
+                                        : items.address_type}
                                     </td>
                                   </tr>
                                 );
-                              }
-                            )}
-                          </tbody>
-                        </Table>
-                      )}
-                    </div>
-
-                    {/* Address Div */}
-                    <div>
-                      <p
-                        style={{
-                          fontWeight: "bold",
-                          letterSpacing: ".2rem",
-                          fontSize: "18pt",
-                          margin: "0",
-                          padding: "12px 0 0 12px", // top, right, bottom, left
-                          color: "#368be0",
-                        }}
-                      >
-                        {"Address"}
-                      </p>
-
-                      {editPersonalState ? (
-                        <Table striped>
-                          <tbody>
-                            <tr>
-                              <th scope="row">Province:</th>
-                              <td>
-                                {editableCell("province", null, {
-                                  placeholder: "Leave blank if Butuan City",
-                                })}
-                              </td>
-                            </tr>
-                            <tr>
-                              <th scope="row">City:</th>
-                              <td>{editableCell("city")}</td>
-                            </tr>
-                            <tr>
-                              <th scope="row">Barangay:</th>
-                              <td>{editableCell("barangay")}</td>
-                            </tr>
-                            <tr>
-                              <th scope="row">Subdivision:</th>
-                              <td>{editableCell("subdivision")}</td>
-                            </tr>
-                            <tr>
-                              <th scope="row">
-                                Specific Location/Address Line:
-                              </th>
-                              <td>{editableCell("address_line")}</td>
-                            </tr>
-                          </tbody>
-                        </Table>
-                      ) : (
-                        <Table striped>
-                          <thead>
-                            <tr>
-                              <th>City</th>
-                              <th>Barangay</th>
-                              <th>Subdivision</th>
-                              <th>Specific Location/Address Line</th>
-                              <th>Type</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {userData?.user_addresses?.map((items, index) => {
-                              return (
-                                <tr key={index}>
-                                  <td>
-                                    {isLoading ? "loading ..." : items.city}
-                                  </td>
-                                  <td>
-                                    {isLoading ? "loading ..." : items.barangay}
-                                  </td>
-                                  <td>
-                                    {isLoading
-                                      ? "loading ..."
-                                      : items.subdivision}
-                                  </td>
-                                  <td>
-                                    {isLoading
-                                      ? "loading ..."
-                                      : items.address_line}
-                                  </td>
-                                  <td>
-                                    {isLoading
-                                      ? "loading ..."
-                                      : items.address_type}
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </Table>
-                      )}
-                    </div>
-
-                    {individual && userData && (
-                      <div
-                        style={{
-                          paddingBottom: "15px",
-                          display: "flex",
-                          justifyContent: "flex-end",
-                        }}
-                      >
-                        {editPersonalState ? (
-                          <>
-                            <Button
-                              key="save-personal"
-                              type="submit"
-                              color="success"
-                              style={{ width: "80px", fontWeight: "600" }}
-                              disabled={isSubmitting}
-                            >
-                              Save
-                            </Button>
-                            <Button
-                              key="cancel-personal"
-                              type="button"
-                              color="secondary"
-                              onClick={() => {
-                                resetForm();
-                                seteditPersonalState(false);
-                              }}
-                              style={{
-                                marginLeft: "15px",
-                                width: "80px",
-                                fontWeight: "600",
-                              }}
-                              disabled={isSubmitting}
-                            >
-                              Cancel
-                            </Button>
-                          </>
-                        ) : (
-                          <Button
-                            key="edit-personal"
-                            type="button"
-                            style={{
-                              backgroundColor: "#1a56db",
-                              fontWeight: "600",
-                              color: "white",
-                            }}
-                            onClick={() => seteditPersonalState(true)}
-                          >
-                            Edit Personal Details
-                          </Button>
-                        )}
-                      </div>
-                    )}
-                  </Form>
-                )}
-              </Formik>
-              <div>
-                <p
-                  style={{
-                    fontWeight: "bold",
-                    letterSpacing: ".2rem",
-                    fontSize: "18pt",
-                    margin: "0",
-                    padding: "12px 0 0 12px", // top, right, bottom, left
-                    color: "#368be0",
-                  }}
-                >
-                  {"Password"}
-                </p>
-                <Table striped>
-                  <tbody>
-                    <tr>
-                      <td colSpan="2 " className="">
-                        <Button color="primary" onClick={handleChangePassword}>
-                          Change Password
-                        </Button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </Table>
-              </div>
-            </Col>
-            {individual && (
-              <Col md="4" style={{ overflowY: "auto", maxHeight: "70vh" }}>
-                <Formik
-                  innerRef={formikRef}
-                  initialValues={initialValues}
-                  validationSchema={validationSchema}
-                  onSubmit={handleSubmit}
-                  enableReinitialize
-                >
-                  {({ isSubmitting }) => (
-                    <Form>
-                      <p
-                        style={{
-                          fontWeight: "bold",
-                          letterSpacing: ".2rem",
-                          fontSize: "18pt",
-                          margin: "0",
-                          padding: "0 0 0 12px",
-                          color: "#368be0",
-                        }}
-                      >
-                        OCCUPATION DETAILS
-                      </p>
-
-                      <div style={{ paddingTop: "25px" }}>
-                        <Table striped>
-                          <tbody>
-                            <tr>
-                              <th scope="row">Company Name:</th>
-                              <td>
-                                {editOccupationState ? (
-                                  <>
-                                    <Field
-                                      as={Input}
-                                      id="companyName"
-                                      name="companyName"
-                                      placeholder="Enter Company Name"
-                                    />
-                                    <ErrorMessage
-                                      name="companyName"
-                                      component="div"
-                                      className="text-danger"
-                                    />
-                                  </>
-                                ) : (
-                                  userData?.user_occupation_details
-                                    ?.company_name || ""
-                                )}
-                              </td>
-                            </tr>
-                            <tr>
-                              <th scope="row">Position:</th>
-                              <td>
-                                {editOccupationState ? (
-                                  <>
-                                    <Field
-                                      as={Input}
-                                      id="position"
-                                      name="position"
-                                      placeholder="Enter Position"
-                                    />
-                                    <ErrorMessage
-                                      name="position"
-                                      component="div"
-                                      className="text-danger"
-                                    />
-                                  </>
-                                ) : (
-                                  userData?.user_occupation_details?.position ||
-                                  ""
-                                )}
-                              </td>
-                            </tr>
-                            <tr>
-                              <th scope="row">Date Hired:</th>
-                              <td>
-                                {editOccupationState ? (
-                                  <>
-                                    <Field
-                                      as={Input}
-                                      id="dateHired"
-                                      name="dateHired"
-                                      type="date"
-                                    />
-                                    <ErrorMessage
-                                      name="dateHired"
-                                      component="div"
-                                      className="text-danger"
-                                    />
-                                  </>
-                                ) : (
-                                  userData?.user_occupation_details
-                                    ?.date_hired || ""
-                                )}
-                              </td>
-                            </tr>
-                          </tbody>
-                        </Table>
-                      </div>
-
-                      <p
-                        style={{
-                          fontWeight: "bold",
-                          letterSpacing: ".2rem",
-                          fontSize: "18pt",
-                          margin: "0",
-                          padding: "0 0 0 12px",
-                          color: "#368be0",
-                        }}
-                      >
-                        COMPANY ADDRESS
-                      </p>
-
-                      <div style={{ paddingTop: "25px" }}>
-                        <Table striped>
-                          <tbody>
-                            <tr>
-                              <th scope="row">Province:</th>
-                              <td>
-                                {editOccupationState ? (
-                                  <>
-                                    <Field
-                                      as={Input}
-                                      id="province"
-                                      name="province"
-                                      placeholder="Enter Province"
-                                    />
-                                    <ErrorMessage
-                                      name="province"
-                                      component="div"
-                                      className="text-danger"
-                                    />
-                                  </>
-                                ) : (
-                                  userData?.user_occupation_details?.province ||
-                                  ""
-                                )}
-                              </td>
-                            </tr>
-                            <tr>
-                              <th scope="row">City:</th>
-                              <td>
-                                {editOccupationState ? (
-                                  <>
-                                    <Field
-                                      as={Input}
-                                      id="city"
-                                      name="city"
-                                      placeholder="Enter City"
-                                    />
-                                    <ErrorMessage
-                                      name="city"
-                                      component="div"
-                                      className="text-danger"
-                                    />
-                                  </>
-                                ) : (
-                                  userData?.user_occupation_details?.city || ""
-                                )}
-                              </td>
-                            </tr>
-                            <tr>
-                              <th scope="row">Barangay:</th>
-                              <td>
-                                {editOccupationState ? (
-                                  <>
-                                    <Field
-                                      as={Input}
-                                      id="barangay"
-                                      name="barangay"
-                                      placeholder="Enter Barangay"
-                                    />
-                                    <ErrorMessage
-                                      name="barangay"
-                                      component="div"
-                                      className="text-danger"
-                                    />
-                                  </>
-                                ) : (
-                                  userData?.user_occupation_details?.barangay ||
-                                  ""
-                                )}
-                              </td>
-                            </tr>
-                            <tr>
-                              <th scope="row">Subdivision:</th>
-                              <td>
-                                {editOccupationState ? (
-                                  <>
-                                    <Field
-                                      as={Input}
-                                      id="subdivision"
-                                      name="subdivision"
-                                      placeholder="Enter Subdivision"
-                                    />
-                                    <ErrorMessage
-                                      name="subdivision"
-                                      component="div"
-                                      className="text-danger"
-                                    />
-                                  </>
-                                ) : (
-                                  userData?.user_occupation_details
-                                    ?.subdivision || ""
-                                )}
-                              </td>
-                            </tr>
-                            <tr>
-                              <th scope="row">
-                                Specific Location/Address Line:
-                              </th>
-                              <td>
-                                {editOccupationState ? (
-                                  <>
-                                    <Field
-                                      as={Input}
-                                      id="addressLine"
-                                      name="addressLine"
-                                      placeholder="Enter Address Line"
-                                    />
-                                    <ErrorMessage
-                                      name="addressLine"
-                                      component="div"
-                                      className="text-danger"
-                                    />
-                                  </>
-                                ) : (
-                                  userData?.user_occupation_details
-                                    ?.address_line || ""
-                                )}
-                              </td>
-                            </tr>
-                          </tbody>
-                        </Table>
-                      </div>
-
-                      <div
-                        style={{
-                          paddingTop: "25px",
-                          display: "flex",
-                          justifyContent: "flex-end",
-                        }}
-                      >
-                        {editOccupationState ? (
-                          <>
-                            <Button
-                              type="button"
-                              onClick={() => {
-                                const formik = formikRef.current.values;
-
-                                // console.log(formik);
-                                // console.log(formik.amountPaid);
-                                // var bodyFormData = getFormData(formik);
-                                handleSubmit(
-                                  {
-                                    url: "api/client/edit/occupation-details",
-                                    message: {
-                                      title:
-                                        "Are you sure you want to Proceed?",
-                                      failedTitle: "FAILED",
-                                      success: "Success!",
-                                      error: "unknown error occured",
-                                    },
-                                    params: formik,
-                                  },
-                                  [
-                                    () => seteditOccupationState(false),
-                                    () => setrefresh(!refresh),
-                                  ],
-                                  []
-                                );
-                              }}
-                              color="success"
-                              style={{
-                                width: "80px",
-                                fontWeight: "600",
-                                fontFamily:
-                                  "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
-                              }}
-                              disabled={isSubmitting}
-                            >
-                              Save
-                            </Button>
-                            <Button
-                              type="button"
-                              color="secondary"
-                              onClick={() => seteditOccupationState(false)}
-                              style={{
-                                marginLeft: "15px",
-                                width: "80px",
-                                fontWeight: "600",
-                                fontFamily:
-                                  "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
-                              }}
-                              disabled={isSubmitting}
-                            >
-                              Cancel
-                            </Button>
-                          </>
-                        ) : (
-                          <Button
-                            style={{
-                              backgroundColor: "#1a56db",
-                              fontWeight: "600",
-                              fontFamily:
-                                "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
-                              color: "white",
-                              width: "80px",
-                            }}
-                            type="button"
-                            onClick={() => seteditOccupationState(true)}
-                          >
-                            Edit
-                          </Button>
+                              })}
+                            </tbody>
+                          </Table>
                         )}
                       </div>
                     </Form>
                   )}
                 </Formik>
-              </Col>
+              </CardBody>
+            </Card>
+            {individual && (
+              <Card>
+                <CardBody>
+                  <Formik
+                    innerRef={formikRef}
+                    initialValues={initialValues}
+                    validationSchema={validationSchema}
+                    onSubmit={handleSubmit}
+                    enableReinitialize
+                  >
+                    {({ isSubmitting }) => (
+                      <Form>
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                          <h5 className="text-primary mb-0">
+                            Occupation Details
+                          </h5>
+                          <div className="d-flex gap-2">
+                            {editOccupationState ? (
+                              <>
+                                <Button
+                                  size="sm"
+                                  type="button"
+                                  onClick={() => {
+                                    const formik = formikRef.current.values;
+
+                                    // console.log(formik);
+                                    // console.log(formik.amountPaid);
+                                    // var bodyFormData = getFormData(formik);
+                                    handleSubmit(
+                                      {
+                                        url: "api/client/edit/occupation-details",
+                                        message: {
+                                          title:
+                                            "Are you sure you want to Proceed?",
+                                          failedTitle: "FAILED",
+                                          success: "Success!",
+                                          error: "unknown error occured",
+                                        },
+                                        params: formik,
+                                      },
+                                      [
+                                        () => seteditOccupationState(false),
+                                        () => setrefresh(!refresh),
+                                      ],
+                                      []
+                                    );
+                                  }}
+                                  color="primary"
+                                  disabled={isSubmitting}
+                                >
+                                  Save
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  type="button"
+                                  color="light"
+                                  onClick={() => seteditOccupationState(false)}
+                                  disabled={isSubmitting}
+                                >
+                                  Cancel
+                                </Button>
+                              </>
+                            ) : (
+                              <Button
+                                size="sm"
+                                type="button"
+                                color="primary"
+                                onClick={() => seteditOccupationState(true)}
+                              >
+                                Edit
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <Table striped>
+                            <tbody>
+                              <tr>
+                                <th scope="row">Company Name:</th>
+                                <td>
+                                  {editOccupationState ? (
+                                    <>
+                                      <Field
+                                        as={Input}
+                                        id="companyName"
+                                        name="companyName"
+                                        placeholder="Enter Company Name"
+                                      />
+                                      <ErrorMessage
+                                        name="companyName"
+                                        component="div"
+                                        className="text-danger"
+                                      />
+                                    </>
+                                  ) : (
+                                    userData?.user_occupation_details
+                                      ?.company_name || ""
+                                  )}
+                                </td>
+                              </tr>
+                              <tr>
+                                <th scope="row">Position:</th>
+                                <td>
+                                  {editOccupationState ? (
+                                    <>
+                                      <Field
+                                        as={Input}
+                                        id="position"
+                                        name="position"
+                                        placeholder="Enter Position"
+                                      />
+                                      <ErrorMessage
+                                        name="position"
+                                        component="div"
+                                        className="text-danger"
+                                      />
+                                    </>
+                                  ) : (
+                                    userData?.user_occupation_details
+                                      ?.position || ""
+                                  )}
+                                </td>
+                              </tr>
+                              <tr>
+                                <th scope="row">Date Hired:</th>
+                                <td>
+                                  {editOccupationState ? (
+                                    <>
+                                      <Field
+                                        as={Input}
+                                        id="dateHired"
+                                        name="dateHired"
+                                        type="date"
+                                      />
+                                      <ErrorMessage
+                                        name="dateHired"
+                                        component="div"
+                                        className="text-danger"
+                                      />
+                                    </>
+                                  ) : (
+                                    userData?.user_occupation_details
+                                      ?.date_hired || ""
+                                  )}
+                                </td>
+                              </tr>
+                            </tbody>
+                          </Table>
+                        </div>
+
+                        <h6 className="text-primary mt-4 mb-2">
+                          Company Address
+                        </h6>
+
+                        <div>
+                          <Table striped>
+                            <tbody>
+                              <tr>
+                                <th scope="row">Province:</th>
+                                <td>
+                                  {editOccupationState ? (
+                                    <>
+                                      <Field
+                                        as={Input}
+                                        id="province"
+                                        name="province"
+                                        placeholder="Enter Province"
+                                      />
+                                      <ErrorMessage
+                                        name="province"
+                                        component="div"
+                                        className="text-danger"
+                                      />
+                                    </>
+                                  ) : (
+                                    userData?.user_occupation_details
+                                      ?.province || ""
+                                  )}
+                                </td>
+                              </tr>
+                              <tr>
+                                <th scope="row">City:</th>
+                                <td>
+                                  {editOccupationState ? (
+                                    <>
+                                      <Field
+                                        as={Input}
+                                        id="city"
+                                        name="city"
+                                        placeholder="Enter City"
+                                      />
+                                      <ErrorMessage
+                                        name="city"
+                                        component="div"
+                                        className="text-danger"
+                                      />
+                                    </>
+                                  ) : (
+                                    userData?.user_occupation_details?.city ||
+                                    ""
+                                  )}
+                                </td>
+                              </tr>
+                              <tr>
+                                <th scope="row">Barangay:</th>
+                                <td>
+                                  {editOccupationState ? (
+                                    <>
+                                      <Field
+                                        as={Input}
+                                        id="barangay"
+                                        name="barangay"
+                                        placeholder="Enter Barangay"
+                                      />
+                                      <ErrorMessage
+                                        name="barangay"
+                                        component="div"
+                                        className="text-danger"
+                                      />
+                                    </>
+                                  ) : (
+                                    userData?.user_occupation_details
+                                      ?.barangay || ""
+                                  )}
+                                </td>
+                              </tr>
+                              <tr>
+                                <th scope="row">Subdivision:</th>
+                                <td>
+                                  {editOccupationState ? (
+                                    <>
+                                      <Field
+                                        as={Input}
+                                        id="subdivision"
+                                        name="subdivision"
+                                        placeholder="Enter Subdivision"
+                                      />
+                                      <ErrorMessage
+                                        name="subdivision"
+                                        component="div"
+                                        className="text-danger"
+                                      />
+                                    </>
+                                  ) : (
+                                    userData?.user_occupation_details
+                                      ?.subdivision || ""
+                                  )}
+                                </td>
+                              </tr>
+                              <tr>
+                                <th scope="row">
+                                  Specific Location/Address Line:
+                                </th>
+                                <td>
+                                  {editOccupationState ? (
+                                    <>
+                                      <Field
+                                        as={Input}
+                                        id="addressLine"
+                                        name="addressLine"
+                                        placeholder="Enter Address Line"
+                                      />
+                                      <ErrorMessage
+                                        name="addressLine"
+                                        component="div"
+                                        className="text-danger"
+                                      />
+                                    </>
+                                  ) : (
+                                    userData?.user_occupation_details
+                                      ?.address_line || ""
+                                  )}
+                                </td>
+                              </tr>
+                            </tbody>
+                          </Table>
+                        </div>
+                      </Form>
+                    )}
+                  </Formik>
+                </CardBody>
+              </Card>
             )}
-
-            {/* <Col md="4">
-              <p
-                style={{
-                  fontWeight: "bold",
-                  letterSpacing: ".2rem",
-                  fontSize: "18pt",
-                  margin: "0",
-                  padding: "0 0 0 12px", // top, right, bottom, left
-                  color: "#368be0",
-                }}
-              >
-                {"OCCUPATION DETAILS"}
-              </p>
-
-              <div style={{ paddingTop: "25px" }}>
-                <Table striped>
-                  <tbody>
-                    <tr>
-                      <th scope="row">Company Name:</th>
-                      <td>
-                        {editOccupationState ? (
-                          <Input
-                            id="companyName"
-                            name={`companyName`}
-                            placeholder="Enter Company Name"
-                            // onChange={props.handleChange}
-                          />
-                        ) : userData?.user_occupation_details?.company_name ? (
-                          userData.user_occupation_details.company_name
-                        ) : (
-                          ""
-                        )}
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Position:</th>
-                      <td>
-                        {editOccupationState ? (
-                          <Input
-                            id="position"
-                            name={`position`}
-                            placeholder="Enter Position"
-                            // onChange={props.handleChange}
-                          />
-                        ) : userData?.user_occupation_details?.position ? (
-                          userData.user_occupation_details.position
-                        ) : (
-                          ""
-                        )}
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Date Hired:</th>
-                      <td>
-                        {editOccupationState ? (
-                          <Input
-                            id="dateHired"
-                            name={`dateHired`}
-                            type="date"
-                            // onChange={props.handleChange}
-                          />
-                        ) : userData?.user_occupation_details?.date_hired ? (
-                          userData.user_occupation_details.date_hired
-                        ) : (
-                          ""
-                        )}
-                      </td>
-                    </tr>
-                  </tbody>
-                </Table>
-              </div>
-
-              <p
-                style={{
-                  fontWeight: "bold",
-                  letterSpacing: ".2rem",
-                  fontSize: "18pt",
-                  margin: "0",
-                  padding: "0 0 0 12px", // top, right, bottom, left
-                  color: "#368be0",
-                }}
-              >
-                {"COMPANY ADDRESS"}
-              </p>
-
-              <div style={{ paddingTop: "25px" }}>
-                <Table striped>
-                  <tbody>
-                    <tr>
-                      <th scope="row">Province:</th>
-                      <td>
-                        {editOccupationState ? (
-                          <Input
-                            id="province"
-                            name={`province`}
-                            placeholder="Enter Province"
-                            // onChange={props.handleChange}
-                          />
-                        ) : userData?.user_occupation_details?.province ? (
-                          userData.user_occupation_details.province
-                        ) : (
-                          ""
-                        )}
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">City:</th>
-                      <td>
-                        {editOccupationState ? (
-                          <Input
-                            id="city"
-                            name={`city`}
-                            placeholder="Enter City"
-                            // onChange={props.handleChange}
-                          />
-                        ) : userData?.user_occupation_details?.city ? (
-                          userData.user_occupation_details.city
-                        ) : (
-                          ""
-                        )}
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Barangay:</th>
-                      <td>
-                        {editOccupationState ? (
-                          <Input
-                            id="barangay"
-                            name={`barangay`}
-                            placeholder="Enter Barangay"
-                            // onChange={props.handleChange}
-                          />
-                        ) : userData?.user_occupation_details?.barangay ? (
-                          userData.user_occupation_details.barangay
-                        ) : (
-                          ""
-                        )}
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Specific Location/Address Line:</th>
-                      <td>
-                        {editOccupationState ? (
-                          <Input
-                            id="addressLine"
-                            name={`addressLine`}
-                            placeholder="Enter Address Line"
-                            // onChange={props.handleChange}
-                          />
-                        ) : userData?.user_occupation_details?.address_line ? (
-                          userData.user_occupation_details.address_line
-                        ) : (
-                          ""
-                        )}
-                      </td>
-                    </tr>
-                  </tbody>
-                </Table>
-              </div>
-
-              <div
-                style={{
-                  paddingTop: "25px",
-                  display: "flex",
-                  justifyContent: "flex-end",
-                }}
-              >
-                {editOccupationState === false ? (
-                  <Button
-                    style={{
-                      backgroundColor: "#1a56db",
-                      fontWeight: "600",
-                      fontFamily:
-                        "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
-                      color: "white",
-                      width: "80px",
-                    }}
-                    onClick={() => {
-                      seteditOccupationState(true);
-                    }}
-                  >
-                    Edit
-                  </Button>
-                ) : (
-                  <Button
-                    style={{
-                      // backgroundColor: "#1a56db",
-                      width: "80px",
-                      fontWeight: "600",
-                      fontFamily:
-                        "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
-                      // color: "white",
-                    }}
-                    color="success"
-                    onClick={() => {
-                      seteditOccupationState(false);
-                    }}
-                  >
-                    Save
-                  </Button>
-                )}
-              </div>
-            </Col> */}
-          </Row>
-        </CardBody>
-      </Card>
+          </Col>
+        </Row>
+      </Container>
     </div>
   );
 };

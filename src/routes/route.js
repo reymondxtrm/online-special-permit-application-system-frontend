@@ -1,6 +1,19 @@
-import React from "react";
+import React, { Suspense } from "react";
 import PropTypes from "prop-types";
 import { Route, Redirect } from "react-router-dom";
+
+// Shown while a lazy page chunk downloads.
+const PageLoader = () => (
+  <div
+    className="d-flex justify-content-center align-items-center"
+    style={{ minHeight: "60vh" }}
+    role="status"
+    aria-live="polite"
+  >
+    <div className="spinner-border text-primary" />
+    <span className="visually-hidden">Loading...</span>
+  </div>
+);
 
 const Authmiddleware = ({
   component: Component,
@@ -42,7 +55,9 @@ const Authmiddleware = ({
             }
             return (
               <Layout>
-                <Component {...props} />
+                <Suspense fallback={<PageLoader />}>
+                  <Component {...props} />
+                </Suspense>
               </Layout>
             );
           }}

@@ -1,0 +1,175 @@
+//
+// _polish.scss — light global UI refinements on top of the template.
+// Screen only, so printables keep their exact print styling.
+//
+
+@media screen {
+  // Smoother font rendering
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  // Cards: softer corners, hairline border, gentle shadow
+  .card {
+    border: 1px solid rgba($gray-700, 0.06);
+    border-radius: 0.6rem;
+    box-shadow: 0 1px 3px rgba(18, 38, 63, 0.05);
+  }
+
+  // Buttons
+  .btn {
+    border-radius: 0.4rem;
+    font-weight: 500;
+    transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s,
+      transform 0.1s;
+
+    &:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+  }
+
+  // Inputs: consistent radius and a visible, soft focus ring
+  .form-control,
+  .form-select {
+    border-radius: 0.4rem;
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &:focus {
+      border-color: rgba($primary, 0.6);
+      box-shadow: 0 0 0 0.2rem rgba($primary, 0.15);
+    }
+  }
+
+  // Keyboard users get a clear focus outline (theme.scss removes outlines)
+  .btn:focus-visible,
+  a:focus-visible,
+  .form-check-input:focus-visible {
+    outline: 2px solid rgba($primary, 0.5) !important;
+    outline-offset: 2px;
+  }
+
+  // Modals
+  .modal-content {
+    border: 0;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 40px rgba(18, 38, 63, 0.15);
+    overflow: hidden;
+  }
+  .modal-header,
+  .modal-footer {
+    border-color: rgba($gray-700, 0.08);
+  }
+  .modal-title {
+    font-weight: $font-weight-semibold;
+  }
+
+  // Data tables (printable form tables use .table-container and are left alone)
+  .table:not(.table-container) {
+    > thead th {
+      font-weight: $font-weight-semibold;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+    > tbody td {
+      vertical-align: middle;
+    }
+    > tbody tr {
+      transition: background-color 0.12s;
+    }
+    > tbody tr:hover > * {
+      background-color: rgba($primary, 0.035);
+    }
+  }
+
+  // Client applications table: compact muted header, roomier rows
+  .tableFixHead .client-table {
+    margin-bottom: 0.5rem;
+
+    > thead th {
+      background-color: $gray-100;
+      color: $gray-600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding-top: 0.7rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid rgba($gray-700, 0.1);
+    }
+    > tbody td {
+      padding-top: 0.85rem;
+      padding-bottom: 0.85rem;
+      border-color: rgba($gray-700, 0.07);
+    }
+  }
+
+  // Attachment link chip (FileIconFormat)
+  .file-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px 3px 8px;
+    border-radius: 999px;
+    background-color: rgba($primary, 0.08);
+    color: $primary;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.15s;
+
+    i {
+      font-size: 14px;
+    }
+    &:hover {
+      background-color: rgba($primary, 0.16);
+    }
+  }
+
+  // Badges read better with a bit more room
+  .badge:not(.rounded-pill) {
+    padding: 0.4em 0.65em;
+    border-radius: 0.35rem;
+    font-weight: 500;
+  }
+
+  // Sidebar: rounded, tinted active/hover items
+  #sidebar-menu ul li a {
+    transition: color 0.15s, background-color 0.15s;
+  }
+  #sidebar-menu > ul > li > a {
+    margin: 2px 10px;
+    border-radius: 0.4rem;
+    padding-left: 0.9rem;
+    padding-right: 0.9rem;
+
+    &:hover {
+      background-color: rgba($primary, 0.06);
+    }
+  }
+  #sidebar-menu > ul > li.mm-active > a {
+    background-color: rgba($primary, 0.1);
+  }
+
+  // Slim, unobtrusive scrollbars
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba($gray-600, 0.3);
+    border-radius: 8px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba($gray-600, 0.5);
+  }
+}
+
+// Respect reduced-motion preference
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}

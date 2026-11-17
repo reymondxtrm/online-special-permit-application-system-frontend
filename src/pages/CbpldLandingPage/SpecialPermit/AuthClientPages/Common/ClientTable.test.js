@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import React from "react";
 import { render, screen, fireEvent, within } from "@testing-library/react";
 import ClientTable from "./ClientTable";

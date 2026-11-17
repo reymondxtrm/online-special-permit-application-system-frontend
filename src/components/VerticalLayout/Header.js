@@ -176,7 +176,7 @@ const Header = (props) => {
               </button>
             </div>
 
-            <NotificationDropdown />
+            {/* <NotificationDropdown /> */}
             <ProfileMenu userType={userDetails.user_type} />
             {/* {userRole === "Administrator" && (
               <div

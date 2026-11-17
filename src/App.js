@@ -21,6 +21,20 @@ import Authmiddleware from "./routes/route";
 import VerticalLayout from "./components/VerticalLayout";
 import NonAuthLayout from "./components/NonAuthLayout";
 
+// Pages are lazy-loaded, but these global (non-module) styles leak between
+// printables/modals, so keep them loaded up front and before the theme, as before.
+import "sweetalert2/dist/sweetalert2.min.css";
+import "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Modals/Common/RoutePlanViewer.css";
+import "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Printables/MayorsAndGoodMoralRequestForm.css";
+import "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Printables/OccupationalRequestForm.css";
+import "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Printables/RequestForm.css";
+import "pages/CbpldLandingPage/SpecialPermit/AuthClientPages/Modals/PaymentModal.css";
+import "pages/CbpldLandingPage/SpecialPermit/Printables/CedulaApplicationForm/cedulaApplicationForm.css";
+import "pages/CbpldLandingPage/SpecialPermit/Printables/Certification/style.css";
+import "pages/CbpldLandingPage/SpecialPermit/Printables/Events/style.css";
+import "pages/CbpldLandingPage/SpecialPermit/Printables/OccupationalCertificate/OccupationalCertificate.css";
+import "pages/CbpldLandingPage/SpecialPermit/SpecialPermitDetailsQr/style.css";
+
 // Import scss
 import "./assets/scss/theme.scss";
 import "./assets/css/tableStyle.css";
