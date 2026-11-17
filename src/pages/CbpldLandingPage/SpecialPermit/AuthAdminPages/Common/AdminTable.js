@@ -66,6 +66,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
   const [remarksModal, setremarksModal] = useState(false);
   const [returnRemarksModal, setreturnRemarksModal] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState(null);
+  const [selectedPaymentDetail, setSelectedPaymentDetail] = useState(null);
   const [refreshPage, setrefreshPage] = useState(false);
   const [generateModal, setgenerateModal] = useState(false);
   const [uploadModal, setuploadModal] = useState(false);
@@ -196,8 +197,9 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
     }
   }, [activeTab, refreshPage]);
 
-  const handleViewAttachments = (uploadedFiles) => {
+  const handleViewAttachments = (uploadedFiles, paymentDetail = null) => {
     setSelectedFiles(uploadedFiles);
+    setSelectedPaymentDetail(paymentDetail);
     setAttachmentModal(true);
   };
   const togglePdfViewer = () => {
@@ -256,6 +258,7 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
         toggleModal={toggleAttachmentModal}
         openModal={attachmentModal}
         uploadedFiles={selectedFiles}
+        paymentDetail={selectedPaymentDetail}
         applicationType={applicationType}
         mainActiveTab={activeTab}
       />
@@ -655,7 +658,13 @@ const AdminTable = ({ applicationType, status, activeTab }) => {
                           <Button
                             color="success"
                             onClick={() =>
-                              handleViewAttachments(application.uploaded_file)
+                              handleViewAttachments(
+                                application.uploaded_file,
+                                status === "completed"
+                                  ? application?.order_of_payment
+                                      ?.payment_detail
+                                  : null,
+                              )
                             }
                           >
                             Attachments

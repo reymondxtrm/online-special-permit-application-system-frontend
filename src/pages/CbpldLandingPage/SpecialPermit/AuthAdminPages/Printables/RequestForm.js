@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import cgbLogo from "../../../../../assets/images/cgbLogo.png";
 import headerLine from "../../../../../assets/images/permitHeaderLine.png";
-import butuanOnLogo from "../../../../../assets/images/butuanOnLogo.png";
+import butuanOnLogo from "../../../../../assets/images/butuanOnLogoRising.png";
 import footerLine from "../../../../../assets/images/permitFooterLine.png";
 import tuvLogo from "../../../../../assets/images/TUV.jpg";
 import qrCode from "../../../../../assets/images/qr.jpg";
@@ -143,7 +143,7 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                 </p>
                 <p className="rf18-header-city">Butuan City</p>
               </div>
-              <p className="rf18-revised">Revised on March 19, 2026</p>
+              <p className="rf18-revised">Revised on October 14, 2026</p>
             </div>
           </div>
           <img className="rf18-rule" src={headerLine} alt="" />
@@ -352,7 +352,7 @@ export default function RequestForm({ isOpen, toggle, applicationId }) {
                     alt="Butuan ON"
                     className="rf18-butuanon"
                   />
-                  <p className="rf18-form-code">CBPLD.BPLD.F.018.REV06</p>
+                  <p className="rf18-form-code">CBPLD.BPLD.F.018.REV07</p>
                 </td>
               </tr>
             </tbody>

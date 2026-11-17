@@ -803,7 +803,7 @@ function PaymentModal({
                                             window.location.protocol +
                                             "//" +
                                             process.env.REACT_APP_URL +
-                                            "client/for-payment/dashboard",
+                                            "client/applications",
                                           new_collection: eor_collection,
                                           updateUrl: {
                                             // link: "http://ospas01.b.staging.butuan.gov.ph/api/online/create-db-state",

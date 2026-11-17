@@ -25,6 +25,9 @@ const UserProfile = () => {
   const [refresh, setrefresh] = useState(false);
   const userDetails = useSelector((state) => state.user);
   const [changePassword, setChangePassword] = useState(false);
+  const [editPersonalState, seteditPersonalState] = useState(false);
+  const [civilStatuses, setcivilStatuses] = useState([]);
+  const [loadError, setloadError] = useState("");
 
   const handleSubmit = useSubmit();
   const formikRef = useRef(null);
@@ -34,21 +37,111 @@ const UserProfile = () => {
 
   useEffect(() => {
     setisLoading(true);
-    axios
-      .get("api/client/user-details", {
-        params: { permit_type: "good_moral" },
-      })
-      .then(
-        (res) => {
-          setisLoading(false);
-          setuserData(res.data);
-        },
-        (error) => {
-          setisLoading(false);
-          console.log(error);
-        },
-      );
+    setloadError("");
+    axios.get("api/client/profile").then(
+      (res) => {
+        setisLoading(false);
+        setuserData(res.data);
+      },
+      (error) => {
+        setisLoading(false);
+        setloadError(error.response?.data?.message);
+      }
+    );
   }, [refresh]);
+
+  useEffect(() => {
+    axios.get("api/get-civil-status").then(
+      (res) => setcivilStatuses(res.data),
+      () => setcivilStatuses([])
+    );
+  }, []);
+
+  const phone = userData?.user_phone_numbers?.[0];
+  const address = userData?.user_addresses?.[0];
+
+  const personalInitialValues = {
+    birthdate: userData?.user_details?.birthdate?.slice(0, 10) || "",
+    birthplace: userData?.user_details?.birthplace || "",
+    sex: (userData?.sex || "").toUpperCase(),
+    civil_status_id: userData?.user_details?.civil_status_id || "",
+    educational_attainment:
+      userData?.user_details?.educational_attainment || "",
+    height: userData?.user_details?.height || "",
+    weight: userData?.user_details?.weight || "",
+    blood_type: userData?.user_details?.blood_type || "",
+    contact_no: phone?.phone_number || "",
+    province: address?.province || "",
+    city: address?.city || "",
+    barangay: address?.barangay || "",
+    subdivision: address?.subdivision || "",
+    address_line: address?.address_line || "",
+  };
+
+  const personalValidationSchema = Yup.object().shape({
+    birthdate: Yup.date()
+      .required("Birthday is required")
+      .max(new Date(), "Birthday cannot be in the future"),
+    birthplace: Yup.string().required("Birth place is required"),
+    sex: Yup.string().required("Sex is required"),
+    civil_status_id: Yup.string().required("Civil status is required"),
+    educational_attainment: Yup.string().required(
+      "Educational attainment is required"
+    ),
+    height: Yup.number()
+      .typeError("Height must be a number")
+      .required("Height is required"),
+    weight: Yup.number()
+      .typeError("Weight must be a number")
+      .required("Weight is required"),
+    blood_type: Yup.string().nullable(),
+    contact_no: Yup.string().required("Phone number is required"),
+    province: Yup.string().nullable(),
+    city: Yup.string().required("City is required"),
+    barangay: Yup.string().required("Barangay is required"),
+    subdivision: Yup.string().nullable(),
+    address_line: Yup.string().required("Address line is required"),
+  });
+
+  // Same option values as the registration form
+  const sexOptions = ["MALE", "FEMALE"];
+  const educationalAttainmentOptions = [
+    { value: "College Graduate", label: "College Graduate" },
+    { value: "High-school Graduate", label: "High-school Graduate" },
+    { value: "SeniorGraduate", label: "Senior-High Graduate" },
+    { value: "Non-Graduate", label: "Non-Graduate" },
+    { value: "Vocational Graduate", label: "Vocational Graduate" },
+  ];
+  const bloodTypeOptions = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+
+  const savePersonalDetails = (values) => {
+    handleSubmit(
+      {
+        url: "api/client/profile/update",
+        message: {
+          title: "Are you sure you want to save your personal details?",
+          failedTitle: "FAILED",
+          success: "Profile updated!",
+        },
+        params: values,
+      },
+      [() => seteditPersonalState(false), () => setrefresh(!refresh)],
+      []
+    );
+  };
+
+  // Shows the value, or an input with its error while editing
+  const editableCell = (name, display, inputProps = {}) =>
+    editPersonalState ? (
+      <>
+        <Field as={Input} id={name} name={name} {...inputProps} />
+        <ErrorMessage name={name} component="div" className="text-danger" />
+      </>
+    ) : isLoading ? (
+      "loading ..."
+    ) : (
+      display ?? ""
+    );
 
   const initialValues = {
     companyName: userData?.user_occupation_details?.company_name || "",
@@ -73,6 +166,7 @@ const UserProfile = () => {
   });
 
   function formatDate(dateStr) {
+    if (!dateStr) return "";
     const date = new Date(dateStr);
 
     const month = date.toLocaleString("en-US", { month: "short" }); // 'Oct'
@@ -178,177 +272,428 @@ const UserProfile = () => {
               md={individual ? "5" : "8"}
               style={{ overflowY: "auto", maxHeight: "70vh" }}
             >
-              <p
-                style={{
-                  fontWeight: "bold",
-                  letterSpacing: ".2rem",
-                  fontSize: "18pt",
-                  margin: "0",
-                  padding: "0 0 0 12px", // top, right, bottom, left
-                  color: "#368be0",
+              {loadError && (
+                <div className="alert alert-danger">{loadError}</div>
+              )}
+              <Formik
+                initialValues={personalInitialValues}
+                validationSchema={personalValidationSchema}
+                onSubmit={(values, { setSubmitting }) => {
+                  setSubmitting(false);
+                  savePersonalDetails(values);
                 }}
+                enableReinitialize
               >
-                {"PERSONAL INFORMATION"}
-              </p>
-              <div style={{ paddingTop: "25px" }}>
-                <Table striped>
-                  <tbody>
-                    <tr>
-                      <th scope="row">
-                        {individual ? "Full Name:" : "Company Name:"}
-                      </th>
-                      <td>
-                        {isLoading
-                          ? "loading ..."
-                          : userData
-                          ? userData.fname
-                          : ""}
-                      </td>
-                    </tr>
-                    {individual ? (
-                      <React.Fragment>
-                        <tr>
-                          <th scope="row">Birthday:</th>
-                          <td>
-                            {isLoading
-                              ? "loading ..."
-                              : userData
-                              ? formatDate(userData?.user_details?.birthdate)
-                              : ""}
-                          </td>
-                        </tr>
-                        <tr>
-                          <th scope="row">Age:</th>
-                          <td>
-                            {isLoading
-                              ? "loading ..."
-                              : userData
-                              ? calculateAge(userData?.user_details?.birthdate)
-                              : ""}
-                          </td>
-                        </tr>
-                        <tr>
-                          <th scope="row">Birth Place:</th>
-                          <td>
-                            {isLoading
-                              ? "loading ..."
-                              : userData
-                              ? userData?.user_details?.birthplace
-                              : ""}
-                          </td>
-                        </tr>
-                        <tr>
-                          <th scope="row">Civil Status:</th>
-                          <td>
-                            {isLoading
-                              ? "loading ..."
-                              : userData
-                              ? userData?.user_details?.civil_status?.name
-                              : ""}
-                          </td>
-                        </tr>
-                        <tr>
-                          <th scope="row">Educational Attainment:</th>
-                          <td>College Graduate</td>
-                        </tr>
-                      </React.Fragment>
-                    ) : null}
-                  </tbody>
-                </Table>
-              </div>
+                {({ isSubmitting, values, resetForm }) => (
+                  <Form>
+                    <p
+                      style={{
+                        fontWeight: "bold",
+                        letterSpacing: ".2rem",
+                        fontSize: "18pt",
+                        margin: "0",
+                        padding: "0 0 0 12px", // top, right, bottom, left
+                        color: "#368be0",
+                      }}
+                    >
+                      {"PERSONAL INFORMATION"}
+                    </p>
+                    <div style={{ paddingTop: "25px" }}>
+                      <Table striped>
+                        <tbody>
+                          <tr>
+                            <th scope="row">
+                              {individual ? "Full Name:" : "Company Name:"}
+                            </th>
+                            <td>
+                              {isLoading
+                                ? "loading ..."
+                                : userData
+                                ? individual
+                                  ? userData.fullname
+                                  : userData.fname
+                                : ""}
+                              {editPersonalState && (
+                                <div className="text-muted small">
+                                  To correct your name or email, please contact
+                                  CBPLD.
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                          {individual ? (
+                            <React.Fragment>
+                              <tr>
+                                <th scope="row">Birthday:</th>
+                                <td>
+                                  {editableCell(
+                                    "birthdate",
+                                    formatDate(
+                                      userData?.user_details?.birthdate
+                                    ),
+                                    { type: "date" }
+                                  )}
+                                </td>
+                              </tr>
+                              <tr>
+                                <th scope="row">Age:</th>
+                                <td>
+                                  {isLoading
+                                    ? "loading ..."
+                                    : editPersonalState
+                                    ? values.birthdate
+                                      ? calculateAge(values.birthdate)
+                                      : ""
+                                    : userData?.user_details?.birthdate
+                                    ? calculateAge(
+                                        userData.user_details.birthdate
+                                      )
+                                    : ""}
+                                </td>
+                              </tr>
+                              <tr>
+                                <th scope="row">Birth Place:</th>
+                                <td>
+                                  {editableCell(
+                                    "birthplace",
+                                    userData?.user_details?.birthplace
+                                  )}
+                                </td>
+                              </tr>
+                              <tr>
+                                <th scope="row">Sex:</th>
+                                <td>
+                                  {editableCell("sex", userData?.sex, {
+                                    type: "select",
+                                    children: [
+                                      <option key="" value="">
+                                        Select Sex
+                                      </option>,
+                                      ...sexOptions.map((option) => (
+                                        <option key={option} value={option}>
+                                          {option}
+                                        </option>
+                                      )),
+                                    ],
+                                  })}
+                                </td>
+                              </tr>
+                              <tr>
+                                <th scope="row">Civil Status:</th>
+                                <td>
+                                  {editableCell(
+                                    "civil_status_id",
+                                    userData?.user_details?.civil_status?.name,
+                                    {
+                                      type: "select",
+                                      children: [
+                                        <option key="" value="">
+                                          Select Civil Status
+                                        </option>,
+                                        ...civilStatuses.map((status) => (
+                                          <option
+                                            key={status.id}
+                                            value={status.id}
+                                          >
+                                            {status.name}
+                                          </option>
+                                        )),
+                                      ],
+                                    }
+                                  )}
+                                </td>
+                              </tr>
+                              <tr>
+                                <th scope="row">Educational Attainment:</th>
+                                <td>
+                                  {editableCell(
+                                    "educational_attainment",
+                                    educationalAttainmentOptions.find(
+                                      (option) =>
+                                        option.value ===
+                                        userData?.user_details
+                                          ?.educational_attainment
+                                    )?.label ||
+                                      userData?.user_details
+                                        ?.educational_attainment,
+                                    {
+                                      type: "select",
+                                      children: [
+                                        <option key="" value="">
+                                          Select Educational Attainment
+                                        </option>,
+                                        ...educationalAttainmentOptions.map(
+                                          (option) => (
+                                            <option
+                                              key={option.value}
+                                              value={option.value}
+                                            >
+                                              {option.label}
+                                            </option>
+                                          )
+                                        ),
+                                      ],
+                                    }
+                                  )}
+                                </td>
+                              </tr>
+                              <tr>
+                                <th scope="row">Height (cm):</th>
+                                <td>
+                                  {editableCell(
+                                    "height",
+                                    userData?.user_details?.height,
+                                    { type: "number", step: "any", min: "0" }
+                                  )}
+                                </td>
+                              </tr>
+                              <tr>
+                                <th scope="row">Weight (kg):</th>
+                                <td>
+                                  {editableCell(
+                                    "weight",
+                                    userData?.user_details?.weight,
+                                    { type: "number", step: "any", min: "0" }
+                                  )}
+                                </td>
+                              </tr>
+                              <tr>
+                                <th scope="row">Blood Type:</th>
+                                <td>
+                                  {editableCell(
+                                    "blood_type",
+                                    userData?.user_details?.blood_type,
+                                    {
+                                      type: "select",
+                                      children: [
+                                        <option key="" value="">
+                                          Select Blood Type
+                                        </option>,
+                                        ...bloodTypeOptions.map((option) => (
+                                          <option key={option} value={option}>
+                                            {option}
+                                          </option>
+                                        )),
+                                      ],
+                                    }
+                                  )}
+                                </td>
+                              </tr>
+                            </React.Fragment>
+                          ) : null}
+                        </tbody>
+                      </Table>
+                    </div>
 
-              {/* Contact Div */}
-              <div>
-                <p
-                  style={{
-                    fontWeight: "bold",
-                    letterSpacing: ".2rem",
-                    fontSize: "18pt",
-                    margin: "0",
-                    padding: "12px 0 0 12px", // top, right, bottom, left
-                    color: "#368be0",
-                  }}
-                >
-                  {"CONTACT"}
-                </p>
-                <p
-                  style={{
-                    margin: "0",
-                    padding: "12px 0 0 12px", // top, right, bottom, left
-                  }}
-                >
-                  <span style={{ fontWeight: "600" }}>Email: </span>
-                  {userDetails.email ? userDetails.email : ""}
-                </p>
+                    {/* Contact Div */}
+                    <div>
+                      <p
+                        style={{
+                          fontWeight: "bold",
+                          letterSpacing: ".2rem",
+                          fontSize: "18pt",
+                          margin: "0",
+                          padding: "12px 0 0 12px", // top, right, bottom, left
+                          color: "#368be0",
+                        }}
+                      >
+                        {"CONTACT"}
+                      </p>
+                      <p
+                        style={{
+                          margin: "0",
+                          padding: "12px 0 0 12px", // top, right, bottom, left
+                        }}
+                      >
+                        <span style={{ fontWeight: "600" }}>Email: </span>
+                        {userDetails.email ? userDetails.email : ""}
+                      </p>
 
-                <Table striped>
-                  <thead>
-                    <tr>
-                      <th>Phone Number</th>
-                      <th>Type</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {userData?.user_phone_numbers.map((items, index) => {
-                      return (
-                        <tr key={index}>
-                          <td>
-                            {isLoading ? "loading ..." : items.phone_number}
-                          </td>
-                          <td>{isLoading ? "loading ..." : items.type}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </Table>
-              </div>
+                      {editPersonalState ? (
+                        <Table striped>
+                          <tbody>
+                            <tr>
+                              <th scope="row">Phone Number:</th>
+                              <td>{editableCell("contact_no")}</td>
+                            </tr>
+                          </tbody>
+                        </Table>
+                      ) : (
+                        <Table striped>
+                          <thead>
+                            <tr>
+                              <th>Phone Number</th>
+                              <th>Type</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {userData?.user_phone_numbers?.map(
+                              (items, index) => {
+                                return (
+                                  <tr key={index}>
+                                    <td>
+                                      {isLoading
+                                        ? "loading ..."
+                                        : items.phone_number}
+                                    </td>
+                                    <td>
+                                      {isLoading ? "loading ..." : items.type}
+                                    </td>
+                                  </tr>
+                                );
+                              }
+                            )}
+                          </tbody>
+                        </Table>
+                      )}
+                    </div>
 
-              {/* Address Div */}
-              <div>
-                <p
-                  style={{
-                    fontWeight: "bold",
-                    letterSpacing: ".2rem",
-                    fontSize: "18pt",
-                    margin: "0",
-                    padding: "12px 0 0 12px", // top, right, bottom, left
-                    color: "#368be0",
-                  }}
-                >
-                  {"Address"}
-                </p>
+                    {/* Address Div */}
+                    <div>
+                      <p
+                        style={{
+                          fontWeight: "bold",
+                          letterSpacing: ".2rem",
+                          fontSize: "18pt",
+                          margin: "0",
+                          padding: "12px 0 0 12px", // top, right, bottom, left
+                          color: "#368be0",
+                        }}
+                      >
+                        {"Address"}
+                      </p>
 
-                <Table striped>
-                  <thead>
-                    <tr>
-                      <th>City</th>
-                      <th>Barangay</th>
-                      <th>Subdivision</th>
-                      <th>Specific Location/Address Line</th>
-                      <th>Type</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {userData?.user_addresses.map((items, index) => {
-                      return (
-                        <tr key={index}>
-                          <td>{isLoading ? "loding ..." : items.city}</td>
-                          <td>{isLoading ? "loding ..." : items.barangay}</td>
-                          <td>
-                            {isLoading ? "loding ..." : items.subdivision}
-                          </td>
-                          <td>
-                            {isLoading ? "loding ..." : items.address_line}
-                          </td>
-                          <td>
-                            {isLoading ? "loding ..." : items.address_type}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </Table>
-              </div>
+                      {editPersonalState ? (
+                        <Table striped>
+                          <tbody>
+                            <tr>
+                              <th scope="row">Province:</th>
+                              <td>
+                                {editableCell("province", null, {
+                                  placeholder: "Leave blank if Butuan City",
+                                })}
+                              </td>
+                            </tr>
+                            <tr>
+                              <th scope="row">City:</th>
+                              <td>{editableCell("city")}</td>
+                            </tr>
+                            <tr>
+                              <th scope="row">Barangay:</th>
+                              <td>{editableCell("barangay")}</td>
+                            </tr>
+                            <tr>
+                              <th scope="row">Subdivision:</th>
+                              <td>{editableCell("subdivision")}</td>
+                            </tr>
+                            <tr>
+                              <th scope="row">
+                                Specific Location/Address Line:
+                              </th>
+                              <td>{editableCell("address_line")}</td>
+                            </tr>
+                          </tbody>
+                        </Table>
+                      ) : (
+                        <Table striped>
+                          <thead>
+                            <tr>
+                              <th>City</th>
+                              <th>Barangay</th>
+                              <th>Subdivision</th>
+                              <th>Specific Location/Address Line</th>
+                              <th>Type</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {userData?.user_addresses?.map((items, index) => {
+                              return (
+                                <tr key={index}>
+                                  <td>
+                                    {isLoading ? "loading ..." : items.city}
+                                  </td>
+                                  <td>
+                                    {isLoading ? "loading ..." : items.barangay}
+                                  </td>
+                                  <td>
+                                    {isLoading
+                                      ? "loading ..."
+                                      : items.subdivision}
+                                  </td>
+                                  <td>
+                                    {isLoading
+                                      ? "loading ..."
+                                      : items.address_line}
+                                  </td>
+                                  <td>
+                                    {isLoading
+                                      ? "loading ..."
+                                      : items.address_type}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </Table>
+                      )}
+                    </div>
+
+                    {individual && userData && (
+                      <div
+                        style={{
+                          paddingBottom: "15px",
+                          display: "flex",
+                          justifyContent: "flex-end",
+                        }}
+                      >
+                        {editPersonalState ? (
+                          <>
+                            <Button
+                              key="save-personal"
+                              type="submit"
+                              color="success"
+                              style={{ width: "80px", fontWeight: "600" }}
+                              disabled={isSubmitting}
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              key="cancel-personal"
+                              type="button"
+                              color="secondary"
+                              onClick={() => {
+                                resetForm();
+                                seteditPersonalState(false);
+                              }}
+                              style={{
+                                marginLeft: "15px",
+                                width: "80px",
+                                fontWeight: "600",
+                              }}
+                              disabled={isSubmitting}
+                            >
+                              Cancel
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            key="edit-personal"
+                            type="button"
+                            style={{
+                              backgroundColor: "#1a56db",
+                              fontWeight: "600",
+                              color: "white",
+                            }}
+                            onClick={() => seteditPersonalState(true)}
+                          >
+                            Edit Personal Details
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </Form>
+                )}
+              </Formik>
               <div>
                 <p
                   style={{
@@ -621,6 +966,7 @@ const UserProfile = () => {
                         {editOccupationState ? (
                           <>
                             <Button
+                              type="button"
                               onClick={() => {
                                 const formik = formikRef.current.values;
 
@@ -643,7 +989,7 @@ const UserProfile = () => {
                                     () => seteditOccupationState(false),
                                     () => setrefresh(!refresh),
                                   ],
-                                  [],
+                                  []
                                 );
                               }}
                               color="success"
@@ -658,6 +1004,7 @@ const UserProfile = () => {
                               Save
                             </Button>
                             <Button
+                              type="button"
                               color="secondary"
                               onClick={() => seteditOccupationState(false)}
                               style={{
@@ -682,6 +1029,7 @@ const UserProfile = () => {
                               color: "white",
                               width: "80px",
                             }}
+                            type="button"
                             onClick={() => seteditOccupationState(true)}
                           >
                             Edit

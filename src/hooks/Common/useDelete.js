@@ -2,6 +2,7 @@ import React from "react";
 import Swal from "sweetalert2";
 import axios from "axios";
 import { useDispatch } from "react-redux";
+import { getErrorMessage } from "helpers/axiosSetup";
 
 const useDelete = () => {
   const dispatch = useDispatch();
@@ -58,10 +59,15 @@ const useDelete = () => {
       Swal.fire({
         icon: "error",
         title: "Something went wrong!",
-        text:
-          error.response?.data?.message ||
+        text: getErrorMessage(
+          error,
           "An error occurred while deleting the record.",
+        ),
         confirmButtonColor: "#3085d6",
+        didOpen: (popup) => {
+          const text = popup.querySelector(".swal2-html-container");
+          if (text) text.style.whiteSpace = "pre-line";
+        },
       });
     }
   };

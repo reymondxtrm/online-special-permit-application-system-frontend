@@ -20,9 +20,10 @@ const SidebarContent = (props) => {
   useEffect(() => {
     const pathName = props.location.pathname;
     const initMenu = () => {
+      const ul = document.getElementById("side-menu");
+      if (!ul) return;
       new MetisMenu("#side-menu");
       let matchingMenuItem = null;
-      const ul = document.getElementById("side-menu");
       const items = ul.getElementsByTagName("a");
       for (let i = 0; i < items.length; ++i) {
         if (pathName === items[i].pathname) {
@@ -135,50 +136,9 @@ const SidebarContent = (props) => {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/client/dashboard">
-                    <i className="mdi mdi-view-dashboard fs-2"></i>
-                    <span>{props.t("Dashboard")}</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/client/pending">
-                    <i className="mdi mdi-progress-clock fs-2"></i>
-                    <span>{props.t("Initial Receiving")}</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/#" className="has-arrow">
-                    <i className="mdi mdi-currency-usd fs-2"></i>
-                    <span>{props.t("Payment")}</span>
-                  </Link>
-                  <ul className="sub-menu">
-                    <li>
-                      <Link to="/client/for-payment/approval">
-                        {props.t("Final Receiving")}
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/client/for-payment/dashboard">
-                        {props.t("Initial Action")}
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/client/returned/dashboard">
-                        {props.t("Returned Payment")}
-                      </Link>
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <Link to="/client/for-signature">
-                    <i className="mdi mdi-file-check fs-2"></i>
-                    <span>{props.t("Issuance")}</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/client/declined">
-                    <i className="mdi mdi-file-cancel fs-2"></i>
-                    <span>{props.t("Returned Application")}</span>
+                  <Link to="/client/applications">
+                    <i className="mdi mdi-file-document-multiple fs-2"></i>
+                    <span>{props.t("My Applications")}</span>
                   </Link>
                 </li>
 

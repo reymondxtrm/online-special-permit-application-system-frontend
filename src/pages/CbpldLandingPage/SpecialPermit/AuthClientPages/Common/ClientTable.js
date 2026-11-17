@@ -44,6 +44,52 @@ import ReuploadCedulaModal from "../Modals/ReuploadCedulaModal";
 import TableLoaders from "components/Loaders/TableLoaders";
 import FileViewerModal2 from "../../AuthAdminPages/AdminControls/Modals/FileViewerModal2";
 import { useSelectedPaymentDetails } from "hooks/Common/useSelectedPaymentDetails";
+
+// Client-facing stage labels (same wording the old sidebar used).
+export const STATUS_LABELS = {
+  pending: "Initial Receiving",
+  for_payment: "Initial Action",
+  for_payment_approval: "Final Receiving",
+  returned: "Returned Payment",
+  for_signature: "Issuance",
+  completed: "Completed",
+  declined: "Returned Application",
+};
+const STATUS_COLORS = {
+  pending: "info",
+  for_payment: "warning",
+  for_payment_approval: "primary",
+  returned: "danger",
+  for_signature: "secondary",
+  completed: "success",
+  declined: "danger",
+};
+const EVENT_PERMITS = [
+  "event",
+  "motorcade",
+  "parade",
+  "recorrida",
+  "use_of_government_property",
+];
+const DOCUMENT_COLUMNS = [
+  { key: "police_clearance", label: "Police Clearance" },
+  { key: "barangay_clearance", label: "Barangay Clearance" },
+  { key: "community_tax_certificate", label: "Community Tax Certificate" },
+  { key: "fiscal_clearance", label: "Fiscal Clearance" },
+  { key: "court_clearance", label: "Court Clearance" },
+  { key: "certificate_of_ordinance", label: "Certificate of Ordinance" },
+  { key: "s_e_c_certificate", label: "SEC Certificate" },
+];
+const rowStatusOf = (application) => application?.special_permit_status?.code;
+// Remarks only matter for declined/returned; pick the history entry for the row's current status.
+const remarksOf = (application, rowStatus) => {
+  if (!["declined", "returned"].includes(rowStatus)) return "—";
+  return (
+    application?.status_histories?.find((h) => h.status_code === rowStatus)
+      ?.remarks || "—"
+  );
+};
+
 const ClientTable = ({ applicationType, status, activeTab }) => {
   const handleSubmit = useSubmit();
 
@@ -130,12 +176,14 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
     setOpenOccupationalPermitModal((prev) => !prev);
   };
   useEffect(() => {
-    const params = { status: status, permit_type: applicationType };
+    // status is optional: omitted = every stage in one table.
+    const params = { permit_type: applicationType, ...(status && { status }) };
     if (applicationType === activeTab) {
+      setSelectedRow([]);
       dispatch(getClientTableData(params));
       dispatch(SpecialPermitClientSlice.actions.setProps(params));
     }
-  }, [activeTab, refreshPage]);
+  }, [activeTab, refreshPage, status]);
 
   const togglerFunction = useCallback(() => {
     if (applicationType === "mayors_permit") {
@@ -176,188 +224,219 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
     });
   };
 
-  const handleSelectAll = (rows) => {
-    if (selectedRow.length === rows.length) {
-      setSelectedRow([]);
-    } else {
-      const selectedIds = [];
-      rows.forEach((r) => {
-        selectedIds.push(r.id);
+
+  const rows = specialPermitClient?.clientTableData?.data || [];
+  const isCompany = user?.accountType === "company";
+  const isPersonalPermit = ["mayors_permit", "good_moral"].includes(
+    applicationType,
+  );
+  const isEventPermit = EVENT_PERMITS.includes(applicationType);
+  const isOccupational = applicationType === "occupational_permit";
+
+  // Company bulk payment: only for_payment rows not already being paid.
+  const payableIds = rows
+    .filter(
+      (r) =>
+        rowStatusOf(r) === "for_payment" &&
+        r?.order_of_payment?.payment_on_progress !== 1,
+    )
+    .map((r) => r.id);
+  const selectedPayable = selectedRow.filter((id) => payableIds.includes(id));
+
+  const columns = [
+    "",
+    "#",
+    "Status",
+    "Reference No.",
+    ...(isPersonalPermit
+      ? [
+          "Purpose",
+          ...(applicationType === "good_moral"
+            ? ["Exemption", "Exemption Status"]
+            : []),
+          ...DOCUMENT_COLUMNS.map((d) => d.label),
+        ]
+      : []),
+    ...(isEventPermit
+      ? ["Requestor", "Name of Event", "Date From", "Date To"]
+      : []),
+    ...(isOccupational
+      ? [
+          ...(isCompany
+            ? ["Name of Requestor", "Gender", "Address"]
+            : ["Name"]),
+          "Attachment",
+        ]
+      : []),
+    "Amount",
+    "Remarks",
+    "Actions",
+  ];
+
+  const downloadPermit = (fileId) => {
+    if (!fileId) {
+      alert("Special Permit ID is required for download.");
+      return;
+    }
+
+    axios
+      .get("/api/client/download-permit", {
+        responseType: "blob",
+        params: {
+          special_permit_id: fileId,
+          _t: Date.now(),
+        },
+      })
+      .then((response) => {
+        const blob = new Blob([response.data], {
+          type: response.headers["content-type"] || "application/pdf",
+        });
+
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${applicationType}_${fileId}.pdf`;
+
+        document.body.appendChild(a);
+        a.click();
+
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      })
+      .catch((error) => {
+        console.error("Download error:", error);
+        alert("Failed to download the file.");
       });
-      setSelectedRow(selectedIds);
+  };
+
+  const payIndividual = (application) => {
+    if (!application?.id) {
+      console.error("Application data is missing");
+      return;
+    }
+
+    if (application?.order_of_payment?.payment_on_progress === 1) {
+      Swal.fire({
+        icon: "info",
+        title: "Processing Payment",
+        text: "Your application payment is currently being processed. Please wait for further updates.",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
+    setSelectedRow([application?.id]);
+    dispatch(
+      SpecialPermitClientSlice?.actions?.setApplicationIdsForPayment([
+        application?.id,
+      ]),
+    );
+    toggleOverTheCounterModal();
+  };
+
+  const fileCell = (fileType, path) =>
+    path ? (
+      <FileIconFormat
+        fileType={fileType}
+        path={path}
+        toggleIsViewerOpen={toggleIsViewerOpen}
+        getImageHandle={getImageHandle}
+      />
+    ) : (
+      "N/A"
+    );
+
+  const renderActions = (application, rowStatus) => {
+    const inProgress = application?.order_of_payment?.payment_on_progress === 1;
+    switch (rowStatus) {
+      case "returned":
+        return (
+          <div className="d-flex gap-2 align-items-center">
+            {application?.order_of_payment?.payment_detail?.attachment &&
+              fileCell(
+                "official_receipt",
+                application.order_of_payment.payment_detail.attachment,
+              )}
+            <Button
+              color="primary"
+              onClick={() => {
+                setSelectedRow([application?.id]);
+                toggleReUploadModal();
+              }}
+            >
+              Reupload O.R
+            </Button>
+          </div>
+        );
+      case "for_payment":
+        return (
+          <div className="d-flex gap-2 align-items-center">
+            {!isCompany && (
+              <Button
+                color="primary"
+                disabled={inProgress}
+                onClick={(e) => {
+                  e.preventDefault();
+                  payIndividual(application);
+                }}
+              >
+                Pay
+              </Button>
+            )}
+            <Badge
+              style={{
+                borderRadius: "20px",
+                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+              }}
+              color={inProgress ? "warning" : "primary"}
+            >
+              {inProgress ? "Paying" : "Unpaid"}
+            </Badge>
+          </div>
+        );
+      case "declined":
+        return (
+          <Button
+            onClick={() => {
+              setSelectedRow([application?.id]);
+              togglerFunction();
+            }}
+            color="primary"
+          >
+            Revise & Resubmit
+          </Button>
+        );
+      case "completed":
+        return (
+          <div className="d-flex gap-2">
+            <Button
+              type="button"
+              color="success"
+              onClick={() => downloadPermit(application?.id)}
+            >
+              <i className="mdi mdi-download fs-4 me-2"></i>
+              Download
+            </Button>
+
+            <Button
+              color="primary"
+              onClick={() => {
+                const url = process.env.REACT_APP_FEEDBACK_URL;
+
+                window.open(url, "_blank");
+              }}
+            >
+              <i className="mdi mdi-star fs-4 me-2 text-warning"></i>
+              Submit Feedback
+            </Button>
+          </div>
+        );
+      default:
+        return "—";
     }
   };
 
-  const columnConfig = useMemo(
-    () => [
-      { key: "checkbox", label: "", condition: () => true },
-      { key: "index", label: "#", condition: () => true },
-      {
-        key: "purpose",
-        label: "Purpose",
-        condition: () =>
-          ["mayors_permit", "good_moral"].includes(applicationType),
-      },
-      {
-        key: "exemption",
-        label: "Exemption",
-        condition: () =>
-          applicationType === "good_moral" &&
-          ["pending", "declined", "for_signature", "completed"].includes(
-            status,
-          ),
-      },
-      {
-        key: "exemptionStatus",
-        label: "Exemption Status",
-        condition: () =>
-          applicationType === "good_moral" &&
-          ["pending", "declined", "for_signature", "completed"].includes(
-            status,
-          ),
-      },
-      {
-        key: "policeClearance",
-        label: "Police Clearance",
-        condition: () =>
-          ["mayors_permit", "good_moral"].includes(applicationType) &&
-          ["pending", "declined"].includes(status),
-      },
-      {
-        key: "barangayClearance",
-        label: "Barangay Clearance",
-        condition: () =>
-          ["mayors_permit", "good_moral"].includes(applicationType) &&
-          ["pending", "declined"].includes(status),
-      },
-      {
-        key: "ctc",
-        label: "Community Tax Certificate",
-        condition: () =>
-          ["mayors_permit", "good_moral"].includes(applicationType) &&
-          ["pending", "declined"].includes(status),
-      },
-      {
-        key: "fiscalClearance",
-        label: "Fiscal Clearance",
-        condition: () =>
-          ["mayors_permit", "good_moral"].includes(applicationType) &&
-          ["pending", "declined"].includes(status),
-      },
-      {
-        key: "certificateOfOrdinance",
-        label: "Certificate of Ordinance",
-        condition: () =>
-          ["mayors_permit", "good_moral"].includes(applicationType) &&
-          ["pending", "declined"].includes(status),
-      },
-      {
-        key: "SECCertificate",
-        label: "SEC Certificate",
-        condition: () =>
-          ["mayors_permit", "good_moral"].includes(applicationType) &&
-          ["pending", "declined"].includes(status),
-      },
-      {
-        key: "remarks",
-        label: "Remarks",
-        condition: () => ["declined", "returned"].includes(status),
-      },
-      { key: "or", label: "O.R", condition: () => status === "returned" },
-      {
-        key: "actions",
-        label: "Actions",
-        condition: () =>
-          status === "returned" ||
-          (status === "for_payment" && user?.accountType === "individual") ||
-          status === "declined",
-      },
-      {
-        key: "amount",
-        label: "Amount",
-        condition: () =>
-          [
-            "for_payment",
-            "for_payment_approval",
-            "for_signature",
-            "completed",
-          ].includes(status),
-      },
-      {
-        key: "eventName",
-        label: "Name of Event",
-        condition: () =>
-          [
-            "event",
-            "motorcade",
-            "parade",
-            "recorrida",
-            "use_of_government_property",
-          ].includes(applicationType),
-      },
-      {
-        key: "dateFrom",
-        label: "Date From",
-        condition: () =>
-          [
-            "event",
-            "motorcade",
-            "parade",
-            "recorrida",
-            "use_of_government_property",
-          ].includes(applicationType),
-      },
-      {
-        key: "dateTo",
-        label: "Date To",
-        condition: () =>
-          [
-            "event",
-            "motorcade",
-            "parade",
-            "recorrida",
-            "use_of_government_property",
-          ].includes(applicationType),
-      },
-      {
-        key: "requestorName",
-        label: "Name of Requestor",
-        condition: () =>
-          applicationType === "occupational_permit" &&
-          user?.accountType === "company",
-      },
-      {
-        key: "gender",
-        label: "Gender",
-        condition: () =>
-          applicationType === "occupational_permit" &&
-          user?.accountType === "company",
-      },
-      {
-        key: "address",
-        label: "Address",
-        condition: () =>
-          applicationType === "occupational_permit" &&
-          user?.accountType === "company",
-      },
-      {
-        key: "nameAttachment",
-        label: "Attachment",
-        condition: () =>
-          applicationType === "occupational_permit" && status === "pending",
-      },
-      {
-        key: "specialPermit",
-        label: "Special Permit",
-        condition: () => status === "completed",
-      },
-    ],
-    [applicationType, status, user?.accountType],
-  );
-  const getActiveColumnCount = useMemo(
-    () => columnConfig.filter((col) => col.condition()).length,
-    [applicationType, status, user?.accountType],
-  );
   return (
     <>
       {isViewerOpen &&
@@ -382,14 +461,12 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
             isOpen={isViewerOpen}
           />
         ))}
-      {status === "returned" ? (
-        <ReuploadModal
-          toggleModal={toggleReUploadModal}
-          openModal={reuploadModal}
-          applicationId={selectedRow}
-          toggleRefresh={toggleRefresh}
-        />
-      ) : null}
+      <ReuploadModal
+        toggleModal={toggleReUploadModal}
+        openModal={reuploadModal}
+        applicationId={selectedRow}
+        toggleRefresh={toggleRefresh}
+      />
       {reUploadCedulaModal && (
         <ReuploadCedulaModal
           specialPermitApplicationId={selectedRow[0]}
@@ -502,18 +579,19 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
       )}
       <div className="d-flex gap-2">
         <div>
-          {status === "for_payment" && user?.accountType === "company" ? (
+          {isCompany && payableIds.length > 0 ? (
             <Button
               color="primary"
               onClick={() => {
+                setSelectedRow(selectedPayable);
                 toggleOverTheCounterModal();
                 dispatch(
                   SpecialPermitClientSlice.actions.setApplicationIdsForPayment(
-                    selectedRow,
+                    selectedPayable,
                   ),
                 );
               }}
-              disabled={selectedRow.length <= 0}
+              disabled={selectedPayable.length <= 0}
             >
               <i className="fa fas fa-money-bill-wave"></i>
               <span> Pay</span>
@@ -529,408 +607,120 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
               backgroundColor: "white",
             }}
           >
-            {user?.accountType === "company" && status === "for_payment" && (
-              <tr></tr>
-            )}
             <tr>
               <th style={{ width: "5%" }}>
-                {status === "for_payment" && user?.accountType === "company" ? (
+                {isCompany && payableIds.length > 0 ? (
                   <Input
                     type="checkbox"
-                    checked={
-                      selectedRow?.length ===
-                        specialPermitClient?.clientTableData?.data?.length &&
-                      specialPermitClient?.clientTableData?.data?.length !== 0
-                    }
-                    onClick={() => {
-                      handleSelectAll(
-                        specialPermitClient?.clientTableData?.data,
+                    aria-label="Select all for payment"
+                    checked={selectedPayable.length === payableIds.length}
+                    onChange={() => {
+                      setSelectedRow(
+                        selectedPayable.length === payableIds.length
+                          ? []
+                          : payableIds,
                       );
                     }}
                     style={{ width: "20px", height: "20px" }}
                   />
                 ) : null}
               </th>
-              <th>#</th>
-              {(status === "for_signature" || status === "completed") && (
-                <th>Reference No.</th>
-              )}
-
-              {(applicationType === "mayors_permit" ||
-                applicationType === "good_moral") && (
-                <>
-                  <th>Purpose</th>
-                  {(status === "pending" || status === "declined") && (
-                    <>
-                      {applicationType === "good_moral" && (
-                        <>
-                          <th>Exemption</th>
-                          <th>Exemption Status</th>
-                        </>
-                      )}
-                      <th>Police Clearance</th>
-                      <th>Barangay Clearance</th>
-                      <th>Community Tax Certificate</th>
-                      <th>Fiscal Clearance</th>
-                      <th>Court Clearance</th>
-                      <th>Certificate of Ordinance</th>
-                      <th>SEC Certificate</th>
-                    </>
-                  )}
-
-                  {status === "returned" && (
-                    <>
-                      <th>Remarks</th>
-                    </>
-                  )}
-
-                  {status === "returned" && (
-                    <>
-                      <th>O.R</th>
-                    </>
-                  )}
-
-                  {status === "returned" && (
-                    <>
-                      <th>Actions</th>
-                    </>
-                  )}
-
-                  {(status === "for_payment" ||
-                    status === "for_payment_approval") && (
-                    <>
-                      <th>Amount</th>
-                    </>
-                  )}
-
-                  {(status === "for_signature" || status === "completed") && (
-                    <>
-                      {applicationType === "good_moral" && (
-                        <>
-                          <th>Exemption</th>
-                          <th>Exemption Status</th>
-                        </>
-                      )}
-                      <th>Amount</th>
-                    </>
-                  )}
-                </>
-              )}
-
-              {(applicationType === "event" ||
-                applicationType === "motorcade" ||
-                applicationType === "parade" ||
-                applicationType === "recorrida" ||
-                applicationType === "use_of_government_property") && (
-                <>
-                  <th>Requestor</th>
-                  <th>Name of Event</th>
-                  <th>Date From</th>
-                  <th>Date To</th>
-                  {status === "returned" && (
-                    <>
-                      <th>Remarks</th>
-                      <th>O.R</th>
-                      <th>Action</th>
-                    </>
-                  )}
-                </>
-              )}
-
-              {applicationType === "occupational_permit" && (
-                <>
-                  {user?.accountType === "company" && (
-                    <>
-                      <th>Name of Requestor</th>
-                      <th>Gender</th>
-                      <th>Address</th>
-                    </>
-                  )}
-                  {(status === "for_payment" ||
-                    status === "for_payment_approval") && (
-                    <>
-                      <th> Amount</th>
-                    </>
-                  )}
-                  {status === "pending" && (
-                    <>
-                      <th>Name</th>
-                      <th>Attachment</th>
-                    </>
-                  )}
-                  {status === "returned" && (
-                    <>
-                      <th>Remarks</th>
-                    </>
-                  )}
-
-                  {status === "returned" && (
-                    <>
-                      <th>O.R</th>
-                      <th>Action</th>
-                    </>
-                  )}
-                </>
-              )}
-              {status === "for_payment" &&
-              user?.accountType === "individual" ? (
-                <>
-                  <th>Actions</th>
-                  <th>Payment Status</th>
-                </>
-              ) : null}
-              {status === "completed" ? <th>Special Permit</th> : null}
-              {status === "declined" ? (
-                <>
-                  <th>Remarks</th> <th>Actions</th>{" "}
-                </>
-              ) : null}
+              {columns.slice(1).map((label) => (
+                <th key={label}>{label}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {specialPermitClient?.getTableDataIsFetching ? (
-              <TableLoaders col={10} row={getActiveColumnCount} />
-            ) : specialPermitClient?.clientTableData?.data?.length > 0 ? (
-              specialPermitClient?.clientTableData?.data.map(
-                (application, index) => (
+              <TableLoaders col={10} row={columns.length} />
+            ) : rows.length > 0 ? (
+              rows.map((application, index) => {
+                const rowStatus = rowStatusOf(application);
+                return (
                   <tr key={application.id}>
                     <td>
-                      {user?.accountType === "company" &&
-                        status === "for_payment" && (
-                          <Input
-                            type="checkbox"
-                            disabled={
-                              application?.order_of_payment
-                                ?.payment_on_progress === 1
-                            }
-                            checked={selectedRow?.includes(application.id)}
-                            onClick={(e) => {
-                              handleSelect(application.id);
-                            }}
-                            style={{ width: "20px", height: "20px" }}
-                          />
-                        )}
+                      {isCompany && rowStatus === "for_payment" && (
+                        <Input
+                          type="checkbox"
+                          aria-label={`Select application ${application.id}`}
+                          disabled={
+                            application?.order_of_payment
+                              ?.payment_on_progress === 1
+                          }
+                          checked={selectedRow?.includes(application.id)}
+                          onChange={() => {
+                            handleSelect(application.id);
+                          }}
+                          style={{ width: "20px", height: "20px" }}
+                        />
+                      )}
                     </td>
 
                     <td>
                       <div className="d-flex gap-2">{`${index + 1}.`}</div>
                     </td>
-                    {(status === "for_signature" || status === "completed") && (
-                      <td>{application.reference_no}</td>
-                    )}
+                    <td>
+                      <Badge
+                        color={STATUS_COLORS[rowStatus] || "secondary"}
+                        data-testid="row-status"
+                      >
+                        {STATUS_LABELS[rowStatus] ||
+                          application?.special_permit_status?.name ||
+                          "—"}
+                      </Badge>
+                    </td>
+                    <td>
+                      {["for_signature", "completed"].includes(rowStatus) &&
+                      application.reference_no
+                        ? application.reference_no
+                        : "—"}
+                    </td>
 
-                    {(applicationType === "mayors_permit" ||
-                      applicationType === "good_moral") && (
+                    {isPersonalPermit && (
                       <>
                         <td>{application.application_purpose?.name}</td>
-
-                        {(status === "pending" || status === "declined") && (
+                        {applicationType === "good_moral" && (
                           <>
-                            {applicationType === "good_moral" && (
-                              <>
-                                <td>
-                                  {application.permit_application_exemption
-                                    ?.exempted_case_name
-                                    ? application.permit_application_exemption
-                                        .exempted_case_name
-                                    : "N/A"}
-                                </td>
-                                <td>
-                                  {application.permit_application_exemption
-                                    ?.status
-                                    ? application.permit_application_exemption
-                                        .status
-                                    : "N/A"}
-                                </td>
-                              </>
-                            )}
                             <td>
-                              {application.uploaded_file?.police_clearance ? (
-                                <FileIconFormat
-                                  fileType="police_clearance"
-                                  path={
-                                    application.uploaded_file?.police_clearance
-                                  }
-                                  toggleIsViewerOpen={toggleIsViewerOpen}
-                                  getImageHandle={getImageHandle}
-                                />
-                              ) : (
-                                "N/A"
-                              )}
+                              {application.permit_application_exemption
+                                ?.exempted_case_name || "N/A"}
                             </td>
                             <td>
-                              {application.uploaded_file?.barangay_clearance &&
-                              status !== "for_payment" ? (
-                                <FileIconFormat
-                                  fileType="barangay_clearance"
-                                  path={
-                                    application.uploaded_file
-                                      ?.barangay_clearance
-                                  }
-                                  toggleIsViewerOpen={toggleIsViewerOpen}
-                                  getImageHandle={getImageHandle}
-                                />
-                              ) : (
-                                "N/A"
-                              )}
-                            </td>
-
-                            <td>
-                              {application.uploaded_file
-                                ?.community_tax_certificate &&
-                              status !== "for_payment" ? (
-                                <FileIconFormat
-                                  fileType="community_tax_certificate"
-                                  path={
-                                    application.uploaded_file
-                                      ?.community_tax_certificate
-                                  }
-                                  toggleIsViewerOpen={toggleIsViewerOpen}
-                                  getImageHandle={getImageHandle}
-                                />
-                              ) : (
-                                "N/A"
-                              )}
-                            </td>
-
-                            <td>
-                              {application.uploaded_file?.fiscal_clearance &&
-                              status !== "for_payment" ? (
-                                <FileIconFormat
-                                  fileType="fiscal_clearance"
-                                  path={
-                                    application.uploaded_file?.fiscal_clearance
-                                  }
-                                  toggleIsViewerOpen={toggleIsViewerOpen}
-                                  getImageHandle={getImageHandle}
-                                />
-                              ) : (
-                                "N/A"
-                              )}
-                            </td>
-                            <td>
-                              {application.uploaded_file?.court_clearance &&
-                              status !== "for_payment" ? (
-                                <FileIconFormat
-                                  fileType="court_clearance"
-                                  path={
-                                    application.uploaded_file?.court_clearance
-                                  }
-                                  toggleIsViewerOpen={toggleIsViewerOpen}
-                                  getImageHandle={getImageHandle}
-                                />
-                              ) : (
-                                "N/A"
-                              )}
-                            </td>
-                            <td>
-                              {application.uploaded_file
-                                ?.certificate_of_ordinance &&
-                              status !== "for_payment" ? (
-                                <FileIconFormat
-                                  fileType="certificate_of_ordinance"
-                                  path={
-                                    application.uploaded_file
-                                      ?.certificate_of_ordinance
-                                  }
-                                  toggleIsViewerOpen={toggleIsViewerOpen}
-                                  getImageHandle={getImageHandle}
-                                />
-                              ) : (
-                                "N/A"
-                              )}
-                            </td>
-                            <td>
-                              {application?.uploaded_file?.s_e_c_certificate &&
-                              status !== "for_payment" ? (
-                                <FileIconFormat
-                                  fileType="s_e_c_certificate"
-                                  path={
-                                    application?.uploaded_file
-                                      ?.s_e_c_certificate
-                                  }
-                                  toggleIsViewerOpen={toggleIsViewerOpen}
-                                  getImageHandle={getImageHandle}
-                                />
-                              ) : (
-                                "N/A"
-                              )}
+                              {application.permit_application_exemption
+                                ?.status || "N/A"}
                             </td>
                           </>
                         )}
-
-                        {(status === "declined" || status === "returned") && (
-                          <td>{application?.status_histories?.[0]?.remarks}</td>
-                        )}
-
-                        {status === "returned" &&
-                          application?.order_of_payment?.payment_detail
-                            ?.attachment && (
-                            <FileIconFormat
-                              fileType="official_receipt"
-                              path={
-                                application?.order_of_payment?.payment_detail
-                                  ?.attachment
-                              }
-                              toggleIsViewerOpen={toggleIsViewerOpen}
-                              getImageHandle={getImageHandle}
-                            />
-                          )}
-
-                        {status === "returned" && (
-                          <td>
-                            <Button
-                              color="primary"
-                              onClick={() => {
-                                setSelectedRow([application?.id]);
-                                toggleReUploadModal();
-                              }}
-                            >
-                              Reupload O.R
-                            </Button>
+                        {DOCUMENT_COLUMNS.map((d) => (
+                          <td key={d.key}>
+                            {fileCell(d.key, application.uploaded_file?.[d.key])}
                           </td>
-                        )}
-
-                        {(status === "for_payment" ||
-                          status === "for_payment_approval") && (
-                          <>
-                            <td>
-                              {application.order_of_payment?.total_amount}
-                            </td>
-                          </>
-                        )}
-
-                        {(status === "for_signature" ||
-                          status === "completed") && (
-                          <>
-                            {applicationType === "good_moral" && (
-                              <>
-                                <td>
-                                  {application.permit_application_exemption
-                                    ?.exempted_case_name
-                                    ? application.permit_application_exemption
-                                        .exempted_case_name
-                                    : "N/A"}
-                                </td>
-                                <td>
-                                  {application.permit_application_exemption
-                                    ?.status
-                                    ? application.permit_application_exemption
-                                        .status
-                                    : "N/A"}
-                                </td>
-                              </>
-                            )}
-                            <td>
-                              {application.order_of_payment?.total_amount}
-                            </td>
-                          </>
-                        )}
+                        ))}
                       </>
                     )}
-                    {applicationType === "occupational_permit" ? (
+
+                    {isEventPermit && (
                       <>
-                        {user?.accountType === "company" && (
+                        <td>{application?.requestor_name}</td>
+                        <td>{application?.event_name}</td>
+                        <td>
+                          {dateOfEvent(
+                            application?.event_date_from,
+                            application?.event_time_from,
+                          )}
+                        </td>
+                        <td>
+                          {dateOfEvent(
+                            application?.event_date_to,
+                            application?.event_time_to,
+                          )}
+                        </td>
+                      </>
+                    )}
+
+                    {isOccupational && (
+                      <>
+                        {isCompany ? (
                           <>
                             <td>{application?.requestor_name}</td>
                             <td>{application?.corporation_member?.sex}</td>
@@ -942,344 +732,38 @@ const ClientTable = ({ applicationType, status, activeTab }) => {
                               }
                             </td>
                           </>
+                        ) : (
+                          <td>{application?.requestor_name}</td>
                         )}
-                        {status === "pending" && (
-                          <>
-                            <td>{application?.requestor_name}</td>
-                            <td>
-                              <Button
-                                color="success"
-                                onClick={() => {
-                                  toggleAttachmentModal();
-
-                                  setSelectedUploadedFiles(
-                                    application?.uploaded_file,
-                                  );
-                                }}
-                              >
-                                Attachment
-                              </Button>{" "}
-                            </td>
-                          </>
-                        )}
-
-                        {(status === "for_payment" ||
-                          status === "for_payment_approval") && (
-                          <td>{`₱ ${application?.order_of_payment?.total_amount}`}</td>
-                        )}
-                        {status === "returned" && (
-                          <>
-                            <td>
-                              {application?.status_histories?.[0]?.remarks}
-                            </td>
-                            <td>
-                              <FileIconFormat
-                                fileType="official_receipt"
-                                path={
-                                  application?.order_of_payment?.payment_detail
-                                    ?.attachment
-                                }
-                                toggleIsViewerOpen={toggleIsViewerOpen}
-                                getImageHandle={getImageHandle}
-                              />
-                            </td>
-                            <td>
-                              <Button
-                                color="primary"
-                                onClick={() => {
-                                  setSelectedRow([application?.id]);
-                                  toggleReUploadModal();
-                                }}
-                              >
-                                Reupload O.R
-                              </Button>
-                            </td>
-                          </>
-                        )}
-                      </>
-                    ) : null}
-
-                    {applicationType === "event" ||
-                    applicationType === "motorcade" ||
-                    applicationType === "parade" ||
-                    applicationType === "recorrida" ||
-                    applicationType === "use_of_government_property" ? (
-                      // (applicationType === "use_of_government_property" &&
-                      //   status !== "for_payment")
-
-                      <>
-                        <td>{application?.requestor_name}</td>
-                        <td>{application?.event_name}</td>
-                        <td>
-                          {dateOfEvent(
-                            application?.event_date_from,
-                            application?.event_time_from,
-                          )}
-                        </td>
-
-                        <td>
-                          {dateOfEvent(
-                            application?.event_date_to,
-                            application?.event_time_to,
-                          )}
-                        </td>
-                        {status === "returned" && (
-                          <>
-                            <td>
-                              {application?.status_histories?.[0]?.remarks}
-                            </td>
-                            <td>
-                              <FileIconFormat
-                                fileType="official_receipt"
-                                path={
-                                  application?.order_of_payment?.payment_detail
-                                    ?.attachment
-                                }
-                                toggleIsViewerOpen={toggleIsViewerOpen}
-                                getImageHandle={getImageHandle}
-                              />
-                            </td>
-                            <td>
-                              <Button
-                                color="primary"
-                                onClick={() => {
-                                  setSelectedRow([application?.id]);
-                                  toggleReUploadModal();
-                                }}
-                              >
-                                Reupload O.R
-                              </Button>
-                            </td>
-                          </>
-                        )}
-                      </>
-                    ) : null}
-                    {status === "for_payment" &&
-                    user?.accountType === "individual" ? (
-                      <>
                         <td>
                           <Button
-                            color="primary"
-                            disabled={
-                              application?.order_of_payment
-                                ?.payment_on_progress === 1
-                            }
-                            onClick={(e) => {
-                              e.preventDefault();
-
-                              if (!application?.id) {
-                                console.error("Application data is missing");
-                                return;
-                              }
-
-                              if (
-                                application?.order_of_payment
-                                  ?.payment_on_progress === 1
-                              ) {
-                                Swal.fire({
-                                  icon: "info",
-                                  title: "Processing Payment",
-                                  text: "Your application payment is currently being processed. Please wait for further updates.",
-                                  confirmButtonText: "OK",
-                                });
-                                return;
-                              }
-
-                              setSelectedRow([application?.id]);
-                              dispatch(
-                                SpecialPermitClientSlice?.actions?.setApplicationIdsForPayment(
-                                  [application?.id],
-                                ),
-                              );
-                              toggleOverTheCounterModal();
-                            }}
-                          >
-                            Pay
-                          </Button>
-                        </td>
-                        <td>
-                          <h4>
-                            <Badge
-                              style={{
-                                borderRadius: "20px",
-                                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-                              }}
-                              color={
-                                application?.order_of_payment
-                                  ?.payment_on_progress === 1
-                                  ? "warning"
-                                  : "primary"
-                              }
-                            >
-                              {application?.order_of_payment
-                                ?.payment_on_progress === 1
-                                ? "Paying"
-                                : "Unpaid"}
-                            </Badge>
-                          </h4>
-                        </td>
-                        {/* <td>
-                          <>
-                            <UncontrolledDropdown
-                              className="me-2"
-                              direction="end"
-                            >
-                              <DropdownToggle caret color="primary">
-                                Actions
-                              </DropdownToggle>
-                              <DropdownMenu
-                                style={{
-                                  maxHeight: "200px",
-                                  overflowY: "auto",
-                                  zIndex: 1050, // High z-index to appear above
-                                  position: "absolute", // Ensure it's detached from parent
-                                }}
-                              >
-                                <DropdownItem
-                                  onClick={() => {
-                                    toggleOverTheCounterModal();
-                                    setSelectedRow([application?.id]);
-                                    dispatch(
-                                      SpecialPermitClientSlice.actions.setApplicationIdsForPayment(
-                                        [application?.id]
-                                      )
-                                    );
-                                  }}
-                                >
-                                  Pay
-                                </DropdownItem>
-
-                                <DropdownItem
-                                  onClick={() => {
-                                    toggleReUploadCedulaModal();
-                                    setSelectedRow([application?.id]);
-                                  }}
-                                >
-                                  Reupload Cedula
-                                </DropdownItem>
-                              </DropdownMenu>
-                            </UncontrolledDropdown>
-                          </>
-                        </td> */}
-                        {/* {application?.uploaded_file
-                          ?.community_tax_certificate == null &&
-                        (applicationType === "occupational_permit" ||
-                          applicationType === "mayors_permit" ||
-                          applicationType === "good_moral") ? (
-                          <td>
-                            <Badge color="danger">No Cedula</Badge>
-                          </td>
-                        ) : null} */}
-                      </>
-                    ) : null}
-
-                    {status === "completed" ? (
-                      <td>
-                        <div
-                          style={{
-                            display: "flex",
-                          }}
-                        >
-                          <div
-                            style={{ paddingRight: "10px" }}
-                            className="d-flex gap-2"
-                          >
-                            <Button
-                              type="button"
-                              color="success"
-                              onClick={() => {
-                                const fileId = application?.id;
-
-                                if (!fileId) {
-                                  alert(
-                                    "Special Permit ID is required for download.",
-                                  );
-                                  return;
-                                }
-
-                                axios
-                                  .get("/api/client/download-permit", {
-                                    responseType: "blob",
-                                    params: {
-                                      special_permit_id: fileId,
-                                      _t: Date.now(),
-                                    },
-                                  })
-                                  .then((response) => {
-                                    const blob = new Blob([response.data], {
-                                      type:
-                                        response.headers["content-type"] ||
-                                        "application/pdf",
-                                    });
-
-                                    const url =
-                                      window.URL.createObjectURL(blob);
-
-                                    const a = document.createElement("a");
-                                    a.href = url;
-                                    a.download = `${applicationType}_${fileId}.pdf`;
-
-                                    document.body.appendChild(a);
-                                    a.click();
-
-                                    document.body.removeChild(a);
-                                    window.URL.revokeObjectURL(url);
-                                  })
-                                  .catch((error) => {
-                                    console.error("Download error:", error);
-                                    alert("Failed to download the file.");
-                                  });
-                              }}
-                            >
-                              <i className="mdi mdi-download fs-4 me-2"></i>
-                              Download
-                            </Button>
-
-                            <Button
-                              color="primary"
-                              onClick={() => {
-                                const url = process.env.REACT_APP_FEEDBACK_URL;
-
-                                window.open(url, "_blank");
-                              }}
-                            >
-                              <i className="mdi mdi-star fs-4 me-2 text-warning"></i>
-                              Submit Feedback
-                            </Button>
-                          </div>
-                        </div>
-                      </td>
-                    ) : null}
-                    {status === "declined" && (
-                      <>
-                        {(applicationType === "event" ||
-                          applicationType === "parade" ||
-                          applicationType === "recorrida" ||
-                          applicationType === "motorcade" ||
-                          applicationType === "use_of_government_property" ||
-                          applicationType === "occupational_permit") && (
-                          <td>{application?.status_histories?.[0]?.remarks}</td>
-                        )}
-
-                        <td>
-                          <Button
+                            color="success"
                             onClick={() => {
-                              setSelectedRow([application?.id]);
-                              togglerFunction();
+                              toggleAttachmentModal();
+                              setSelectedUploadedFiles(
+                                application?.uploaded_file,
+                              );
                             }}
-                            color="primary"
                           >
-                            Revise & Resubmit
+                            Attachment
                           </Button>
                         </td>
                       </>
                     )}
+
+                    <td>
+                      {application?.order_of_payment?.total_amount != null
+                        ? `₱ ${application.order_of_payment.total_amount}`
+                        : "—"}
+                    </td>
+                    <td>{remarksOf(application, rowStatus)}</td>
+                    <td>{renderActions(application, rowStatus)}</td>
                   </tr>
-                ),
-              )
+                );
+              })
             ) : (
               <tr>
-                <td colSpan="7" style={{ textAlign: "center" }}>
+                <td colSpan={columns.length} style={{ textAlign: "center" }}>
                   No applications found.
                 </td>
               </tr>

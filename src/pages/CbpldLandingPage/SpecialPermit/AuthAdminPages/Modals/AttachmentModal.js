@@ -29,6 +29,7 @@ function AttachmentModal({
   applicationType,
   mainActiveTab = "individual_permit",
   isClient = false,
+  paymentDetail = null,
 }) {
   const getActiveTabInitialState = (applicationType) => {
     if (applicationType == "mayors_permit" || applicationType == "good_moral") {
@@ -97,6 +98,11 @@ function AttachmentModal({
       "Training Certificate": uploadedFiles?.training_certificate,
     },
   };
+  const OFFICIAL_RECEIPT = "Official Receipt";
+  const isOnlineReceipt = paymentDetail?.payment_type === "online";
+  if (paymentDetail && fileMapping[applicationType]) {
+    fileMapping[applicationType][OFFICIAL_RECEIPT] = paymentDetail.attachment;
+  }
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages);
   }
@@ -104,6 +110,8 @@ function AttachmentModal({
     const filePath = fileMapping?.[applicationType]?.[activeTab];
 
     if (!activeTab || !filePath) return;
+    // Online payments store an external receipt URL, opened in a new tab instead
+    if (activeTab === OFFICIAL_RECEIPT && isOnlineReceipt) return;
 
     const fetchImage = async () => {
       setIsFetching(true);
@@ -249,16 +257,37 @@ function AttachmentModal({
                           ([tabId, filePath], index) => (
                             <TabPane key={tabId} tabId={tabId}>
                               <div className="d-flex justify-content-between align-items-center">
-                                <h4 className="card-title mb-4">{tabId}</h4>
+                                <h4 className="card-title mb-4">
+                                  {tabId}
+                                  {tabId === OFFICIAL_RECEIPT &&
+                                    paymentDetail?.or_no &&
+                                    ` — OR No. ${paymentDetail.or_no}`}
+                                </h4>
                                 <Button
                                   color="primary"
-                                  onClick={() => handleDownload(filePath)}
+                                  onClick={() =>
+                                    tabId === OFFICIAL_RECEIPT &&
+                                    isOnlineReceipt
+                                      ? window.open(filePath, "_blank")
+                                      : handleDownload(filePath)
+                                  }
                                 >
                                   <i className="mdi mdi-download "></i>
                                 </Button>
                               </div>
 
-                              {filePath ? (
+                              {filePath &&
+                              tabId === OFFICIAL_RECEIPT &&
+                              isOnlineReceipt ? (
+                                <Button
+                                  color="success"
+                                  onClick={() =>
+                                    window.open(filePath, "_blank")
+                                  }
+                                >
+                                  Open Official Receipt
+                                </Button>
+                              ) : filePath ? (
                                 isFetching ? (
                                   <div className="text-center">
                                     <Spinner color="primary" type="grow">

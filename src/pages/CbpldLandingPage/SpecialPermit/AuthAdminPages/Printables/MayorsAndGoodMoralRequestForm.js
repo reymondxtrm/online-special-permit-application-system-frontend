@@ -4,7 +4,7 @@ import "./MayorsAndGoodMoralRequestForm.css";
 import cgbLogo from "../../../../../assets/images/cgbLogo.png";
 import headerLine from "../../../../../assets/images/permitHeaderLine.png";
 import footerLine from "../../../../../assets/images/permitFooterLine.png";
-import butuanOnLogo from "../../../../../assets/images/butuanOnLogo.png";
+import butuanOnLogo from "../../../../../assets/images/butuanOnLogoRising.png";
 import tuvLogo from "../../../../../assets/images/TUV.jpg";
 import qrCode from "../../../../../assets/images/qr.jpg";
 import axios from "axios";
@@ -121,7 +121,7 @@ export default function MayorsAndGoodMoralRequestForm({
                 </p>
                 <p className="rf17-header-city">Butuan City</p>
               </div>
-              <p className="rf17-revised">Revised on March 19, 2026</p>
+              <p className="rf17-revised">Revised on October 14, 2026</p>
             </div>
           </div>
           <img className="rf17-rule" src={headerLine} alt="" />
@@ -436,7 +436,7 @@ export default function MayorsAndGoodMoralRequestForm({
                     alt="Butuan ON"
                     className="rf17-butuanon"
                   />
-                  <p className="rf17-form-code">CBPLD.BPLD.F.017.REV07</p>
+                  <p className="rf17-form-code">CBPLD.BPLD.F.017.REV08</p>
                 </td>
               </tr>
             </tbody>

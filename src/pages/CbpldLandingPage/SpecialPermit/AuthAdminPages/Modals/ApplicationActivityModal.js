@@ -10,6 +10,15 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { getApplicationDetails } from "features/SpecialPermitAdmin";
 
+// Display names for the backend status labels
+const ACTIVITY_LABELS = {
+  "PENDING": "Initial Receiving",
+  "FOR PAYMENT": "Initial Action",
+  "FOR PAYMENT APPROVAL": "Final Receiving",
+  "FOR SIGNATURE": "Issuance",
+  "COMPLETED": "Completed",
+};
+
 function ApplicationActivityModal({ openModal, toggleModal, applicationId }) {
   const dispatch = useDispatch();
   const { applicationDetails, getApplicationDetailsIsFetching } = useSelector(
@@ -72,7 +81,10 @@ function ApplicationActivityModal({ openModal, toggleModal, applicationId }) {
                   </div>
                   <div className="flex-grow-1">
                     <p>
-                      <strong>{item.label}</strong> By {item.by}
+                      <strong>
+                        {ACTIVITY_LABELS[item.label?.toUpperCase()] ??
+                          item.label}
+                      </strong> By {item.by}
                     </p>
                     {item.remarks && (
                       <p className="text-muted mb-0">{item.remarks}</p>

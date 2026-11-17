@@ -1,14 +1,15 @@
 import Swal from "sweetalert2";
 import axios from "axios";
 import { useDispatch } from "react-redux";
+import { getErrorMessage } from "helpers/axiosSetup";
 
 const useSubmit = () => {
   const dispatch = useDispatch();
 
   const handleApprove = (
     { url, params, message, headers = {} },
-    forDispatchArray,
-    toggleArray,
+    forDispatchArray = [],
+    toggleArray = [],
   ) => {
     Swal.fire({
       title: message?.title
@@ -54,34 +55,18 @@ const useSubmit = () => {
             });
           })
           .catch((error) => {
-            let errorMessage = message?.error
-              ? message?.error
-              : "Unknown error occurred";
-
-            if (
-              error.response &&
-              error.response.data &&
-              error.response.data.message
-            ) {
-              const backendMessage = error.response.data.message;
-              if (
-                typeof backendMessage === "object" &&
-                backendMessage !== null
-              ) {
-                errorMessage = Object.values(backendMessage).join(",");
-              } else {
-                errorMessage = backendMessage;
-              }
-            } else if (error.message) {
-              errorMessage = `${errorMessage} (Error: ${error.message})`;
-            }
+            const errorMessage = getErrorMessage(error, message?.error);
 
             Swal.fire({
-              icon: "warning",
+              icon: "error",
               title: message?.failedTitle ? message?.failedTitle : "FAILED",
               text: errorMessage,
-              showConfirmButton: false,
-              timer: 3000,
+              confirmButtonText: "OK",
+              didOpen: (popup) => {
+                // keep one line per validation message
+                const text = popup.querySelector(".swal2-html-container");
+                if (text) text.style.whiteSpace = "pre-line";
+              },
             });
           });
       } else {

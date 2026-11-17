@@ -53,14 +53,9 @@ import Summary from "pages/Summary";
 import CbpldLandingPage from "pages/CbpldLandingPage";
 
 import ClientServices from "../pages/CbpldLandingPage/SpecialPermit/AuthClientPages/Services";
-import ClientPending from "../pages/CbpldLandingPage/SpecialPermit/AuthClientPages/Pending";
-import ClientDeclined from "../pages/CbpldLandingPage/SpecialPermit/AuthClientPages/Declined";
-import ClientDashboard from "../pages/CbpldLandingPage/SpecialPermit/AuthClientPages/Dashboard";
-import ClientForSignature from "../pages/CbpldLandingPage/SpecialPermit/AuthClientPages/ForSignature";
-import ClientForPayment from "../pages/CbpldLandingPage/SpecialPermit/AuthClientPages/Payment/ForPayment";
-import ClientReturned from "../pages/CbpldLandingPage/SpecialPermit/AuthClientPages/Payment/Returned";
 import ClientProfile from "../pages/CbpldLandingPage/SpecialPermit/AuthClientPages/Profile";
-import ClientForPaymentApproval from "../pages/CbpldLandingPage/SpecialPermit/AuthClientPages/Payment/ForApproval";
+import ClientApplications from "../pages/CbpldLandingPage/SpecialPermit/AuthClientPages/Applications";
+
 
 import AdminPending from "../pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Pending";
 import AdminDashboard from "../pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/Dashboard";
@@ -92,21 +87,28 @@ import SpecialPermitReports from "pages/CbpldLandingPage/SpecialPermit/AuthAdmin
 import Release from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/OfflineTransaction/Release";
 import OfflineDashboard from "pages/CbpldLandingPage/SpecialPermit/AuthAdminPages/OfflineTransaction/OfflineDashboard";
 
+// Old per-stage client URLs (still linked from sent emails / payment returns).
+const ToClientApplications = () => <Redirect to="/client/applications" />;
+const OLD_CLIENT_STAGE_PATHS = [
+  "/client/dashboard",
+  "/client/pending",
+  "/client/for-payment/approval",
+  "/client/for-payment/dashboard",
+  "/client/returned/dashboard",
+  "/client/for-signature",
+  "/client/declined",
+];
+
 const authProtectedRoutes = [
   { path: "/dashboard", component: Analytics },
 
   // Special Permit Routes
   { path: "/client/services", component: ClientServices },
-  { path: "/client/dashboard", component: ClientDashboard },
-  { path: "/client/for-signature", component: ClientForSignature },
-  { path: "/client/for-payment/dashboard", component: ClientForPayment },
-  { path: "/client/returned/dashboard", component: ClientReturned },
-  {
-    path: "/client/for-payment/approval",
-    component: ClientForPaymentApproval,
-  },
-  { path: "/client/pending", component: ClientPending },
-  { path: "/client/declined", component: ClientDeclined },
+  { path: "/client/applications", component: ClientApplications },
+  ...OLD_CLIENT_STAGE_PATHS.map((path) => ({
+    path,
+    component: ToClientApplications,
+  })),
   { path: "/client/profile", component: ClientProfile },
 
   { path: "/admin/dashboard", component: AdminDashboard },

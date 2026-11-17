@@ -551,6 +551,7 @@
 .footer-right img {
   height: calc(79px * var(--scale));
   width: calc(213px * var(--scale));
+  object-fit: contain;
 }
 
 .footer-note {

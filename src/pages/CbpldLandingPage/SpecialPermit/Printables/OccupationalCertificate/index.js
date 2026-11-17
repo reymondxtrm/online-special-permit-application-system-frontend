@@ -3,7 +3,7 @@ import logo from "../../../../../assets/images/cgbLogo.png";
 import "./OccupationalCertificate.css";
 import permitHeaderLine from "../../../../../assets/images/permitHeaderLine.png";
 import permitFooterLine from "../../../../../assets/images/permitFooterLine.png";
-import butuanOnLogo from "../../../../../assets/images/butuanOnLogo.png";
+import butuanOnLogo from "../../../../../assets/images/butuanOnLogoRising.png";
 import axios from "axios";
 import QrCodeGenerator from "../Certification/CertificateSections/QrCodeGenerator";
 
@@ -275,7 +275,7 @@ const OccupationalCertificate = forwardRef(({ applicationDetails }, ref) => {
           </div>
           <div className="logo-section">
             <img src={butuanOnLogo} className="butuan-on-logo" />
-            <span className="fw-bold rev-code">CBPLD.BPLD.P.013.REV03</span>
+            <span className="fw-bold rev-code">CBPLD.BPLD.P.013.REV04</span>
           </div>
         </div>
         <div>

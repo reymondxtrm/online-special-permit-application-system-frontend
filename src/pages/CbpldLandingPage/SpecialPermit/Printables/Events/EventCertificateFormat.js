@@ -1,6 +1,6 @@
 import React from "react";
 import cgbLogo from "../../../../../assets/images/cgbLogo.png";
-import butuanOnLogo from "../../../../../assets/images/butuanOnLogo.png";
+import butuanOnLogo from "../../../../../assets/images/butuanOnLogoRising.png";
 import headerLine from "../../../../../assets/images/permitHeaderLine.png";
 import footerLine from "../../../../../assets/images/permitFooterLine.png";
 import "./style.css"; // Import the external CSS file
